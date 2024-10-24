@@ -26,3 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Early Alert';
+
+/*LDAP Setting*/
+$string['ldap_url'] = 'LDAP Url';
+$string['ldap_user'] = 'LDAP User';
+$string['ldap_password'] = 'LDAP User Password';
