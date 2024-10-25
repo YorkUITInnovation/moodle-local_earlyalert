@@ -4,7 +4,7 @@
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="earlyalert_message" COMMENT="A table for storing messages that are used in early alerts. It is made up of an email template">
+    <TABLE NAME="local_earlyalert_message" COMMENT="A table for storing messages that are used in early alerts. It is made up of an email template">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="subject" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false"/>
@@ -20,7 +20,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="earlyalert_usermessage" COMMENT="A table linking users and their messages">
+    <TABLE NAME="local_earlyalert_usermessage" COMMENT="A table linking users and their messages">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -31,7 +31,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_messageid" TYPE="foreign" FIELDS="messageid" REFTABLE="earlyalert_message" REFFIELDS="id"/>
+        <KEY NAME="fk_messageid" TYPE="foreign" FIELDS="messageid" REFTABLE="local_earlyalert_message" REFFIELDS="id"/>
         <KEY NAME="fk_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
@@ -40,7 +40,7 @@
         <INDEX NAME="idx_messageid_userid" UNIQUE="false" FIELDS="messageid,userid" />
       </INDEXES>
     </TABLE>
-    <TABLE NAME="earlyalert_report_log" COMMENT="Reporting table for early alerts">
+    <TABLE NAME="local_earlyalert_report_log" COMMENT="Reporting table for early alerts">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="messageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -55,24 +55,25 @@
         <FIELD NAME="assignmentid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="trigger_grade" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="actual_grade" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="student_advised" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_messageid" TYPE="foreign" FIELDS="messageid" REFTABLE="earlyalert_message" REFFIELDS="id"/>
+        <KEY NAME="fk_messageid" TYPE="foreign" FIELDS="messageid" REFTABLE="local_earlyalert_message" REFFIELDS="id"/>
         <KEY NAME="fk_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="fk_facultyspecific_textid" TYPE="foreign" FIELDS="facultyspecific_textid" REFTABLE="earlyalert_fac_specific_text" REFFIELDS="id"/>
+        <KEY NAME="fk_facultyspecific_textid" TYPE="foreign" FIELDS="facultyspecific_textid" REFTABLE="local_earlyalert_facspec_txt" REFFIELDS="id"/>
         <KEY NAME="fk_courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="idx_messageid" UNIQUE="false" FIELDS="messageid"/>
         <INDEX NAME="idx_triggered_from_userid" UNIQUE="false" FIELDS="triggered_from_userid"/>
         <INDEX NAME="idx_courseid" UNIQUE="false" FIELDS="courseid"/>
-        <INDEX NAME="idx_messageid_userid_courseid" UNIQUE="false" FIELDS="messageid,triggered_from_userid, courseid" />
+        <INDEX NAME="idx_messageid_userid_courseid" UNIQUE="false" FIELDS="messageid,triggered_from_userid,courseid" />
       </INDEXES>
     </TABLE>
-    <TABLE NAME="earlyalert_fac_specific_text" COMMENT="A table containing faculty specific text">
+    <TABLE NAME="local_earlyalert_facspec_txt" COMMENT="A table containing faculty specific text">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="unitid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -82,7 +83,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_unitid" TYPE="foreign" FIELDS="unitid" REFTABLE="organization_unit" REFFIELDS="id"/>
+        <KEY NAME="fk_unitid" TYPE="foreign" FIELDS="unitid" REFTABLE="local_organization_unit" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>
