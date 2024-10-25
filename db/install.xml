@@ -9,9 +9,9 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="subject" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="body" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="from_userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="to_userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="template_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="from_user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="to_user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="datesent" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -23,36 +23,36 @@
     <TABLE NAME="local_earlyalert_usermessage" COMMENT="A table linking users and their messages">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="messageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="message_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="read" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="flag for if the message was read by user"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_messageid" TYPE="foreign" FIELDS="messageid" REFTABLE="local_earlyalert_message" REFFIELDS="id"/>
-        <KEY NAME="fk_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="fk_message_id" TYPE="foreign" FIELDS="message_id" REFTABLE="local_earlyalert_message" REFFIELDS="id"/>
+        <KEY NAME="fk_user_id" TYPE="foreign" FIELDS="user_id" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="idx_messageid" UNIQUE="false" FIELDS="messageid"/>
-        <INDEX NAME="idx_userid" UNIQUE="false" FIELDS="userid"/>
-        <INDEX NAME="idx_messageid_userid" UNIQUE="false" FIELDS="messageid,userid" />
+        <INDEX NAME="idx_message_id" UNIQUE="false" FIELDS="message_id"/>
+        <INDEX NAME="idx_use_id" UNIQUE="false" FIELDS="user_id"/>
+        <INDEX NAME="idx_messageid_user_id" UNIQUE="false" FIELDS="message_id,user_id" />
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_earlyalert_report_log" COMMENT="Reporting table for early alerts">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="messageid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="revisionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="triggered_from_userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="target_userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="unitid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="departmentid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="facultyspecific_textid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="instructorid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="assignmentid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="message_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="revision_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="triggered_from_user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="target_user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="unit_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="department_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="facultyspecific_text_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="instructor_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="assignment_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="trigger_grade" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="actual_grade" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="student_advised" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
@@ -61,29 +61,28 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_messageid" TYPE="foreign" FIELDS="messageid" REFTABLE="local_earlyalert_message" REFFIELDS="id"/>
-        <KEY NAME="fk_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-        <KEY NAME="fk_facultyspecific_textid" TYPE="foreign" FIELDS="facultyspecific_textid" REFTABLE="local_earlyalert_facspec_txt" REFFIELDS="id"/>
-        <KEY NAME="fk_courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="fk_message_id" TYPE="foreign" FIELDS="message_id" REFTABLE="local_earlyalert_message" REFFIELDS="id"/>
+        <KEY NAME="fk_facultyspecific_text_id" TYPE="foreign" FIELDS="facultyspecific_text_id" REFTABLE="local_earlyalert_facspec_txt" REFFIELDS="id"/>
+        <KEY NAME="fk_course_id" TYPE="foreign" FIELDS="course_id" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="idx_messageid" UNIQUE="false" FIELDS="messageid"/>
-        <INDEX NAME="idx_triggered_from_userid" UNIQUE="false" FIELDS="triggered_from_userid"/>
-        <INDEX NAME="idx_courseid" UNIQUE="false" FIELDS="courseid"/>
-        <INDEX NAME="idx_messageid_userid_courseid" UNIQUE="false" FIELDS="messageid,triggered_from_userid,courseid" />
+        <INDEX NAME="idx_message_id" UNIQUE="false" FIELDS="message_id"/>
+        <INDEX NAME="idx_triggered_from_user_id" UNIQUE="false" FIELDS="triggered_from_user_id"/>
+        <INDEX NAME="idx_course_id" UNIQUE="false" FIELDS="course_id"/>
+        <INDEX NAME="idx_messageid_userid_courseid" UNIQUE="false" FIELDS="message_id,triggered_from_user_id,course_id" />
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_earlyalert_facspec_txt" COMMENT="A table containing faculty specific text">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="unitid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="instance_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="unit_context" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="facultytext" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_unitid" TYPE="foreign" FIELDS="unitid" REFTABLE="local_organization_unit" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>
