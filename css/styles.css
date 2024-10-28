@@ -1,0 +1,22 @@
+.card {
+    background-color: #f9f9f9;
+    padding: 1em;
+    border-radius: 0.5em;
+}
+
+.links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1em;
+}
+
+.link {
+    color: #337ab7;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.link:hover {
+    background-color: #ddd;
+}
