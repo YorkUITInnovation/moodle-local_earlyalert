@@ -1,13 +1,12 @@
 
-<div class = 'test'>
-Print courses
-    {{#courses}}
-        <div class="card">
+<div class = 'card-container'>
+    {{#.}}
+        <div class="card-tile">
             <h2>{{fullname}}</h2>
             <div class="links">
                 <a href="#" class="link">Assignments</a>
                 <a href="#" class="link">Grades</a>
             </div>
         </div>
-    {{/courses}}
+    {{/.}}
 </div>

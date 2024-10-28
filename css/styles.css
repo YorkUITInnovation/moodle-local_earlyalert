@@ -1,7 +1,8 @@
-.card {
-    background-color: #f9f9f9;
-    padding: 1em;
-    border-radius: 0.5em;
+.card-container {
+    padding-top: 10px;
+    padding-right: 20px;
+    display: flex;
+    justify-content: space-between; /* Add some space between tiles */
 }
 
 .links {
@@ -19,4 +20,16 @@
 
 .link:hover {
     background-color: #ddd;
+}
+
+.card-tile {
+    width: calc(50% - 10px); /* Make each tile take up half of the container minus a little padding */
+    background-color: #f7f7f7; /* Some default styling for the tiles */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.course-tile:nth-child(1) {
+    margin-right: 20px; /* Add some space between the tiles */
 }

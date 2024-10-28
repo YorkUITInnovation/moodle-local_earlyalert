@@ -30,8 +30,11 @@ if (!$courses = enrol_get_users_courses($USER->id)) {
 
 $data[] = array();
 //base::debug_to_console($coursedata);
+$i=0;
 foreach($courses as $course){
     base::debug_to_console($course->fullname);
+    $data[$i] = $course;
+    $i++;
 }
 // build a list of courses for the links
 
@@ -41,6 +44,9 @@ base::page(
     get_string('idashboard', 'local_earlyalert')
 );
 
+$courses = ["one", "two"];
+
 echo $OUTPUT->header();
-echo $OUTPUT->render_from_template('local_earlyalert/course_cards', $courses);
+echo $OUTPUT->render_from_template('local_earlyalert/course_cards', $data);
 echo $OUTPUT->footer();
+
