@@ -1,25 +1,19 @@
 .card-container {
     padding-top: 10px;
     padding-right: 20px;
+    padding-bottom: 50px;
     display: flex;
     justify-content: space-between; /* Add some space between tiles */
 }
 
 .links {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: left;
     margin-top: 1em;
 }
 
-.link {
-    color: #337ab7;
-    text-decoration: none;
-    transition: background-color 0.2s ease-in-out;
-}
-
-.link:hover {
-    background-color: #ddd;
+.links a:nth-child(2){
+    margin-left: 20px; /* Add some space between the tiles */
 }
 
 .card-tile {
@@ -31,5 +25,5 @@
 }
 
 .course-tile:nth-child(1) {
-    margin-right: 20px; /* Add some space between the tiles */
+    margin-right: 30px; /* Add some space between the tiles */
 }

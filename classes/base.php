@@ -3,12 +3,6 @@
 namespace local_earlyalert;
 
 //TO DO: Change this into a Singleton and get rid of static functions
-use local_organization\DateTime;
-use local_organization\HTML;
-use function local_organization\current_language;
-use function local_organization\get_string_manager;
-use function local_organization\get_user_roles;
-use function local_organization\has_capability;
 
 class base
 {

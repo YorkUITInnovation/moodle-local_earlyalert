@@ -1,0 +1,13 @@
+#save-cancel-buttons {
+    display: flex;
+}
+.save_changes_button {
+    margin-right: 10px;
+}
+
+#id_grade_header {
+    background-color: #f0ffff; /* Some default styling for the tiles */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

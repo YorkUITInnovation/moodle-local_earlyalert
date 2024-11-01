@@ -42,3 +42,10 @@ PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
 this program.  If not, see <https://www.gnu.org/licenses/>.
+
+--------------
+TODO:
+1. Link grade button to grade form view and display
+2. add check to select students id and course id for sending email
+3. Integrate PREVIEW for email templates
+4.

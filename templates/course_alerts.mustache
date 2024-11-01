@@ -1,0 +1,10 @@
+{{#tableData}}
+    <tr>
+        {{#columns}}
+            <td>{{ column1 }}</td>
+        {{/columns}}
+        {{#checkboxes}}
+            <input type="checkbox" name="my_checkboxes[]" value="{{ id }}">
+        {{/checkboxes}}
+    </tr>
+{{/tableData}}

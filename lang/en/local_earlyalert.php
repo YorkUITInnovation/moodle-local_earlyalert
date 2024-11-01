@@ -27,6 +27,10 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Early Alert';
 $string['idashboard'] = 'Instructor Dashboard';
+$string['select_grade'] = 'Default Grade';
+$string['preview_email'] = 'Preview';
+$string['send'] = 'Send';
+$string['grade'] = 'Grade';
 
 
 /*LDAP Setting*/
