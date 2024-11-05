@@ -31,3 +31,11 @@ $string['pluginname'] = 'Early Alert';
 $string['ldap_url'] = 'LDAP Url';
 $string['ldap_user'] = 'LDAP User';
 $string['ldap_password'] = 'LDAP User Password';
+
+/**
+ * Capabilities
+ */
+$string['earlyalert:accessreports'] = 'Access early alert system/category reports';
+$string['earlyalert:searchotherusers'] = 'Search for users other than yourself';
+$string['earlyalert:sendalerts'] = 'Send alerts for courses you have access to';
+$string['earlyalert:sendonbehalf'] = 'Send alerts on behalf of another user';
