@@ -43,6 +43,7 @@ function filter_students_by_grade() {
         select_all_li.appendChild(select_all_label);
         ulElement.appendChild(select_all_li);
         let i = 0;
+        let selected_students = [];
         // Create an unordered list for each grade
         results.forEach((item) => {
 
@@ -52,6 +53,7 @@ function filter_students_by_grade() {
                 checkbox.type = 'checkbox';
                 checkbox.className = 'early_alert_filterform_checkbox';
                 checkbox.id = `early_alert_filterform_checkbox_${i}`;
+                checkbox.setAttribute('user_id', item.id);
 
                 // Add the checkbox to the list item (LI)
                 li.appendChild(checkbox);
@@ -104,13 +106,28 @@ function filter_students_by_grade() {
         select_all_checkbox.addEventListener('change', function() {
             // Get all checkboxes within the list
             let checkboxes = document.querySelectorAll("input[class^='early_alert_filterform_checkbox']");
-            alert(checkboxes);
             // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
             checkboxes.forEach(function(checkbox) {
                 if (select_all_checkbox.checked) {
                     checkbox.checked = true;
+                    selected_students.push(checkbox.getAttribute('user_id'));
                 } else {
                     checkbox.checked = false;
+                    selected_students = selected_students.filter(item => item !== checkbox.getAttribute('user_id'));
+                }
+
+            });
+
+        });
+        // search dom for checkboxes and add to checked list
+        let grade_checkboxes = document.querySelectorAll("input[class^='early_alert_filterform_checkbox']");
+        // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
+        grade_checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('click', function() {
+                if (checkbox.checked) {
+                    selected_students.push(checkbox.getAttribute('user_id'));
+                } else {
+                    selected_students = selected_students.filter(item => item !== checkbox.getAttribute('user_id'));
                 }
             });
         });
