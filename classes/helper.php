@@ -98,7 +98,7 @@ class helper
                                     $grade = ($grade->grade / $grade->item->grademax) * 100;
                                     $student_grade = number_format((float)$grade,
                                         '2');
-                                    $students[$student->id] = ['id'=>$student->id, 'course_id'=>$course->id, 'first_name' => $student->firstname, 'last_name' => $student->lastname, 'grade'=>$student_grade];
+                                    $students[$student->id] = ['id'=>$student->id, 'course_id'=>$course->id, 'first_name' => $student->firstname, 'last_name' => $student->lastname, 'grade'=>$student_grade, 'course'=>$course->fullname];
                                 }
                             }
                         }

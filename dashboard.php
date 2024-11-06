@@ -16,6 +16,7 @@ require_login(1, false);
 $context = context_system::instance();
 // Load AMD module
 $PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
+//$PAGE->requires->js_call_amd('local_earlyalert/preview_student_email', 'init');
 $PAGE->requires->css('/local/earlyalert/css/gradeform.css');
 /*if (!has_capability('local/earlyalert:instructor_dash_view', $PAGE->context, $USER->id)) {
     redirect($CFG->wwwroot . '/my');
@@ -36,11 +37,12 @@ if (!$courses = enrol_get_users_courses($USER->id)) {
 // build a list of courses for the links
 $data = helper::get_courses_in_acadyear($courses);
 
-base::page(
-    new moodle_url('/local/earlyalert/dashboard.php'),
-    get_string('idashboard', 'local_earlyalert'),
-    get_string('idashboard', 'local_earlyalert')
-);
+// get course names and ids
+$course_data_for_display = [];
+foreach($courses as $c) {
+    $course_data_for_display[$c->id] = $c->fullname;
+}
+$formdata -> courses = $course_data_for_display;
 
 // build a student / course / final grade array object
 $student_grades = helper::get_moodle_grades($data);
@@ -48,30 +50,35 @@ $student_grades = helper::get_moodle_grades($data);
 //    base::debug_to_console($student);
 //}
 
-// need to filter out instructors and other roles from result later!
-
-
-
-// grade display with checkboxes form
-//$grade_alert_form = new \local_earlyalert\forms\grades_form(null, array('formdata' => $student_grades));
 
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_earlyalert/course_cards', $data);
+$grades_filter_form = new \local_earlyalert\forms\grades_filter(null, array('formdata' => $formdata));
 
-//echo $OUTPUT->render_from_template('local_earlyalert/course_alerts', $student_grades);
 if ($course_id) {
     // grade filter drop down render
-    $grades_filter_form = new \local_earlyalert\forms\grades_filter(null, array('formdata' => $formdata));
     $grades_filter_form->display();
-
-    if ($formdata = $grades_filter_form->get_data()) {
-        // attach data to dom for table with checkbox and submit buttons
-        base::debug_to_console('test select');
-        $selected_value = $formdata->grade_select;
-        base::debug_to_console($selected_value);
-        // Do something with the selected value
-
+    if ($grades_filter_form->is_validated())
+    {
+        $data = $grades_filter_form->get_data();
+        // Get the value of the hidden field (e.g., 'student_ids')
+        $studentIds = $data->student_ids;
+        // Use to send emails
+        base::debug_to_console($studentIds);
     }
 }
+
+//echo $OUTPUT->single_button('test', get_string('delete'), 'get', [
+//    'data-modal' => 'modal',
+//    'data-modal-title-str' => json_encode(['delete', 'core']),
+//    'data-modal-content-str' => json_encode(['areyousure']),
+//    'data-modal-yes-button-str' => json_encode(['delete', 'core'])
+//]);
+base::page(
+    new moodle_url('/local/earlyalert/dashboard.php'),
+    get_string('idashboard', 'local_earlyalert'),
+    get_string('idashboard', 'local_earlyalert')
+);
+
 echo $OUTPUT->footer();
 
