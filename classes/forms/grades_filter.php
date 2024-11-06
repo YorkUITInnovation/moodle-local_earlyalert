@@ -31,7 +31,7 @@ class grades_filter extends \moodleform
         $mform->addElement('html', '<div id = "early_alert_filter_students_container"></div>');
 
         // Hidden input field to hold the selected grade
-        $mform->addElement('hidden', 'my_grade');
+        $mform->addElement('hidden', 'student_ids');
         $mform->addElement('hidden', 'early_alert_filter_course_id', $formdata->course_id);
         $buttonarray=array();
         $buttonarray[] = $mform->createElement('submit', 'preview_button', get_string('preview_email', 'local_earlyalert'));

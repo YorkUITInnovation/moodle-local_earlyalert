@@ -44,6 +44,7 @@ function filter_students_by_grade() {
         ulElement.appendChild(select_all_li);
         let i = 0;
         let selected_students = [];
+        let student_ids_selected = document.querySelector('input[name="student_ids"]') || {};
         // Create an unordered list for each grade
         results.forEach((item) => {
 
@@ -115,8 +116,8 @@ function filter_students_by_grade() {
                     checkbox.checked = false;
                     selected_students = selected_students.filter(item => item !== checkbox.getAttribute('user_id'));
                 }
-
             });
+            student_ids_selected.value = JSON.stringify(selected_students);
 
         });
         // search dom for checkboxes and add to checked list
@@ -129,9 +130,10 @@ function filter_students_by_grade() {
                 } else {
                     selected_students = selected_students.filter(item => item !== checkbox.getAttribute('user_id'));
                 }
+                student_ids_selected.value = JSON.stringify(selected_students);
             });
-        });
 
+        });
     }).fail(function (e) {
 
         alert(e);
