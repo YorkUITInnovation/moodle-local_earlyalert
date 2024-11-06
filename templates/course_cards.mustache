@@ -2,10 +2,10 @@
 <div class = 'card-container'>
     {{#.}}
         <div class="card-tile">
-            <h2>{{fullname}}</h2>
+            <h4>{{fullname}}</h4>
                 <div class="links">
-                    <a href="" data-id= "{{id}}" data-name= "{{fullname}}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Grades</a>
-                    <a href="" data-id= "{{id}}" data-name= "{{fullname}}" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Assignments</a>
+                    <a href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}" data-id= "{{id}}" data-name= "{{fullname}}" data-link="grade" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Grades</a>
+                    <a href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}" data-id= "{{id}}" data-name= "{{fullname}}" data-link="assign" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Assignments</a>
                 </div>
         </div>
     {{/.}}

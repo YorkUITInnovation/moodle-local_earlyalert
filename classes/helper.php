@@ -41,8 +41,6 @@ class helper
         $data = array();
         $i=0;
         foreach($courses as $course){
-            base::debug_to_console($course->fullname);
-            base::debug_to_console($course->idnumber);
             if (isset($course->idnumber)) {
                 $year_from_idnumber = strchr($course->idnumber,"_",true); // searches for first instance of year in course by looking for _
                 $is_valid_year = is_numeric($year_from_idnumber);
@@ -111,5 +109,35 @@ class helper
         }
     }
 
+    public static function get_moodle_grades_by_course($course_id)
+    {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/lib/gradelib.php');
+        require_once($CFG->dirroot . '/grade/querylib.php');
+        require_once($CFG->dirroot . '/lib/grade/grade_item.php');
+        require_once($CFG->dirroot . '/lib/enrollib.php');
+        require_once("../../../html/enrol/externallib.php");
+        try {
+            $students = array();
+            if (isset($course_id)) {
+                // pull student from enrolments
+                $users = enrol_get_course_users($course_id, true); // returns user objects of those enrolled in course
+                foreach ($users as $student) {
+                    $grade = grade_get_course_grade($student->id,$course_id);
+                    if ($grade->grade) {
+                        $grade = ($grade->grade / $grade->item->grademax) * 100;
+                        $student_grade = number_format((float)$grade,
+                            '2');
+                        $students[$student->id] = ['id'=>$student->id, 'course_id'=>$course_id, 'first_name' => $student->firstname, 'last_name' => $student->lastname, 'grade'=>$student_grade];
+                    }
+                }
+            }
+
+            return $students;
+        } catch (\Exception $e) {
+            base::debug_to_console('it died');
+            die($e->getMessage());
+        }
+    }
 
 }

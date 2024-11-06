@@ -23,27 +23,24 @@ class grades_form extends \moodleform
         $fields = array('id', 'course_id', 'grade', 'first_name', 'last_name');
         $grade_letters = new \local_earlyalert\grade_letters();
         $options = $grade_letters->get_select_array();
-        $mform->addElement('header', 'grade_header', get_string('grade',  'local_earlyalert'));
-        $mform->addElement('select', 'grade_select', get_string('select_grade', 'local_earlyalert'), $options, array('onchange' => 'testjsfunction'));
+        $mform->addElement('header', 'grade_header', get_string('grade',  'local_earlyalert'), 'class="smaller-header"');
 
-        // Hidden input field to hold the selected grade
+        // Hidden input field to hold the selected grades
         $mform->addElement('hidden', 'my_grade');
 
         foreach ($formdata as $row) {
             base::debug_to_console('Row');
-            base::debug_to_console($row);
+//            base::debug_to_console($row);
             // Create a table row element
 
             $tableRowData = "";
             foreach ($row as $key => $value) {
-                base::debug_to_console($value);
+//                base::debug_to_console($value);
                 if ($key == 'first_name' || $key == 'last_name' || $key == 'grade') {
                     $tableRowData .= $value . " ";
                 }
             }
-
-            $mform->addElement('advcheckbox', 'atest', $tableRowData, 'test', array('group' => 1), array(0, 1));
-
+            $mform->addElement('advcheckbox', 'atest', $tableRowData, ' ' , array('group' => 1), array(0, 1));
             unset($tableRowData);
 
             // Close the table row element
@@ -54,10 +51,10 @@ class grades_form extends \moodleform
         $buttonarray=array();
         $buttonarray[] = $mform->createElement('submit', 'preview_button', get_string('preview_email', 'local_earlyalert'));
         $buttonarray[] = $mform->createElement('submit', 'save_button', get_string('send', 'local_earlyalert'));
-        $mform->addGroup($buttonarray, 'buttonar', '', ' ', false);
+        $mform->addGroup($buttonarray, 'buttonarray', '', ' ', false);
     }
     // Function to filter and display table data based on selected grade
-    protected function filterTable($tableData, $selectedGrade) {
+    protected function filterTable($tableData = null, $selectedGrade = null) {
         base::debug_to_console('filterTable');
         base::debug_to_console($selectedGrade);
         $filteredData = [];
