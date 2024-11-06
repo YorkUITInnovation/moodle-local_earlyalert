@@ -21,7 +21,7 @@
     align-items: center;
 }
 
-.checkbox {
+.early_alert_filterform_select_all_checkbox, .early_alert_filterform_checkbox {
     margin-right: 10px;
 }
 

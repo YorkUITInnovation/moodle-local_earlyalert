@@ -26,14 +26,31 @@ function filter_students_by_grade() {
         const students_gradesList = document.getElementById('early_alert_filter_students_container');
         students_gradesList.innerHTML = '';
         const ulElement = document.createElement('ul');
+
+        let select_all_checkbox = document.createElement('INPUT');
+        select_all_checkbox.type = 'checkbox';
+        select_all_checkbox.className = 'early_alert_filterform_select_all_checkbox';
+        select_all_checkbox.id = 'early_alert_filterform_select_all_checkbox_0';
+
+        let select_all_li = document.createElement('LI');
+
+        // Create a label for the select allcheckbox
+        let select_all_label = document.createElement('LABEL');
+        select_all_label.textContent = 'Select All';
+        select_all_label.htmlFor = 'early_alert_filterform_select_all_checkbox';
+
+        select_all_li.appendChild(select_all_checkbox);
+        select_all_li.appendChild(select_all_label);
+        ulElement.appendChild(select_all_li);
+        let i = 0;
         // Create an unordered list for each grade
         results.forEach((item) => {
-                let i = 0;
+
                 // Create a new list item (LI) element
                 let li = document.createElement('LI');
                 let checkbox = document.createElement('INPUT');
                 checkbox.type = 'checkbox';
-                checkbox.className = 'checkbox';
+                checkbox.className = 'early_alert_filterform_checkbox';
                 checkbox.id = `early_alert_filterform_checkbox_${i}`;
 
                 // Add the checkbox to the list item (LI)
@@ -83,13 +100,25 @@ function filter_students_by_grade() {
             });
         students_gradesList.appendChild(ulElement);
 
+        // Add an event listener to the select all checkbox
+        select_all_checkbox.addEventListener('change', function() {
+            // Get all checkboxes within the list
+            let checkboxes = document.querySelectorAll("input[class^='early_alert_filterform_checkbox']");
+            alert(checkboxes);
+            // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
+            checkboxes.forEach(function(checkbox) {
+                if (select_all_checkbox.checked) {
+                    checkbox.checked = true;
+                } else {
+                    checkbox.checked = false;
+                }
+            });
+        });
 
     }).fail(function (e) {
 
         alert(e);
         // fail gracefully somehow :'( ;
     });
-
-
 
 }
