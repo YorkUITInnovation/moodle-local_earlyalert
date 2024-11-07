@@ -1,27 +1,14 @@
-{{< core/modal }}
-    {{$title}}{{#str}} Email Preview {{/str}}{{/title}}
-    {{$body}}
-        <div class="modal-body">
-            <div class="email-header">
-                <h2>{{ get_string('preview_email_subject', 'your_module') }}</h2>
-            </div>
+<div class="modal-body">
+    <div class="email-header">
+        <h3>{{ subject }}</h3>
+    </div>
+    <div class="email-content">
+        <p>Dear {{ student_name }}</p>
+        <p>{{{ message }}} </p>
+    </div>
 
-            <div class="email-content">
-                <p>{{ get_string('preview_email_greeting', 'your_module') }}, {{ $student_name }}</p>
-
-                <p>{{ get_string('preview_email_body', 'your_module') }} {{ $grades_data }}</p>
-
-                <p>{{ get_string('preview_email_footer', 'your_module') }}</p>
-            </div>
-
-            <div class="email-footer">
-                <p>Best regards,</p>
-                <p>{{ get_string('preview_email_signature', 'your_module') }}</p>
-            </div>
-        </div>
-    {{/body}}
-    {{$footer}}
-        <button type="button" class="btn btn-primary" data-action="send">{{#str}} send {{/str}}</button>
-        <button type="button" class="btn btn-secondary" data-action="cancel">{{#str}} cancel {{/str}}</button>
-    {{/footer}}
-{{/ core/modal }}
+    <div class="email-footer">
+        <p>Best regards,</p>
+        <p>{{ instructor_name }}</p>
+    </div>
+</div>

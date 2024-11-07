@@ -9,14 +9,15 @@ export const init = () => {
 function filter_students_by_grade() {
 
     // Get the s delected grade value from the dropdown
-    //const selectedGrade = document.getElementById('id_early_alert_filter_grade_select').value;
+    const selected_grade = document.getElementById('id_early_alert_filter_grade_select').value;
     const course_id = document.getElementsByName('early_alert_filter_course_id')[0].value;
     // Filter your data based on the selected grade value (for example)
     // Delete the record
     var get_filtered_studentgrades = ajax.call([{
         methodname: 'earlyalert_course_grades_percent_get',
         args: {
-            id: course_id
+            id: course_id,
+            grade_id: selected_grade
         }
     }]);
     get_filtered_studentgrades[0].done(function (results) {
@@ -136,7 +137,7 @@ function filter_students_by_grade() {
         });
     }).fail(function (e) {
 
-        alert(e);
+        alert(e.message());
         // fail gracefully somehow :'( ;
     });
 

@@ -33,6 +33,11 @@ $string['send'] = 'Send';
 $string['grade'] = 'Grade';
 
 
+
+/* Email template */
+$string['preview_email_greeting'] = 'Hello';
+
+
 /*LDAP Setting*/
 $string['ldap_url'] = 'LDAP Url';
 $string['ldap_user'] = 'LDAP User';

@@ -2,23 +2,23 @@
 import ModalFactory from 'core/modal_factory';
 import {get_string as getString} from 'core/str';
 import Templates from 'core/templates';
-
-export const init = () => {
-    preview_student_email();
-};
-
+import ajax from 'core/ajax';
 /**
- * Create js modal
+ * Modal for email template preview
  */
-function preview_student_email() {
+export const init = async () => {
+
     ModalFactory.create({
         title: getString('preview_email', 'local_earlyalert'),
-        body: Templates.render('/local/earlyalert/templates/preview_student_email', {}),
-        removeOnClose: true,
-    })
-        .then(modal => {
-            modal.show();
-            return modal;
-        });
+        type: ModalFactory.types.CANCEL,
+        body: Templates.render('local_earlyalert/preview_student_email', {name: 'etemplate name', student_name: 'Peter Parker', subject: 'Math 101' , message: '<p> Please contact Student Admissions to further discuss </p><p>It has been brought to our attention...</p> ', instructor_name: 'Mr. White'})
+    }).then(modal => {
+        const preview_button = document.getElementById('id_early_alert_filter_preview_button');
+        if (preview_button) {
+            preview_button.addEventListener('click', function() {
+                modal.show();
+            });
+        }
+    });
+};
 
-}

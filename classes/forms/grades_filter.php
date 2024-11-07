@@ -13,6 +13,9 @@ class grades_filter extends \moodleform
     protected function definition()
     {
         GLOBAL $PAGE;
+        $PAGE->requires->js_call_amd('local_earlyalert/preview_student_email', 'init');
+        // Load AMD module
+        $PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
 
         $formdata = $this->_customdata['formdata'];
         // Create form object
@@ -36,8 +39,8 @@ class grades_filter extends \moodleform
             $mform->addElement('hidden', 'early_alert_filter_course_id', $formdata->course_id);
 
             $buttonarray=array();
-            $buttonarray[] = $mform->createElement('button', 'preview_button', get_string('preview_email', 'local_earlyalert'), array('onclick' => 'javascript:preview_student_email()'));
-            $buttonarray[] = $mform->createElement('submit', 'save_button', get_string('send', 'local_earlyalert'), array('onclick' => 'window.location.href = \'dashboard.php?course_id=' . $formdata->course_id . '\';'));
+            $buttonarray[] = $mform->createElement('button', 'early_alert_filter_preview_button', get_string('preview_email', 'local_earlyalert'));
+            $buttonarray[] = $mform->createElement('submit', 'early_alert_filter_save_button', get_string('send', 'local_earlyalert'), array('onclick' => 'window.location.href = \'dashboard.php?course_id=' . $formdata->course_id . '\';'));
             $mform->addGroup($buttonarray, 'buttonarray', '', ' ', false);
         }
 

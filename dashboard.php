@@ -14,16 +14,13 @@ use local_earlyalert\helper;
 require_login(1, false);
 
 $context = context_system::instance();
-// Load AMD module
-$PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
-//$PAGE->requires->js_call_amd('local_earlyalert/preview_student_email', 'init');
+// Load CSS
 $PAGE->requires->css('/local/earlyalert/css/gradeform.css');
+$PAGE->requires->css('/local/earlyalert/css/styles.css');
 /*if (!has_capability('local/earlyalert:instructor_dash_view', $PAGE->context, $USER->id)) {
     redirect($CFG->wwwroot . '/my');
 }*/
 
-// Load CSS file
-$PAGE->requires->css('/local/earlyalert/css/styles.css');
 // Get the list of courses from Moodle API for the category year 2024
 //$coursedata = \core_course_external::get_courses_by_field('category', '2');
 
@@ -68,12 +65,6 @@ if ($course_id) {
     }
 }
 
-//echo $OUTPUT->single_button('test', get_string('delete'), 'get', [
-//    'data-modal' => 'modal',
-//    'data-modal-title-str' => json_encode(['delete', 'core']),
-//    'data-modal-content-str' => json_encode(['areyousure']),
-//    'data-modal-yes-button-str' => json_encode(['delete', 'core'])
-//]);
 base::page(
     new moodle_url('/local/earlyalert/dashboard.php'),
     get_string('idashboard', 'local_earlyalert'),

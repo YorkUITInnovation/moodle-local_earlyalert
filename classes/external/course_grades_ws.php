@@ -13,7 +13,7 @@ class local_earlyalert_course_grades_ws extends external_api
      **/
 
     public static function get_course_grades_percent_parameters() {
-        return new external_function_parameters(array('id' => new external_value(PARAM_INT, 'Course id', false, -1)));
+        return new external_function_parameters(array('id' => new external_value(PARAM_INT, 'Course id', false, -1), 'grade_id' => new external_value(PARAM_TEXT, 'Grade letter id', false, 11)));
     }
 
     /** Returns users
@@ -21,9 +21,10 @@ class local_earlyalert_course_grades_ws extends external_api
      * @return array users
      **/
 
-    public static function get_course_grades_percent($id) {
+    public static function get_course_grades_percent($id, $grade_id) {
+        // TODO: restrict by grade id if exists
         global $DB;
-        $params = self::validate_parameters(self::get_course_grades_percent_parameters(), array('id' => $id));
+        $params = self::validate_parameters(self::get_course_grades_percent_parameters(), array('id' => $id, 'grade_id' => $grade_id));
         $mdlGrades = helper::get_moodle_grades_by_course($id);
         $users = [];
         $i = 0;
