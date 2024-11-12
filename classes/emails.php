@@ -6,7 +6,7 @@
  * 
  */
 
-namespace local_etemplate;
+namespace local_earlyalert;
 
 class emails
 {

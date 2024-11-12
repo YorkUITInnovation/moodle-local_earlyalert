@@ -34,10 +34,12 @@ $string['send'] = 'Send';
 $string['grade'] = 'Grade';
 
 
-
 /* Email template */
 $string['preview_email_greeting'] = 'Hello';
-
+$string['send_email'] = 'Send Email';
+$string['send_dialog_text'] = 'Are you sure you want to send the alert emails to the selected students?';
+$string['cancel'] = 'Cancel';
+$string['could_not_send_email'] = 'Sorry an error occured and we could not send the emails';
 
 /*LDAP Setting*/
 $string['pluginsettings'] = 'Plugin Settings';

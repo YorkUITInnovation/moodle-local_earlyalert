@@ -6,10 +6,10 @@
  * 
  */
 
-namespace local_etemplate;
+namespace local_earlyalert;
 
-use local_etemplate\crud;
-use local_etemplate\base;
+use local_earlyalert\crud;
+use local_earlyalert\base;
 
 class email extends crud
 {

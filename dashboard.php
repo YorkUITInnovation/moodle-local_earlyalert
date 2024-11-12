@@ -59,9 +59,27 @@ if ($course_id) {
     {
         $data = $grades_filter_form->get_data();
         // Get the value of the hidden field (e.g., 'student_ids')
-        $studentIds = $data->student_ids;
+
+        $unit_dept = helper::get_unit_department_from_courseid($course_id); // based on course_code
+        base:debug_to_console('unit_dept ids: '. $unit_dept);
+
+        $template_id = helper::get_template_from_unit_department($unit_dept->unitid, $unit_dept->departmentid); // based on course code / Unit/ Faculty
+        base::debug_to_console('template id found: '. $template_id);
+
+        $student_user_ids = $data->student_ids;
         // Use to send emails
-        base::debug_to_console($studentIds);
+        base::debug_to_console('User ids now');
+        foreach($student_user_ids as $userid) {
+            // send email
+            // show Confirmation of students sent ?
+            base::debug_to_console($userid);
+//            email_processEmail($course -> id); // preview only
+//            email_processEmail($student -> id); // sends email
+        }
+    }
+    else if ($grades_filter_form->is_cancelled()) {
+        // preview
+        base::debug_to_console('Form is cancelled');
     }
 }
 

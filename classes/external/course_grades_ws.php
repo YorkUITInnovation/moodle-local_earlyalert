@@ -13,28 +13,44 @@ class local_earlyalert_course_grades_ws extends external_api
      **/
 
     public static function get_course_grades_percent_parameters() {
-        return new external_function_parameters(array('id' => new external_value(PARAM_INT, 'Course id', false, -1), 'grade_id' => new external_value(PARAM_TEXT, 'Grade letter id', false, 11)));
+        return new external_function_parameters(array('id' => new external_value(PARAM_INT, 'Course id', false, -1), 'grade_letter_id' => new external_value(PARAM_INT, 'Grade letter id', false, -1)));
     }
 
     /** Returns users
      * @global moodle_database $DB
-     * @return array users
+     * @return array $students
      **/
 
-    public static function get_course_grades_percent($id, $grade_id) {
+    public static function get_course_grades_percent($id, $grade_letter_id) {
         // TODO: restrict by grade id if exists
         global $DB;
-        $params = self::validate_parameters(self::get_course_grades_percent_parameters(), array('id' => $id, 'grade_id' => $grade_id));
+        $params = self::validate_parameters(self::get_course_grades_percent_parameters(), array('id' => $id, 'grade_letter_id' => $grade_letter_id));
         $mdlGrades = helper::get_moodle_grades_by_course($id);
-        $users = [];
+        $students = [];
         $i = 0;
-        foreach ($mdlGrades as $grade) {
-            foreach ($grade as $key => $value) {
-                $users[$i][$key] = $value;
-            }
-            $i++;
+        $filter_students = false;
+        $filter_me_out = false;
+
+        if ($grade_letter_id > 0) {
+            // get grade ranges and filter students
+            $mdlGradeRanges = helper::get_moodle_grade_percent_range($grade_letter_id);
+            $filter_students = true;
+            $filter_me_out = true;
         }
-        return $users;
+
+        foreach ($mdlGrades as $grade) {
+            foreach ($grade as $key => $value) { // only those filtered
+                 $students[$i][$key] = $value;
+                 if ($filter_students && $key == 'grade' && (float)$value >= $mdlGradeRanges['min'] && (float)$value <= $mdlGradeRanges['max']){
+                     $filter_me_out = false;   // we want to keep this student
+                 }
+             }
+             if ($filter_students && $filter_me_out) {
+                 unset($students[$i]);
+             }
+             $i++;
+         }
+        return $students;
     }
 
     /** Get students

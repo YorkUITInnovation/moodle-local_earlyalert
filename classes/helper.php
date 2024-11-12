@@ -193,4 +193,19 @@ class helper
             die($e->getMessage());
         }
     }
+
+    public static function get_moodle_grade_percent_range($grade_letter_id){
+        try {
+            $grade_letters = new \local_earlyalert\grade_letters();
+            $grade_ranges = $grade_letters->get_grade_percentage_range();
+           if ($grade_letter_id > 0 && isset($grade_ranges[$grade_letter_id])) {
+                return $grade_ranges[$grade_letter_id];
+            }
+           else return [];
+
+        } catch (\Exception $e) {
+            base::debug_to_console('it died');
+            die($e->getMessage());
+        }
+    }
 }
