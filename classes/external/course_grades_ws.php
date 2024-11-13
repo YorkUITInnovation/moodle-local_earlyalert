@@ -63,7 +63,8 @@ class local_earlyalert_course_grades_ws extends external_api
             'course_id' => new external_value(PARAM_INT, 'Course id', false),
             'first_name' => new external_value(PARAM_TEXT, 'User first name', false),
             'last_name' => new external_value(PARAM_TEXT, 'User last name', false),
-            'grade' => new external_value(PARAM_TEXT, 'grade', false)
+            'grade' => new external_value(PARAM_TEXT, 'grade', false),
+            'idnumber' => new external_value(PARAM_TEXT, 'idnumber', false)
         );
         return new external_single_structure($fields);
     }

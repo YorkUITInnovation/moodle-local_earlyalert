@@ -10,7 +10,7 @@ function filter_students_by_grade() {
 
     // Get the s delected grade value from the dropdown
     const selected_grade = document.getElementById('id_early_alert_filter_grade_select');
-    let $grade_letter_id = 0;
+    let $grade_letter_id = selected_grade.value;
     const course_id = document.getElementsByName('early_alert_filter_course_id')[0].value;
 
     setup_filter_students_by_grade(course_id, $grade_letter_id);
@@ -89,7 +89,7 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
 
             // Create a label for the checkbox
             let label = document.createElement('LABEL');
-            label.textContent = item.first_name + ' ' + item.last_name;
+            label.textContent = item.idnumber + ' | ' + item.first_name + ' ' + item.last_name;
             label.htmlFor = `early_alert_filterform_checkbox_${i}`;
 
             // Add the label to column 1 div
