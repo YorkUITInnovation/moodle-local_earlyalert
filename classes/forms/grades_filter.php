@@ -34,8 +34,8 @@ class grades_filter extends \moodleform
 
         if (isset($formdata->course_id)) {
             $mform->addElement('header', 'early_alert_filter_grade_header', "Grade's for " . $formdata -> courses[$formdata->course_id], 'class="smaller-header"');
-            $mform->addElement('select', 'early_alert_filter_grade_select', get_string('select_grade', 'local_earlyalert'), $options);
-
+            $grade_select = $mform->addElement('select', 'early_alert_filter_grade_select', get_string('select_grade', 'local_earlyalert'), $options);
+            $mform->addElement('advcheckbox', 'early_alert_filter_grade_chk', '', 'Show grades (temporary feature)', array('group' => 1), array(0, 1));
 
             // Add a container element to hold the students list
             $mform->addElement('html', '<div id = "early_alert_filter_students_container">No records!</div>');
@@ -43,6 +43,7 @@ class grades_filter extends \moodleform
             // Hidden input field to hold the selected grade
             $mform->addElement('hidden', 'student_ids');
             $mform->addElement('hidden', 'early_alert_filter_course_id', $formdata->course_id);
+            $grade_select->setSelected(9); // whichever is D+ which is ID:9
 
             $buttonarray=array();
             $buttonarray[] = $mform->createElement('button', 'early_alert_filter_preview_button', get_string('preview_email', 'local_earlyalert'));

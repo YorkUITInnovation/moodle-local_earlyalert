@@ -12,6 +12,7 @@ function filter_students_by_grade() {
     const selected_grade = document.getElementById('id_early_alert_filter_grade_select');
     let $grade_letter_id = 0;
     const course_id = document.getElementsByName('early_alert_filter_course_id')[0].value;
+
     setup_filter_students_by_grade(course_id, $grade_letter_id);
 
     selected_grade.addEventListener('change', function() {
@@ -27,6 +28,8 @@ function filter_students_by_grade() {
  * @param $grade_letter_id
  */
 function setup_filter_students_by_grade(course_id, $grade_letter_id) {
+    let selected_students = [];
+
     var get_filtered_studentgrades = ajax.call([{
         methodname: 'earlyalert_course_grades_percent_get',
         args: {
@@ -38,6 +41,7 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
         //results.filter(item => item.grade === parseInt(selectedGrade));
         //let t = selectedGrade;
         // Update your page with the filtered data
+
         const students_gradesList = document.getElementById('early_alert_filter_students_container');
         students_gradesList.innerHTML = '';
         const ulElement = document.createElement('ul');
@@ -62,8 +66,9 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
         select_all_li.appendChild(select_all_label);
         ulElement.appendChild(select_all_li);
         let i = 0;
-        let selected_students = [];
+
         let student_ids_selected = document.querySelector('input[name="student_ids"]') || {};
+        student_ids_selected.value = [];
         // Create an unordered list for each grade
         results.forEach((item) => {
 
@@ -101,8 +106,9 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
             // Create a span for the pill element
             let pillSpan = document.createElement('SPAN');
             pillSpan.className = 'pill red';
-            pillSpan.textContent = '5'; // move to css
             pillSpan.textContent = item.grade;
+            pillSpan.id = `early_alert_filterform_grade_pill_${i}`;
+            pillSpan.style.display = 'none';
 
             // Add the pill to column 2 div
             col2Div.appendChild(pillSpan);
@@ -110,7 +116,6 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
             // Create another span for the value text
             let valueSpan = document.createElement('SPAN');
             valueSpan.className = 'value-text';
-            valueSpan.textContent = '!';
 
             // Add the value text to column 2 div
             col2Div.appendChild(valueSpan);
@@ -153,9 +158,28 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
             });
 
         });
+        show_grades();
     }).fail(function (e) {
 
         alert(e);
         // fail gracefully somehow :'( ;
+    });
+}
+
+function show_grades() {
+    // check box for grade showing - remove later
+    const show_grade_checkbox = document.getElementById('id_early_alert_filter_grade_chk');
+    // check box for grade showing - remove later
+    show_grade_checkbox.addEventListener('click', function() {
+        let grade_pills = document.querySelectorAll("span.pill");
+        grade_pills.forEach(function (grade_pill) {
+        if (show_grade_checkbox.checked) {
+            if (grade_pill.style.display == 'none') {
+                grade_pill.style.display = 'block';
+            }
+        }
+        else {
+            grade_pill.style.display = 'none';}
+        });
     });
 }
