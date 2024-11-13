@@ -32,6 +32,7 @@ $string['select_grade'] = 'Default Grade';
 $string['preview_email'] = 'Preview';
 $string['send'] = 'Send';
 $string['grade'] = 'Grade';
+$string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
 
 
 /* Email template */

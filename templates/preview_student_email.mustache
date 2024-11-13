@@ -1,14 +1,14 @@
 <div class="modal-body">
     <div class="email-header">
-        <h3>{{ subject }}</h3>
+        <h4>Subject: {{ subject }}</h4>
     </div>
     <div class="email-content">
-        <p>Dear {{ student_name }}</p>
+        <p>Dear {{ student_name }},</p>
         <p>{{{ message }}} </p>
     </div>
 
     <div class="email-footer">
-        <p>Best regards,</p>
+        <p>Sincerely, <br>Your Academic advisors</p>
         <p>{{ instructor_name }}</p>
     </div>
 </div>

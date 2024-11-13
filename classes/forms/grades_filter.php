@@ -36,6 +36,8 @@ class grades_filter extends \moodleform
             $mform->addElement('header', 'early_alert_filter_grade_header', "Grade's for " . $formdata -> courses[$formdata->course_id], 'class="smaller-header"');
             $grade_select = $mform->addElement('select', 'early_alert_filter_grade_select', get_string('select_grade', 'local_earlyalert'), $options);
             $mform->addElement('advcheckbox', 'early_alert_filter_grade_chk', '', 'Show grades (temporary feature)', array('group' => 1), array(0, 1));
+            $mform->addElement('static', 'description', get_string('student_list', 'local_earlyalert'),
+                null);
 
             // Add a container element to hold the students list
             $mform->addElement('html', '<div id = "early_alert_filter_students_container">No records!</div>');
