@@ -7,7 +7,7 @@ export const init = () => {
 };
 
 /**
- * Delete advisor
+ * Send email
  */
 function sendEmails() {
     // Pop-up notification when .btn-local-organization-delete-advisor is clicked
