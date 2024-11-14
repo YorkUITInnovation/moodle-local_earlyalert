@@ -3,7 +3,7 @@ import Templates from 'core/templates';
 
 export const init = () => {
     button_click();
-    filter_students_by_grade();
+    filter_students_by_default_grade();
 };
 
 function button_click() {
@@ -12,8 +12,9 @@ function button_click() {
         if (event.target.classList.contains('early-alert-type-button')) {
             let dataLink = event.target.getAttribute('data-link');
             let link = event.target.getAttribute('data-href');
+            let course_name = event.target.getAttribute('data-name');
             // Redirect to the link
-            window.location = link + '&alert_type=' + dataLink;
+            window.location = link + '&alert_type=' + dataLink + '&course_name=' + course_name;
         }
     });
 }
@@ -22,28 +23,38 @@ function button_click() {
 /**
  * Adds students with grades
  */
-function filter_students_by_grade() {
-
-    // Get the s delected grade value from the dropdown
-    // const selected_grade = document.getElementById('id_early_alert_filter_grade_select');
-    // let $grade_letter_id = selected_grade.value;
+function filter_students_by_default_grade() {
 
     // Get course id from the hidden input field wiht id early_alert_filter_course_id
     const course_id = document.getElementById('early_alert_filter_course_id').value;
-    console.log('Course ID is ' + course_id);
-    setup_filter_students_by_grade(course_id, 9);
-
-    // selected_grade.addEventListener('change', function () {
-    //     $grade_letter_id = selected_grade.value;
-    //     setup_filter_students_by_grade(course_id, $grade_letter_id);
-    // });
+    // initial default setup of student list
+    setup_filter_students_by_grade(course_id, 9); // extract this 9 from php which might be configurable in the future
 
 }
 
-function setup_filter_students_by_grade(course_id, $grade_letter_id) {
+function filter_students_by_grade_select(){
+
+    // Get the s delected grade value from the dropdown
+    const grade_select = document.getElementById('id_early_alert_filter_grade_select');
+    const course_id = document.getElementById('early_alert_filter_course_id').value;
+    // setup listener for drop down selection
+
+    grade_select.addEventListener('change', function (e) {
+        let grade_letter_id = e.Target.value;
+        setup_filter_students_by_grade(course_id, grade_letter_id);
+    });
+
+}
+
+function setup_filter_students_by_grade(course_id, grade_letter_id) {
     let selected_students = [];
     // convert course_id into an integer
     course_id = parseInt(course_id);
+    grade_letter_id = parseInt(grade_letter_id);
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let course_name = urlParams.get('course_name');
+
     // Only display if course_id is greater than 0
     if (course_id > 0) {
         //Show loader
@@ -62,12 +73,14 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
             methodname: 'earlyalert_course_grades_percent_get',
             args: {
                 id: course_id,
-                grade_letter_id: $grade_letter_id
+                grade_letter_id: grade_letter_id
             }
         }]);
         get_filtered_studentgrades[0].done(function (results) {
+
             // Reformat the data to display in a grid
             let num_students = results.length;
+            console.log('Number of students returned: ' + num_students);
             let num_rows = Math.min(3, Math.ceil(num_students / 3));
             let num_cols = Math.ceil(num_students / num_rows);
             let display_data = {
@@ -112,13 +125,18 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
                 // Add alert_type to display_data
                 display_data.alert_type = 'Missed Exam';
             }
-
+            display_data.fullname = course_name;
             // Render the template with display_data
             Templates.render('local_earlyalert/course_student_list', display_data)
                 .then(function (html, js) {
                     // Insert the rendered template into the target element
                     document.getElementById('early-alert-student-results').innerHTML = html;
                     Templates.runTemplateJS(js);
+                    // set default grade letter selected
+                    let grade_select = document.getElementById('id_early_alert_filter_grade_select');
+                    grade_select.value = grade_letter_id;
+                    // setup listener
+                    filter_students_by_grade_select();
                 })
                 .catch(function (error) {
                     console.error('Failed to render template:', error);

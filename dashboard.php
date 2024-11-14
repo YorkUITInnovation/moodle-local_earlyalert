@@ -2,12 +2,7 @@
 global $CFG, $OUTPUT, $PAGE, $DB, $USER;
 require_once("../../config.php");
 require_once($CFG->libdir . "/externallib.php");
-//require_once("../../../html/course/externallib.php");
 require_once("../../../html/enrol/externallib.php");
-require_once("classes/forms/grades_form.php");
-require_once("classes/forms/grades_filter.php");
-
-//require_once($CFG->dirroot . '/lib/enrollib.php');
 
 
 use local_earlyalert\base;
@@ -28,6 +23,7 @@ $PAGE->requires->css('/local/earlyalert/css/styles.css');
 
 $course_id = optional_param('course_id', 0, PARAM_INT);
 $alert_type = optional_param('alert_type', '', PARAM_TEXT);
+$grade_letter_id = optional_param('grade_letter_id', '', PARAM_TEXT);
 
 $formdata = new stdClass();
 $formdata->course_id = $course_id;
@@ -46,6 +42,8 @@ if ($course_id) {
 if ($alert_type) {
     $course_data['alert_type'] = $alert_type;
 }
+// Ad alert_type to $course_data if $alert_type is not empty
+
 $course_data_for_grades = [];
 // Prepare course data fro grades
 $i = 0;

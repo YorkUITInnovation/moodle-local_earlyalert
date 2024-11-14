@@ -7,6 +7,7 @@ namespace local_earlyalert;
 class base
 {
 
+    const GRADE_LETTER_ID = 9; // change to something editable in the future
     /**
      * Creates the Moodle page header
      * @param string $url Current page url

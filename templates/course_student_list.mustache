@@ -1,7 +1,7 @@
 <!--Instructions row-->
 <div class="row">
     <div class="col">
-        <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} {{alert_type}}</h3>
+        <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} {{alert_type}} for {{fullname}}</h3>
         <p></p>{{{alert_type_message}}}
         <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}</b>
             <select id="id_early_alert_filter_grade_select"
@@ -11,7 +11,7 @@
                 <option value="0">All</option>
                 <option value="11">F</option>
                 <option value="10">D</option>
-                <option value="9" selected="">D+</option>
+                <option value="9" >D+</option>
                 <option value="8">C-</option>
                 <option value="7">C</option>
                 <option value="6">C+</option>
