@@ -1,7 +1,7 @@
 <!--Instructions row-->
 <div class="row">
     <div class="col">
-        <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} {{alert_type}} for {{fullname}}</h3>
+        <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} <span class="text-danger">{{alert_type}}</span> for {{fullname}}</h3>
         <p></p>{{{alert_type_message}}}
         <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}</b>
             <select id="id_early_alert_filter_grade_select"
