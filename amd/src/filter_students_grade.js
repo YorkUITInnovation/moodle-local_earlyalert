@@ -2,6 +2,7 @@ import ajax from 'core/ajax';
 import Templates from 'core/templates';
 import ModalFactory from 'core/modal_factory';
 import {get_string as getString} from 'core/str';
+import notification from 'core/notification';
 
 export const init = () => {
     button_click();
@@ -144,6 +145,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id) {
                     check_all_student_grades(selected_students);
                     check_allnone_listener(selected_students);
                     setup_preview_emails();
+                    setup_send_emails();
 
                 })
                 .catch(function (error) {
@@ -365,6 +367,49 @@ function setup_preview_emails() {
         });
     });
 }
+
+function setup_send_emails() {
+    // Pop-up notification when .btn-local-organization-delete-advisor is clicked
+    const send_button = document.getElementById('early-alert-send-button1');
+    const send_button2 = document.getElementById('early-alert-send-button2');
+    var ids = document.getElementById("early-alert-student-ids").value; // hidden field ids
+    send_button.addEventListener('click', function () {
+        create_notification_dialog(ids);
+    });
+    send_button2.addEventListener('click', function () {
+        create_notification_dialog(ids);
+    });
+}
+
+function create_notification_dialog(ids) {
+    // Get the data id attribute value
+    var send_string = getString('send_email', 'local_earlyalert');
+    var send_dialog_text = getString('send_dialog_text', 'local_earlyalert');
+    var send = getString('send', 'local_earlyalert');
+    var cancel = getString('cancel', 'local_earlyalert');
+    var sent_email = getString('sent_email', 'local_earlyalert');
+    var could_not_send_email = getString('could_not_send_email', 'local_earlyalert');
+    var sent_dialog_text = getString('sent_dialog_text', 'local_earlyalert');
+
+    // Notification
+    notification.confirm(send_string, send_dialog_text, send, cancel, function () {
+        // Delete the record
+        var sendEmail = ajax.call([{
+            methodname: 'local_earlyalert_sendEmail',
+            args: {
+                id: ids,
+            }
+        }]);
+        sendEmail[0].done(function () {
+            // success
+            notification.alert('Email', sent_email);
+        }).fail(function () {
+            //notification.alert(could_not_send_email);
+            notification.alert('Email',sent_dialog_text);
+        });
+    });
+}
+
 
 function show_grades() {
     // check box for grade showing - remove later

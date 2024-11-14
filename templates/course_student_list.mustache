@@ -29,7 +29,7 @@
     <div class="col">
         <h3>{{#str}}my_list_of_students, local_earlyalert{{/str}}</h3>
         <p>{{#str}}select_students, local_earlyalert, {{alert_type}} {{/str}}</p>
-        <p><input type="checkbox" id="early-alert-checkall-student-checkbox" class="early-alert-checkall-student-checkbox">  All/None</p>
+        <p><input type="checkbox" id="early-alert-checkall-student-checkbox" class="early-alert-checkall-student-checkbox">  All/None <button id="early-alert-send-button1" class="btn btn-primary early-alert-send-button">Send</button></p>
     </div>
 </div>
 <!--Student list row-->
@@ -63,3 +63,4 @@
         </div>
     {{/student_rows}}
 </div>
+<div><button id="early-alert-send-button2" class="btn btn-primary float-right early-alert-send-button2">Send</button></div>

@@ -14,6 +14,9 @@ $context = context_system::instance();
 // Load CSS
 $PAGE->requires->css('/local/earlyalert/css/gradeform.css');
 $PAGE->requires->css('/local/earlyalert/css/styles.css');
+// Load AMD module
+$PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
+
 /*if (!has_capability('local/earlyalert:instructor_dash_view', $PAGE->context, $USER->id)) {
     redirect($CFG->wwwroot . '/my');
 }*/
@@ -75,7 +78,6 @@ echo base::page(
 
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_earlyalert/course_cards', $course_data);
-$grades_filter_form = new \local_earlyalert\forms\grades_filter(null, array('formdata' => $formdata));
 
 //if ($course_id) {
 //    // grade filter drop down render
