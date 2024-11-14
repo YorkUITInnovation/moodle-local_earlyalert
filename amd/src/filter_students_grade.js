@@ -40,8 +40,9 @@ function filter_students_by_grade_select(){
     // setup listener for drop down selection
 
     grade_select.addEventListener('change', function (e) {
-        let grade_letter_id = e.Target.value;
+        let grade_letter_id = e.target.value;
         setup_filter_students_by_grade(course_id, grade_letter_id);
+
     });
 
 }
@@ -137,6 +138,9 @@ function setup_filter_students_by_grade(course_id, grade_letter_id) {
                     grade_select.value = grade_letter_id;
                     // setup listener
                     filter_students_by_grade_select();
+                    check_all_student_grades(selected_students);
+                    check_allnone_listener(selected_students);
+
                 })
                 .catch(function (error) {
                     console.error('Failed to render template:', error);
@@ -293,6 +297,45 @@ function setup_filter_students_by_grade_original(course_id, $grade_letter_id) {
     });
 }
 
+function check_all_student_grades(selected_students) {
+    const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
+    student_ids_selected.value = [];
+    const check_all_none_checkbox = document.getElementById('early-alert-checkall-student-checkbox');
+    check_all_none_checkbox.checked = true;
+    //check box for grade showing - remove later
+    const student_checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']");
+    // check box for grade showing - remove later
+    student_checkboxes.forEach(function (checkbox) {
+        checkbox.checked = true;
+        selected_students.push(checkbox.getAttribute('data-student-id'));
+    });
+    student_ids_selected.value = JSON.stringify(selected_students);
+}
+
+function check_allnone_listener(selected_students){
+    // Add an event listener to the select all checkbox
+    const check_all_none_checkbox = document.getElementById('early-alert-checkall-student-checkbox');
+    const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
+
+    check_all_none_checkbox.addEventListener('click', function () {
+        student_ids_selected.value = [];
+        // Get all checkboxes within the list
+        let checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']");
+        // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
+        checkboxes.forEach(function (checkbox) {
+            if (check_all_none_checkbox.checked) {
+                checkbox.checked = true;
+                selected_students.push(checkbox.getAttribute('data-student-id'));
+            } else {
+                checkbox.checked = false;
+                selected_students = selected_students.filter(item => item !== checkbox.getAttribute('data-student-id'));
+            }
+        });
+        student_ids_selected.value = JSON.stringify(selected_students);
+    });
+
+
+}
 function show_grades() {
     // check box for grade showing - remove later
     const show_grade_checkbox = document.getElementById('id_early_alert_filter_grade_chk');

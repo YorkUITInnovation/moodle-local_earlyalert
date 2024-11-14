@@ -1,4 +1,5 @@
 <!--Instructions row-->
+<input type="hidden" id="early-alert-student-ids">
 <div class="row">
     <div class="col">
         <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} <span class="text-danger">{{alert_type}}</span> for {{fullname}}</h3>
@@ -28,6 +29,7 @@
     <div class="col">
         <h3>{{#str}}my_list_of_students, local_earlyalert{{/str}}</h3>
         <p>{{#str}}select_students, local_earlyalert{{/str}}</p>
+        <p><input type="checkbox" id="early-alert-checkall-student-checkbox" class="early-alert-checkall-student-checkbox">  All/None</p>
     </div>
 </div>
 <!--Student list row-->
