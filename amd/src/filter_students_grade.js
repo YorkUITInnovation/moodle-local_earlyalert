@@ -103,6 +103,16 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
                 display_data.alert_type = 'Low Grade';
             }
 
+            if (alert_type === 'assign') {
+                // Add alert_type to display_data
+                display_data.alert_type = 'Missed Assignment';
+            }
+
+            if (alert_type === 'exam') {
+                // Add alert_type to display_data
+                display_data.alert_type = 'Missed Exam';
+            }
+
             // Render the template with display_data
             Templates.render('local_earlyalert/course_student_list', display_data)
                 .then(function (html, js) {
