@@ -3,7 +3,7 @@ import ajax from 'core/ajax';
 import {get_string as getString} from 'core/str';
 
 export const init = () => {
-    sendEmails();
+    //sendEmails();
 };
 
 /**

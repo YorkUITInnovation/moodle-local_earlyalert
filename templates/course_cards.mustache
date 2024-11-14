@@ -1,12 +1,80 @@
+<input type="hidden" id="early-alert-alert-type" value="{{alert_type}}">
+<input type="hidden" id="early_alert_filter_course_id" value="{{course_id}}">
+{{#rows}}
+    <div class="row">
+        <div class="col">
+            <div class="card-deck">
+                {{#courses}}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>{{fullname}}</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-danger">
+                                <b>{{#str}}available_alert_types, local_earlyalert{{/str}}</b>
+                            </div>
+                            <h5>{{#str}}send_alert_based_on, local_earlyalert{{/str}}</h5>
+                            <div class="card-deck">
 
-<div class = 'card-container'>
-    {{#.}}
-        <div class="card-tile">
-            <h4>{{fullname}}</h4>
-                <div class="links">
-                    <a href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}" data-id= "{{id}}" data-name= "{{fullname}}" data-link="grade" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Grades</a>
-                    <a href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}" data-id= "{{id}}" data-name= "{{fullname}}" data-link="assign" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Assignments</a>
-                </div>
+                                <div class="card" style="m">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <img src="{{config.wwwroot}}/local/earlyalert/pix/low_grade.png"
+                                             class="img-fluid" alt="Grade">
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-center align-items-center">
+                                        <button
+                                                type="button"
+                                                data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
+                                        data-id="{{id}}"
+                                        data-name="{{fullname}}"
+                                        data-link="grade"
+                                        class="btn btn-outline-danger btn-sm early-alert-type-button"
+                                        role="button" aria-pressed="true">{{#str}}low_grade, local_earlyalert{{/str}}</button>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <img src="{{config.wwwroot}}/local/earlyalert/pix/missed_assignment.png"
+                                             class="img-fluid" alt="Assignment">
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-center align-items-center">
+                                        <a href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}" data-id= "{{id}}" data-name= "{{fullname}}"
+                                        data-link="assign"
+                                        class="btn btn-outline-danger btn-sm early-alert-type-button"
+                                        role="button" aria-pressed="true">{{#str}}missed_assignment, local_earlyalert{{/str}}</a>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <img src="{{config.wwwroot}}/local/earlyalert/pix/missed_exam.png"
+                                             class="img-fluid" alt="Exam">
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-center align-items-center">
+                                        <a href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}" data-id= "{{id}}" data-name= "{{fullname}}"
+                                        data-link="exam"
+                                        class="btn btn-outline-danger btn-sm early-alert-type-button"
+                                        role="button" aria-pressed="true">{{#str}}missed_exam, local_earlyalert{{/str}}</a>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                {{/courses}}
+            </div>
         </div>
-    {{/.}}
+    </div>
+{{/rows}}
+<div class="row mt-3">
+    <div class="col">
+        <div class="card">
+            <div class="card-body">
+                <div id="early-alert-student-results" class="col early-alert-student-results">
+
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

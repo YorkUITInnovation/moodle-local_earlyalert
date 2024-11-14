@@ -1,7 +1,23 @@
 import ajax from 'core/ajax';
+import Templates from 'core/templates';
+
 export const init = () => {
+    button_click();
     filter_students_by_grade();
 };
+
+function button_click() {
+    // Get data-link when .early-alert-type-button link is clicked
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('early-alert-type-button')) {
+            let dataLink = event.target.getAttribute('data-link');
+            let link = event.target.getAttribute('data-href');
+            // Redirect to the link
+            window.location = link + '&alert_type=' + dataLink;
+        }
+    });
+}
+
 
 /**
  * Adds students with grades
@@ -9,25 +25,108 @@ export const init = () => {
 function filter_students_by_grade() {
 
     // Get the s delected grade value from the dropdown
-    const selected_grade = document.getElementById('id_early_alert_filter_grade_select');
-    let $grade_letter_id = selected_grade.value;
-    const course_id = document.getElementsByName('early_alert_filter_course_id')[0].value;
+    // const selected_grade = document.getElementById('id_early_alert_filter_grade_select');
+    // let $grade_letter_id = selected_grade.value;
 
-    setup_filter_students_by_grade(course_id, $grade_letter_id);
+    // Get course id from the hidden input field wiht id early_alert_filter_course_id
+    const course_id = document.getElementById('early_alert_filter_course_id').value;
+    console.log('Course ID is ' + course_id);
+    setup_filter_students_by_grade(course_id, 9);
 
-    selected_grade.addEventListener('change', function() {
-        $grade_letter_id = selected_grade.value;
-        setup_filter_students_by_grade(course_id, $grade_letter_id);
-    });
+    // selected_grade.addEventListener('change', function () {
+    //     $grade_letter_id = selected_grade.value;
+    //     setup_filter_students_by_grade(course_id, $grade_letter_id);
+    // });
 
+}
+
+function setup_filter_students_by_grade(course_id, $grade_letter_id) {
+    let selected_students = [];
+    // convert course_id into an integer
+    course_id = parseInt(course_id);
+    // Only display if course_id is greater than 0
+    if (course_id > 0) {
+        //Show loader
+        Templates.render('local_earlyalert/loader', {})
+            .then(function (html, js) {
+                // Insert the rendered template into the target element
+                document.getElementById('early-alert-student-results').innerHTML = html;
+                Templates.runTemplateJS(js);
+            })
+            .catch(function (error) {
+                console.error('Failed to render template:', error);
+            });
+
+        // Fetch the student list
+        var get_filtered_studentgrades = ajax.call([{
+            methodname: 'earlyalert_course_grades_percent_get',
+            args: {
+                id: course_id,
+                grade_letter_id: $grade_letter_id
+            }
+        }]);
+        get_filtered_studentgrades[0].done(function (results) {
+            // Reformat the data to display in a grid
+            let num_students = results.length;
+            let num_rows = Math.min(3, Math.ceil(num_students / 3));
+            let num_cols = Math.ceil(num_students / num_rows);
+            let display_data = {
+                num_rows: num_rows,
+                num_cols: num_cols,
+                student_rows: []
+            };
+
+// Initialize rows array
+            for (let r = 0; r < num_rows; r++) {
+                display_data.student_rows[r] = {students: []};
+            }
+
+            let row = 0;
+            let col = 0;
+
+            results.forEach(result => {
+                if (typeof result === 'object') {
+                    display_data.student_rows[row].students[col] = result;
+                    col++;
+                    if (col === num_cols) {
+                        col = 0;
+                        row++;
+                    }
+                }
+            });
+
+            // Get alert type
+            let alert_type = document.getElementById('early-alert-alert-type').value;
+
+            if (alert_type === 'grade') {
+                // Add alert_type to display_data
+                display_data.alert_type = 'Low Grade';
+            }
+
+            // Render the template with display_data
+            Templates.render('local_earlyalert/course_student_list', display_data)
+                .then(function (html, js) {
+                    // Insert the rendered template into the target element
+                    document.getElementById('early-alert-student-results').innerHTML = html;
+                    Templates.runTemplateJS(js);
+                })
+                .catch(function (error) {
+                    console.error('Failed to render template:', error);
+                });
+        }).fail(function (e) {
+            alert(e);
+            // fail gracefully somehow :'( ;
+        });
+    }
 }
 
 /**
  *  Filter your data based on the selected grade value (for example)
  * @param course_id
  * @param $grade_letter_id
+ * @deprecated
  */
-function setup_filter_students_by_grade(course_id, $grade_letter_id) {
+function setup_filter_students_by_grade_original(course_id, $grade_letter_id) {
     let selected_students = [];
 
     var get_filtered_studentgrades = ajax.call([{
@@ -128,11 +227,11 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
         students_gradesList.appendChild(ulElement);
 
         // Add an event listener to the select all checkbox
-        select_all_checkbox.addEventListener('change', function() {
+        select_all_checkbox.addEventListener('change', function () {
             // Get all checkboxes within the list
             let checkboxes = document.querySelectorAll("input[class^='early_alert_filterform_checkbox']");
             // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-            checkboxes.forEach(function(checkbox) {
+            checkboxes.forEach(function (checkbox) {
                 if (select_all_checkbox.checked) {
                     checkbox.checked = true;
                     selected_students.push(checkbox.getAttribute('user_id'));
@@ -147,8 +246,8 @@ function setup_filter_students_by_grade(course_id, $grade_letter_id) {
         // search dom for checkboxes and add to checked list
         let grade_checkboxes = document.querySelectorAll("input[class^='early_alert_filterform_checkbox']");
         // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-        grade_checkboxes.forEach(function(checkbox) {
-            checkbox.addEventListener('click', function() {
+        grade_checkboxes.forEach(function (checkbox) {
+            checkbox.addEventListener('click', function () {
                 if (checkbox.checked) {
                     selected_students.push(checkbox.getAttribute('user_id'));
                 } else {
@@ -170,16 +269,16 @@ function show_grades() {
     // check box for grade showing - remove later
     const show_grade_checkbox = document.getElementById('id_early_alert_filter_grade_chk');
     // check box for grade showing - remove later
-    show_grade_checkbox.addEventListener('click', function() {
+    show_grade_checkbox.addEventListener('click', function () {
         let grade_pills = document.querySelectorAll("span.pill");
         grade_pills.forEach(function (grade_pill) {
-        if (show_grade_checkbox.checked) {
-            if (grade_pill.style.display == 'none') {
-                grade_pill.style.display = 'block';
+            if (show_grade_checkbox.checked) {
+                if (grade_pill.style.display == 'none') {
+                    grade_pill.style.display = 'block';
+                }
+            } else {
+                grade_pill.style.display = 'none';
             }
-        }
-        else {
-            grade_pill.style.display = 'none';}
         });
     });
 }

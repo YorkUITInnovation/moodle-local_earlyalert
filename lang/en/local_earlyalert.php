@@ -27,11 +27,25 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Early Alert';
 $string['adashboard'] = 'Admin Dashboard';
+$string['adjust_default_grade'] = 'Adjust Default Grade';
+$string['available_alert_types'] = 'Available alert types';
 $string['idashboard'] = 'Instructor Dashboard';
+$string['low_grade'] = 'Low grade';
+$string['missed_assignment'] = 'Missed Assignment';
+$string['missed_exam'] = 'Missed Exam';
+$string['my_courses'] = 'My Courses';
+$string['my_list_of_students'] = 'My List of Students';
+$string['name'] = 'Name';
 $string['select_grade'] = 'Default Grade';
+$string['select_students'] ='Select the students to whom you would like a ${a} alert to be sent by using the checkbox(es) below.<br><br>
+You can preview the message by clicking on the “preview” button prior to sending.
+';
 $string['preview_email'] = 'Preview';
 $string['send'] = 'Send';
 $string['grade'] = 'Grade';
+$string['preview'] = 'Preview';
+$string['selected_alert_based_on'] = 'You are selecting an alert based on a';
+$string['send_alert_based_on'] = 'Send an alert based on';
 $string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
 
 

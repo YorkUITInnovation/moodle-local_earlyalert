@@ -51,7 +51,35 @@ class helper
                 }
             }
         }
+//print_object($data);
         return $data;
+    }
+
+    public static function get_courses_in_acadyear_by_row($courses)
+    {
+        $data = self::get_courses_in_acadyear($courses);
+        // Take $data and set number of rows and columns to display based on the number of courses. You want to display no more than 3 columns per row.
+        $num_courses = count($data);
+        $num_rows = ceil($num_courses / 3);
+        $num_cols = 3;
+        $display_data['num_rows'] = $num_rows;
+        $display_data['num_cols'] = $num_cols;
+        // Loop trhough to put the courses into the correct row and column
+        $row = 0;
+        $col = 0;
+        $i = 0;
+        foreach ($data as $course) {
+            if (is_object($course)) {
+                $display_data['rows'][$row]['courses'][$col] = $course;
+                $col++;
+                if ($col == $num_cols) {
+                    $col = 0;
+                    $row++;
+                }
+            }
+        }
+
+        return $display_data;
     }
 
     public static function get_current_period()
