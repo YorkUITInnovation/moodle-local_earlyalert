@@ -5,19 +5,18 @@ import {get_string as getString} from 'core/str';
 import notification from 'core/notification';
 
 export const init = () => {
-    button_click();
-    filter_students_by_default_grade();
+    alert_type_button();
 };
 
-function button_click() {
+function alert_type_button() {
     // Get data-link when .early-alert-type-button link is clicked
     document.addEventListener('click', function (event) {
         if (event.target.classList.contains('early-alert-type-button')) {
-            let dataLink = event.target.getAttribute('data-link');
-            let link = event.target.getAttribute('data-href');
+            let alert_type = event.target.getAttribute('data-link');
             let course_name = event.target.getAttribute('data-name');
-            // Redirect to the link
-            window.location = link + '&alert_type=' + dataLink + '&course_name=' + course_name;
+            let course_id = event.target.getAttribute('data-course_id');
+            // Get student list based on alert type
+            setup_filter_students_by_grade(course_id, 9, course_name, alert_type);
         }
     });
 }
@@ -26,38 +25,49 @@ function button_click() {
 /**
  * Adds students with grades
  */
-function filter_students_by_default_grade() {
-
-    // Get course id from the hidden input field wiht id early_alert_filter_course_id
-    const course_id = document.getElementById('early_alert_filter_course_id').value;
-    // initial default setup of student list
-    setup_filter_students_by_grade(course_id, 9); // extract this 9 from php which might be configurable in the future
-
-}
+// function filter_students_by_default_grade() {
+//
+//     // Get course id from the hidden input field wiht id early_alert_filter_course_id
+//     const course_id = document.getElementById('early_alert_filter_course_id').value;
+//     // initial default setup of student list
+//     setup_filter_students_by_grade(course_id, 9); // extract this 9 from php which might be configurable in the future
+//
+// }
 
 function filter_students_by_grade_select(){
 
     // Get the s delected grade value from the dropdown
     const grade_select = document.getElementById('id_early_alert_filter_grade_select');
     const course_id = document.getElementById('early_alert_filter_course_id').value;
+    const course_name = document.getElementById('early_alert_course_name').value;
+    const alert_type = document.getElementById('early-alert-alert-type').value;
     // setup listener for drop down selection
 
     grade_select.addEventListener('change', function (e) {
         let grade_letter_id = e.target.value;
-        setup_filter_students_by_grade(course_id, grade_letter_id);
+        setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type);
 
     });
-
 }
 
-function setup_filter_students_by_grade(course_id, grade_letter_id) {
+/**
+ * Fetches the student list based on the course_id and grade_letter_id
+ * @param course_id
+ * @param grade_letter_id
+ * @param course_name
+ * @param alert_type
+ */
+function setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type) {
     let selected_students = [];
     // convert course_id into an integer
     course_id = parseInt(course_id);
     grade_letter_id = parseInt(grade_letter_id);
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    let course_name = urlParams.get('course_name');
+    // Add course_id to element with id early_alert_filter_course_id
+    document.getElementById('early_alert_filter_course_id').value = course_id;
+    // Add alert type to element with id early-alert-alert-type
+    document.getElementById('early-alert-alert-type').value = alert_type;
+    // Add course name to element with id early_alert_course_name
+    document.getElementById('early_alert_course_name').value = course_name;
 
     // Only display if course_id is greater than 0
     if (course_id > 0) {
@@ -112,9 +122,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id) {
                 }
             });
 
-            // Get alert type
-            let alert_type = document.getElementById('early-alert-alert-type').value;
-
             if (alert_type === 'grade') {
                 // Add alert_type to display_data
                 display_data.alert_type = 'Low Grade';
@@ -146,7 +153,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id) {
                     check_allnone_listener(selected_students);
                     setup_preview_emails();
                     setup_send_emails();
-
                 })
                 .catch(function (error) {
                     console.error('Failed to render template:', error);
@@ -158,150 +164,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id) {
     }
 }
 
-/**
- *  Filter your data based on the selected grade value (for example)
- * @param course_id
- * @param $grade_letter_id
- * @deprecated
- */
-function setup_filter_students_by_grade_original(course_id, $grade_letter_id) {
-    let selected_students = [];
-
-    var get_filtered_studentgrades = ajax.call([{
-        methodname: 'earlyalert_course_grades_percent_get',
-        args: {
-            id: course_id,
-            grade_letter_id: $grade_letter_id
-        }
-    }]);
-    get_filtered_studentgrades[0].done(function (results) {
-        //results.filter(item => item.grade === parseInt(selectedGrade));
-        //let t = selectedGrade;
-        // Update your page with the filtered data
-
-        const students_gradesList = document.getElementById('early_alert_filter_students_container');
-        students_gradesList.innerHTML = '';
-        const ulElement = document.createElement('ul');
-
-        let select_all_checkbox = document.createElement('INPUT');
-        select_all_checkbox.type = 'checkbox';
-        select_all_checkbox.className = 'early_alert_filterform_select_all_checkbox';
-        select_all_checkbox.id = 'early_alert_filterform_select_all_checkbox_0';
-
-        let select_all_li = document.createElement('LI');
-
-        // Create a label for the select allcheckbox
-        let select_all_label = document.createElement('LABEL');
-        select_all_label.textContent = 'Select All/None';
-        select_all_label.htmlFor = 'early_alert_filterform_select_all_checkbox';
-
-        let no_record = document.createElement('LABEL');
-        no_record.textContent = 'No records';
-        no_record.id = 'early_alert_filterform_li_nothing';
-
-        select_all_li.appendChild(select_all_checkbox);
-        select_all_li.appendChild(select_all_label);
-        ulElement.appendChild(select_all_li);
-        let i = 0;
-
-        let student_ids_selected = document.querySelector('input[name="student_ids"]') || {};
-        student_ids_selected.value = [];
-        // Create an unordered list for each grade
-        results.forEach((item) => {
-
-            // Create a new list item (LI) element
-            let li = document.createElement('LI');
-            let checkbox = document.createElement('INPUT');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'early_alert_filterform_checkbox';
-            checkbox.id = `early_alert_filterform_checkbox_${i}`;
-            checkbox.setAttribute('user_id', item.id);
-
-            // Add the checkbox to the list item (LI)
-            li.appendChild(checkbox);
-
-            // Create a div for column 1
-            let col1Div = document.createElement('DIV');
-            col1Div.className = 'column1';
-
-            // Create a label for the checkbox
-            let label = document.createElement('LABEL');
-            label.textContent = item.idnumber + ' | ' + item.first_name + ' ' + item.last_name;
-            label.htmlFor = `early_alert_filterform_checkbox_${i}`;
-
-            // Add the label to column 1 div
-            col1Div.appendChild(checkbox);
-            col1Div.appendChild(label);
-
-            // Add column 1 div to list item (LI)
-            li.appendChild(col1Div);
-
-            // Create a div for column 2
-            let col2Div = document.createElement('DIV');
-            col2Div.className = 'column2';
-
-            // Create a span for the pill element
-            let pillSpan = document.createElement('SPAN');
-            pillSpan.className = 'pill red';
-            pillSpan.textContent = item.grade;
-            pillSpan.id = `early_alert_filterform_grade_pill_${i}`;
-            pillSpan.style.display = 'none';
-
-            // Add the pill to column 2 div
-            col2Div.appendChild(pillSpan);
-
-            // Create another span for the value text
-            let valueSpan = document.createElement('SPAN');
-            valueSpan.className = 'value-text';
-
-            // Add the value text to column 2 div
-            col2Div.appendChild(valueSpan);
-
-            // Add column 2 div to list item (LI)
-            li.appendChild(col2Div);
-            ulElement.appendChild((li));
-            i++;
-        });
-        students_gradesList.appendChild(ulElement);
-
-        // Add an event listener to the select all checkbox
-        select_all_checkbox.addEventListener('change', function () {
-            // Get all checkboxes within the list
-            let checkboxes = document.querySelectorAll("input[class^='early_alert_filterform_checkbox']");
-            // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-            checkboxes.forEach(function (checkbox) {
-                if (select_all_checkbox.checked) {
-                    checkbox.checked = true;
-                    selected_students.push(checkbox.getAttribute('user_id'));
-                } else {
-                    checkbox.checked = false;
-                    selected_students = selected_students.filter(item => item !== checkbox.getAttribute('user_id'));
-                }
-            });
-            student_ids_selected.value = JSON.stringify(selected_students);
-
-        });
-        // search dom for checkboxes and add to checked list
-        let grade_checkboxes = document.querySelectorAll("input[class^='early_alert_filterform_checkbox']");
-        // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-        grade_checkboxes.forEach(function (checkbox) {
-            checkbox.addEventListener('click', function () {
-                if (checkbox.checked) {
-                    selected_students.push(checkbox.getAttribute('user_id'));
-                } else {
-                    selected_students = selected_students.filter(item => item !== checkbox.getAttribute('user_id'));
-                }
-                student_ids_selected.value = JSON.stringify(selected_students);
-            });
-
-        });
-        show_grades();
-    }).fail(function (e) {
-
-        alert(e);
-        // fail gracefully somehow :'( ;
-    });
-}
 
 function check_all_student_grades(selected_students) {
     const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
