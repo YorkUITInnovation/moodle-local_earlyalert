@@ -37,6 +37,11 @@ $string['assignment_instructions'] = '<ul>
 </ul>';
 $string['assignment_title'] = 'Assignment Title';
 $string['available_alert_types'] = 'Available alert types';
+$string['course_overview'] = 'Course Overview';
+$string['course_overview_instructions'] = '<ul>
+<li>View all alerts raised for a particular course</li>
+<li>Indicate that you have advised a student that has followed-up</li>
+</ul>';
 $string['exam_instructions'] = '<ul>
 <li>These messages inform students of a missed exam that threatens their success in the course  
 </li>
