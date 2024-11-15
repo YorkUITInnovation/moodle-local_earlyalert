@@ -33,20 +33,30 @@ $alert_type = optional_param('alert_type', '', PARAM_TEXT);
 $grade_letter_id = optional_param('grade_letter_id', '', PARAM_TEXT);
 $user_id = optional_param('user_id', $USER->id, PARAM_INT);
 
+$is_impersonating = false;
+if ($user_id != $USER->id) {
+    $is_impersonating = true;
+    $impersonated_user = $DB->get_record('user', ['id' => $user_id]);
+}
+
 $show_grades = $CFG->earlyalert_showgrades;
 
-if ($teacher) {
+if ($teacher || $is_impersonating) {
     if (!$courses = enrol_get_users_courses($user_id)) {
         base::debug_to_console('no course'); //add no course mustache message
     }
 }
 // build a list of courses for the links
-if ($teacher) {
+if ($teacher || $is_impersonating) {
     $course_data = helper::get_courses_in_acadyear_by_row($courses);
 } else {
     $course_data = [];
 }
 
+// Add impersonting user name to $course_data if $is_impersonating is true
+if ($is_impersonating) {
+    $course_data['impersonated_user'] = $impersonated_user->firstname . ' ' . $impersonated_user->lastname;
+}
 //print_object($course_data);
 // Add course_id to $course_data if $course_id is not 0
 if ($course_id) {
@@ -64,7 +74,7 @@ if ($impersonate && !$teacher) {
     $course_data['impersonate'] = true;
 }
 
-if ($teacher) {
+if ($teacher || $is_impersonating) {
     $course_data_for_grades = [];
 // Prepare course data fro grades
     $i = 0;

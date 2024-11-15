@@ -26,6 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_earlyalert';
 $plugin->release = '0.0.1';
-$plugin->version = 2024111405;
+$plugin->version = 2024111500;
 $plugin->requires = 2022112800;
 $plugin->maturity = MATURITY_ALPHA;

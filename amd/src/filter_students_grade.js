@@ -301,6 +301,9 @@ function show_grades() {
     });
 }
 
+/**
+ * Get users from the search input
+ */
 function get_users() {
     const inputElement = document.getElementById('search');
     const datalistElement = document.getElementById('early-alert-impersonate');

@@ -42,6 +42,7 @@ $string['exam_instructions'] = '<ul>
 </li>
 </ul>';
 $string['idashboard'] = 'Instructor Dashboard';
+$string['impersonating_user'] = 'Impersonating User';
 $string['generate_reports'] = 'Generate Reports';
 $string['grade'] = 'Grade';
 $string['grade_instructions'] = '<ul>
