@@ -125,16 +125,19 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             if (alert_type === 'grade') {
                 // Add alert_type to display_data
                 display_data.alert_type = 'Low Grade';
+                display_data.grade = true;
             }
 
             if (alert_type === 'assign') {
                 // Add alert_type to display_data
                 display_data.alert_type = 'Missed Assignment';
+                display_data.assign = true;
             }
 
             if (alert_type === 'exam') {
                 // Add alert_type to display_data
                 display_data.alert_type = 'Missed Exam';
+                display_data.exam = true;
             }
             display_data.fullname = course_name;
 
@@ -148,7 +151,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     let grade_select = document.getElementById('id_early_alert_filter_grade_select');
                     grade_select.value = grade_letter_id;
                     // setup listener
-                    filter_students_by_grade_select();
+                    // filter_students_by_grade_select();
                     check_all_student_grades(selected_students);
                     check_allnone_listener(selected_students);
                     setup_preview_emails();

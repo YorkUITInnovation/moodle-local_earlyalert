@@ -3,33 +3,48 @@
 <div class="row">
     <div class="col">
         <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} <span class="text-danger">{{alert_type}}</span> for {{fullname}}</h3>
-        <p></p>{{{alert_type_message}}}
-        <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}</b>
-            <select id="id_early_alert_filter_grade_select"
-                    name="early_alert_filter_grade_select"
-                    style="width: 50px;"
-                    data-initial-value="9">
-                <option value="0">All</option>
-                <option value="11">F</option>
-                <option value="10">D</option>
-                <option value="9" >D+</option>
-                <option value="8">C-</option>
-                <option value="7">C</option>
-                <option value="6">C+</option>
-                <option value="5">B-</option>
-                <option value="4">B</option>
-                <option value="3">B+</option>
-                <option value="2">A-</option>
-                <option value="1">A</option>
-            </select>
-        </p>
+        {{#grade}}
+            <p>{{#str}}grade_instructions, local_earlyalert{{/str}}</p>
+            <p>
+                <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}</b>
+                <select id="id_early_alert_filter_grade_select"
+                        name="early_alert_filter_grade_select"
+                        style="width: 50px;"
+                        data-initial-value="9">
+                    <option value="0">All</option>
+                    <option value="11">F</option>
+                    <option value="10">D</option>
+                    <option value="9">D+</option>
+                    <option value="8">C-</option>
+                    <option value="7">C</option>
+                    <option value="6">C+</option>
+                    <option value="5">B-</option>
+                    <option value="4">B</option>
+                    <option value="3">B+</option>
+                    <option value="2">A-</option>
+                    <option value="1">A</option>
+                </select>
+            </p>
+        {{/grade}}
+        {{#assign}}
+            <p>{{#str}}assignment_instructions, local_earlyalert{{/str}}</p>
+            <b>{{#str}}assignment_title, local_earlyalert{{/str}}</b>
+            <input type="text" id="early-alert-assignment-title" class="form-control" style="width: 300px;"/>
+        {{/assign}}
+        {{#exam}}
+            <p>{{#str}}exam_instructions, local_earlyalert{{/str}}</p>
+        {{/exam}}
+
+
     </div>
 </div>
-<div class="row">
+<div class="row mt-2">
     <div class="col">
         <h3>{{#str}}my_list_of_students, local_earlyalert{{/str}}</h3>
         <p>{{#str}}select_students, local_earlyalert, {{alert_type}} {{/str}}</p>
-        <p><input type="checkbox" id="early-alert-checkall-student-checkbox" class="early-alert-checkall-student-checkbox">  All/None <button id="early-alert-send-button1" class="btn btn-primary early-alert-send-button">Send</button></p>
+        <p><input type="checkbox" id="early-alert-checkall-student-checkbox" class="early-alert-checkall-student-checkbox"> All/None
+            <button id="early-alert-send-button1" class="btn btn-primary early-alert-send-button">Send</button>
+        </p>
     </div>
 </div>
 <!--Student list row-->
@@ -50,10 +65,10 @@
                     <tr>
                         <td><input type="checkbox" class="early-alert-student-checkbox" data-student-id="{{id}}"></td>
                         <td>{{last_name}}, {{first_name}}<br>{{idnumber}}</td>
-                        <td class="early-alert-grade-column"><span class="badge badge-primary"{{grade}}</span></td>
+                        <td class="early-alert-grade-column"><span class="badge badge-primary">{{grade}}</span></td>
                         <td>
                             <button
-                                    class="btn btn-outline-primary early-alert-preview-button"
+                                    class="btn btn-outline-primary btn-sm early-alert-preview-button"
                             >{{#str}}preview, local_earlyalert{{/str}}</button>
                         </td>
                     </tr>
@@ -63,4 +78,6 @@
         </div>
     {{/student_rows}}
 </div>
-<div><button id="early-alert-send-button2" class="btn btn-primary float-right early-alert-send-button2">Send</button></div>
+<div>
+    <button id="early-alert-send-button2" class="btn btn-primary float-right early-alert-send-button2">Send</button>
+</div>

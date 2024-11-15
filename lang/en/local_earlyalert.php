@@ -28,8 +28,28 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'Early Alert';
 $string['adashboard'] = 'Admin Dashboard';
 $string['adjust_default_grade'] = 'Adjust Default Grade';
+$string['assignment_instructions'] = '<ul>
+<li>These messages inform students of a missed assignment that threatens their success in the course 
+</li> 
+<li>To ensure they know which assignment you are referring to, please enter the assignment title below.
+<ul><li>Note that this title will appear in the email.</li></ul>
+</li>
+</ul>';
+$string['assignment_title'] = 'Assignment Title';
 $string['available_alert_types'] = 'Available alert types';
+$string['exam_instructions'] = '<ul>
+<li>These messages inform students of a missed exam that threatens their success in the course  
+</li>
+</ul>';
 $string['idashboard'] = 'Instructor Dashboard';
+$string['grade_instructions'] = '<ul>
+<li>Grades messages inform students they are averaging below a certain letter grade.
+    <ul><li>The default has been set to a D+.</li></ul>
+</li> 
+<li>Should you wish to adjust this for your course, please use the selector below.
+<ul><li>Note that this is the letter grade that will appear in the email. </li></ul>
+</li>
+</ul>';
 $string['low_grade'] = 'Low grade';
 $string['missed_assignment'] = 'Missed Assignment';
 $string['missed_exam'] = 'Missed Exam';
@@ -38,8 +58,8 @@ $string['my_list_of_students'] = 'My List of Students';
 $string['name'] = 'Name';
 $string['select_grade'] = 'Default Grade';
 $string['select_students'] ='Select the students to whom you would like a {$a} alert to be sent by using the checkbox(es) below.<br><br>
-You can preview the message by clicking on the “preview” button prior to sending.
-';
+You can preview the message by clicking on the “preview” button prior to sending.';
+$string['showgrades'] = 'Show Grades';
 $string['preview_email'] = 'Preview';
 $string['send'] = 'Send';
 $string['grade'] = 'Grade';

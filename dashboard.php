@@ -28,6 +28,10 @@ $course_id = optional_param('course_id', 0, PARAM_INT);
 $alert_type = optional_param('alert_type', '', PARAM_TEXT);
 $grade_letter_id = optional_param('grade_letter_id', '', PARAM_TEXT);
 
+// get config settings
+$config = get_config('local_earlyalert');
+$show_grades = $CFG->earlyalert_showgrades;
+
 $formdata = new stdClass();
 $formdata->course_id = $course_id;
 
@@ -44,6 +48,10 @@ if ($course_id) {
 // Ad alert_type to $course_data if $alert_type is not empty
 if ($alert_type) {
     $course_data['alert_type'] = $alert_type;
+}
+// Add show_grades to $course_data if $show_grades is not empty
+if ($show_grades) {
+    $course_data['show_grades'] = $show_grades;
 }
 // Ad alert_type to $course_data if $alert_type is not empty
 
