@@ -42,6 +42,8 @@ $string['exam_instructions'] = '<ul>
 </li>
 </ul>';
 $string['idashboard'] = 'Instructor Dashboard';
+$string['generate_reports'] = 'Generate Reports';
+$string['grade'] = 'Grade';
 $string['grade_instructions'] = '<ul>
 <li>Grades messages inform students they are averaging below a certain letter grade.
     <ul><li>The default has been set to a D+.</li></ul>
@@ -51,18 +53,22 @@ $string['grade_instructions'] = '<ul>
 </li>
 </ul>';
 $string['low_grade'] = 'Low grade';
+$string['manage_roles'] = 'Manage Roles';
+$string['manage_templates'] = 'Manage Templates';
 $string['missed_assignment'] = 'Missed Assignment';
 $string['missed_exam'] = 'Missed Exam';
 $string['my_courses'] = 'My Courses';
 $string['my_list_of_students'] = 'My List of Students';
+$string['my_tools'] = 'My Tools';
 $string['name'] = 'Name';
 $string['select_grade'] = 'Default Grade';
 $string['select_students'] ='Select the students to whom you would like a {$a} alert to be sent by using the checkbox(es) below.<br><br>
 You can preview the message by clicking on the “preview” button prior to sending.';
 $string['showgrades'] = 'Show Grades';
+$string['student_lookup'] = 'Student Lookup';
 $string['preview_email'] = 'Preview';
+$string['raise_an_alert'] = 'Raise an Alert';
 $string['send'] = 'Send';
-$string['grade'] = 'Grade';
 $string['preview'] = 'Preview';
 $string['selected_alert_based_on'] = 'You are selecting an alert based on a';
 $string['send_alert_based_on'] = 'Send an alert based on';
@@ -82,3 +88,8 @@ $string['pluginsettings'] = 'Plugin Settings';
 $string['ldap_url'] = 'LDAP Url';
 $string['ldap_user'] = 'LDAP User';
 $string['ldap_password'] = 'LDAP User Password';
+
+// Capabilities
+$string['earlyalert:impersonate'] = 'Impersonate users';
+$string['earlyalert:student_lookup'] = 'Student Lookup';
+$string['earlyalert:view_reports'] = 'View Reports';

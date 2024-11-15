@@ -6,6 +6,7 @@ import notification from 'core/notification';
 
 export const init = () => {
     alert_type_button();
+    get_users();
 };
 
 function alert_type_button() {
@@ -34,7 +35,7 @@ function alert_type_button() {
 //
 // }
 
-function filter_students_by_grade_select(){
+function filter_students_by_grade_select() {
 
     // Get the s delected grade value from the dropdown
     const grade_select = document.getElementById('id_early_alert_filter_grade_select');
@@ -183,7 +184,7 @@ function check_all_student_grades(selected_students) {
     student_ids_selected.value = JSON.stringify(selected_students);
 }
 
-function check_allnone_listener(selected_students){
+function check_allnone_listener(selected_students) {
     // Add an event listener to the select all checkbox
     const check_all_none_checkbox = document.getElementById('early-alert-checkall-student-checkbox');
     const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
@@ -212,7 +213,11 @@ function setup_preview_emails() {
     ModalFactory.create({
         title: getString('preview_email', 'local_earlyalert'),
         type: ModalFactory.types.CANCEL,
-        body: Templates.render('local_earlyalert/preview_student_email', {name: 'etemplate name', student_name: 'Fred', subject: 'Grade in AP/ECON 2350 3.00' , message: '<p> We know that many students juggle a lot alongside their academics. The academic advising team at the Faculty of Liberal Arts and Professional Studies works with professors to ensure that students receive information about their course progress so that way we can work with those who are facing challenges.<br>' +
+        body: Templates.render('local_earlyalert/preview_student_email', {
+            name: 'etemplate name',
+            student_name: 'Fred',
+            subject: 'Grade in AP/ECON 2350 3.00',
+            message: '<p> We know that many students juggle a lot alongside their academics. The academic advising team at the Faculty of Liberal Arts and Professional Studies works with professors to ensure that students receive information about their course progress so that way we can work with those who are facing challenges.<br>' +
                 '    We’re reaching out because your course director, Nick Valentino, has notified our office that you are averaging less than D+ in AP/ECON 2350 3.00, which puts you in danger of failing. </p>' +
                 '    <p><b><u>Your next step: Book an appointment with an advisor</u></b><br>' +
                 '    We want you to know that you’re not alone – it’s not uncommon for students to experience academic difficulties. We’re here to support you, and so we’re inviting you to a coaching session with your advisors at LA&PS Academic Advising Services. <u>Connect with them</u> at a day or time that is convenient for you!</p>' +
@@ -220,7 +225,9 @@ function setup_preview_emails() {
                 '    Looking for ways to manage your time? Study and learn more effectively? Keep up with readings and course work? Let <u>Learning Skills Services</u> help you achieve those goals.</br>' +
                 '    Feeling like you could use some extra support outside of the classroom? Explore <u>counselling and wellness resources </u>designed to help you navigate challenges and thrive throughout your journey here with us.</br>' +
                 '    Just not the course for you? That’s totally okay too. If this is the case just be sure that you are aware of the drop/withdraw deadlines, and what they mean.</br>' +
-                '    <p>Have unanswered questions? Why not <u>chat with SAVY?</u> You can ask SAVY about programs and courses, student life, campus services, career development and more.</p> ', instructor_name: ''}),
+                '    <p>Have unanswered questions? Why not <u>chat with SAVY?</u> You can ask SAVY about programs and courses, student life, campus services, career development and more.</p> ',
+            instructor_name: ''
+        }),
         large: true,
 
     }).then(modal => {
@@ -270,7 +277,7 @@ function create_notification_dialog(ids) {
             notification.alert('Email', sent_email);
         }).fail(function () {
             //notification.alert(could_not_send_email);
-            notification.alert('Email',sent_dialog_text);
+            notification.alert('Email', sent_dialog_text);
         });
     });
 }
@@ -290,6 +297,40 @@ function show_grades() {
             } else {
                 grade_pill.style.display = 'none';
             }
+        });
+    });
+}
+
+function get_users() {
+    const inputElement = document.getElementById('search');
+    const datalistElement = document.getElementById('early-alert-impersonate');
+
+    // Event listener for input element
+    inputElement.addEventListener('input', function (event) {
+        const query = event.target.value;
+        var get_users = ajax.call([{
+            methodname: 'organization_users_get',
+            args: {
+                name: query
+            }
+        }]);
+        get_users[0].done(function (users) {
+            console.log(users);
+            datalistElement.innerHTML = '';
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.text = user.firstname + ' ' + user.lastname;
+                datalistElement.appendChild(option);
+            });
+            // When a selection is made, reload the page with the user_id as a parameter
+            inputElement.addEventListener('change', function (event) {
+                window.location.href = window.location.href + '?user_id=' + event.target.value;
+            });
+
+        }).fail(function (e) {
+            alert(e);
+            // fail gracefully somehow :'( ;
         });
     });
 }

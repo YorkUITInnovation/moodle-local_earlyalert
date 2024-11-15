@@ -8,6 +8,18 @@
 <input type="hidden" id="early-alert-alert-type" value="{{alert_type}}">
 <input type="hidden" id="early_alert_filter_course_id" value="{{course_id}}">
 <input type="hidden" id="early_alert_course_name" value="{{fullname}}">
+{{#impersonate}}
+
+    <div class="row">
+        <div class="col-md-3">
+            <label for="search">Search:</label>
+            <input list="early-alert-impersonate" id="search" name="search">
+            <datalist id="early-alert-impersonate">
+
+            </datalist>
+        </div>
+    </div>
+{{/impersonate}}
 {{#rows}}
     <div class="row">
         <div class="col">

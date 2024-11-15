@@ -3,6 +3,8 @@
 namespace local_earlyalert;
 
 
+use core\event\role_assigned;
+
 class helper
 {
 
@@ -236,4 +238,27 @@ class helper
             die($e->getMessage());
         }
     }
+
+    /**
+     * Check if the current user is a teacher.
+     *
+     * @return bool
+     */
+    public static function is_teacher()
+    {
+        global $USER, $DB;
+        // Get role ID for editing teacher.
+        $editing_teacher = $DB->get_record('role', array('shortname' => 'editingteacher'), 'id');
+        // Get Role ID for teacher.
+        $teacher = $DB->get_record('role', array('shortname' => 'teacher'), 'id');
+        // SQL to get user roles based on the editing_teacher and teacher role IDs.
+        $sql = "SELECT * FROM {role_assignments} WHERE userid = ? AND roleid IN ($editing_teacher->id, $teacher->id)";
+        // Get user roles.
+        if ($userroles = $DB->get_records_sql($sql, array($USER->id))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
