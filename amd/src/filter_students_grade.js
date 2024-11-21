@@ -177,7 +177,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                             }
                         }
                     });
-
+                    finalCache.set('course_name', course_name);
                     setup_preview_emails(finalCache);
                     setup_send_emails();
                 })
@@ -229,67 +229,83 @@ function check_allnone_listener(selected_students) {
 }
 
 function setup_preview_emails(templateCache) {
-    const preview_buttons = document.querySelectorAll("input[class^='early-alert-preview-button']");
+    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
     console.log("template cache:", templateCache);
-    ModalFactory.create({
-        title: getString('preview_email', 'local_earlyalert'),
-        type: ModalFactory.types.CANCEL,
-        body: Templates.render('local_earlyalert/preview_student_email', {
-            name: 'etemplate name',
-            student_name: 'Fred',
-            subject: 'Grade in AP/ECON 2350 3.00',
-            message: '<p> We know that many students juggle a lot alongside their academics. The academic advising team at the Faculty of Liberal Arts and Professional Studies works with professors to ensure that students receive information about their course progress so that way we can work with those who are facing challenges.<br>' +
-                '    We’re reaching out because your course director, Nick Valentino, has notified our office that you are averaging less than D+ in AP/ECON 2350 3.00, which puts you in danger of failing. </p>' +
-                '    <p><b><u>Your next step: Book an appointment with an advisor</u></b><br>' +
-                '    We want you to know that you’re not alone – it’s not uncommon for students to experience academic difficulties. We’re here to support you, and so we’re inviting you to a coaching session with your advisors at LA&PS Academic Advising Services. <u>Connect with them</u> at a day or time that is convenient for you!</p>' +
-                '    <p><b><u>Other helpful resources</u></b></br>' +
-                '    Looking for ways to manage your time? Study and learn more effectively? Keep up with readings and course work? Let <u>Learning Skills Services</u> help you achieve those goals.</br>' +
-                '    Feeling like you could use some extra support outside of the classroom? Explore <u>counselling and wellness resources </u>designed to help you navigate challenges and thrive throughout your journey here with us.</br>' +
-                '    Just not the course for you? That’s totally okay too. If this is the case just be sure that you are aware of the drop/withdraw deadlines, and what they mean.</br>' +
-                '    <p>Have unanswered questions? Why not <u>chat with SAVY?</u> You can ask SAVY about programs and courses, student life, campus services, career development and more.</p> ',
-            instructor_name: ''
-        }),
-        large: true,
+    let record_data = {};
+    preview_buttons.forEach(function (button) {
+        const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
+        const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
+        if (checkbox) {
 
-    }).then(modal => {
-        const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
-        preview_buttons.forEach(function (button) {
-            const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
-            const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
-            if (checkbox) {
-                const studentCampusAttr = checkbox.getAttribute('data-student-campus');
-                const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
-                const studentMajorAttr = checkbox.getAttribute('data-student-major');
-                var templateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
-                var templateEmailContent = '';
-
-                console.log("Looking for '" + templateKey + "'");
-                console.log("map get:'", templateCache.get(templateKey),"'");
-                templateCache.forEach(function(value, key) {
-                    console.log("key:", key);
-                    console.log("value:", value);
-                });
-                if (templateCache.includes(templateKey)) {
-                    templateEmailContent = templateCache[templateKey].message;
-                } else {
-                    templateEmailContent = 'Template not found';
-                }
-
-            } else {
-                // console.log("couldn't find checkbox :/");
-            }
-            if (assigngrade){
-                console.log("assign grade: ", assigngrade);
-            }
-            console.log("template email content:", templateEmailContent);
-            button.addEventListener('click', function () {
-                modal.show();
+            // now, access the parent <tr> element (the table row)
+            const table_row = checkbox.parentNode;
+            // extract the student name from the second <td> element within the table row
+            const student_name_td = table_row.nextElementSibling;
+            // fix and parse the name
+            const student_lname_fname = student_name_td.firstChild;
+            var student_name_arr = [];
+            var student_name = "";
+            student_lname_fname.data.split(/\s*,\s*/).forEach(function(me) {
+                student_name_arr.push(me);
             });
+            student_name = student_name_arr[1] + ' ' + student_name_arr[0];
+
+            const student_id = checkbox.getAttribute('data-student-id');
+            const studentCampusAttr = checkbox.getAttribute('data-student-campus');
+            const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
+            const studentMajorAttr = checkbox.getAttribute('data-student-major');
+            var templateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
+            var templateEmailContent = '';
+
+            console.log("Looking for '" + templateKey + "'");
+            console.log("map get:'", templateCache.get(templateKey),"'");
+            templateCache.forEach(function(value, key) {
+                console.log("key:", key);
+                console.log("value:", value);
+            });
+            if (templateCache.includes(templateKey)) {
+                templateEmailContent = templateCache[templateKey].message;
+            } else {
+                templateEmailContent = 'Template not found';
+            }
+
+        } else {
+            // console.log("couldn't find checkbox :/");
+        }
+        if (assigngrade){
+            console.log("assign grade: ", assigngrade);
+        }
+        console.log("template email content:", templateEmailContent);
+
+        // assemble record data for individual buttons which includes student and template data
+        record_data.student_name = student_name;
+        record_data.course_name = templateCache.get('course_name');
+        record_data.templateEmailContent = templateEmailContent;
+
+        button.addEventListener('click', function () {
+            setup_preview_buttons_from_template(record_data)
         });
     });
 }
 
+function setup_preview_buttons_from_template(student_template_data) {
+
+    ModalFactory.create({
+        title: getString('preview_email', 'local_earlyalert'),
+        type: ModalFactory.types.CANCEL,
+        body: Templates.render('local_earlyalert/preview_student_email', {
+            name: student_template_data.template_name,
+            student_name: student_template_data.student_name,
+            subject: 'Grade in ' + student_template_data.course_name,
+            message: student_template_data.templateEmailContent,
+            instructor_name: ''
+        }),
+        large: true,
+    }).then(modal => {
+        modal.show();
+    });
+}
 function setup_send_emails() {
     // Pop-up notification when .btn-local-organization-delete-advisor is clicked
     const send_button = document.getElementById('early-alert-send-button1');
