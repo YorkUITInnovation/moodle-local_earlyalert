@@ -231,9 +231,9 @@ function check_allnone_listener(selected_students) {
 function setup_preview_emails(templateCache) {
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-    console.log("template cache:", templateCache);
-    let record_data = {};
+    //console.log("template cache:", templateCache);
     preview_buttons.forEach(function (button) {
+        let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
         if (checkbox) {
@@ -250,7 +250,7 @@ function setup_preview_emails(templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-
+            console.log(student_name);
             const student_id = checkbox.getAttribute('data-student-id');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
@@ -258,12 +258,12 @@ function setup_preview_emails(templateCache) {
             var templateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
             var templateEmailContent = '';
 
-            console.log("Looking for '" + templateKey + "'");
-            console.log("map get:'", templateCache.get(templateKey),"'");
-            templateCache.forEach(function(value, key) {
-                console.log("key:", key);
-                console.log("value:", value);
-            });
+            // console.log("Looking for '" + templateKey + "'");
+            // console.log("map get:'", templateCache.get(templateKey),"'");
+            // templateCache.forEach(function(value, key) {
+            //     console.log("key:", key);
+            //     console.log("value:", value);
+            // });
             if (templateCache.includes(templateKey)) {
                 templateEmailContent = templateCache[templateKey].message;
             } else {
@@ -274,7 +274,7 @@ function setup_preview_emails(templateCache) {
             // console.log("couldn't find checkbox :/");
         }
         if (assigngrade){
-            console.log("assign grade: ", assigngrade);
+            // console.log("assign grade: ", assigngrade);
         }
         console.log("template email content:", templateEmailContent);
 
