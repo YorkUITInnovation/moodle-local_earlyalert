@@ -84,42 +84,20 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 console.error('Failed to render template:', error);
             });
 
-        // Fetch the student list
-        var get_filtered_studentgrades = ajax.call([{
-            methodname: 'earlyalert_course_grades_percent_get',
-            args: {
-                id: course_id,
-                grade_letter_id: grade_letter_id
-            }
-        }]);
-        // Fetch the student templates
-        var get_filtered_studenttemplates = ajax.call([{
-            methodname: 'earlyalert_course_student_templates',
-            args: {
-                id: course_id
-            }
-        }]);
-        console.log("get filtered student templates results = ");
+
+
+        // Fetch student list and templates
+        var get_grades_and_templates = ajax.call([
+            { methodname: 'earlyalert_course_grades_percent_get', args: { id: course_id, grade_letter_id: grade_letter_id } },
+            { methodname: 'earlyalert_course_student_templates', args: { id: course_id } }
+        ]);
+
         const finalCache = new Map();
-        get_filtered_studenttemplates[0].done(function (results){
-            const cachedArrayElement = document.getElementById('early-alert-template-cache');
-            const cachedArray = JSON.parse(cachedArrayElement.value);
 
-            results.forEach(result => {
-                if (typeof result === 'object') {
-                    if (cachedArray.includes(result.templateKey)){
-                        // finalCache.push({key: result.templateKey, value: result.message});
-                        finalCache.set(result.templateKey, result.message);
-                    }
-                }
-            });
-        }).fail(function(xhr, status, err) {
-            //TODO: need to add fail state logic
-        });
-        get_filtered_studentgrades[0].done(function (results) {
-
+        Promise.all(get_grades_and_templates).then(([grades_response, templates_response]) => {
+            
             // Reformat the data to display in a grid
-            let num_students = results.length;
+            let num_students = grades_response.length;
             console.log('Number of students returned: ' + num_students);
             let num_rows = Math.min(3, Math.ceil(num_students / 3));
             let num_cols = Math.ceil(num_students / num_rows);
@@ -139,7 +117,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             let row = 0;
             let col = 0;
 
-            results.forEach(result => {
+            grades_response.forEach(result => {
                 if (typeof result === 'object') {
                     if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.major)) {
                         templates.push(result.campus + "_" + result.faculty + "_" + result.major);
@@ -187,16 +165,27 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     // filter_students_by_grade_select();
                     check_all_student_grades(selected_students);
                     check_allnone_listener(selected_students);
+
+                    const cachedArrayElement = document.getElementById('early-alert-template-cache');
+                    const cachedArray = JSON.parse(cachedArrayElement.value);
+
+                    templates_response.forEach(result => {
+                        if (typeof result === 'object') {
+                            if (cachedArray.includes(result.templateKey)){
+                                // finalCache.push({key: result.templateKey, value: result.message});
+                                finalCache.set(result.templateKey, result.message);
+                            }
+                        }
+                    });
+
                     setup_preview_emails(finalCache);
                     setup_send_emails();
                 })
                 .catch(function (error) {
                     console.error('Failed to render template:', error);
                 });
-        }).fail(function (e) {
-            alert(e);
-            // fail gracefully somehow :'( ;
         });
+
     }
 }
 
