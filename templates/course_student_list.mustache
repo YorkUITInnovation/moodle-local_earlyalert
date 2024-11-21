@@ -1,5 +1,6 @@
 <!--Instructions row-->
 <input type="hidden" id="early-alert-student-ids">
+<input type="hidden" id="early-alert-template-cache" value="{{templates}}">
 <div class="row">
     <div class="col">
         <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} <span class="text-danger">{{alert_type}}</span> for {{fullname}}</h3>
@@ -63,7 +64,12 @@
                 <tbody>
                 {{#students}}
                     <tr>
-                        <td><input type="checkbox" class="early-alert-student-checkbox" data-student-id="{{id}}"></td>
+                        <td><input type="checkbox" class="early-alert-student-checkbox"
+                                   data-student-id="{{id}}"
+                                   data-student-campus="{{campus}}"
+                                   data-student-faculty="{{faculty}}"
+                                   data-student-major="{{major}}"
+                        ></td>
                         <td>{{last_name}}, {{first_name}}<br>{{idnumber}}</td>
                         <td class="early-alert-grade-column"><span class="badge badge-primary">{{grade}}</span></td>
                         <td>

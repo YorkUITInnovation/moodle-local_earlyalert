@@ -10,4 +10,13 @@ $functions = array(
         'capabilities' => '',
         'ajax' => true
     ),
+    'earlyalert_course_student_templates' => array(
+        'classname' => 'local_earlyalert_course_grades_ws',
+        'methodname' => 'get_course_student_templates',
+        'classpath' => 'local/earlyalert/classes/external/course_grades_ws.php',
+        'description' => 'return list of email templates for this course',
+        'type' => 'read',
+        'capabilities' => '',
+        'ajax' => true
+    ),
 );

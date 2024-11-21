@@ -207,12 +207,56 @@ class helper
                 foreach ($users as $student) {
                     // Get the student's grade for the given course ID.
                     $grade = grade_get_course_grade($student->id, $course_id);
+                    // Get student campus, faculty, major
+                    if ($campus = $DB->get_record_sql("SELECT uid.data AS 'campus'
+                            FROM {user_info_data} uid
+                            LEFT JOIN {user_info_field} uif on uid.fieldid=uif.id
+                            WHERE uid.userid = ?
+                            and uif.shortname = ?
+                    ", array($student->id, 'campus'))){
+                        //has campus
+                        $studentcampus = $campus->campus;
+                    } else {
+                        $studentcampus = '';
+                    }
+                    if ($faculty = $DB->get_record_sql("SELECT uid.data AS 'faculty'
+                            FROM {user_info_data} uid
+                            LEFT JOIN {user_info_field} uif on uid.fieldid=uif.id
+                            WHERE uid.userid = ?
+                            and uif.shortname = ?
+                    ", array($student->id, 'ldapfaculty'))){
+                        //has faculty
+                        $studentfaculty = $faculty->faculty;
+                    } else {
+                        $studentfaculty = '';
+                    }
+                    if ($major = $DB->get_record_sql("SELECT uid.data AS 'major'
+                            FROM {user_info_data} uid
+                            LEFT JOIN {user_info_field} uif on uid.fieldid=uif.id
+                            WHERE uid.userid = ?
+                            and uif.shortname = ?
+                    ", array($student->id, 'ldapmajor'))){
+                        //has major
+                        $studentmajor = $major->major;
+                    } else {
+                        $studentmajor = '';
+                    }
                     if ($grade->grade) {
                         // Convert the grade to a percentage and format it as a decimal number with two places.
                         $grade = ($grade->grade / $grade->item->grademax) * 100;
                         $student_grade = number_format((float)$grade,
                             '2');
-                        $students[$student->id] = ['id' => $student->id, 'course_id' => $course_id, 'first_name' => $student->firstname, 'last_name' => $student->lastname, 'grade' => $student_grade, 'idnumber' => $student->idnumber];
+                        $students[$student->id] = [
+                            'id' => $student->id,
+                            'course_id' => $course_id,
+                            'first_name' => $student->firstname,
+                            'last_name' => $student->lastname,
+                            'grade' => $student_grade,
+                            'idnumber' => $student->idnumber,
+                            'campus' => $studentcampus,
+                            'faculty' => $studentfaculty,
+                            'major' => $studentmajor
+                        ];
                     }
                 }
             }

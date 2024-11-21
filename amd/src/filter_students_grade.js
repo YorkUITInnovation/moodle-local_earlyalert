@@ -6,7 +6,8 @@ import notification from 'core/notification';
 
 export const init = () => {
     alert_type_button();
-    get_users();
+    // get_users();
+    // get_templates();
 };
 
 function alert_type_button() {
@@ -91,6 +92,30 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 grade_letter_id: grade_letter_id
             }
         }]);
+        // Fetch the student templates
+        var get_filtered_studenttemplates = ajax.call([{
+            methodname: 'earlyalert_course_student_templates',
+            args: {
+                id: course_id
+            }
+        }]);
+        console.log("get filtered student templates results = ");
+        const finalCache = new Map();
+        get_filtered_studenttemplates[0].done(function (results){
+            const cachedArrayElement = document.getElementById('early-alert-template-cache');
+            const cachedArray = JSON.parse(cachedArrayElement.value);
+
+            results.forEach(result => {
+                if (typeof result === 'object') {
+                    if (cachedArray.includes(result.templateKey)){
+                        // finalCache.push({key: result.templateKey, value: result.message});
+                        finalCache.set(result.templateKey, result.message);
+                    }
+                }
+            });
+        }).fail(function(xhr, status, err) {
+            //TODO: need to add fail state logic
+        });
         get_filtered_studentgrades[0].done(function (results) {
 
             // Reformat the data to display in a grid
@@ -104,6 +129,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 student_rows: []
             };
 
+            let templates = [];
+
 // Initialize rows array
             for (let r = 0; r < num_rows; r++) {
                 display_data.student_rows[r] = {students: []};
@@ -114,6 +141,9 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
             results.forEach(result => {
                 if (typeof result === 'object') {
+                    if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.major)) {
+                        templates.push(result.campus + "_" + result.faculty + "_" + result.major);
+                    }
                     display_data.student_rows[row].students[col] = result;
                     col++;
                     if (col === num_cols) {
@@ -122,6 +152,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     }
                 }
             });
+
+            display_data.templates = JSON.stringify(templates);
 
             if (alert_type === 'grade') {
                 // Add alert_type to display_data
@@ -155,7 +187,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     // filter_students_by_grade_select();
                     check_all_student_grades(selected_students);
                     check_allnone_listener(selected_students);
-                    setup_preview_emails();
+                    setup_preview_emails(finalCache);
                     setup_send_emails();
                 })
                 .catch(function (error) {
@@ -207,9 +239,10 @@ function check_allnone_listener(selected_students) {
     });
 }
 
-function setup_preview_emails() {
+function setup_preview_emails(templateCache) {
     const preview_buttons = document.querySelectorAll("input[class^='early-alert-preview-button']");
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
+    console.log("template cache:", templateCache);
     ModalFactory.create({
         title: getString('preview_email', 'local_earlyalert'),
         type: ModalFactory.types.CANCEL,
@@ -233,6 +266,34 @@ function setup_preview_emails() {
     }).then(modal => {
         const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
         preview_buttons.forEach(function (button) {
+            const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
+            const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
+            if (checkbox) {
+                const studentCampusAttr = checkbox.getAttribute('data-student-campus');
+                const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
+                const studentMajorAttr = checkbox.getAttribute('data-student-major');
+                var templateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
+                var templateEmailContent = '';
+
+                console.log("Looking for '" + templateKey + "'");
+                console.log("map get:'", templateCache.get(templateKey),"'");
+                templateCache.forEach(function(value, key) {
+                    console.log("key:", key);
+                    console.log("value:", value);
+                });
+                if (templateCache.includes(templateKey)) {
+                    templateEmailContent = templateCache[templateKey].message;
+                } else {
+                    templateEmailContent = 'Template not found';
+                }
+
+            } else {
+                // console.log("couldn't find checkbox :/");
+            }
+            if (assigngrade){
+                console.log("assign grade: ", assigngrade);
+            }
+            console.log("template email content:", templateEmailContent);
             button.addEventListener('click', function () {
                 modal.show();
             });
@@ -317,7 +378,40 @@ function get_users() {
                 name: query
             }
         }]);
-        get_users[0].done(function (users) {
+        /*get_users[0].done(function (users) {
+            console.log(users);
+            datalistElement.innerHTML = '';
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.text = user.firstname + ' ' + user.lastname;
+                datalistElement.appendChild(option);
+            });
+            // When a selection is made, reload the page with the user_id as a parameter
+            inputElement.addEventListener('change', function (event) {
+                window.location.href = window.location.href + '?user_id=' + event.target.value;
+            });
+
+        }).fail(function (e) {
+            alert(e);
+            // fail gracefully somehow :'( ;
+        });*/
+    });
+}
+
+function get_templates() {
+    const templatecache = document.getElementById('early-alert-template-cache');
+
+    // Event listener for input element
+    inputElement.addEventListener('input', function (event) {
+        const query = event.target.value;
+        var get_templates = ajax.call([{
+            methodname: 'organization_users_get',
+            args: {
+                name: query
+            }
+        }]);
+        get_templates[0].done(function (users) {
             console.log(users);
             datalistElement.innerHTML = '';
             users.forEach(user => {
