@@ -103,6 +103,7 @@ class local_earlyalert_course_grades_ws extends external_api
                             $email = new \local_etemplate\email($factemp->id);
                             $templateCache[] = array(
                                 'templateKey' => $student['campus'] . "_" . $student['faculty'],
+                                'subject' => $email->get_subject(),
                                 'message' => $email->preload_template()
                             );
                         }
@@ -116,6 +117,7 @@ class local_earlyalert_course_grades_ws extends external_api
                             $email = new \local_etemplate\email($depttemp->id);
                             $templateCache[] = array(
                                 'templateKey' => $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'],
+                                'subject' => $email->get_subject(),
                                 'message' => $email->preload_template()
                             );
                         }
@@ -123,7 +125,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 }
             }
         }
-        //error_log("template cache = " . print_r($templateCache, TRUE));
+        error_log("template cache = " . print_r($templateCache, TRUE));
         return $templateCache;
     }
     /**
@@ -144,6 +146,7 @@ class local_earlyalert_course_grades_ws extends external_api
     {
         $fields = array(
             'templateKey' => new external_value(PARAM_RAW, 'Campus_Faculty_Major key for templates', false),
+            'subject' => new external_value(PARAM_RAW, 'Subject for template message', false),
             'message' => new external_value(PARAM_RAW, 'Message text for template', false)
         );
         return new external_single_structure($fields);

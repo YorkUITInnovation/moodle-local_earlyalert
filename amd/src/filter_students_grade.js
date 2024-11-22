@@ -172,7 +172,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         if (typeof result === 'object') {
                             if (cachedArray.includes(result.templateKey)){
                                 // finalCache.push({key: result.templateKey, value: result.message});
-                                finalCache.set(result.templateKey, result.message);
+                                let finalMessage = {subject: result.subject, message: result.message};
+                                finalCache.set(result.templateKey, finalMessage);
                             }
                         }
                     });
@@ -257,10 +258,13 @@ function setup_preview_emails(templateCache) {
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
             var templateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
             var templateEmailContent = '';
+            var templateEmailSubject = '';
 
             if (templateCache.has(templateKey)) {
-                templateEmailContent = templateCache.get(templateKey);
+                templateEmailSubject = templateCache.get(templateKey).subject;
+                templateEmailContent = templateCache.get(templateKey).message;
             } else {
+                templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';
             }
 
@@ -279,6 +283,7 @@ function setup_preview_emails(templateCache) {
         // assemble record data for individual buttons which includes student and template data
         record_data.student_name = student_name;
         record_data.course_name = templateCache.get('course_name');
+        record_data.templateEmailSubject = templateEmailSubject;
         record_data.templateEmailContent = templateEmailContent;
 
         button.addEventListener('click', function () {
@@ -295,7 +300,7 @@ function setup_preview_buttons_from_template(student_template_data) {
         body: Templates.render('local_earlyalert/preview_student_email', {
             name: student_template_data.template_name,
             student_name: student_template_data.student_name,
-            subject: 'Grade in ' + student_template_data.course_name,
+            subject: student_template_data.templateEmailSubject,
             message: student_template_data.templateEmailContent,
             instructor_name: ''
         }),
