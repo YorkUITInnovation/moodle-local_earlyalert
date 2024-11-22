@@ -108,7 +108,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
             let templates = [];
 
-// Initialize rows array
+            // Initialize rows array
             for (let r = 0; r < num_rows; r++) {
                 display_data.student_rows[r] = {students: []};
             }
@@ -179,7 +179,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     });
                     finalCache.set('course_name', course_name);
                     setup_preview_emails(finalCache);
-                    setup_send_emails();
                 })
                 .catch(function (error) {
                     console.error('Failed to render template:', error);
@@ -201,6 +200,19 @@ function check_all_student_grades(selected_students) {
     student_checkboxes.forEach(function (checkbox) {
         checkbox.checked = true;
         selected_students.push(checkbox.getAttribute('data-student-id'));
+    });
+    student_ids_selected.value = JSON.stringify(selected_students);
+}
+
+// function to save to hidden field on submit if anyone unchecks student records
+function check_individual_students_checkboxes_for_submit(){
+    let selected_students = [];
+    const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
+    const student_checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']");
+    student_checkboxes.forEach(function (checkbox) {
+        if (checkbox.checked){
+            selected_students.push(checkbox.getAttribute('data-student-id'));
+        }
     });
     student_ids_selected.value = JSON.stringify(selected_students);
 }
@@ -232,6 +244,8 @@ function setup_preview_emails(templateCache) {
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
     //console.log("template cache:", templateCache);
+    // store ALL the student data and template cache etc when its processed
+    let student_template_cache_array = [];
     preview_buttons.forEach(function (button) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
@@ -253,7 +267,7 @@ function setup_preview_emails(templateCache) {
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
             // console.log(student_name);
-            const student_id = checkbox.getAttribute('data-student-id');
+            var student_id = checkbox.getAttribute('data-student-id');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
@@ -290,6 +304,7 @@ function setup_preview_emails(templateCache) {
         // console.log("template email content post-addUserInfo:", templateEmailContent);
 
         // assemble record data for individual buttons which includes student and template data
+        record_data.student_id = student_id;
         record_data.student_name = student_name;
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
@@ -298,7 +313,12 @@ function setup_preview_emails(templateCache) {
         button.addEventListener('click', function () {
             setup_preview_buttons_from_template(record_data)
         });
+        // add record to student_template_cache_array to have data to submit / email
+        student_template_cache_array.push(record_data);
+
     });
+    // once we have all the data we can setup the emails to submit with the template cache data and student ids BUT we have to manage and select the users if they are checked/unchceked
+    setup_send_emails(student_template_cache_array);
 }
 
 function setup_preview_buttons_from_template(student_template_data) {
@@ -318,20 +338,41 @@ function setup_preview_buttons_from_template(student_template_data) {
         modal.show();
     });
 }
-function setup_send_emails() {
-    // Pop-up notification when .btn-local-organization-delete-advisor is clicked
+function setup_send_emails(student_template_cache_array) {
     const send_button = document.getElementById('early-alert-send-button1');
     const send_button2 = document.getElementById('early-alert-send-button2');
-    var ids = document.getElementById("early-alert-student-ids").value; // hidden field ids
+    var student_ids_array = [];
     send_button.addEventListener('click', function () {
-        create_notification_dialog(ids);
+
+        check_individual_students_checkboxes_for_submit();
+        student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
+        console.log(student_ids_array)
+        // remove students from template cache if they have been unchecked
+
+        student_template_cache_array.filter(student => !student_ids_array.includes(student.id) );
+
+        console.log('Filtered!');
+        console.log(student_template_cache_array);
+        create_notification_dialog(student_template_cache_array);
     });
     send_button2.addEventListener('click', function () {
-        create_notification_dialog(ids);
+
+        check_individual_students_checkboxes_for_submit();
+        student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
+        console.log(student_ids_array)
+        // remove students from template cache if they have been unchecked
+
+        student_template_cache_array.filter(student => !student_ids_array.includes(student.id) );
+
+        console.log('Filtered!');
+        console.log(student_template_cache_array);
+        create_notification_dialog(student_template_cache_array);
     });
 }
 
-function create_notification_dialog(ids) {
+function create_notification_dialog(student_template_cache_array) {
+
+    console.log(student_template_cache_array);
     // Get the data id attribute value
     var send_string = getString('send_email', 'local_earlyalert');
     var send_dialog_text = getString('send_dialog_text', 'local_earlyalert');
@@ -345,9 +386,9 @@ function create_notification_dialog(ids) {
     notification.confirm(send_string, send_dialog_text, send, cancel, function () {
         // Delete the record
         var sendEmail = ajax.call([{
-            methodname: 'local_earlyalert_sendEmail',
+            methodname: 'earlyalert_report_log_insert',
             args: {
-                id: ids,
+                id: 0,
             }
         }]);
         sendEmail[0].done(function () {
@@ -360,24 +401,6 @@ function create_notification_dialog(ids) {
     });
 }
 
-
-function show_grades() {
-    // check box for grade showing - remove later
-    const show_grade_checkbox = document.getElementById('id_early_alert_filter_grade_chk');
-    // check box for grade showing - remove later
-    show_grade_checkbox.addEventListener('click', function () {
-        let grade_pills = document.querySelectorAll("span.pill");
-        grade_pills.forEach(function (grade_pill) {
-            if (show_grade_checkbox.checked) {
-                if (grade_pill.style.display == 'none') {
-                    grade_pill.style.display = 'block';
-                }
-            } else {
-                grade_pill.style.display = 'none';
-            }
-        });
-    });
-}
 
 /**
  * Get users from the search input

@@ -20,7 +20,7 @@ $functions = array(
         'ajax' => true
     ),
     'earlyalert_report_log_insert' => array(
-        'classname' => 'local_earlyalert_course_grades_ws',
+        'classname' => 'local_earlyalert_record_log_ws',
         'methodname' => 'insert_email_log',
         'classpath' => 'local/earlyalert/classes/external/record_log_ws.php',
         'description' => 'inserts reporting log of early alert email',

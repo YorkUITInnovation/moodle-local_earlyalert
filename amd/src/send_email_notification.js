@@ -28,7 +28,7 @@ function sendEmails() {
             notification.confirm(send_string, send_dialog_text, send, cancel, function () {
                 // Delete the record
                 var sendEmail = ajax.call([{
-                    methodname: 'local_earlyalert_sendEmail',
+                    methodname: 'earlyalert_report_log_insert',
                     args: {
                         id: ids,
                     }
