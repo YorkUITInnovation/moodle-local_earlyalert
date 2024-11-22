@@ -123,7 +123,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 }
             }
         }
-        error_log("template cache = " . print_r($templateCache, TRUE));
+        //error_log("template cache = " . print_r($templateCache, TRUE));
         return $templateCache;
     }
     /**

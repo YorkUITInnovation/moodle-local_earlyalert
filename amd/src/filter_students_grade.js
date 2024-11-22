@@ -7,7 +7,6 @@ import notification from 'core/notification';
 export const init = () => {
     alert_type_button();
     // get_users();
-    // get_templates();
 };
 
 function alert_type_button() {
@@ -95,7 +94,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
         const finalCache = new Map();
 
         Promise.all(get_grades_and_templates).then(([grades_response, templates_response]) => {
-            
+
             // Reformat the data to display in a grid
             let num_students = grades_response.length;
             console.log('Number of students returned: ' + num_students);
@@ -236,6 +235,7 @@ function setup_preview_emails(templateCache) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
+
         if (checkbox) {
 
             // now, access the parent <tr> element (the table row)
@@ -250,7 +250,7 @@ function setup_preview_emails(templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-            console.log(student_name);
+            // console.log(student_name);
             const student_id = checkbox.getAttribute('data-student-id');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
@@ -258,14 +258,8 @@ function setup_preview_emails(templateCache) {
             var templateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
             var templateEmailContent = '';
 
-            // console.log("Looking for '" + templateKey + "'");
-            // console.log("map get:'", templateCache.get(templateKey),"'");
-            // templateCache.forEach(function(value, key) {
-            //     console.log("key:", key);
-            //     console.log("value:", value);
-            // });
-            if (templateCache.includes(templateKey)) {
-                templateEmailContent = templateCache[templateKey].message;
+            if (templateCache.has(templateKey)) {
+                templateEmailContent = templateCache.get(templateKey);
             } else {
                 templateEmailContent = 'Template not found';
             }
@@ -276,7 +270,11 @@ function setup_preview_emails(templateCache) {
         if (assigngrade){
             // console.log("assign grade: ", assigngrade);
         }
-        console.log("template email content:", templateEmailContent);
+        // console.log("template email content:", templateEmailContent);
+
+        templateEmailContent = addUserInfo(templateEmailContent, student_name_arr, assigngrade );
+
+        // console.log("template email content post-addUserInfo:", templateEmailContent);
 
         // assemble record data for individual buttons which includes student and template data
         record_data.student_name = student_name;
@@ -404,35 +402,44 @@ function get_users() {
     });
 }
 
-function get_templates() {
-    const templatecache = document.getElementById('early-alert-template-cache');
+function addUserInfo(emailText, usernamearr, grade) {
+    // Define text replacements
+    const textReplace = [
+        '[firstname]',
+        '[fullname]',
+        '[usergrade]'
+    ];
 
-    // Event listener for input element
-    inputElement.addEventListener('input', function (event) {
-        const query = event.target.value;
-        var get_templates = ajax.call([{
-            methodname: 'organization_users_get',
-            args: {
-                name: query
+    // Build replacement info
+    let uniqueMatches = {};
+    for (let i = 0; i < textReplace.length; i++) {
+        if (emailText.includes(textReplace[i])) {
+            // Perform action for each unique match found
+            switch (i) {
+                case 0:
+                    // firstname action
+                    let firstNameText = usernamearr[1] ? usernamearr[1] : '{USER_NOT_FOUND}';
+                    uniqueMatches[i] = firstNameText;
+                    break;
+                case 1:
+                    // fullname action
+                    let targetUser = usernamearr[1] ? `${usernamearr[1]} ${usernamearr[0]}` : '{USER_NOT_FOUND}';
+                    uniqueMatches[i] = targetUser;
+                    break;
+                case 2:
+                    // usergrade action
+                    let userGradeText = grade || '{GRADE NOT PROVIDED/FOUND}';
+                    uniqueMatches[i] = userGradeText;
+                    break;
             }
-        }]);
-        get_templates[0].done(function (users) {
-            console.log(users);
-            datalistElement.innerHTML = '';
-            users.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.id;
-                option.text = user.firstname + ' ' + user.lastname;
-                datalistElement.appendChild(option);
-            });
-            // When a selection is made, reload the page with the user_id as a parameter
-            inputElement.addEventListener('change', function (event) {
-                window.location.href = window.location.href + '?user_id=' + event.target.value;
-            });
-
-        }).fail(function (e) {
-            alert(e);
-            // fail gracefully somehow :'( ;
-        });
-    });
+        }
+    }
+    // Replace the text with the matched values
+    for (let i = 0; i < textReplace.length; i++) {
+        if (uniqueMatches[i]) {
+            emailText = emailText.replace(textReplace[i], uniqueMatches[i]);
+            // emailText = emailText.replace(new RegExp(textReplace[i], 'g'), uniqueMatches[i]);
+        }
+    }
+    return emailText;
 }
