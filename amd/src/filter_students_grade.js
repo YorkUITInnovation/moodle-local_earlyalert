@@ -236,7 +236,8 @@ function setup_preview_emails(templateCache) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
-
+        const grade_select = document.getElementById('id_early_alert_filter_grade_select');
+        let selected_grade = grade_select.options[grade_select.selectedIndex].text;
         if (checkbox) {
 
             // now, access the parent <tr> element (the table row)
@@ -276,7 +277,15 @@ function setup_preview_emails(templateCache) {
         }
         // console.log("template email content:", templateEmailContent);
 
-        templateEmailContent = addUserInfo(templateEmailContent, student_name_arr, assigngrade );
+        var params = {
+            studentname: student_name_arr,
+            assignmentgrade: assigngrade,
+            assignmenttitle: document.getElementById('early-alert-assignment-title') ? document.getElementById('early-alert-assignment-title').value : '',
+            coursename: templateCache.get('course_name'),
+            customgrade: grade_select.options[grade_select.selectedIndex].text,
+            defaultgrade: "D+"
+        };
+        templateEmailContent = addUserInfo(templateEmailContent, params );
 
         // console.log("template email content post-addUserInfo:", templateEmailContent);
 
@@ -407,12 +416,16 @@ function get_users() {
     });
 }
 
-function addUserInfo(emailText, usernamearr, grade) {
+function addUserInfo(emailText, params) {
     // Define text replacements
     const textReplace = [
         '[firstname]',
         '[fullname]',
-        '[usergrade]'
+        '[usergrade]',
+        '[customgrade]',
+        '[defaultgrade]',
+        '[coursetitle]',
+        '[assignmenttitle]'
     ];
 
     // Build replacement info
@@ -423,18 +436,38 @@ function addUserInfo(emailText, usernamearr, grade) {
             switch (i) {
                 case 0:
                     // firstname action
-                    let firstNameText = usernamearr[1] ? usernamearr[1] : '{USER_NOT_FOUND}';
+                    let firstNameText = params.studentname[1] ? params.studentname[1] : '{USER_NOT_FOUND}';
                     uniqueMatches[i] = firstNameText;
                     break;
                 case 1:
                     // fullname action
-                    let targetUser = usernamearr[1] ? `${usernamearr[1]} ${usernamearr[0]}` : '{USER_NOT_FOUND}';
+                    let targetUser = params.studentname[1] ? `${params.studentname[1]} ${params.studentname[0]}` : '{USER_NOT_FOUND}';
                     uniqueMatches[i] = targetUser;
                     break;
                 case 2:
                     // usergrade action
-                    let userGradeText = grade || '{GRADE NOT PROVIDED/FOUND}';
+                    let userGradeText = params.assignmentgrade || '{GRADE NOT PROVIDED/FOUND}';
                     uniqueMatches[i] = userGradeText;
+                    break;
+                case 3:
+                    // customgrade acton
+                    let customGradeText = params.customgrade || '{CUSTOM GRADE NOT PROVIDED/FOUND}';
+                    uniqueMatches[i] = customGradeText;
+                    break;
+                case 4:
+                    // defaultgrade acton
+                    let defaultGradeText = params.defaultgrade || '{DEFAULT GRADE NOT PROVIDED/FOUND}';
+                    uniqueMatches[i] = defaultGradeText;
+                    break;
+                case 5:
+                    // coursetitle action
+                    let courseTitleText = params.coursename || '{COURSE TITLE NOT FOUND}';
+                    uniqueMatches[i] = courseTitleText;
+                    break;
+                case 6:
+                    // assignmenttitle action
+                    let assignmentTitleText = params.assignmenttitle || '{ASSIGNMENT TITLE NOT FOUND}';
+                    uniqueMatches[i] = assignmentTitleText;
                     break;
             }
         }

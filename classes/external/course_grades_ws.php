@@ -104,7 +104,7 @@ class local_earlyalert_course_grades_ws extends external_api
                             $templateCache[] = array(
                                 'templateKey' => $student['campus'] . "_" . $student['faculty'],
                                 'subject' => $email->get_subject(),
-                                'message' => $email->preload_template()
+                                'message' => $email->preload_template($courseid)
                             );
                         }
                     }
@@ -118,7 +118,7 @@ class local_earlyalert_course_grades_ws extends external_api
                             $templateCache[] = array(
                                 'templateKey' => $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'],
                                 'subject' => $email->get_subject(),
-                                'message' => $email->preload_template()
+                                'message' => $email->preload_template($courseid)
                             );
                         }
                     }
