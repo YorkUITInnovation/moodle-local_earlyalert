@@ -349,7 +349,6 @@ function setup_send_emails(student_template_cache_array) {
     });
 }
 
-
 function maintain_student_template_data_for_submit(student_template_cache_array){
     check_individual_students_checkboxes_for_submit();
     var student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
@@ -378,7 +377,7 @@ function create_notification_dialog(student_template_cache_array) {
         var sendEmail = ajax.call([{
             methodname: 'earlyalert_report_log_insert',
             args: {
-                id: 0,
+                template_data: JSON.stringify(student_template_cache_array),
             }
         }]);
         sendEmail[0].done(function () {

@@ -273,7 +273,7 @@ class email_report_log extends crud
     /**
      * @param Type: bigint (18)
      */
-    public function set_id(int $id): void
+    public function set_id($id): void
     {
         $this->id = $id;
     }
@@ -337,7 +337,7 @@ class email_report_log extends crud
     /**
      * @param Type: bigint (18)
      */
-    public function set_timemodified(int $timemodified)
+    public function set_timemodified($timemodified)
     {
         $this->timemodified = $timemodified;
     }
@@ -347,7 +347,7 @@ class email_report_log extends crud
         return $this->revision_id;
     }
 
-    public function setRevisionId(int $revision_id): void
+    public function setRevisionId( $revision_id): void
     {
         $this->revision_id = $revision_id;
     }
@@ -357,7 +357,7 @@ class email_report_log extends crud
         return $this->triggered_from_user_id;
     }
 
-    public function setTriggeredFromUserId(int $triggered_from_user_id): void
+    public function setTriggeredFromUserId($triggered_from_user_id): void
     {
         $this->triggered_from_user_id = $triggered_from_user_id;
     }
@@ -367,7 +367,7 @@ class email_report_log extends crud
         return $this->target_user_id;
     }
 
-    public function setTargetUserId(int $target_user_id): void
+    public function setTargetUserId($target_user_id): void
     {
         $this->target_user_id = $target_user_id;
     }
@@ -377,7 +377,7 @@ class email_report_log extends crud
         return $this->user_read;
     }
 
-    public function setUserRead(int $user_read): void
+    public function setUserRead($user_read): void
     {
         $this->user_read = $user_read;
     }
@@ -387,7 +387,7 @@ class email_report_log extends crud
         return $this->unit_id;
     }
 
-    public function setUnitId(int $unit_id): void
+    public function setUnitId($unit_id): void
     {
         $this->unit_id = $unit_id;
     }
@@ -397,7 +397,7 @@ class email_report_log extends crud
         return $this->department_id;
     }
 
-    public function setDepartmentId(int $department_id): void
+    public function setDepartmentId($department_id): void
     {
         $this->department_id = $department_id;
     }
