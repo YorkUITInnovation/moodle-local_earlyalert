@@ -341,33 +341,23 @@ function setup_preview_buttons_from_template(student_template_data) {
 function setup_send_emails(student_template_cache_array) {
     const send_button = document.getElementById('early-alert-send-button1');
     const send_button2 = document.getElementById('early-alert-send-button2');
-    var student_ids_array = [];
     send_button.addEventListener('click', function () {
-
-        check_individual_students_checkboxes_for_submit();
-        student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
-        console.log(student_ids_array)
-        // remove students from template cache if they have been unchecked
-
-        student_template_cache_array.filter(student => !student_ids_array.includes(student.id) );
-
-        console.log('Filtered!');
-        console.log(student_template_cache_array);
-        create_notification_dialog(student_template_cache_array);
+        maintain_student_template_data_for_submit(student_template_cache_array);
     });
     send_button2.addEventListener('click', function () {
-
-        check_individual_students_checkboxes_for_submit();
-        student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
-        console.log(student_ids_array)
-        // remove students from template cache if they have been unchecked
-
-        student_template_cache_array.filter(student => !student_ids_array.includes(student.id) );
-
-        console.log('Filtered!');
-        console.log(student_template_cache_array);
-        create_notification_dialog(student_template_cache_array);
+        maintain_student_template_data_for_submit(student_template_cache_array);
     });
+}
+
+
+function maintain_student_template_data_for_submit(student_template_cache_array){
+    check_individual_students_checkboxes_for_submit();
+    var student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
+    // remove students from template cache if they have been unchecked
+    var new_student_temp_array = student_template_cache_array.filter(student => student_ids_array.includes(student.student_id));
+    console.log('Filtered!');
+    console.log(new_student_temp_array);
+    create_notification_dialog(new_student_temp_array);
 }
 
 function create_notification_dialog(student_template_cache_array) {
