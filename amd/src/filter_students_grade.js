@@ -318,6 +318,25 @@ function setup_preview_emails(templateCache) {
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
         record_data.templateEmailContent = templateEmailContent;
+        // record_data.template_id
+        // record_data.revision_id
+        // record_data.triggered_from_user_id
+        // record_data.target_user_id
+        // record_data.user_read
+        // record_data.unit_id
+        // record_data.department_id
+        // record_data.facultyspecific_text_id
+        // record_data.course_id
+        // record_data.instructor_id
+        // record_data.assignment_id
+        // record_data.trigger_grade
+        // record_data.trigger_grade_letter
+        // record_data.actual_grade
+        // record_data.actual_grade_letter
+        // record_data.student_advised
+        // record_data.date_message_sent
+        // record_data.timecreated
+        // record_data.timemodified
 
         button.addEventListener('click', function () {
             setup_preview_buttons_from_template(record_data)

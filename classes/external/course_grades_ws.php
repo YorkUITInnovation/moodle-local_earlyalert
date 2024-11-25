@@ -188,7 +188,15 @@ class local_earlyalert_course_grades_ws extends external_api
                             $templateCache[] = array(
                                 'templateKey' => $student['campus'] . "_" . $student['faculty'],
                                 'subject' => $template_data->subject,
-                                'message' => $template_data->message
+                                'message' => $template_data->message,
+                                'templateid' => $template_data->templateid,
+                                'revision_id' => $template_data->revision_id,
+                                'body' => $template_data->body,
+                                'course_id' => $template_data->course_id,
+                                'instructor_id' => $template_data->instructor_id,
+                                'date_message_sent' => $template_data->date_message_sent,
+                                'timecreated' => $template_data->timecreated,
+                                'timemodified' => $template_data->timemodified
                             );
                         }
                     } else {
@@ -201,7 +209,15 @@ class local_earlyalert_course_grades_ws extends external_api
                                 $templateCache[] = array(
                                     'templateKey' => $student['campus'] . "_" . $student['faculty'],
                                     'subject' => $template_data->subject,
-                                    'message' => $template_data->message
+                                    'message' => $template_data->message,
+                                    'templateid' => $template_data->templateid,
+                                    'revision_id' => $template_data->revision_id,
+                                    'body' => $template_data->body,
+                                    'course_id' => $template_data->course_id,
+                                    'instructor_id' => $template_data->instructor_id,
+                                    'date_message_sent' => $template_data->date_message_sent,
+                                    'timecreated' => $template_data->timecreated,
+                                    'timemodified' => $template_data->timemodified
                                 );
                             }
                         }
@@ -218,7 +234,15 @@ class local_earlyalert_course_grades_ws extends external_api
                             $templateCache[] = array(
                                 'templateKey' => $student['campus'] . "_" . $student['faculty']. "_" . $student['major'],
                                 'subject' => $template_data->subject,
-                                'message' => $template_data->message
+                                'message' => $template_data->message,
+                                'templateid' => $template_data->templateid,
+                                'revision_id' => $template_data->revision_id,
+                                'body' => $template_data->body,
+                                'course_id' => $template_data->course_id,
+                                'instructor_id' => $template_data->instructor_id,
+                                'date_message_sent' => $template_data->date_message_sent,
+                                'timecreated' => $template_data->timecreated,
+                                'timemodified' => $template_data->timemodified
                             );
                         }
                     } else {
@@ -231,7 +255,15 @@ class local_earlyalert_course_grades_ws extends external_api
                                 $templateCache[] = array(
                                     'templateKey' => $student['campus'] . "_" . $student['faculty']. "_" . $student['major'],
                                     'subject' => $template_data->subject,
-                                    'message' => $template_data->message
+                                    'message' => $template_data->message,
+                                    'templateid' => $template_data->templateid,
+                                    'revision_id' => $template_data->revision_id,
+                                    'body' => $template_data->body,
+                                    'course_id' => $template_data->course_id,
+                                    'instructor_id' => $template_data->instructor_id,
+                                    'date_message_sent' => $template_data->date_message_sent,
+                                    'timecreated' => $template_data->timecreated,
+                                    'timemodified' => $template_data->timemodified
                                 );
                             }
                         }
@@ -240,6 +272,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 $i++;
             }
         }
+        error_log("returning templatecache :" . print_r($templateCache, TRUE));
         return $templateCache;
     }
 
