@@ -64,18 +64,6 @@ class local_earlyalert_course_grades_ws extends external_api
                 $students[$i]['teacher_email'] = $teacher->email;
 
                 if ($key === 'id') {
-                    // Get faculty
-//                    $sql = "Select
-//                            uid.id,
-//                            uid.data
-//                        From
-//                            {user} u Inner Join
-//                            {user_info_data} uid On uid.userid = u.id Inner Join
-//                            {user_info_field} uif On uif.id = uid.fieldid
-//                        Where
-//                            uif.shortname = 'facultyaffiliaton' And
-//                            u.id = " . $value;
-//                    $faculty = $DB->get_record_sql($sql);
                     // Get faculty and campus from svadata table
                     $sql = "Select
                             sva.faculty,
@@ -178,10 +166,8 @@ class local_earlyalert_course_grades_ws extends external_api
 
             $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
 
-
             //check if
             if (!isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major']])) {
-
                 //get all templates for this campus/faculty/major combo
                 if ($campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']))) {
                     //campus exists
@@ -200,7 +186,7 @@ class local_earlyalert_course_grades_ws extends external_api
                             $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
                             file_put_contents('/var/www/moodledata/temp/template_data' . $i . '.txt', print_r($template_data, TRUE));
                             $templateCache[] = array(
-                                'templateKey' => $student['campus'] . "_" . $student['faculty']. "_" . $student['major'],
+                                'templateKey' => $student['campus'] . "_" . $student['faculty'],
                                 'subject' => $template_data->subject,
                                 'message' => $template_data->message
                             );
@@ -213,7 +199,7 @@ class local_earlyalert_course_grades_ws extends external_api
                                 $email = new \local_etemplate\email($catchalltemp->id);
                                 $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
                                 $templateCache[] = array(
-                                    'templateKey' => $student['campus'] . "_" . $student['faculty']. "_" . $student['major'],
+                                    'templateKey' => $student['campus'] . "_" . $student['faculty'],
                                     'subject' => $template_data->subject,
                                     'message' => $template_data->message
                                 );
@@ -254,7 +240,6 @@ class local_earlyalert_course_grades_ws extends external_api
                 $i++;
             }
         }
-        error_log("template cache = " . print_r($templateCache, TRUE));
         return $templateCache;
     }
 
