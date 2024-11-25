@@ -34,9 +34,12 @@ $grade_letter_id = optional_param('grade_letter_id', '', PARAM_TEXT);
 $user_id = optional_param('user_id', $USER->id, PARAM_INT);
 
 $is_impersonating = false;
+$impersonated_user = new stdClass();
 if ($user_id != $USER->id) {
     $is_impersonating = true;
     $impersonated_user = $DB->get_record('user', ['id' => $user_id]);
+} else {
+    $user_id = $USER->id;
 }
 
 $show_grades = $CFG->earlyalert_showgrades;
@@ -73,6 +76,8 @@ if ($show_grades) {
 if ($impersonate && !$teacher) {
     $course_data['impersonate'] = true;
 }
+
+$course_data['teacher_user_id'] = $user_id;
 
 if ($teacher || $is_impersonating) {
     $course_data_for_grades = [];

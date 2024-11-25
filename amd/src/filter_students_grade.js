@@ -6,7 +6,7 @@ import notification from 'core/notification';
 
 export const init = () => {
     alert_type_button();
-    // get_users();
+    get_users();
 };
 
 function alert_type_button() {
@@ -16,8 +16,10 @@ function alert_type_button() {
             let alert_type = event.target.getAttribute('data-link');
             let course_name = event.target.getAttribute('data-name');
             let course_id = event.target.getAttribute('data-course_id');
+            let teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
+            console.log('teacher_user_id:', teacher_user_id);
             // Get student list based on alert type
-            setup_filter_students_by_grade(course_id, 9, course_name, alert_type);
+            setup_filter_students_by_grade(course_id, 9, course_name, alert_type,teacher_user_id);
         }
     });
 }
@@ -42,11 +44,11 @@ function filter_students_by_grade_select() {
     const course_id = document.getElementById('early_alert_filter_course_id').value;
     const course_name = document.getElementById('early_alert_course_name').value;
     const alert_type = document.getElementById('early-alert-alert-type').value;
+    const teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
     // setup listener for drop down selection
-
     grade_select.addEventListener('change', function (e) {
         let grade_letter_id = e.target.value;
-        setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type);
+        setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id);
 
     });
 }
@@ -58,7 +60,7 @@ function filter_students_by_grade_select() {
  * @param course_name
  * @param alert_type
  */
-function setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type) {
+function setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id) {
     let selected_students = [];
     // convert course_id into an integer
     course_id = parseInt(course_id);
@@ -87,8 +89,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
         // Fetch student list and templates
         var get_grades_and_templates = ajax.call([
-            { methodname: 'earlyalert_course_grades_percent_get', args: { id: course_id, grade_letter_id: grade_letter_id } },
-            { methodname: 'earlyalert_course_student_templates', args: { id: course_id } }
+            { methodname: 'earlyalert_course_grades_percent_get', args: { id: course_id, grade_letter_id: grade_letter_id, "teacher_user_id": teacher_user_id } },
+            { methodname: 'earlyalert_course_student_templates', args: { "teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type } }
         ]);
 
         const finalCache = new Map();
@@ -117,10 +119,14 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             let col = 0;
 
             grades_response.forEach(result => {
+                console.log(result);
                 if (typeof result === 'object') {
                     if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.major)) {
                         templates.push(result.campus + "_" + result.faculty + "_" + result.major);
                     }
+                    result.faculty = result.faculty ? result.faculty : '';
+                    result.major = result.major ? result.major : '';
+                    result.campus = result.campus ? result.campus : '';
                     display_data.student_rows[row].students[col] = result;
                     col++;
                     if (col === num_cols) {
@@ -150,7 +156,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 display_data.exam = true;
             }
             display_data.fullname = course_name;
-
+// console.log( display_data);
             // Render the template with display_data
             Templates.render('local_earlyalert/course_student_list', display_data)
                 .then(function (html, js) {
@@ -242,6 +248,8 @@ function check_allnone_listener(selected_students) {
 
 function setup_preview_emails(templateCache) {
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
+    // Get the early-alert-alert-type value
+    const alert_type = document.getElementById('early-alert-alert-type').value;
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
     //console.log("template cache:", templateCache);
     // store ALL the student data and template cache etc when its processed
@@ -407,7 +415,7 @@ function get_users() {
                 name: query
             }
         }]);
-        /*get_users[0].done(function (users) {
+        get_users[0].done(function (users) {
             console.log(users);
             datalistElement.innerHTML = '';
             users.forEach(user => {
@@ -424,7 +432,7 @@ function get_users() {
         }).fail(function (e) {
             alert(e);
             // fail gracefully somehow :'( ;
-        });*/
+        });
     });
 }
 

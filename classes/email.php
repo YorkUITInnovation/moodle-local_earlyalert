@@ -14,8 +14,10 @@ use local_earlyalert\base;
 class email extends crud
 {
 
-    const MESSAGE_TYPE_EMAIL = 0;
-    const MESSAGE_TYPE_INTERNAL = 1;
+    const MESSAGE_TYPE_GRADE = 0;
+    const MESSAGE_TYPE_ASSIGNMENT = 1;
+    const MESSAGE_TYPE_EXAM = 2;
+    const MESSAGE_TYPE_CATCHALL = 3;
 
     /**
      *

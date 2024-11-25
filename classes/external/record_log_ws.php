@@ -15,7 +15,9 @@ class local_earlyalert_record_log_ws extends external_api
     {
         return new external_function_parameters(
             array(
-                'template_data' => new external_value(PARAM_RAW, 'data for student templates', false, 0),
+                'ids' => new external_value(PARAM_RAW, 'All selected student ids', VALUE_OPTIONAL , ''),
+                'course_id' => new external_value(PARAM_INT, 'The course id', VALUE_OPTIONAL, 0),
+                'alert_type' => new external_value(PARAM_TEXT, 'The alert type: grade, assign, exam', VALUE_OPTIONAL, 0),
             )
         );
     }
@@ -27,13 +29,15 @@ class local_earlyalert_record_log_ws extends external_api
      * @throws invalid_parameter_exception
      * @throws restricted_context_exception
      */
-    public static function insert_email_log($template_data)
+    public static function insert_email_log($ids, $course_id, $alert_type)
     {
         global $CFG, $USER, $DB, $PAGE;
 
         //Parameter validation
         $params = self::validate_parameters(self::insert_email_log_parameters(), array(
-                'template_data'	=>	$template_data,
+                'ids' => $ids,
+                'course_id'	=> $course_id,
+                'alert_type' =>	$alert_type
             )
         );
 
@@ -42,9 +46,9 @@ class local_earlyalert_record_log_ws extends external_api
         $context = \context_system::instance();
         self::validate_context($context);
         // check student template object map
-        $template_array = json_decode($params['template_data'], true);
+        $students = json_decode($ids, true);
 
-        forEach($template_array as $template) {
+        forEach($students as $student) {
             // add to data structure
             $data= new stdClass();
             $data->template_id = $template->template_id;

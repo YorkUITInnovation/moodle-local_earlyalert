@@ -13,6 +13,10 @@ class helper
     const PERIOD_YEAR = 2;
     const PERIOD_WINTER_YEAR = 3;
     const PERIOD_SUMMER = 4;
+    // Alert Types
+    const ALERT_TYPE_GRADE = 'grade';
+    const ALERT_TYPE_ASSIGN = 'assign';
+    const ALERT_TYPE_EXAM = 'exam';
 
     public static function get_acad_year()
     {
