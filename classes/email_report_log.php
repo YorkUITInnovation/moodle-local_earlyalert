@@ -155,6 +155,8 @@ class email_report_log extends crud
      */
     private $record;
 
+    private $data;
+
 
     public function __construct($id = 0)
     {
@@ -191,7 +193,7 @@ class email_report_log extends crud
         $this->trigger_grade = $result->trigger_grade ?? '';
         $this->trigger_grade_letter = $result->trigger_grade_letter ?? '';
         $this->actual_grade = $result->actual_grade ?? 0;
-        $this->actual_grade_letter = $result->actual_grade_letter ?? 0;
+        $this->actual_grade_letter = $result->actual_grade_letter ?? '';
         $this->student_advised = $result->student_advised ?? 0;
         $this->facultyspecific_text_id = $result->facultyspecific_text_id ?? 0;
         $this->timecreated = $result->timecreated ?? 0;
@@ -204,6 +206,28 @@ class email_report_log extends crud
         if ($this->timemodified) {
             $this->timemodified_hr = base::strftime(get_string('strftimedate'), $result->timemodified);
         }
+    }
+
+    public function insert_record($data)
+    {
+        global $DB, $USER;
+
+        $this->table = 'local_earlyalert_report_log';
+
+        if (!isset($data->timecreated)) {
+            $data->timecreated = time();
+        }
+
+        if (!isset($data->timemodified)) {
+            $data->timemodified = time();
+        }
+
+        //Set user
+        $data->usermodified = $USER->id;
+
+        $id = $DB->insert_record($this->table, $data);
+
+        return $id;
     }
 
     /**
@@ -500,5 +524,21 @@ class email_report_log extends crud
     public function setDateMessageSent(int $date_message_sent): void
     {
         $this->date_message_sent = $date_message_sent;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param mixed $data
+     */
+    public function set_data($data): void
+    {
+        $this->data = $data;
     }
 }

@@ -3,6 +3,7 @@ import Templates from 'core/templates';
 import ModalFactory from 'core/modal_factory';
 import {get_string as getString} from 'core/str';
 import notification from 'core/notification';
+import {get_format as formatString} from 'core/str';
 
 export const init = () => {
     alert_type_button();
@@ -367,7 +368,6 @@ function create_notification_dialog(student_template_cache_array) {
     var send_dialog_text = getString('send_dialog_text', 'local_earlyalert');
     var send = getString('send', 'local_earlyalert');
     var cancel = getString('cancel', 'local_earlyalert');
-    var sent_email = getString('sent_email', 'local_earlyalert');
     var could_not_send_email = getString('could_not_send_email', 'local_earlyalert');
     var sent_dialog_text = getString('sent_dialog_text', 'local_earlyalert');
 
@@ -382,7 +382,9 @@ function create_notification_dialog(student_template_cache_array) {
         }]);
         sendEmail[0].done(function () {
             // success
-            notification.alert('Email', sent_email);
+            sendEmail[0].then(result => {
+                notification.alert('Email', getString('sent_dialog_text', 'local_earlyalert', result));}
+            );
         }).fail(function () {
             //notification.alert(could_not_send_email);
             notification.alert('Email', sent_dialog_text);

@@ -43,34 +43,36 @@ class local_earlyalert_record_log_ws extends external_api
         self::validate_context($context);
         // check student template object map
         $template_array = json_decode($params['template_data'], true);
-
+        $count = 0;
         forEach($template_array as $template) {
-            // add to data structure
-            $data= new stdClass();
-            $data->template_id = $template->template_id;
-            $data->revision_id = $template->revision_id;
-            $data->triggered_from_user_id = $template->triggered_from_user_id;
-            $data->target_user_id = $template->student_id;
-            $data->subject = $template->templateEmailSubject;
-            $data->body = $template->templateEmailContent;
-            $data->user_read = $template->user_read;
-            $data->unit_id = $template->unit_id;
-            $data->department_id = $template->department_id;
-            $data->facultyspecific_text_id = $template->facultyspecific_text_id;
-            $data->course_id = $template->course_id;
-            $data->instructor_id = $template->instructor_id;
-            $data->assignment_id = $template->assignment_id;
-            $data->trigger_grade = $template->trigger_grade;
-            $data->trigger_grade_letter = $template->trigger_grade_letter;
-            $data->actual_grade = $template->actual_grade;
-            $data->actual_grade_letter = $template->actual_grade_letter;
-            $data->student_advised = $template->student_advised;
-            $data->date_message_sent = $template->date_message_sent;
+            $data = new stdClass();
+
+            $data->template_id = ($template['revision_id'] !== null) ? $template['template_id'] : 0;
+            $data->revision_id = ($template['revision_id'] !== null) ? $template['revision_id'] : 0;
+            $data->triggered_from_user_id = ($template['instructor_id'] !== null) ? $template['instructor_id'] : 0;
+            $data->target_user_id = $template['student_id'];
+            $data->subject = $template['templateEmailSubject'];
+            //$data->body = $template['templateEmailContent'];
+            $data->body = 'email retrieved using template_id, revision_id, target_user_id, course_id etc';
+            $data->user_read = ($template['user_read'] !== null) ? $template['user_read'] : 0;
+            $data->unit_id = ($template['unit_id'] !== null) ? $template['unit_id'] : 0;
+            $data->department_id = ($template['department_id'] !== null) ? $template['department_id'] : 0;
+            $data->facultyspecific_text_id = ($template['facultyspecific_text_id'] !== null) ? $template['facultyspecific_text_id'] : 0;
+            $data->instructor_id = ($template['instructor_id'] !== null) ? $template['instructor_id'] : 0;
+            $data->course_id = ($template['course_id'] !== null) ? $template['course_id'] : 0;
+            $data->assignment_id = ($template['assignment_id'] !== null) ? $template['assignment_id'] : 0;
+            $data->trigger_grade = ($template['trigger_grade'] !== null) ? $template['trigger_grade'] : 0;
+            $data->trigger_grade_letter = ($template['trigger_grade_letter'] !== null) ? $template['trigger_grade_letter'] : '';
+            $data->actual_grade = ($template['actual_grade'] !== null) ? $template['actual_grade'] : 0;
+            $data->actual_grade_letter = ($template['actual_grade_letter'] !== null) ? $template['actual_grade_letter'] : 0;
+            $data->student_advised = ($template['student_advised'] !== null) ? $template['student_advised'] : 0;
+            $data->date_message_sent = ($template['date_message_sent'] !== null) ? $template['date_message_sent'] : 0;
+
             $EMAIL_LOG = new email_report_log();
             $EMAIL_LOG->insert_record($data);
+            $count++;
         }
-
-        return true;
+        return $count;
     }
 
     /**
@@ -79,49 +81,6 @@ class local_earlyalert_record_log_ws extends external_api
      */
     public static function insert_email_log_returns()
     {
-        return new external_value(PARAM_INT, 'Boolean');
+        return new external_value(PARAM_INT, 'Integer');
     }
 }
-
-
-//'revision_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'triggered_from_user_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'target_user_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'subject' => new external_value(PARAM_TEXT, 'Revision ID', false, 0),
-//                'body' => new external_value(PARAM_TEXT, 'Revision ID', false, 0),
-//                'user_read' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'unit_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'department_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'facultyspecific_text_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'course_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'instructor_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'assignment_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'trigger_grade' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'trigger_grade_letter' => new external_value(PARAM_TEXT, 'Revision ID', false, 0),
-//                'actual_grade' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'actual_grade_letter' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'student_advised' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'date_message_sent' => new external_value(PARAM_INT, 'Revision ID', false, 0)
-
-//template_id,$revision_id,$triggered_from_user_id,$target_user_id,$subject,$body,$user_read,$unit_id,$department_id,$facultyspecific_text_id,$course_id,$instructor_id,$assignment_id,$trigger_grade,$trigger_grade_letter,$actual_grade,$actual_grade_letter,$student_advised,$date_message_sent
-
-
-//'template_id'	=>	$template_id,
-//                'revision_id'	=>	$revision_id,
-//                'triggered_from_user_id'	=>	$triggered_from_user_id,
-//                'target_user_id'	=>	$target_user_id,
-//                'subject'	=>	$subject,
-//                'body'	=>	$body,
-//                'user_read'	=>	$user_read,
-//                'unit_id'	=>	$unit_id,
-//                'department_id'	=>	$department_id,
-//                'facultyspecific_text_id'	=>	$facultyspecific_text_id,
-//                'course_id'	=>	$course_id,
-//                'instructor_id'	=>	$instructor_id,
-//                'assignment_id'	=>	$assignment_id,
-//                'trigger_grade'	=>	$trigger_grade,
-//                'trigger_grade_letter'	=>	$trigger_grade_letter,
-//                'actual_grade'	=>	$actual_grade,
-//                'actual_grade_letter'	=>	$actual_grade_letter,
-//                'student_advised'	=>	$student_advised,
-//                'date_message_sent'	=>	$date_message_sent
