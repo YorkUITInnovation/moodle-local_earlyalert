@@ -170,8 +170,9 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     let grade_select = document.getElementById('id_early_alert_filter_grade_select');
                     grade_select.value = grade_letter_id;
                     // setup listener
-                    // filter_students_by_grade_select();
-                    check_all_student_grades(selected_students);
+                    filter_students_by_grade_select();
+                    // we're not doing any more
+                    // check_all_student_grades(selected_students);
                     check_allnone_listener(selected_students);
 
                     const cachedArrayElement = document.getElementById('early-alert-template-cache');
@@ -408,9 +409,7 @@ function maintain_student_template_data_for_submit(student_template_cache_array)
     var student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
     // remove students from template cache if they have been unchecked
     var new_student_temp_array = student_template_cache_array.filter(student => student_ids_array.includes(student.student_id));
-    // console.log('Filtered!');
-    // console.log(new_student_temp_array);
-    create_notification_dialog(new_student_temp_array);
+    new_student_temp_array.length > 0 ? create_notification_dialog(new_student_temp_array) : alert('No students selected');
 }
 
 function create_notification_dialog(student_template_cache_array) {
@@ -425,7 +424,8 @@ function create_notification_dialog(student_template_cache_array) {
 
     // Notification
     notification.confirm(send_string, send_dialog_text, send, cancel, function () {
-        // Delete the record
+
+        // send emails and save records
         var sendEmail = ajax.call([{
             methodname: 'earlyalert_report_log_insert',
             args: {
@@ -438,8 +438,7 @@ function create_notification_dialog(student_template_cache_array) {
                 notification.alert('Email', getString('sent_dialog_text', 'local_earlyalert', result));}
             );
         }).fail(function () {
-            //notification.alert(could_not_send_email);
-            notification.alert('Email', sent_dialog_text);
+            notification.alert(could_not_send_email);
         });
     });
 }

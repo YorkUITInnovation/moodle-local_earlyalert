@@ -93,7 +93,7 @@ $string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
 $string['preview_email_greeting'] = 'Hello';
 $string['send_email'] = 'Send Email';
 $string['send_dialog_text'] = 'Are you sure you want to send the alert emails to the selected students?';
-$string['sent_dialog_text'] = 'Thank you. This message has been sent to {$a} students.';
+$string['sent_dialog_text'] = 'Thank you. This message has been scheduled to be sent to {$a} students.';
 $string['cancel'] = 'Cancel';
 $string['could_not_send_email'] = 'Sorry an error occured and we could not send the emails';
 

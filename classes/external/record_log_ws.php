@@ -27,13 +27,13 @@ class local_earlyalert_record_log_ws extends external_api
      * @throws invalid_parameter_exception
      * @throws restricted_context_exception
      */
-    public static function insert_email_log($ids)
+    public static function insert_email_log($template_data)
     {
         global $CFG, $USER, $DB, $PAGE;
 
         //Parameter validation
         $params = self::validate_parameters(self::insert_email_log_parameters(), array(
-                'template_data' => $ids
+                'template_data' => $template_data
             )
         );
 
@@ -42,7 +42,9 @@ class local_earlyalert_record_log_ws extends external_api
         $context = \context_system::instance();
         self::validate_context($context);
         // check student template object map
-        $students = json_decode($ids, true);
+        $id=0;
+        $ids=[];
+        $students = json_decode($template_data, true);
         forEach($students as $student) {
 
             // add to data structure
@@ -67,10 +69,11 @@ class local_earlyalert_record_log_ws extends external_api
             $data->student_advised = ($student['student_advised'] ?? false);
             $data->date_message_sent = ($student['date_message_sent'] ?? '');
             $EMAIL_LOG = new email_report_log();
-            $EMAIL_LOG->insert_record($data);
+            $id = $EMAIL_LOG->insert_record($data);
+            $id > 0 ? array_push($ids, $id) : error_log('error saving message');
         }
 
-        return true;
+        return sizeof($ids);
     }
 
     /**
@@ -82,46 +85,3 @@ class local_earlyalert_record_log_ws extends external_api
         return new external_value(PARAM_INT, 'Boolean');
     }
 }
-
-
-//'revision_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'triggered_from_user_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'target_user_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'subject' => new external_value(PARAM_TEXT, 'Revision ID', false, 0),
-//                'body' => new external_value(PARAM_TEXT, 'Revision ID', false, 0),
-//                'user_read' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'unit_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'department_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'facultyspecific_text_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'course_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'instructor_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'assignment_id' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'trigger_grade' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'trigger_grade_letter' => new external_value(PARAM_TEXT, 'Revision ID', false, 0),
-//                'actual_grade' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'actual_grade_letter' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'student_advised' => new external_value(PARAM_INT, 'Revision ID', false, 0),
-//                'date_message_sent' => new external_value(PARAM_INT, 'Revision ID', false, 0)
-
-//template_id,$revision_id,$triggered_from_user_id,$target_user_id,$subject,$body,$user_read,$unit_id,$department_id,$facultyspecific_text_id,$course_id,$instructor_id,$assignment_id,$trigger_grade,$trigger_grade_letter,$actual_grade,$actual_grade_letter,$student_advised,$date_message_sent
-
-
-//'template_id'	=>	$template_id,
-//                'revision_id'	=>	$revision_id,
-//                'triggered_from_user_id'	=>	$triggered_from_user_id,
-//                'target_user_id'	=>	$target_user_id,
-//                'subject'	=>	$subject,
-//                'body'	=>	$body,
-//                'user_read'	=>	$user_read,
-//                'unit_id'	=>	$unit_id,
-//                'department_id'	=>	$department_id,
-//                'facultyspecific_text_id'	=>	$facultyspecific_text_id,
-//                'course_id'	=>	$course_id,
-//                'instructor_id'	=>	$instructor_id,
-//                'assignment_id'	=>	$assignment_id,
-//                'trigger_grade'	=>	$trigger_grade,
-//                'trigger_grade_letter'	=>	$trigger_grade_letter,
-//                'actual_grade'	=>	$actual_grade,
-//                'actual_grade_letter'	=>	$actual_grade_letter,
-//                'student_advised'	=>	$student_advised,
-//                'date_message_sent'	=>	$date_message_sent
