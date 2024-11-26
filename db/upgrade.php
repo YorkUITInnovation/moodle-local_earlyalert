@@ -36,10 +36,18 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    // For further information please read {@link https://docs.moodle.org/dev/Upgrade_API}.
-    //
-    // You will also have to create the db/install.xml file by using the XMLDB Editor.
-    // Documentation for the XMLDB Editor can be found at {@link https://docs.moodle.org/dev/XMLDB_editor}.
+    if ($oldversion < 2024112506) {
+
+        // Changing type of field body on table local_earlyalert_report_log to text.
+        $table = new xmldb_table('local_earlyalert_report_log');
+        $field = new xmldb_field('body', XMLDB_TYPE_TEXT, null, null, null, null, null, 'subject');
+
+        // Launch change of type for field body.
+        $dbman->change_field_type($table, $field);
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 2024112506, 'local', 'earlyalert');
+    }
 
     return true;
 }

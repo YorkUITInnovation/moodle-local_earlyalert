@@ -28,4 +28,13 @@ $functions = array(
         'capabilities' => '',
         'ajax' => true
     ),
+    'earlyalert_course_overview' => array(
+        'classname' => 'local_earlyalert_course_overview_ws',
+        'methodname' => 'get_course_overview',
+        'classpath' => 'local/earlyalert/classes/external/course_overview_ws.php',
+        'description' => 'Returns all students ith alerts for a course',
+        'type' => 'write',
+        'capabilities' => '',
+        'ajax' => true
+    ),
 );

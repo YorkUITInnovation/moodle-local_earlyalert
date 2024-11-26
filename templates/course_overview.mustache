@@ -1,0 +1,50 @@
+<div class="row">
+    <div class="col">
+        <h3>{{#str}}my_list_of_students, local_earlyalert{{/str}} - {{#str}}alerts_raised, local_earlyalert{{/str}}</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        {{#str}}course_overview_render_instructions, local_earlyalert{{/str}}
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h5>{{#str}}course_list, local_earlyalert{{/str}}</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="accordionCourseOverview">
+                    {{#students}}
+                        <div class="card">
+                            <div class="card-header {{#has_logs}}bg-danger text-white{{/has_logs}}" id="heading{{id}}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left {{#has_logs}}text-white{{/has_logs}}" type="button" data-toggle="collapse" data-target="#collapse{{id}}"
+                                            aria-expanded="true" aria-controls="collapse{{id}}">
+                                        {{lastname}}, {{firstname}} ({{idnumber}})
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapse{{id}}" class="collapse" aria-labelledby="heading{{id}}" data-parent="#accordionCourseOverview">
+                                <div class="card-body">
+                                    {{#logs}}
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                {{message_type}}
+                                            </div>
+                                            <div class="col-md-4">
+                                                Buttons go here
+                                            </div>
+                                        </div>
+                                    {{/logs}}
+                                </div>
+                            </div>
+                        </div>
+                    {{/students}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

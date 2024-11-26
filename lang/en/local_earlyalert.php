@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'Early Alert';
 $string['adashboard'] = 'Admin Dashboard';
 $string['adjust_default_grade'] = 'Adjust Default Grade';
+$string['alerts_raised'] = 'Alerts raised';
 $string['assignment_instructions'] = '<ul>
 <li>These messages inform students of a missed assignment that threatens their success in the course 
 </li> 
@@ -37,10 +38,17 @@ $string['assignment_instructions'] = '<ul>
 </ul>';
 $string['assignment_title'] = 'Assignment Title';
 $string['available_alert_types'] = 'Available alert types';
+$string['course_list'] = 'Course List';
 $string['course_overview'] = 'Course Overview';
 $string['course_overview_instructions'] = '<ul>
 <li>View all alerts raised for a particular course</li>
 <li>Indicate that you have advised a student that has followed-up</li>
+</ul>';
+$string['course_overview_render_instructions'] = '<ul>
+<li>This shows a list of all students in this course, with the alerts that you have raised.</li>
+  <li>If a student’s name appears in red, an alert has been raised.</li>
+  <li>Click on the student’s name to see the alert type(s) and details.</li>
+  <li>To indicate that a student has followed up with you, check off the appropriate box under “advising status”.</li>
 </ul>';
 $string['exam_instructions'] = '<ul>
 <li>These messages inform students of a missed exam that threatens their success in the course  

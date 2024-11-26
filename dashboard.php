@@ -16,6 +16,7 @@ $PAGE->requires->css('/local/earlyalert/css/gradeform.css');
 $PAGE->requires->css('/local/earlyalert/css/styles.css');
 // Load AMD module
 $PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
+$PAGE->requires->js_call_amd('local_earlyalert/course_overview', 'init');
 
 
 $impersonate = has_capability('local/earlyalert:impersonate', $context, $USER->id);

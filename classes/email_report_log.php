@@ -191,9 +191,7 @@ class email_report_log extends crud
         $this->instructor_id = $result->instructor_id ?? 0;
         $this->assignment_id = $result->assignment_id ?? 0;
         $this->trigger_grade = $result->trigger_grade ?? '';
-        $this->trigger_grade_letter = $result->trigger_grade_letter ?? '';
         $this->actual_grade = $result->actual_grade ?? 0;
-        $this->actual_grade_letter = $result->actual_grade_letter ?? '';
         $this->student_advised = $result->student_advised ?? 0;
         $this->facultyspecific_text_id = $result->facultyspecific_text_id ?? 0;
         $this->timecreated = $result->timecreated ?? 0;
@@ -212,7 +210,8 @@ class email_report_log extends crud
     {
         global $DB, $USER;
 
-        $this->table = 'local_earlyalert_report_log';
+        unset($data->trigger_grade_letter);
+        unset($data->actual_grade_letter);
 
         if (!isset($data->timecreated)) {
             $data->timecreated = time();
@@ -222,10 +221,13 @@ class email_report_log extends crud
             $data->timemodified = time();
         }
 
-        //Set user
-        $data->usermodified = $USER->id;
 
-        $id = $DB->insert_record($this->table, $data);
+
+        //Set user
+//        $data->usermodified = $USER->id;
+        file_put_contents('/var/www/moodledata/temp/earlyalert.log', print_r((array)$data, true), FILE_APPEND);
+
+        $id = $DB->insert_record($this->table, (array)$data);
 
         return $id;
     }
@@ -278,12 +280,132 @@ class email_report_log extends crud
         return $this->body;
     }
 
+    public function get_user_read(): int
+    {
+        return $this->user_read;
+    }
+
+    public function get_course_id(): int
+    {
+        return $this->course_id;
+    }
+
+    public function get_course_name(): string
+    {
+        global $DB;
+        $course = $DB->get_record('course', array('id' => $this->course_id), 'fullname');
+        return $course->fullname;
+    }
+
+    public function get_trigger_grade(): int|null
+    {
+        return $this->trigger_grade;
+    }
+
+    public function get_student_advised(): int|null
+    {
+        return $this->student_advised;
+    }
+
+    public function get_date_sent(): string
+    {
+        return $this->timecreated_hr;
+    }
     /**
      * @return timecreated - bigint (18)
      */
     public function get_timecreated(): int
     {
         return $this->timecreated;
+    }
+
+    /**
+     * Return the student details
+     * @return \stdClass|false
+     * @throws \dml_exception
+     */
+    public function get_student(): \stdClass|false
+    {
+        global $DB;
+        if ($student = $DB->get_record('user', array('id' => $this->target_user_id),'firstname,lastname,idnumber,email')) {
+            $sql = "Select
+                        uid.data As major
+                    From
+                        {user_info_data} uid Inner Join
+                        {user_info_field} uif On uid.fieldid = uif.id Inner Join
+                        {user} u On u.id = uid.userid
+                    Where
+                        uid.userid = " . $this->target_user_id . " And
+                        uif.shortname = 'ldapmajor'";
+            if ($student_info = $DB->get_record_sql($sql)) {
+                $student->major = $student_info->major;
+            }
+            return $student;
+        }
+        return $DB->get_record('user', array('id' => $this->target_user_id),'firstname,lastname,idnumber,email');
+    }
+
+    /**
+     * Return the instructor details
+     * @return \stdClass|false
+     * @throws \dml_exception
+     */
+    public function get_instructor(): \stdClass|false
+    {
+        global $DB;
+        return $DB->get_record('user', array('id' => $this->instructor_id),'firstname,lastname,idnumber,email');
+    }
+
+    /**
+     * Return Unit Details: department, department_shortname, unit, unit_shortname, campus, campus_shortname
+     * @return \stdClass|false
+     * @throws \dml_exception
+     */
+    public function get_unit_information(): \stdClass|false
+    {
+        global $DB;
+
+
+        if ($this->department_id) {
+            $sql = "Select
+                    od.name As department,
+                    od.shortname As department_shortname,
+                    ou.name As unit,
+                    ou.shortname As unit_shortname,
+                    oc.name As campus,
+                    oc.shortname As campus_shortname
+                From
+                    {local_organization_dept} od Inner Join
+                    {local_organization_unit} ou On od.unit_id = ou.id Inner Join
+                    {local_organization_campus} oc On oc.id = ou.campus_id
+                Where
+";
+            $sql .= " od.id = " . $this->department_id;
+
+        } elseif ($this->unit_id) {
+            $sql = "Select
+                    ou.name As unit,
+                    ou.shortname As unit_shortname,
+                    oc.name As campus,
+                    oc.shortname As campus_shortname
+                From
+                    {local_organization_unit} ou Inner Join
+                    {local_organization_campus} oc On oc.id = ou.campus_id
+                Where
+";
+            $sql .= " ou.id = " . $this->unit_id;
+        } else {
+            return false;
+        }
+        return $DB->get_record_sql($sql);
+
+    }
+
+    public function get_message_type(): string
+    {
+        $TEMPLATE = new \local_etemplate\email($this->template_id);
+        $messageTypes = \local_etemplate\email::get_messagetype_nicename($TEMPLATE->get_messagetype());
+        return $messageTypes;
     }
 
     /**
@@ -476,17 +598,7 @@ class email_report_log extends crud
         $this->trigger_grade = $trigger_grade;
     }
 
-    public function getTriggerGradeLetter(): string
-    {
-        return $this->trigger_grade_letter;
-    }
-
-    public function setTriggerGradeLetter(string $trigger_grade_letter): void
-    {
-        $this->trigger_grade_letter = $trigger_grade_letter;
-    }
-
-    public function getActualGrade(): int
+    public function get_actual_grade(): int
     {
         return $this->actual_grade;
     }
