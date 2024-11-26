@@ -49,5 +49,66 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024112506, 'local', 'earlyalert');
     }
 
+    if ($oldversion < 2024112615) {
+
+        // Changing type of field body on table local_earlyalert_report_log to text.
+        $table = new xmldb_table('local_earlyalert_report_log');
+
+    	// Remove facultyspecific_text_id key
+        $key = new xmldb_key('fk_facultyspecific_text_id', XMLDB_KEY_UNIQUE, ['facultyspecific_text_id'], '');
+        $dbman->drop_key($table, $key);
+
+        // Remove body field
+        $field = new xmldb_field('body', XMLDB_TYPE_TEXT, null, null, null, null, null, 'subject');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Remove subject field
+        $field = new xmldb_field('subject', XMLDB_TYPE_TEXT, null, null, null, null, null, 'target_user_id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Remove subject field
+        $field = new xmldb_field('subject', XMLDB_TYPE_TEXT, null, null, null, null, null, 'target_user_id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Remove unit_id field
+        $field = new xmldb_field('unit_id', XMLDB_TYPE_INTEGER, null, null, null, null, null, null);
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Remove department_id field
+        $field = new xmldb_field('department_id', XMLDB_TYPE_INTEGER, null, null, null, null, null, null);
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Remove facultyspecific_text_id field
+        $field = new xmldb_field('facultyspecific_text_id', XMLDB_TYPE_INTEGER, null, null, null, null, null, null);
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Remove actual_grade_letter field
+        $field = new xmldb_field('actual_grade_letter', XMLDB_TYPE_CHAR, null, null, null, null, null, null);
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Remove trigger_grade_letter field
+        $field = new xmldb_field('trigger_grade_letter', XMLDB_TYPE_CHAR, null, null, null, null, null, null);
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 2024112615, 'local', 'earlyalert');
+    }
+
     return true;
 }
