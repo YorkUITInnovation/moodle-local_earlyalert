@@ -302,16 +302,16 @@ function setup_preview_emails(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            if (templateCache.has(facTemplateKey)) {
-                // console.log("faculty cache found:", templateCache.get(facTemplateKey));
-                templateEmailSubject = templateCache.get(facTemplateKey).subject;
-                templateEmailContent = templateCache.get(facTemplateKey).message;
-                templateObj = templateCache.get(facTemplateKey);
-            } else if (templateCache.has(deptTemplateKey)){
+            if (templateCache.has(deptTemplateKey)){
                 // console.log("department cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                 templateEmailContent = templateCache.get(deptTemplateKey).message;
                 templateObj = templateCache.get(deptTemplateKey);
+            } else if (templateCache.has(facTemplateKey)) {
+                // console.log("faculty cache found:", templateCache.get(facTemplateKey));
+                templateEmailSubject = templateCache.get(facTemplateKey).subject;
+                templateEmailContent = templateCache.get(facTemplateKey).message;
+                templateObj = templateCache.get(facTemplateKey);
             } else {
                 templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';
