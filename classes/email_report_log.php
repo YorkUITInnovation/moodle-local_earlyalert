@@ -192,6 +192,7 @@ class email_report_log extends crud
         $this->assignment_id = $result->assignment_id ?? 0;
         $this->trigger_grade = $result->trigger_grade ?? '';
         $this->actual_grade = $result->actual_grade ?? 0;
+        $this->actual_grade_letter = $result->actual_grade_letter ?? '';
         $this->student_advised = $result->student_advised ?? 0;
         $this->facultyspecific_text_id = $result->facultyspecific_text_id ?? 0;
         $this->timecreated = $result->timecreated ?? 0;

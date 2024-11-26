@@ -3,7 +3,6 @@ import Templates from 'core/templates';
 import ModalFactory from 'core/modal_factory';
 import {get_string as getString} from 'core/str';
 import notification from 'core/notification';
-import {get_format as formatString} from 'core/str';
 
 export const init = () => {
     alert_type_button();
@@ -199,7 +198,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         }
                     });
                     finalCache.set('course_name', course_name);
-
+                    // TO remove when templates return the value
+                    finalCache.set('course_id', course_id);
                     setup_preview_emails(finalCache);
                 })
                 .catch(function (error) {
@@ -263,12 +263,11 @@ function check_allnone_listener(selected_students) {
 }
 
 function setup_preview_emails(templateCache) {
-    // console.log("template cache = ", templateCache);
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-    //console.log("template cache:", templateCache);
+    console.log("template cache:", templateCache);
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
     preview_buttons.forEach(function (button) {
@@ -292,7 +291,6 @@ function setup_preview_emails(templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-            // console.log(student_name);
             var student_id = checkbox.getAttribute('data-student-id');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
@@ -339,7 +337,7 @@ function setup_preview_emails(templateCache) {
         // console.log("template email content post-addUserInfo:", templateEmailContent);
 
         // assemble record data for individual buttons which includes student and template data
-        record_data.student_id = student_id;
+        record_data.student_id = student_id; // absolutely needed for filter..
         record_data.student_name = student_name;
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
@@ -352,7 +350,16 @@ function setup_preview_emails(templateCache) {
         // record_data.unit_id = templateObj.;
         // record_data.department_id = templateObj.;
         // record_data.facultyspecific_text_id = templateObj.;
-        record_data.course_id = templateObj.course_id;
+
+
+        // uncomment me!!!!!!! after template data returned
+        //record_data.course_id = templateObj.course_id;
+
+        // NB: using course id from page for now INSTEAD of templateObj as that needs to be fixed!!!
+        record_data.course_id = templateCache.get('course_id');;
+        record_data.actual_grade_letter = selected_grade;
+        record_data.actual_grade = assigngrade;
+
         record_data.instructor_id = templateObj.instructor_id;
         // record_data.assignment_id = templateObj.;
         // record_data.trigger_grade = templateObj.;
@@ -370,6 +377,7 @@ function setup_preview_emails(templateCache) {
         // add record to student_template_cache_array to have data to submit / email
         // console.log("record data =", record_data);
         student_template_cache_array.push(record_data);
+
 
     });
     // once we have all the data we can setup the emails to submit with the template cache data and student ids BUT we have to manage and select the users if they are checked/unchceked
@@ -410,10 +418,11 @@ function maintain_student_template_data_for_submit(student_template_cache_array)
     // remove students from template cache if they have been unchecked
     var new_student_temp_array = student_template_cache_array.filter(student => student_ids_array.includes(student.student_id));
     new_student_temp_array.length > 0 ? create_notification_dialog(new_student_temp_array) : alert('No students selected');
+
 }
 
 function create_notification_dialog(student_template_cache_array) {
-
+    console.log(student_template_cache_array);
     // Get the data id attribute value
     var send_string = getString('send_email', 'local_earlyalert');
     var send_dialog_text = getString('send_dialog_text', 'local_earlyalert');

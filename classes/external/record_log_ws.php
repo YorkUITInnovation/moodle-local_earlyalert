@@ -63,9 +63,9 @@ class local_earlyalert_record_log_ws extends external_api
             $data->instructor_id = ($student['instructor_id'] ?? 0);
             $data->assignment_id = ($student['assignment_id'] ?? 0);
             $data->trigger_grade = ($student['trigger_grade'] ?? 0);
-//            $data->trigger_grade_letter = ($student['trigger_grade_letter'] ?? '');
+            $data->trigger_grade_letter = ($student['trigger_grade_letter'] ?? '');
             $data->actual_grade = ($student['actual_grade'] ?? 0);
-//            $data->actual_grade_letter = ($student['actual_grade_letter'] ?? '');
+            $data->actual_grade_letter = ($student['actual_grade_letter'] ?? '');
             $data->student_advised = ($student['student_advised'] ?? false);
             $data->date_message_sent = ($student['date_message_sent'] ?? '');
             $EMAIL_LOG = new email_report_log();
