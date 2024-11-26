@@ -120,10 +120,12 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             let col = 0;
 
             grades_response.forEach(result => {
-                console.log(result);
                 if (typeof result === 'object') {
                     if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.major)) {
                         templates.push(result.campus + "_" + result.faculty + "_" + result.major);
+                    }
+                    if (!templates.includes(result.campus + "_" + result.faculty)) {
+                        templates.push(result.campus + "_" + result.faculty);
                     }
                     result.faculty = result.faculty ? result.faculty : '';
                     result.major = result.major ? result.major : '';
@@ -174,7 +176,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
                     const cachedArrayElement = document.getElementById('early-alert-template-cache');
                     const cachedArray = JSON.parse(cachedArrayElement.value);
-
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
                             if (cachedArray.includes(result.templateKey)){
@@ -185,6 +186,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         }
                     });
                     finalCache.set('course_name', course_name);
+
                     setup_preview_emails(finalCache);
                 })
                 .catch(function (error) {
@@ -280,13 +282,17 @@ function setup_preview_emails(templateCache) {
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
-            var templateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
+            var facTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
+            var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            if (templateCache.has(templateKey)) {
-                templateEmailSubject = templateCache.get(templateKey).subject;
-                templateEmailContent = templateCache.get(templateKey).message;
+            if (templateCache.has(facTemplateKey)) {
+                templateEmailSubject = templateCache.get(facTemplateKey).subject;
+                templateEmailContent = templateCache.get(facTemplateKey).message;
+            } else if (templateCache.has(deptTemplateKey)){
+                templateEmailSubject = templateCache.get(deptTemplateKey).subject;
+                templateEmailContent = templateCache.get(deptTemplateKey).message;
             } else {
                 templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';

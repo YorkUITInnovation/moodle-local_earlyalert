@@ -163,11 +163,10 @@ class local_earlyalert_course_grades_ws extends external_api
                 $student['faculty'] = $sva_data->faculty;
                 $student['campus'] = $sva_data->campus;
             }
-
             $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
 
-            //check if
-            if (!isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major']])) {
+            //check if template is already defined
+            if (!isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major']]) || !isset($templateCache[$student['campus'] . "_" . $student['faculty']])) {
                 //get all templates for this campus/faculty/major combo
                 if ($campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']))) {
                     //campus exists
