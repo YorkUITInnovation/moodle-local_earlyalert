@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/earlyalert/db" VERSION="20240919" COMMENT="XMLDB file for Moodle local/earlyalert"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+<XMLDB PATH="local/earlyalert/db" VERSION="20241125" COMMENT="XMLDB file for Moodle local/earlyalert"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
     <TABLE NAME="local_earlyalert_report_log" COMMENT="Reporting table for early alerts">
@@ -12,7 +12,7 @@
         <FIELD NAME="triggered_from_user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="target_user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="subject" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="body" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="body" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="user_read" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="unit_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="department_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
@@ -38,7 +38,7 @@
         <INDEX NAME="idx_triggered_from_user_id" UNIQUE="false" FIELDS="triggered_from_user_id"/>
         <INDEX NAME="idx_target_user_id" UNIQUE="false" FIELDS="target_user_id"/>
         <INDEX NAME="idx_course_id" UNIQUE="false" FIELDS="course_id"/>
-        <INDEX NAME="idx_id_userid_courseid" UNIQUE="false" FIELDS="id,triggered_from_user_id,target_user_id,course_id" />
+        <INDEX NAME="idx_id_userid_courseid" UNIQUE="false" FIELDS="id, triggered_from_user_id, target_user_id, course_id"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_earlyalert_facspec_txt" COMMENT="A table containing faculty specific text">
