@@ -297,8 +297,8 @@ function setup_preview_emails(templateCache) {
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
-            var facTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
-            var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr;
+            var facTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr;
+            var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
