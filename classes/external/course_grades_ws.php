@@ -183,8 +183,7 @@ class local_earlyalert_course_grades_ws extends external_api
                         foreach ($facultytemplates as $factemp) {
                             $email = new \local_etemplate\email($factemp->id);
                             $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                            file_put_contents('/var/www/moodledata/temp/template_data' . $i . '.txt', print_r($template_data, TRUE));
-                            $templateCache[] = array(
+                            $templateCache[$student['campus'] . "_" . $student['faculty']] = array(
                                 'templateKey' => $student['campus'] . "_" . $student['faculty'],
                                 'subject' => $template_data->subject,
                                 'message' => $template_data->message,
@@ -205,7 +204,7 @@ class local_earlyalert_course_grades_ws extends external_api
                             foreach ($catchalltemplates as $catchalltemp) {
                                 $email = new \local_etemplate\email($catchalltemp->id);
                                 $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                                $templateCache[] = array(
+                                $templateCache[$student['campus'] . "_" . $student['faculty']] = array(
                                     'templateKey' => $student['campus'] . "_" . $student['faculty'],
                                     'subject' => $template_data->subject,
                                     'message' => $template_data->message,
@@ -230,7 +229,7 @@ class local_earlyalert_course_grades_ws extends external_api
                         foreach ($depttemplates as $depttemp) {
                             $email = new \local_etemplate\email($depttemp->id);
                             $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                            $templateCache[] = array(
+                            $templateCache[$student['campus'] . "_" . $student['faculty']. "_" . $student['major']] = array(
                                 'templateKey' => $student['campus'] . "_" . $student['faculty']. "_" . $student['major'],
                                 'subject' => $template_data->subject,
                                 'message' => $template_data->message,
@@ -251,7 +250,7 @@ class local_earlyalert_course_grades_ws extends external_api
                             foreach ($catchalltemplates as $catchalltemp) {
                                 $email = new \local_etemplate\email($catchalltemp->id);
                                 $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                                $templateCache[] = array(
+                                $templateCache[$student['campus'] . "_" . $student['faculty']. "_" . $student['major']] = array(
                                     'templateKey' => $student['campus'] . "_" . $student['faculty']. "_" . $student['major'],
                                     'subject' => $template_data->subject,
                                     'message' => $template_data->message,
@@ -271,7 +270,6 @@ class local_earlyalert_course_grades_ws extends external_api
                 $i++;
             }
         }
-        error_log("returning templatecache :" . print_r($templateCache, TRUE));
         return $templateCache;
     }
 
@@ -297,7 +295,15 @@ class local_earlyalert_course_grades_ws extends external_api
         $fields = array(
             'templateKey' => new external_value(PARAM_RAW, 'Campus_Faculty_Major key for templates', false),
             'subject' => new external_value(PARAM_RAW, 'Subject for template message', false),
-            'message' => new external_value(PARAM_RAW, 'Message text for template', false)
+            'message' => new external_value(PARAM_RAW, 'Message text for template', false),
+            'templateid' => new external_value(PARAM_RAW, 'Template ID', false),
+            'revision_id' => new external_value(PARAM_RAW, 'Template Revision', false),
+            'body' => new external_value(PARAM_RAW, 'Template Body', false),
+            'course_id' => new external_value(PARAM_RAW, 'Template Course ID', false),
+            'instructor_id' => new external_value(PARAM_RAW, 'Template Instructor ID', false),
+            'date_message_sent' => new external_value(PARAM_RAW, 'Template Date', false),
+            'timecreated' => new external_value(PARAM_RAW, 'Template timecreated', false),
+            'timemodified' => new external_value(PARAM_RAW, 'Template timemodified', false)
         );
         return new external_single_structure($fields);
     }

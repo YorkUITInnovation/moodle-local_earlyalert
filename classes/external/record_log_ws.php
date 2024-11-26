@@ -15,9 +15,7 @@ class local_earlyalert_record_log_ws extends external_api
     {
         return new external_function_parameters(
             array(
-                'ids' => new external_value(PARAM_RAW, 'All selected student ids', VALUE_OPTIONAL , ''),
-                'course_id' => new external_value(PARAM_INT, 'The course id', VALUE_OPTIONAL, 0),
-                'alert_type' => new external_value(PARAM_TEXT, 'The alert type: grade, assign, exam', VALUE_OPTIONAL, 0),
+                'template_data' => new external_value(PARAM_RAW, 'All selected student ids', VALUE_OPTIONAL , '')
             )
         );
     }
@@ -29,15 +27,13 @@ class local_earlyalert_record_log_ws extends external_api
      * @throws invalid_parameter_exception
      * @throws restricted_context_exception
      */
-    public static function insert_email_log($ids, $course_id, $alert_type)
+    public static function insert_email_log($ids)
     {
         global $CFG, $USER, $DB, $PAGE;
 
         //Parameter validation
         $params = self::validate_parameters(self::insert_email_log_parameters(), array(
-                'ids' => $ids,
-                'course_id'	=> $course_id,
-                'alert_type' =>	$alert_type
+                'template_data' => $ids
             )
         );
 
@@ -47,29 +43,29 @@ class local_earlyalert_record_log_ws extends external_api
         self::validate_context($context);
         // check student template object map
         $students = json_decode($ids, true);
-
         forEach($students as $student) {
+
             // add to data structure
             $data= new stdClass();
-            $data->template_id = $template->template_id;
-            $data->revision_id = $template->revision_id;
-            $data->triggered_from_user_id = $template->triggered_from_user_id;
-            $data->target_user_id = $template->student_id;
-            $data->subject = $template->templateEmailSubject;
-            $data->body = $template->templateEmailContent;
-            $data->user_read = $template->user_read;
-            $data->unit_id = $template->unit_id;
-            $data->department_id = $template->department_id;
-            $data->facultyspecific_text_id = $template->facultyspecific_text_id;
-            $data->course_id = $template->course_id;
-            $data->instructor_id = $template->instructor_id;
-            $data->assignment_id = $template->assignment_id;
-            $data->trigger_grade = $template->trigger_grade;
-            $data->trigger_grade_letter = $template->trigger_grade_letter;
-            $data->actual_grade = $template->actual_grade;
-            $data->actual_grade_letter = $template->actual_grade_letter;
-            $data->student_advised = $template->student_advised;
-            $data->date_message_sent = $template->date_message_sent;
+            $data->template_id = ($student['template_id'] ?? 0);
+            $data->revision_id = ($student['revision_id'] ?? 0);
+            $data->triggered_from_user_id = ($student['triggered_from_user_id'] ?? 0);
+            $data->target_user_id = ($student['student_id'] ?? 0);
+            $data->subject = ($student['templateEmailSubject'] ?? '');
+            $data->body = ($student['templateEmailContent'] ?? '');
+            $data->user_read = ($student['user_read'] ?? false);
+            $data->unit_id = ($student['unit_id'] ?? 0);
+            $data->department_id = ($student['department_id'] ?? 0);
+            $data->facultyspecific_text_id = ($student['facultyspecific_text_id'] ?? 0);
+            $data->course_id = ($student['course_id'] ?? 0);
+            $data->instructor_id = ($student['instructor_id'] ?? 0);
+            $data->assignment_id = ($student['assignment_id'] ?? 0);
+            $data->trigger_grade = ($student['trigger_grade'] ?? 0);
+            $data->trigger_grade_letter = ($student['trigger_grade_letter'] ?? '');
+            $data->actual_grade = ($student['actual_grade'] ?? 0);
+            $data->actual_grade_letter = ($student['actual_grade_letter'] ?? '');
+            $data->student_advised = ($student['student_advised'] ?? false);
+            $data->date_message_sent = ($student['date_message_sent'] ?? '');
             $EMAIL_LOG = new email_report_log();
             $EMAIL_LOG->insert_record($data);
         }

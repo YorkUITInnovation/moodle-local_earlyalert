@@ -18,7 +18,7 @@ function alert_type_button() {
             let course_name = event.target.getAttribute('data-name');
             let course_id = event.target.getAttribute('data-course_id');
             let teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
-            console.log('teacher_user_id:', teacher_user_id);
+            // console.log('teacher_user_id:', teacher_user_id);
             // Get student list based on alert type
             setup_filter_students_by_grade(course_id, 9, course_name, alert_type,teacher_user_id);
         }
@@ -100,7 +100,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
             // Reformat the data to display in a grid
             let num_students = grades_response.length;
-            console.log('Number of students returned: ' + num_students);
+            // console.log('Number of students returned: ' + num_students);
             let num_rows = Math.min(3, Math.ceil(num_students / 3));
             let num_cols = Math.ceil(num_students / num_rows);
             let display_data = {
@@ -159,7 +159,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 display_data.exam = true;
             }
             display_data.fullname = course_name;
-// console.log( display_data);
+            // console.log( display_data);
             // Render the template with display_data
             Templates.render('local_earlyalert/course_student_list', display_data)
                 .then(function (html, js) {
@@ -180,7 +180,19 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         if (typeof result === 'object') {
                             if (cachedArray.includes(result.templateKey)){
                                 // finalCache.push({key: result.templateKey, value: result.message});
-                                let finalMessage = {subject: result.subject, message: result.message};
+                                let finalMessage = {
+                                    subject: result.subject,
+                                    message: result.message,
+                                    templateid: result.templateid,
+                                    resvision_id: result.revision_id,
+                                    body: result.body,
+                                    course_id: result.course_id,
+                                    date_message_sent: result.date_message_sent,
+                                    instructor_id: result.instructor_id,
+                                    timecreated: result.timecreated,
+                                    timemodified: result.timemodified
+
+                                };
                                 finalCache.set(result.templateKey, finalMessage);
                             }
                         }
@@ -250,6 +262,7 @@ function check_allnone_listener(selected_students) {
 }
 
 function setup_preview_emails(templateCache) {
+    // console.log("template cache = ", templateCache);
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
@@ -263,6 +276,7 @@ function setup_preview_emails(templateCache) {
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
         const grade_select = document.getElementById('id_early_alert_filter_grade_select');
         let selected_grade = grade_select.options[grade_select.selectedIndex].text;
+        let templateObj = {};
         if (checkbox) {
 
             // now, access the parent <tr> element (the table row)
@@ -288,11 +302,15 @@ function setup_preview_emails(templateCache) {
             var templateEmailSubject = '';
 
             if (templateCache.has(facTemplateKey)) {
+                // console.log("faculty cache found:", templateCache.get(facTemplateKey));
                 templateEmailSubject = templateCache.get(facTemplateKey).subject;
                 templateEmailContent = templateCache.get(facTemplateKey).message;
+                templateObj = templateCache.get(facTemplateKey);
             } else if (templateCache.has(deptTemplateKey)){
+                // console.log("department cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                 templateEmailContent = templateCache.get(deptTemplateKey).message;
+                templateObj = templateCache.get(deptTemplateKey);
             } else {
                 templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';
@@ -301,6 +319,7 @@ function setup_preview_emails(templateCache) {
         } else {
             // console.log("couldn't find checkbox :/");
         }
+
         if (assigngrade){
             // console.log("assign grade: ", assigngrade);
         }
@@ -324,30 +343,31 @@ function setup_preview_emails(templateCache) {
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
         record_data.templateEmailContent = templateEmailContent;
-        // record_data.template_id
-        // record_data.revision_id
-        // record_data.triggered_from_user_id
-        // record_data.target_user_id
-        // record_data.user_read
-        // record_data.unit_id
-        // record_data.department_id
-        // record_data.facultyspecific_text_id
-        // record_data.course_id
-        // record_data.instructor_id
-        // record_data.assignment_id
-        // record_data.trigger_grade
-        // record_data.trigger_grade_letter
-        // record_data.actual_grade
-        // record_data.actual_grade_letter
-        // record_data.student_advised
-        // record_data.date_message_sent
-        // record_data.timecreated
-        // record_data.timemodified
+        record_data.template_id = templateObj.templateid;
+        record_data.revision_id = templateObj.revision_id;
+        // record_data.triggered_from_user_id = templateObj.;
+        record_data.target_user_id = student_id;
+        // record_data.user_read = templateObj.;
+        // record_data.unit_id = templateObj.;
+        // record_data.department_id = templateObj.;
+        // record_data.facultyspecific_text_id = templateObj.;
+        record_data.course_id = templateObj.course_id;
+        record_data.instructor_id = templateObj.instructor_id;
+        // record_data.assignment_id = templateObj.;
+        // record_data.trigger_grade = templateObj.;
+        // record_data.trigger_grade_letter = templateObj.;
+        // record_data.actual_grade = templateObj.;
+        // record_data.actual_grade_letter = templateObj.;
+        // record_data.student_advised = templateObj.;
+        record_data.date_message_sent = templateObj.date_message_sent;
+        record_data.timecreated = templateObj.timecreated;
+        record_data.timemodified = templateObj.timemodified;
 
         button.addEventListener('click', function () {
             setup_preview_buttons_from_template(record_data)
         });
         // add record to student_template_cache_array to have data to submit / email
+        // console.log("record data =", record_data);
         student_template_cache_array.push(record_data);
 
     });
@@ -388,14 +408,13 @@ function maintain_student_template_data_for_submit(student_template_cache_array)
     var student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
     // remove students from template cache if they have been unchecked
     var new_student_temp_array = student_template_cache_array.filter(student => student_ids_array.includes(student.student_id));
-    console.log('Filtered!');
-    console.log(new_student_temp_array);
+    // console.log('Filtered!');
+    // console.log(new_student_temp_array);
     create_notification_dialog(new_student_temp_array);
 }
 
 function create_notification_dialog(student_template_cache_array) {
 
-    console.log(student_template_cache_array);
     // Get the data id attribute value
     var send_string = getString('send_email', 'local_earlyalert');
     var send_dialog_text = getString('send_dialog_text', 'local_earlyalert');
@@ -443,7 +462,7 @@ function get_users() {
             }
         }]);
         get_users[0].done(function (users) {
-            console.log(users);
+            // console.log(users);
             datalistElement.innerHTML = '';
             users.forEach(user => {
                 const option = document.createElement('option');
