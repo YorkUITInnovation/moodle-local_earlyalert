@@ -180,19 +180,14 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
                             if (cachedArray.includes(result.templateKey)){
-                                // finalCache.push({key: result.templateKey, value: result.message});
                                 let finalMessage = {
                                     subject: result.subject,
                                     message: result.message,
                                     templateid: result.templateid,
-                                    resvision_id: result.revision_id,
-                                    body: result.body,
+                                    revision_id: result.revision_id,
                                     course_id: result.course_id,
-                                    date_message_sent: result.date_message_sent,
                                     instructor_id: result.instructor_id,
-                                    timecreated: result.timecreated,
-                                    timemodified: result.timemodified
-
+                                    triggered_from_user_id: result.triggered_from_user_id,
                                 };
                                 finalCache.set(result.templateKey, finalMessage);
                             }
@@ -334,6 +329,8 @@ function setup_preview_emails(templateCache) {
             customgrade: grade_select.options[grade_select.selectedIndex].text,
             defaultgrade: "D+"
         };
+
+        // console.log("passing these params to adduserinfo:", params);
         templateEmailContent = addUserInfo(templateEmailContent, params );
 
         // console.log("template email content post-addUserInfo:", templateEmailContent);
@@ -346,23 +343,12 @@ function setup_preview_emails(templateCache) {
         record_data.templateEmailContent = templateEmailContent;
         record_data.template_id = templateObj.templateid;
         record_data.revision_id = templateObj.revision_id;
-        // record_data.triggered_from_user_id = templateObj.;
+        record_data.triggered_from_user_id = templateObj.triggered_from_user_id;
         record_data.target_user_id = student_id;
-        // record_data.user_read = templateObj.;
-        // record_data.unit_id = templateObj.;
-        // record_data.department_id = templateObj.;
-        // record_data.facultyspecific_text_id = templateObj.;
         record_data.course_id = templateObj.course_id;
         record_data.instructor_id = templateObj.instructor_id;
-        // record_data.assignment_id = templateObj.;
-        // record_data.trigger_grade = templateObj.;
-        // record_data.trigger_grade_letter = templateObj.;
-        // record_data.actual_grade = templateObj.;
-        // record_data.actual_grade_letter = templateObj.;
-        // record_data.student_advised = templateObj.;
-        record_data.date_message_sent = templateObj.date_message_sent;
-        record_data.timecreated = templateObj.timecreated;
-        record_data.timemodified = templateObj.timemodified;
+        record_data.assignment_id = params.assignmenttitle;
+        record_data.actual_grade = assigngrade;
 
         button.addEventListener('click', function () {
             setup_preview_buttons_from_template(record_data)
@@ -377,7 +363,7 @@ function setup_preview_emails(templateCache) {
 }
 
 function setup_preview_buttons_from_template(student_template_data) {
-
+    // console.log("student template data =", student_template_data);
     ModalFactory.create({
         title: getString('preview_email', 'local_earlyalert'),
         type: ModalFactory.types.CANCEL,
@@ -487,8 +473,7 @@ function addUserInfo(emailText, params) {
         '[firstname]',
         '[fullname]',
         '[usergrade]',
-        '[customgrade]',
-        '[defaultgrade]',
+        '[mailgrade]',
         '[coursetitle]',
         '[assignmenttitle]'
     ];
@@ -511,25 +496,20 @@ function addUserInfo(emailText, params) {
                     break;
                 case 2:
                     // usergrade action
-                    let userGradeText = params.assignmentgrade || '{GRADE NOT PROVIDED/FOUND}';
+                    let userGradeText = params.assignmentgrade || (params.defaultgrade ? params.defaultgrade : '{GRADE NOT PROVIDED/FOUND}');
                     uniqueMatches[i] = userGradeText;
                     break;
                 case 3:
-                    // customgrade acton
-                    let customGradeText = params.customgrade || '{CUSTOM GRADE NOT PROVIDED/FOUND}';
-                    uniqueMatches[i] = customGradeText;
-                    break;
-                case 4:
                     // defaultgrade acton
                     let defaultGradeText = params.defaultgrade || '{DEFAULT GRADE NOT PROVIDED/FOUND}';
                     uniqueMatches[i] = defaultGradeText;
                     break;
-                case 5:
+                case 4:
                     // coursetitle action
                     let courseTitleText = params.coursename || '{COURSE TITLE NOT FOUND}';
                     uniqueMatches[i] = courseTitleText;
                     break;
-                case 6:
+                case 5:
                     // assignmenttitle action
                     let assignmentTitleText = params.assignmenttitle || '{ASSIGNMENT TITLE NOT FOUND}';
                     uniqueMatches[i] = assignmentTitleText;
@@ -541,7 +521,6 @@ function addUserInfo(emailText, params) {
     for (let i = 0; i < textReplace.length; i++) {
         if (uniqueMatches[i]) {
             emailText = emailText.replace(textReplace[i], uniqueMatches[i]);
-            // emailText = emailText.replace(new RegExp(textReplace[i], 'g'), uniqueMatches[i]);
         }
     }
     return emailText;

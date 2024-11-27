@@ -156,7 +156,6 @@ class local_earlyalert_course_grades_ws extends external_api
 
         $mdlGrades = helper::get_moodle_grades_by_course($courseid);
         //lets cache all possible email templates based off of these students...
-        $i = 0;
         $templateCache = array();
         foreach ($mdlGrades as $student) {
             if ($sva_data = $DB->get_record('svadata', array('sisid' => $student['idnumber']))) {
@@ -189,12 +188,9 @@ class local_earlyalert_course_grades_ws extends external_api
                                 'message' => $template_data->message,
                                 'templateid' => $template_data->templateid,
                                 'revision_id' => $template_data->revision_id,
-                                'body' => $template_data->body,
                                 'course_id' => $template_data->course_id,
                                 'instructor_id' => $template_data->instructor_id,
-                                'date_message_sent' => $template_data->date_message_sent,
-                                'timecreated' => $template_data->timecreated,
-                                'timemodified' => $template_data->timemodified
+                                'triggered_from_user_id' => $template_data->triggered_from_user_id
                             );
                         }
                     } else {
@@ -210,12 +206,9 @@ class local_earlyalert_course_grades_ws extends external_api
                                     'message' => $template_data->message,
                                     'templateid' => $template_data->templateid,
                                     'revision_id' => $template_data->revision_id,
-                                    'body' => $template_data->body,
                                     'course_id' => $template_data->course_id,
                                     'instructor_id' => $template_data->instructor_id,
-                                    'date_message_sent' => $template_data->date_message_sent,
-                                    'timecreated' => $template_data->timecreated,
-                                    'timemodified' => $template_data->timemodified
+                                    'triggered_from_user_id' => $template_data->triggered_from_user_id
                                 );
                             }
                         }
@@ -235,12 +228,9 @@ class local_earlyalert_course_grades_ws extends external_api
                                 'message' => $template_data->message,
                                 'templateid' => $template_data->templateid,
                                 'revision_id' => $template_data->revision_id,
-                                'body' => $template_data->body,
                                 'course_id' => $template_data->course_id,
                                 'instructor_id' => $template_data->instructor_id,
-                                'date_message_sent' => $template_data->date_message_sent,
-                                'timecreated' => $template_data->timecreated,
-                                'timemodified' => $template_data->timemodified
+                                'triggered_from_user_id' => $template_data->triggered_from_user_id
                             );
                         }
                     } else {
@@ -256,18 +246,14 @@ class local_earlyalert_course_grades_ws extends external_api
                                     'message' => $template_data->message,
                                     'templateid' => $template_data->templateid,
                                     'revision_id' => $template_data->revision_id,
-                                    'body' => $template_data->body,
                                     'course_id' => $template_data->course_id,
                                     'instructor_id' => $template_data->instructor_id,
-                                    'date_message_sent' => $template_data->date_message_sent,
-                                    'timecreated' => $template_data->timecreated,
-                                    'timemodified' => $template_data->timemodified
+                                    'triggered_from_user_id' => $template_data->triggered_from_user_id
                                 );
                             }
                         }
                     }
                 }
-                $i++;
             }
         }
         return $templateCache;
@@ -298,12 +284,9 @@ class local_earlyalert_course_grades_ws extends external_api
             'message' => new external_value(PARAM_RAW, 'Message text for template', false),
             'templateid' => new external_value(PARAM_RAW, 'Template ID', false),
             'revision_id' => new external_value(PARAM_RAW, 'Template Revision', false),
-            'body' => new external_value(PARAM_RAW, 'Template Body', false),
             'course_id' => new external_value(PARAM_RAW, 'Template Course ID', false),
             'instructor_id' => new external_value(PARAM_RAW, 'Template Instructor ID', false),
-            'date_message_sent' => new external_value(PARAM_RAW, 'Template Date', false),
-            'timecreated' => new external_value(PARAM_RAW, 'Template timecreated', false),
-            'timemodified' => new external_value(PARAM_RAW, 'Template timemodified', false)
+            'triggered_from_user_id' => new external_value(PARAM_RAW, 'Template Date', false)
         );
         return new external_single_structure($fields);
     }
