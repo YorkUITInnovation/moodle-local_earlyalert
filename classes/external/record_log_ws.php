@@ -57,7 +57,7 @@ class local_earlyalert_record_log_ws extends external_api
             $data->user_read = 0;
             $data->course_id = ($student['course_id'] ?? 0);
             $data->instructor_id = ($student['instructor_id'] ?? 0);
-            $data->assignment_id = ($student['assignment_id'] ?? 0);
+            $data->assignment_name = ($student['assignment_name'] ?? 0);
             $data->trigger_grade = ($student['trigger_grade'] ?? 0);
             $data->actual_grade = ($student['actual_grade'] ?? 0);
             //all logs default to unadvised

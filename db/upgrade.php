@@ -110,5 +110,21 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024112615, 'local', 'earlyalert');
     }
 
+    if ($oldversion < 2024112620) {
+
+        // Changing type of field body on table local_earlyalert_report_log to text.
+        $table = new xmldb_table('local_earlyalert_report_log');
+        $field = new xmldb_field('assignment_id', XMLDB_TYPE_INTEGER, null, null, null, null, null, 'instructor_id');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $field = new xmldb_field('assignment_name', XMLDB_TYPE_CHAR, 255, null, null, null, null, 'instructor_id');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 2024112620, 'local', 'earlyalert');
+    }
     return true;
 }

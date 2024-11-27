@@ -347,7 +347,7 @@ function setup_preview_emails(templateCache) {
         record_data.target_user_id = student_id;
         record_data.course_id = templateObj.course_id;
         record_data.instructor_id = templateObj.instructor_id;
-        record_data.assignment_id = params.assignmenttitle;
+        record_data.assignment_name = params.assignmenttitle;
         record_data.actual_grade = assigngrade;
 
         button.addEventListener('click', function () {
