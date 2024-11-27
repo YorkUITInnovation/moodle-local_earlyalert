@@ -180,21 +180,17 @@ class email_report_log extends crud
 
         $this->template_id = $result->template_id ?? 0;
         $this->revision_id = $result->revision_id ?? 0;
-        $this->subject = $result->subject ?? '';
-        $this->body = $result->body ?? '';
         $this->triggered_from_user_id = $result->triggered_from_user_id ?? 0;
         $this->target_user_id = $result->target_user_id ?? 0;
         $this->user_read = $result->user_read ?? 0;
-        $this->unit_id = $result->unit_id ?? 0;
-        $this->department_id = $result->department_id ?? 0;
         $this->course_id = $result->course_id ?? 0;
         $this->instructor_id = $result->instructor_id ?? 0;
-        $this->assignment_id = $result->assignment_id ?? 0;
+        $this->assignment_name = $result->assignment_id ?? 0;
         $this->trigger_grade = $result->trigger_grade ?? '';
         $this->actual_grade = $result->actual_grade ?? 0;
-        $this->actual_grade_letter = $result->actual_grade_letter ?? '';
-        $this->student_advised = $result->student_advised ?? 0;
-        $this->facultyspecific_text_id = $result->facultyspecific_text_id ?? 0;
+        $this->student_advised_by_advisor = $result->student_advised_by_advisor ?? 0;
+        $this->student_advised_by_instructor = $result->student_advised_by_instructor ?? 0;
+        $this->date_message_sent = $result->date_message_sent ?? 0;
         $this->timecreated = $result->timecreated ?? 0;
         $this->timecreated_hr = '';
         if ($this->timecreated) {

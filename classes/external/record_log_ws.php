@@ -61,7 +61,8 @@ class local_earlyalert_record_log_ws extends external_api
             $data->trigger_grade = ($student['trigger_grade'] ?? 0);
             $data->actual_grade = ($student['actual_grade'] ?? 0);
             //all logs default to unadvised
-            $data->student_advised = 0;
+            $data->student_advised_by_advisor = 0;
+            $data->student_advised_by_instructor = 0;
             //all logs default to unsent
             $data->date_message_sent = 0;
             $data->timecreated = time();
