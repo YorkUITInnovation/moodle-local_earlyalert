@@ -4,6 +4,7 @@ import {get_string as getString} from 'core/str';
 
 export const init = () => {
     get_course_overview_students();
+
 };
 
 function get_course_overview_students() {

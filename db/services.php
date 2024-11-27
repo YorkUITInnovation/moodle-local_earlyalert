@@ -37,4 +37,22 @@ $functions = array(
         'capabilities' => '',
         'ajax' => true
     ),
+    'earlyalert_update_student_status_instructor' => array(
+        'classname' => 'local_earlyalert_course_overview_ws',
+        'methodname' => 'update_student_status_instructor',
+        'classpath' => 'local/earlyalert/classes/external/course_overview_ws.php',
+        'description' => 'Updates status for field student_advised_by_instructor',
+        'type' => 'write',
+        'capabilities' => '',
+        'ajax' => true
+    ),
+    'earlyalert_update_student_status_advisor' => array(
+        'classname' => 'local_earlyalert_course_overview_ws',
+        'methodname' => 'update_student_status_advisor',
+        'classpath' => 'local/earlyalert/classes/external/course_overview_ws.php',
+        'description' => 'Updates status for field student_advised_by_advisor',
+        'type' => 'write',
+        'capabilities' => '',
+        'ajax' => true
+    ),
 );

@@ -18,9 +18,9 @@
                 <div class="accordion" id="accordionCourseOverview">
                     {{#students}}
                         <div class="card">
-                            <div class="card-header {{#has_logs}}bg-danger text-white{{/has_logs}}" id="heading{{id}}">
+                            <div class="card-header" id="heading{{id}}">
                                 <h2 class="mb-0">
-                                    <button class="btn btn-link btn-block text-left {{#has_logs}}text-white{{/has_logs}}" type="button" data-toggle="collapse" data-target="#collapse{{id}}"
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{id}}"
                                             aria-expanded="true" aria-controls="collapse{{id}}">
                                         {{lastname}}, {{firstname}} ({{idnumber}})
                                     </button>
@@ -34,8 +34,44 @@
                                             <div class="col-md-8">
                                                 {{message_type}}
                                             </div>
-                                            <div class="col-md-4">
-                                                Buttons go here
+                                            <div class="col-md-4 d-flex justify-content-end">
+                                                <table class="table table-borderless table-sm">
+                                                    <thead class="thead-light">
+                                                    <tr>
+                                                        <th>
+                                                            <div class="d-flex justify-content-center">
+                                                                Instructor/TA
+                                                            </div>
+
+                                                        </th>
+                                                        <th>
+                                                            <div class="d-flex justify-content-center">
+                                                                Advisor
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex justify-content-center">
+                                                                <input type="checkbox" class="checkbox-instructor-followup"
+                                                                       data-logid="{{id}}"
+                                                                       {{#student_advised_by_instructor}}checked{{/student_advised_by_instructor}}>
+                                                            </div>
+
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex justify-content-center">
+                                                                <input type="checkbox" class="checkbox-advisor-followup"
+                                                                       data-logid="{{id}}"
+                                                                       {{#student_advised_by_advisor}}checked{{/student_advised_by_advisor}}>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+
+                                                </table>
                                             </div>
                                         </div>
                                     {{/logs}}
@@ -48,3 +84,10 @@
         </div>
     </div>
 </div>
+
+<!-- Add AMD js to call course_overview_updating.js -->
+{{#js}}
+    require(['local_earlyalert/course_overview_updating'], function (course_overview_updating) {
+        course_overview_updating.init();
+    });
+{{/js}}

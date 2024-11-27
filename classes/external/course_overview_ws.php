@@ -60,7 +60,7 @@ class local_earlyalert_course_overview_ws extends external_api
                 $student->has_logs = false;
             }
             // Enter the student record into the results array
-            $results[$i]= $student;
+            $results[$i] = $student;
             $x = 0;
             foreach ($logs as $log) {
                 // Get the log object
@@ -76,13 +76,12 @@ class local_earlyalert_course_overview_ws extends external_api
                 $data = new \stdClass();
                 $data->id = $log->id;
                 $data->message_type = $LOG->get_message_type();
-                $data->subject = $LOG->get_subject();
-                $data->body = $LOG->get_body();
                 $data->user_read = $LOG->get_user_read();
                 $data->course_id = $LOG->get_course_id();
                 $data->course_name = $LOG->get_course_name();
                 $data->trigger_grade = $LOG->get_trigger_grade();
-                $data->student_advised = $LOG->get_student_advised();
+                $data->student_advised_by_advisor = $LOG->get_student_advised_by_advisor();
+                $data->student_advised_by_instructor = $LOG->get_student_advised_by_instructor();
                 $data->date_sent = $LOG->get_date_sent();
                 $data->first_name = $student->firstname;
                 $data->last_name = $student->lastname;
@@ -128,13 +127,12 @@ class local_earlyalert_course_overview_ws extends external_api
                                     array(
                                         'id' => new external_value(PARAM_INT, 'Log ID'),
                                         'message_type' => new external_value(PARAM_TEXT, 'Message type'),
-                                        'subject' => new external_value(PARAM_TEXT, 'Subject'),
-                                        'body' => new external_value(PARAM_RAW, 'Body'),
                                         'user_read' => new external_value(PARAM_INT, 'User read status'),
                                         'course_id' => new external_value(PARAM_INT, 'Course ID'),
                                         'course_name' => new external_value(PARAM_TEXT, 'Course name'),
                                         'trigger_grade' => new external_value(PARAM_INT, 'Trigger grade'),
-                                        'student_advised' => new external_value(PARAM_INT, 'Student advised status'),
+                                        'student_advised_by_advisor' => new external_value(PARAM_INT, 'Student advised by advisor'),
+                                        'student_advised_by_instructor' => new external_value(PARAM_INT, 'Student advised by instructor'),
                                         'date_sent' => new external_value(PARAM_TEXT, 'Date sent'),
                                         'first_name' => new external_value(PARAM_TEXT, 'Student first name'),
                                         'last_name' => new external_value(PARAM_TEXT, 'Student last name'),
@@ -154,5 +152,129 @@ class local_earlyalert_course_overview_ws extends external_api
                 )
             )
         );
+    }
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function update_student_status_instructor_parameters()
+    {
+        return new external_function_parameters(
+            array(
+                'logid' => new external_value(PARAM_INT, 'Log ID', VALUE_REQUIRED),
+                'status' => new external_value(PARAM_INT, 'Status', VALUE_REQUIRED)
+            )
+        );
+    }
+
+    /**
+     * Updates student status
+     * @param $logid
+     * @param $status
+     * @return bool
+     * @throws dml_exception
+     * @throws invalid_parameter_exception
+     * @throws restricted_context_exception
+     */
+    public static function update_student_status_instructor($logid, $status)
+    {
+        global $CFG, $USER, $DB, $PAGE;
+
+        //Parameter validation
+        $params = self::validate_parameters(self::update_student_status_instructor_parameters(), array(
+                'logid' => $logid,
+                'status' => $status
+            )
+        );
+
+        //Context validation
+        //OPTIONAL but in most web service it should present
+        $context = \context_system::instance();
+        self::validate_context($context);
+        $student_advised_by_instructor = 0;
+        if ($status == 1) {
+            $student_advised_by_instructor = time();
+        }
+        $params = [
+            'id' => $logid,
+            'student_advised_by_instructor' => $student_advised_by_instructor
+        ];
+
+        if ($DB->update_record('local_earlyalert_report_log', $params)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return external_value
+     */
+    public static function update_student_status_instructor_returns()
+    {
+        return new external_value(PARAM_BOOL, 'Success');
+    }
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function update_student_status_advisor_parameters()
+    {
+        return new external_function_parameters(
+            array(
+                'logid' => new external_value(PARAM_INT, 'Log ID', VALUE_REQUIRED),
+                'status' => new external_value(PARAM_INT, 'Status', VALUE_REQUIRED)
+            )
+        );
+    }
+
+    /**
+     * Updates student status
+     * @param $logid
+     * @param $status
+     * @return bool
+     * @throws dml_exception
+     * @throws invalid_parameter_exception
+     * @throws restricted_context_exception
+     */
+    public static function update_student_status_advisor($logid, $status)
+    {
+        global $CFG, $USER, $DB, $PAGE;
+
+        //Parameter validation
+        $params = self::validate_parameters(self::update_student_status_advisor_parameters(), array(
+                'logid' => $logid,
+                'status' => $status
+            )
+        );
+
+        //Context validation
+        //OPTIONAL but in most web service it should present
+        $context = \context_system::instance();
+        self::validate_context($context);
+        $student_advised_by_advisor = 0;
+        if ($status == 1) {
+            $student_advised_by_advisor = time();
+        }
+        $params = [
+            'id' => $logid,
+            'student_advised_by_advisor' => $student_advised_by_advisor
+        ];
+
+        if ($DB->update_record('local_earlyalert_report_log', $params)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return external_value
+     */
+    public static function update_student_status_advisor_returns()
+    {
+        return new external_value(PARAM_BOOL, 'Success');
     }
 }

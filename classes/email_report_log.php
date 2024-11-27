@@ -222,7 +222,6 @@ class email_report_log extends crud
 
         //Set user
 //        $data->usermodified = $USER->id;
-        file_put_contents('/var/www/moodledata/temp/earlyalert.log', print_r((array)$data, true), FILE_APPEND);
 
         $id = $DB->insert_record($this->table, (array)$data);
 
@@ -299,9 +298,14 @@ class email_report_log extends crud
         return $this->trigger_grade;
     }
 
-    public function get_student_advised(): int|null
+    public function get_student_advised_by_advisor(): int
     {
-        return $this->student_advised;
+        return $this->student_advised_by_advisor;
+    }
+
+    public function get_student_advised_by_instructor(): int
+    {
+        return $this->student_advised_by_instructor;
     }
 
     public function get_date_sent(): string

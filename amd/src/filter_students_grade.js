@@ -179,6 +179,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     const cachedArray = JSON.parse(cachedArrayElement.value);
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
+                            console.log(result);
                             if (cachedArray.includes(result.templateKey)){
                                 let finalMessage = {
                                     subject: result.subject,

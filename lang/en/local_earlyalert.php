@@ -46,7 +46,6 @@ $string['course_overview_instructions'] = '<ul>
 </ul>';
 $string['course_overview_render_instructions'] = '<ul>
 <li>This shows a list of all students in this course, with the alerts that you have raised.</li>
-  <li>If a student’s name appears in red, an alert has been raised.</li>
   <li>Click on the student’s name to see the alert type(s) and details.</li>
   <li>To indicate that a student has followed up with you, check off the appropriate box under “advising status”.</li>
 </ul>';
