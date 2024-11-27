@@ -55,4 +55,13 @@ $functions = array(
         'capabilities' => '',
         'ajax' => true
     ),
+    'earlyalert_get_users' => array(
+        'classname' => 'local_earlyalert_users_ws',
+        'methodname' => 'get_users',
+        'classpath' => 'local/earlyalert/classes/external/users_ws.php',
+        'description' => 'Search users for a select box',
+        'type' => 'read',
+        'capabilities' => '',
+        'ajax' => true
+    ),
 );

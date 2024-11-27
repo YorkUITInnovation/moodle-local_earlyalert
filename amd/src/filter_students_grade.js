@@ -4,10 +4,12 @@ import ModalFactory from 'core/modal_factory';
 import {get_string as getString} from 'core/str';
 import notification from 'core/notification';
 import {get_format as formatString} from 'core/str';
+import selectBox from 'local_earlyalert/select_box';
+import config from 'core/config';
 
 export const init = () => {
     alert_type_button();
-    get_users();
+    get_users2();
 };
 
 function alert_type_button() {
@@ -430,7 +432,13 @@ function create_notification_dialog(student_template_cache_array) {
     });
 }
 
-
+function get_users2() {
+   selectBox.init('#search', 'earlyalert_get_users', "Select a user");
+   // On search change, navigate to a url with the user_id as a parameter
+    document.getElementById('search').addEventListener('change', function (event) {
+        window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + search.value;
+    });
+}
 /**
  * Get users from the search input
  */

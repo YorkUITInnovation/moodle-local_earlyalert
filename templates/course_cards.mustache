@@ -12,14 +12,12 @@
 {{#impersonate}}
     <div class="row">
         <div class="col-md-3">
-            <label for="search">Search:</label>
-            <input list="early-alert-impersonate" id="search" name="search">
-            <datalist id="early-alert-impersonate">
-            </datalist>
+            <select id="search" name="search" class="form-control">
+            </select>
         </div>
     </div>
     {{#impersonated_user}}
-        <div class="row">
+        <div class="row mt-3">
             <div class="col">
                 <div class="alert alert-info">
                     <b>{{#str}}impersonating_user, local_earlyalert{{/str}}:</b> {{impersonated_user}}
