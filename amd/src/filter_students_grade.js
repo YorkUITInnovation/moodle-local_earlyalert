@@ -3,6 +3,7 @@ import Templates from 'core/templates';
 import ModalFactory from 'core/modal_factory';
 import {get_string as getString} from 'core/str';
 import notification from 'core/notification';
+import {get_format as formatString} from 'core/str';
 
 export const init = () => {
     alert_type_button();
@@ -179,27 +180,21 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
                             if (cachedArray.includes(result.templateKey)){
-                                // finalCache.push({key: result.templateKey, value: result.message});
                                 let finalMessage = {
                                     subject: result.subject,
                                     message: result.message,
                                     templateid: result.templateid,
-                                    resvision_id: result.revision_id,
-                                    body: result.body,
+                                    revision_id: result.revision_id,
                                     course_id: result.course_id,
-                                    date_message_sent: result.date_message_sent,
                                     instructor_id: result.instructor_id,
-                                    timecreated: result.timecreated,
-                                    timemodified: result.timemodified
-
+                                    triggered_from_user_id: result.triggered_from_user_id,
                                 };
                                 finalCache.set(result.templateKey, finalMessage);
                             }
                         }
                     });
                     finalCache.set('course_name', course_name);
-                    // TO remove when templates return the value
-                    finalCache.set('course_id', course_id);
+
                     setup_preview_emails(finalCache);
                 })
                 .catch(function (error) {
@@ -263,11 +258,12 @@ function check_allnone_listener(selected_students) {
 }
 
 function setup_preview_emails(templateCache) {
+    // console.log("template cache = ", templateCache);
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-    console.log("template cache:", templateCache);
+    //console.log("template cache:", templateCache);
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
     preview_buttons.forEach(function (button) {
@@ -291,6 +287,7 @@ function setup_preview_emails(templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
+            // console.log(student_name);
             var student_id = checkbox.getAttribute('data-student-id');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
@@ -332,44 +329,26 @@ function setup_preview_emails(templateCache) {
             customgrade: grade_select.options[grade_select.selectedIndex].text,
             defaultgrade: "D+"
         };
+
+        // console.log("passing these params to adduserinfo:", params);
         templateEmailContent = addUserInfo(templateEmailContent, params );
 
         // console.log("template email content post-addUserInfo:", templateEmailContent);
 
         // assemble record data for individual buttons which includes student and template data
-        record_data.student_id = student_id; // absolutely needed for filter..
+        record_data.student_id = student_id;
         record_data.student_name = student_name;
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
         record_data.templateEmailContent = templateEmailContent;
         record_data.template_id = templateObj.templateid;
         record_data.revision_id = templateObj.revision_id;
-        // record_data.triggered_from_user_id = templateObj.;
+        record_data.triggered_from_user_id = templateObj.triggered_from_user_id;
         record_data.target_user_id = student_id;
-        // record_data.user_read = templateObj.;
-        // record_data.unit_id = templateObj.;
-        // record_data.department_id = templateObj.;
-        // record_data.facultyspecific_text_id = templateObj.;
-
-
-        // uncomment me!!!!!!! after template data returned
-        //record_data.course_id = templateObj.course_id;
-
-        // NB: using course id from page for now INSTEAD of templateObj as that needs to be fixed!!!
-        record_data.course_id = templateCache.get('course_id');;
-        record_data.actual_grade_letter = selected_grade;
-        record_data.actual_grade = assigngrade;
-
+        record_data.course_id = templateObj.course_id;
         record_data.instructor_id = templateObj.instructor_id;
-        // record_data.assignment_id = templateObj.;
-        // record_data.trigger_grade = templateObj.;
-        // record_data.trigger_grade_letter = templateObj.;
-        // record_data.actual_grade = templateObj.;
-        // record_data.actual_grade_letter = templateObj.;
-        // record_data.student_advised = templateObj.;
-        record_data.date_message_sent = templateObj.date_message_sent;
-        record_data.timecreated = templateObj.timecreated;
-        record_data.timemodified = templateObj.timemodified;
+        record_data.assignment_id = params.assignmenttitle;
+        record_data.actual_grade = assigngrade;
 
         button.addEventListener('click', function () {
             setup_preview_buttons_from_template(record_data)
@@ -378,14 +357,13 @@ function setup_preview_emails(templateCache) {
         // console.log("record data =", record_data);
         student_template_cache_array.push(record_data);
 
-
     });
     // once we have all the data we can setup the emails to submit with the template cache data and student ids BUT we have to manage and select the users if they are checked/unchceked
     setup_send_emails(student_template_cache_array);
 }
 
 function setup_preview_buttons_from_template(student_template_data) {
-
+    // console.log("student template data =", student_template_data);
     ModalFactory.create({
         title: getString('preview_email', 'local_earlyalert'),
         type: ModalFactory.types.CANCEL,
@@ -418,11 +396,10 @@ function maintain_student_template_data_for_submit(student_template_cache_array)
     // remove students from template cache if they have been unchecked
     var new_student_temp_array = student_template_cache_array.filter(student => student_ids_array.includes(student.student_id));
     new_student_temp_array.length > 0 ? create_notification_dialog(new_student_temp_array) : alert('No students selected');
-
 }
 
 function create_notification_dialog(student_template_cache_array) {
-    console.log(student_template_cache_array);
+
     // Get the data id attribute value
     var send_string = getString('send_email', 'local_earlyalert');
     var send_dialog_text = getString('send_dialog_text', 'local_earlyalert');
@@ -496,8 +473,7 @@ function addUserInfo(emailText, params) {
         '[firstname]',
         '[fullname]',
         '[usergrade]',
-        '[customgrade]',
-        '[defaultgrade]',
+        '[mailgrade]',
         '[coursetitle]',
         '[assignmenttitle]'
     ];
@@ -520,25 +496,20 @@ function addUserInfo(emailText, params) {
                     break;
                 case 2:
                     // usergrade action
-                    let userGradeText = params.assignmentgrade || '{GRADE NOT PROVIDED/FOUND}';
+                    let userGradeText = params.assignmentgrade || (params.defaultgrade ? params.defaultgrade : '{GRADE NOT PROVIDED/FOUND}');
                     uniqueMatches[i] = userGradeText;
                     break;
                 case 3:
-                    // customgrade acton
-                    let customGradeText = params.customgrade || '{CUSTOM GRADE NOT PROVIDED/FOUND}';
-                    uniqueMatches[i] = customGradeText;
-                    break;
-                case 4:
                     // defaultgrade acton
                     let defaultGradeText = params.defaultgrade || '{DEFAULT GRADE NOT PROVIDED/FOUND}';
                     uniqueMatches[i] = defaultGradeText;
                     break;
-                case 5:
+                case 4:
                     // coursetitle action
                     let courseTitleText = params.coursename || '{COURSE TITLE NOT FOUND}';
                     uniqueMatches[i] = courseTitleText;
                     break;
-                case 6:
+                case 5:
                     // assignmenttitle action
                     let assignmentTitleText = params.assignmenttitle || '{ASSIGNMENT TITLE NOT FOUND}';
                     uniqueMatches[i] = assignmentTitleText;
@@ -550,7 +521,6 @@ function addUserInfo(emailText, params) {
     for (let i = 0; i < textReplace.length; i++) {
         if (uniqueMatches[i]) {
             emailText = emailText.replace(textReplace[i], uniqueMatches[i]);
-            // emailText = emailText.replace(new RegExp(textReplace[i], 'g'), uniqueMatches[i]);
         }
     }
     return emailText;

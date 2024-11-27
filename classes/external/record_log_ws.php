@@ -53,21 +53,19 @@ class local_earlyalert_record_log_ws extends external_api
             $data->revision_id = ($student['revision_id'] ?? 0);
             $data->triggered_from_user_id = ($student['triggered_from_user_id'] ?? 0);
             $data->target_user_id = ($student['student_id'] ?? 0);
-            $data->subject = ($student['templateEmailSubject'] ?? '');
-            $data->body = ($student['templateEmailContent'] ?? '');
-            $data->user_read = ($student['user_read'] ?? false);
-            $data->unit_id = ($student['unit_id'] ?? 0);
-            $data->department_id = ($student['department_id'] ?? 0);
-            $data->facultyspecific_text_id = ($student['facultyspecific_text_id'] ?? 0);
+            //all logs default to unread
+            $data->user_read = 0;
             $data->course_id = ($student['course_id'] ?? 0);
             $data->instructor_id = ($student['instructor_id'] ?? 0);
             $data->assignment_id = ($student['assignment_id'] ?? 0);
             $data->trigger_grade = ($student['trigger_grade'] ?? 0);
-            $data->trigger_grade_letter = ($student['trigger_grade_letter'] ?? '');
             $data->actual_grade = ($student['actual_grade'] ?? 0);
-            $data->actual_grade_letter = ($student['actual_grade_letter'] ?? '');
-            $data->student_advised = ($student['student_advised'] ?? false);
-            $data->date_message_sent = ($student['date_message_sent'] ?? '');
+            //all logs default to unadvised
+            $data->student_advised = 0;
+            //all logs default to unsent
+            $data->date_message_sent = 0;
+            $data->timecreated = time();
+            $data->timemodified = time();
             $EMAIL_LOG = new email_report_log();
             $id = $EMAIL_LOG->insert_record($data);
             $id > 0 ? array_push($ids, $id) : error_log('error saving message');
