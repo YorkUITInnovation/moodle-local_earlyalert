@@ -17,7 +17,8 @@
         <FIELD NAME="assignment_name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="trigger_grade" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="actual_grade" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="student_advised" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="student_advised_by_advisor" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="student_advised_by_instructor" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="date_message_sent" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>

@@ -112,7 +112,7 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
 
     if ($oldversion < 2024112620) {
 
-        // Changing type of field body on table local_earlyalert_report_log to text.
+        // converting assignment_id to assignment_name
         $table = new xmldb_table('local_earlyalert_report_log');
         $field = new xmldb_field('assignment_id', XMLDB_TYPE_INTEGER, null, null, null, null, null, 'instructor_id');
         if ($dbman->field_exists($table, $field)) {
@@ -125,6 +125,26 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
 
         // Earlyalert savepoint reached.
         upgrade_plugin_savepoint(true, 2024112620, 'local', 'earlyalert');
+    }
+    if ($oldversion < 2024112621) {
+
+	//splitting student_advised into student_advised_by_advisor and student_advised_by_instructor
+        $table = new xmldb_table('local_earlyalert_report_log');
+        $field = new xmldb_field('student_advised', XMLDB_TYPE_INTEGER, null, null, null, null, null, 'actual_grade');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        $field = new xmldb_field('student_advised_by_advisor', XMLDB_TYPE_INTEGER, 10, null, null, null, null, 'actual_grade');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('student_advised_by_instructor', XMLDB_TYPE_INTEGER, 10, null, null, null, null, 'student_advised_by_advisor');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 2024112621, 'local', 'earlyalert');
     }
     return true;
 }
