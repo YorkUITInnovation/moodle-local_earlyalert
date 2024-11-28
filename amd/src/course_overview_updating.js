@@ -1,10 +1,12 @@
 import ajax from 'core/ajax';
 import Templates from 'core/templates';
+import ModalFactory from 'core/modal_factory';
 import {get_string as getString} from 'core/str';
 
 export const init = () => {
     update_student_status_for_advisor();
     update_student_status_for_instructor();
+    preview_message();
 };
 
 function update_student_status_for_instructor() {
@@ -13,8 +15,8 @@ function update_student_status_for_instructor() {
     const checkboxes = document.querySelectorAll('.checkbox-instructor-followup');
 
     // Loop through each checkbox and add an event listener
-    checkboxes.forEach(function(checkbox) {
-        checkbox.addEventListener('change', function() {
+    checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
             const logId = this.getAttribute('data-logid');
             const status = this.checked ? 1 : 0;
 
@@ -38,8 +40,8 @@ function update_student_status_for_advisor() {
     const checkboxes = document.querySelectorAll('.checkbox-advisor-followup');
 
     // Loop through each checkbox and add an event listener
-    checkboxes.forEach(function(checkbox) {
-        checkbox.addEventListener('change', function() {
+    checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
             const logId = this.getAttribute('data-logid');
             const status = this.checked ? 1 : 0;
 
@@ -57,3 +59,31 @@ function update_student_status_for_advisor() {
         });
     });
 }
+
+function preview_message() {
+    const previewButtons = document.querySelectorAll('.btn-early-alert-preview-message');
+
+    previewButtons.forEach(function (previewButton) {
+        previewButton.addEventListener('click', function () {
+            const logId = this.getAttribute('data-logid');
+            ajax.call([{
+                methodname: 'earlyalert_get_message',
+                args: {
+                    logid: logId
+                }
+            }])[0].then(function (response) {
+                ModalFactory.create({
+                    title: getString('preview_email', 'local_earlyalert'),
+                    type: ModalFactory.types.CANCEL,
+                    body: Templates.render('local_earlyalert/preview_student_email', response),
+                    large: true,
+                }).then(modal => {
+                    modal.show();
+                });
+            }).catch(function (error) {
+                console.error('Failed to preview message:', error);
+            });
+        });
+    });
+}
+

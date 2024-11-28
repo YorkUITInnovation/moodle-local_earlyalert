@@ -17,7 +17,6 @@ const selectBox = {
         selectElement.parentNode.insertBefore(searchInput, selectElement.nextSibling);
 
         selectElement.addEventListener('click', function () {
-
             searchInput.style.display = 'block'; // Show the search input when the select element is clicked
             // Focus the search input
             searchInput.focus();
@@ -44,8 +43,20 @@ const selectBox = {
         });
 
         function updateOptions(select, options) {
-            select.innerHTML = ''; // Clear existing options
-            // add <option value="">Select a user</option> to the selectElement
+            // If multiple attribute is set, and a or multiple options are selected, do not clear the options
+            if (select.hasAttribute('multiple')) {
+                // Are options slected?
+                if (select.selectedOptions.length > 0) {
+                    // do nothing
+                } else {
+                    select.innerHTML = '';
+                }
+            } else {
+                select.innerHTML = '';
+                select.appendChild(opt);
+            }
+
+
             select.appendChild(opt);
             // Open the options list
             select.size = options.length + 2;

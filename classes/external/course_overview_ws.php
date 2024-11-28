@@ -4,6 +4,7 @@ require_once($CFG->libdir . "/externallib.php");
 require_once("$CFG->dirroot/config.php");
 
 use local_earlyalert\email_report_log;
+use local_etemplate\email;
 use local_earlyalert\base;
 
 class local_earlyalert_course_overview_ws extends external_api
@@ -276,5 +277,87 @@ class local_earlyalert_course_overview_ws extends external_api
     public static function update_student_status_advisor_returns()
     {
         return new external_value(PARAM_BOOL, 'Success');
+    }
+
+
+    public static function get_message_parameters()
+    {
+        return new external_function_parameters(
+            array(
+                'logid' => new external_value(PARAM_INT, 'Log ID', VALUE_REQUIRED)
+            )
+        );
+    }
+
+    /**
+     * Updates student status
+     * @param $logid
+     * @param $status
+     * @return array
+     * @throws dml_exception
+     * @throws invalid_parameter_exception
+     * @throws restricted_context_exception
+     */
+    public static function get_message($logid)
+    {
+        global $CFG, $USER, $DB, $PAGE;
+
+        //Parameter validation
+        $params = self::validate_parameters(self::get_message_parameters(), array(
+                'logid' => $logid
+            )
+        );
+
+        //Context validation
+        //OPTIONAL but in most web service it should present
+        $context = \context_system::instance();
+        self::validate_context($context);
+
+        // Get new log
+        $LOG = new email_report_log($logid);
+
+        // Get etemplate
+        $etemplate = $DB->get_record('local_et_email', ['id' => $LOG->get_templateid()], '*', MUST_EXIST);
+
+        $student = $LOG->get_student();
+        $teacher = $LOG->get_instructor();
+        $prepare_template = email::replace_message_placeholders(
+            $etemplate->message,
+            $etemplate->subject,
+            $LOG->getCourseId(),
+            $student,
+            $LOG->get_instructor_id(),
+            $LOG->get_assignment_name(),
+            $LOG->get_trigger_grade_letter(),
+        );
+
+        $data = [
+            'subject' => $prepare_template->subject,
+            'message' => $prepare_template->message
+        ];
+
+        return $data;
+    }
+
+    public static function get_message_details()
+    {
+        $fields = array(
+            'subject' => new external_value(PARAM_TEXT, 'Message Subject'),
+            'message' => new external_value(PARAM_RAW, 'Message body')
+        );
+        return new external_single_structure($fields);
+    }
+
+    /**
+     *
+     */
+    public static function get_message_returns()
+    {
+        return new external_single_structure(
+            array(
+                'subject' => new external_value(PARAM_TEXT, 'Message Subject'),
+                'message' => new external_value(PARAM_RAW, 'Message body')
+            )
+        );
     }
 }

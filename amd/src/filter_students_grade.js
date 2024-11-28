@@ -10,7 +10,7 @@ import config from 'core/config';
 
 export const init = () => {
     alert_type_button();
-    get_users2();
+    get_users();
 };
 
 function alert_type_button() {
@@ -223,20 +223,20 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                             }
                         }
                     });
-
+                    finalCache.set('course_name', course_name);
                     // case where assignment titles are taken from user input
                     if (alert_type === 'assign') // we have to setup the assignment title before previewing!
                     {
                         finalCache.set('assignment_title',assignment_title );
-                        setup_preview_emails_with_titles(finalCache); // call back function
+                        console.log('setting up previews with titles ');
+                        if (assignment_title){ // there is a case where previews were setup without titles then dont create modals
+                            setup_preview_emails_with_titles(finalCache); // call back function
+                        }
 
                     }
                     else { // for other alert types
-                        finalCache.set('course_name', course_name);
                         setup_preview_emails(finalCache);
                     }
-
-
                 })
                 .catch(function (error) {
                     console.error('Failed to render template:', error);
@@ -593,7 +593,7 @@ function create_notification_dialog(student_template_cache_array) {
     });
 }
 
-function get_users2() {
+function get_users() {
    selectBox.init('#search', 'earlyalert_get_users', "Select a user");
    // On search change, navigate to a url with the user_id as a parameter
     let search = document.getElementById('search');
@@ -602,45 +602,6 @@ function get_users2() {
             window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + search.value;
         });
     }
-}
-/**
- * Get users from the search input
- */
-function get_users() {
-    const inputElement = document.getElementById('search');
-    if (inputElement){ // element exists and available on that specific page tha requires it else nope
-        const datalistElement = document.getElementById('early-alert-impersonate');
-
-        // Event listener for input element
-        inputElement.addEventListener('input', function (event) {
-            const query = event.target.value;
-            var get_users = ajax.call([{
-                methodname: 'organization_users_get',
-                args: {
-                    name: query
-                }
-            }]);
-            get_users[0].done(function (users) {
-                // console.log(users);
-                datalistElement.innerHTML = '';
-                users.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user.id;
-                    option.text = user.firstname + ' ' + user.lastname;
-                    datalistElement.appendChild(option);
-                });
-                // When a selection is made, reload the page with the user_id as a parameter
-                inputElement.addEventListener('change', function (event) {
-                    window.location.href = window.location.href + '?user_id=' + event.target.value;
-                });
-
-            }).fail(function (e) {
-                alert(e);
-                // fail gracefully somehow :'( ;
-            });
-        });
-    }
-
 }
 
 function addUserInfo(emailText, params) {

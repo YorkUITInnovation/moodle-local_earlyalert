@@ -13,7 +13,17 @@ use local_earlyalert\base;
 
 class email_report_log extends crud
 {
-
+CONST GRADE_F = 11;
+CONST GRADE_D = 10;
+CONST GRADE_D_PLUS = 9;
+CONST GRADE_C_MINUS = 8;
+CONST GRADE_C = 7;
+CONST GRADE_C_PLUS = 6;
+CONST GRADE_B_MINUS = 5;
+CONST GRADE_B = 4;
+CONST GRADE_B_PLUS = 3;
+CONST GRADE_A_MINUS = 2;
+CONST GRADE_A = 1;
 
     /**
      *
@@ -286,11 +296,45 @@ class email_report_log extends crud
         return $this->course_id;
     }
 
+    public function get_trigger_grade_letter() {
+        switch ($this->trigger_grade) {
+            case self::GRADE_F:
+                return 'F';
+            case self::GRADE_D:
+                return 'D';
+            case self::GRADE_D_PLUS:
+                return 'D+';
+            case self::GRADE_C_MINUS:
+                return 'C-';
+            case self::GRADE_C:
+                return 'C';
+            case self::GRADE_C_PLUS:
+                return 'C+';
+            case self::GRADE_B_MINUS:
+                return 'B-';
+            case self::GRADE_B:
+                return 'B';
+            case self::GRADE_B_PLUS:
+                return 'B+';
+            case self::GRADE_A_MINUS:
+                return 'A-';
+            case self::GRADE_A:
+                return 'A';
+            default:
+                return '';
+        }
+    }
+
     public function get_course_name(): string
     {
         global $DB;
         $course = $DB->get_record('course', array('id' => $this->course_id), 'fullname');
         return $course->fullname;
+    }
+
+    public function get_assignment_name(): string
+    {
+        return $this->assignment_name;
     }
 
     public function get_trigger_grade(): int|null
@@ -569,7 +613,7 @@ class email_report_log extends crud
         $this->course_id = $course_id;
     }
 
-    public function getInstructorId(): int
+    public function get_instructor_id(): int
     {
         return $this->instructor_id;
     }

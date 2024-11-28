@@ -45,7 +45,6 @@ class local_earlyalert_record_log_ws extends external_api
         $id=0;
         $ids=[];
         $students = json_decode($template_data, true);
-        file_put_contents('/var/www/moodledata/temp/students_object.txt', print_r($students, true));
         forEach($students as $student) {
 
             // add to data structure
