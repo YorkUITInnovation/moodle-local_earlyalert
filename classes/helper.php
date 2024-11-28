@@ -210,7 +210,9 @@ class helper
                 $users = enrol_get_course_users($course_id, true); // returns user objects of those enrolled in course
                 foreach ($users as $student) {
                     // Get the student's grade for the given course ID.
-                    $grade = grade_get_course_grade($student->id, $course_id);
+                    //$grade = grade_get_course_grade($student->id, $course_id);
+                    $grade = new \stdClass();
+                    $grade->grade = 1;
                     // Get student campus, faculty, major
                     if ($campus = $DB->get_record_sql("SELECT uid.data AS 'campus'
                             FROM {user_info_data} uid
@@ -247,9 +249,8 @@ class helper
                     }
                     if ($grade->grade) {
                         // Convert the grade to a percentage and format it as a decimal number with two places.
-                        $grade = ($grade->grade / $grade->item->grademax) * 100;
-                        $student_grade = number_format((float)$grade,
-                            '2');
+                        //$grade = ($grade->grade / $grade->item->grademax) * 100;
+                        $student_grade = number_format((float)$grade,'2');
                         $students[$student->id] = [
                             'id' => $student->id,
                             'course_id' => $course_id,
@@ -264,7 +265,6 @@ class helper
                     }
                 }
             }
-
             return $students;
         } catch (\Exception $e) {
             base::debug_to_console('it died');

@@ -40,7 +40,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 'teacher_user_id' => $teacher_user_id
             )
         );
-        $mdlGrades = helper::get_moodle_grades_by_course($id);
+        $mdlStudents = helper::get_moodle_grades_by_course($id);
 
         $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'id,firstname,lastname,email');
         file_put_contents('/var/www/moodledata/temp/teacher.txt', print_r($teacher, TRUE));
@@ -50,14 +50,14 @@ class local_earlyalert_course_grades_ws extends external_api
         $filter_students = false;
         $filter_me_out = false;
 
-        if ($grade_letter_id > 0) {
-            // get grade ranges and filter students
-            $mdlGradeRanges = helper::get_moodle_grade_percent_range($grade_letter_id);
-            $filter_students = true;
-            $filter_me_out = true;
-        }
-        foreach ($mdlGrades as $grade) {
-            foreach ($grade as $key => $value) { // only those filtered
+//        if ($grade_letter_id > 0) {
+//            // get grade ranges and filter students
+//            $mdlGradeRanges = helper::get_moodle_grade_percent_range($grade_letter_id);
+//            $filter_students = true;
+//            $filter_me_out = true;
+//        }
+        foreach ($mdlStudents as $student) {
+            foreach ($student as $key => $value) { // only those filtered
 
                 $students[$i]['teacher_firstname'] = $teacher->firstname;
                 $students[$i]['teacher_lastname'] = $teacher->lastname;
@@ -86,13 +86,13 @@ class local_earlyalert_course_grades_ws extends external_api
                     $students[$i][$key] = $value;
                 }
 
-                if ($filter_students && $key == 'grade' && (float)$value >= $mdlGradeRanges['min'] && (float)$value <= $mdlGradeRanges['max']) {
-                    $filter_me_out = false;   // we want to keep this student
-                }
+//                if ($filter_students && $key == 'grade' && (float)$value >= $mdlGradeRanges['min'] && (float)$value <= $mdlGradeRanges['max']) {
+//                    $filter_me_out = false;   // we want to keep this student
+//                }
             }
-            if ($filter_students && $filter_me_out) {
-                unset($students[$i]);
-            }
+//            if ($filter_students && $filter_me_out) {
+//                unset($students[$i]);
+//            }
             $i++;
         }
         file_put_contents('/var/www/moodledata/temp/students.txt', print_r($students, TRUE));

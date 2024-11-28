@@ -12,7 +12,6 @@ require_login(1, false);
 
 $context = context_system::instance();
 // Load CSS
-$PAGE->requires->css('/local/earlyalert/css/gradeform.css');
 $PAGE->requires->css('/local/earlyalert/css/styles.css');
 // Load AMD module
 $PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
