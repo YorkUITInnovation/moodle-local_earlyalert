@@ -564,51 +564,12 @@ function create_notification_dialog(student_template_cache_array) {
     });
 }
 
-function get_users2() {
+function get_users() {
    selectBox.init('#search', 'earlyalert_get_users', "Select a user");
    // On search change, navigate to a url with the user_id as a parameter
     document.getElementById('search').addEventListener('change', function (event) {
         window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + search.value;
     });
-}
-/**
- * Get users from the search input
- */
-function get_users() {
-    const inputElement = document.getElementById('search');
-    if (inputElement){ // element exists and available on that specific page tha requires it else nope
-        const datalistElement = document.getElementById('early-alert-impersonate');
-
-        // Event listener for input element
-        inputElement.addEventListener('input', function (event) {
-            const query = event.target.value;
-            var get_users = ajax.call([{
-                methodname: 'organization_users_get',
-                args: {
-                    name: query
-                }
-            }]);
-            get_users[0].done(function (users) {
-                // console.log(users);
-                datalistElement.innerHTML = '';
-                users.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user.id;
-                    option.text = user.firstname + ' ' + user.lastname;
-                    datalistElement.appendChild(option);
-                });
-                // When a selection is made, reload the page with the user_id as a parameter
-                inputElement.addEventListener('change', function (event) {
-                    window.location.href = window.location.href + '?user_id=' + event.target.value;
-                });
-
-            }).fail(function (e) {
-                alert(e);
-                // fail gracefully somehow :'( ;
-            });
-        });
-    }
-
 }
 
 function addUserInfo(emailText, params) {

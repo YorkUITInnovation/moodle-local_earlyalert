@@ -17,7 +17,6 @@ const selectBox = {
         selectElement.parentNode.insertBefore(searchInput, selectElement.nextSibling);
 
         selectElement.addEventListener('click', function () {
-
             searchInput.style.display = 'block'; // Show the search input when the select element is clicked
             // Focus the search input
             searchInput.focus();
@@ -48,7 +47,7 @@ const selectBox = {
             if (select.hasAttribute('multiple')) {
                 // Are options slected?
                 if (select.selectedOptions.length > 0) {
-                   // do nothing
+                    // do nothing
                 } else {
                     select.innerHTML = '';
                 }
