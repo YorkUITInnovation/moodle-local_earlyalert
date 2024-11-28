@@ -321,7 +321,7 @@ CONST GRADE_A = 1;
             case self::GRADE_A:
                 return 'A';
             default:
-                return '';
+                return 'D+';
         }
     }
 
