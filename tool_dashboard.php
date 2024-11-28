@@ -24,7 +24,7 @@ echo base::page(
 );
 $data = new stdClass();
 // Get all capabilites
-if (has_capability('local/earlyalert:student_lookup', $context, $USER->id) || helper::is_teacher()) {
+if (has_capability('local/earlyalert:student_lookup', $context, $USER->id)) {
     $data->student_lookup = true;
 }
 if (has_capability('local/earlyalert:impersonate', $context, $USER->id) || helper::is_teacher()) {
