@@ -56,7 +56,6 @@ const selectBox = {
                 select.appendChild(opt);
             }
 
-
             select.appendChild(opt);
             // Open the options list
             select.size = options.length + 2;
