@@ -215,11 +215,8 @@ CONST GRADE_A = 1;
 
     public function insert_record($data)
     {
-        global $DB, $USER;
-
-        unset($data->trigger_grade_letter);
-        unset($data->actual_grade_letter);
-
+        global $DB;
+        
         if (!isset($data->timecreated)) {
             $data->timecreated = time();
         }

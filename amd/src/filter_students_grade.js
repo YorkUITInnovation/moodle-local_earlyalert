@@ -312,9 +312,11 @@ function setup_preview_emails(templateCache) {
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
         let selected_grade = '';
+        let selected_grade_value = 0;
         if (alert_type === 'grade') { // we only use grade/select etc in this alert type
             const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
             selected_grade = grade_select.options[grade_select.selectedIndex].text;
+            selected_grade_value = grade_select.value;
         }
 
         let templateObj = {};
@@ -396,6 +398,7 @@ function setup_preview_emails(templateCache) {
         record_data.instructor_id = templateObj.instructor_id;
         record_data.assignment_name = params.assignmenttitle;
         record_data.actual_grade = assigngrade;
+        record_data.trigger_grade = selected_grade_value;
 
         // case where previews are just added to grade alert type and missed exam etc
         if (alert_type !== 'assign') {
@@ -428,9 +431,11 @@ function setup_preview_emails_with_titles(templateCache) {
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
         let selected_grade = '';
+        let selected_grade_value = 0;
         if (alert_type === 'grade') { // we only use grade/select etc in this alert type
             const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
             selected_grade = grade_select.options[grade_select.selectedIndex].text;
+            selected_grade_value = grade_select.value;
         }
 
         let templateObj = {};
@@ -511,6 +516,8 @@ function setup_preview_emails_with_titles(templateCache) {
         record_data.instructor_id = templateObj.instructor_id;
         record_data.assignment_name = params.assignmenttitle;
         record_data.actual_grade = assigngrade;
+        record_data.trigger_grade = selected_grade_value;
+
         console.log('checking button onclick: ', button.onclick);
         button.addEventListener('click', function () {
             setup_preview_buttons_from_template(record_data);
