@@ -216,7 +216,7 @@ CONST GRADE_A = 1;
     public function insert_record($data)
     {
         global $DB;
-        
+
         if (!isset($data->timecreated)) {
             $data->timecreated = time();
         }

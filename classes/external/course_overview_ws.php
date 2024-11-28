@@ -327,8 +327,8 @@ class local_earlyalert_course_overview_ws extends external_api
             $LOG->getCourseId(),
             $student,
             $LOG->get_instructor_id(),
-            $LOG->get_assignment_name(),
             $LOG->get_trigger_grade_letter(),
+            $LOG->get_assignment_name(),
         );
 
         $data = [
