@@ -1,6 +1,7 @@
 import ajax from 'core/ajax';
 import Templates from 'core/templates';
 import ModalFactory from 'core/modal_factory';
+import ModalEvents from 'core/modal_events';
 import {get_string as getString} from 'core/str';
 import notification from 'core/notification';
 import {get_format as formatString} from 'core/str';
@@ -56,6 +57,26 @@ function filter_students_by_grade_select() {
     });
 }
 
+function filter_students_by_assignment() {
+
+    console.log('filter students assignment');
+    // Get the s delected grade value from the dropdown
+    const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
+    const course_id = document.getElementById('early_alert_filter_course_id').value;
+    const course_name = document.getElementById('early_alert_course_name').value;
+    const alert_type = document.getElementById('early-alert-alert-type').value;
+    const teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
+    // setup listener for drop down selection
+    const assignment_input = document.getElementById('early-alert-assignment-title');
+    assignment_input.addEventListener('focusout', function(evt) {
+        console.log('setting up listener for assign');
+        var assignment_title = document.getElementById('early-alert-assignment-title').value;
+        if (assignment_title) {
+            console.log('we got a title');
+            setup_filter_students_by_grade(course_id, '9', course_name, alert_type, teacher_user_id, assignment_title);
+        }
+    });
+}
 /**
  * Fetches the student list based on the course_id and grade_letter_id
  * @param course_id
@@ -63,7 +84,7 @@ function filter_students_by_grade_select() {
  * @param course_name
  * @param alert_type
  */
-function setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id) {
+function setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id, assignment_title="") {
     let selected_students = [];
     // convert course_id into an integer
     course_id = parseInt(course_id);
@@ -175,7 +196,10 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         // setup listener for filtering students by grade drop down
                         filter_students_by_grade_select();
                     }
-
+                    if (alert_type === 'assign') {
+                        document.getElementById('early-alert-assignment-title').value = assignment_title;
+                        filter_students_by_assignment();
+                    }
 
                     // we're not doing any more
                     // check_all_student_grades(selected_students);
@@ -199,8 +223,20 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                             }
                         }
                     });
-                    finalCache.set('course_name', course_name);
-                    setup_preview_emails(finalCache);
+
+                    // case where assignment titles are taken from user input
+                    if (alert_type === 'assign') // we have to setup the assignment title before previewing!
+                    {
+                        finalCache.set('assignment_title',assignment_title );
+                        setup_preview_emails_with_titles(finalCache); // call back function
+
+                    }
+                    else { // for other alert types
+                        finalCache.set('course_name', course_name);
+                        setup_preview_emails(finalCache);
+                    }
+
+
                 })
                 .catch(function (error) {
                     console.error('Failed to render template:', error);
@@ -362,7 +398,7 @@ function setup_preview_emails(templateCache) {
         // case where previews are just added to grade alert type and missed exam etc
         if (alert_type !== 'assign') {
             button.addEventListener('click', function () {
-                setup_preview_buttons_from_template(record_data)
+                setup_preview_buttons_from_template(record_data);
             });
         }
         // add record to student_template_cache_array to have data to submit / email
@@ -370,20 +406,7 @@ function setup_preview_emails(templateCache) {
         student_template_cache_array.push(record_data);
 
     });
-    // case where assignment titles are taken from user input
-    if (alert_type === 'assign') // we have to setup the assignment title before previewing! maybe force the user ?
-    {
-        const assignment_input = document.getElementById('early-alert-assignment-title');
-        assignment_input.addEventListener('focusout', function(evt) {
-            var assignment_title = document.getElementById('early-alert-assignment-title').value;
-            if (assignment_title) {
-                templateCache.set('assignment_title', assignment_title);
-                console.log('setting up more modals with titles');
-                setup_preview_emails_with_titles(templateCache); // call back function
-            }
-        });
 
-    }
     // once we have all the data we can setup the emails to submit with the template cache data and student ids BUT we have to manage and select the users if they are checked/unchceked
     setup_send_emails(student_template_cache_array);
 }
@@ -398,6 +421,7 @@ function setup_preview_emails_with_titles(templateCache) {
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
     preview_buttons.forEach(function (button) {
+        button.removeEventListener('click', null);
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
@@ -484,35 +508,40 @@ function setup_preview_emails_with_titles(templateCache) {
         record_data.instructor_id = templateObj.instructor_id;
         record_data.assignment_name = params.assignmenttitle;
         record_data.actual_grade = assigngrade;
-
+        console.log('checking button onclick: ', button.onclick);
         button.addEventListener('click', function () {
-            setup_preview_buttons_from_template(record_data)
-
+            setup_preview_buttons_from_template(record_data);
         });
-        // add record to student_template_cache_array to have data to submit / email
-        // console.log("record data =", record_data);
         student_template_cache_array.push(record_data);
 
     });
     setup_send_emails(student_template_cache_array);
 }
-
+var current_modal = null;
 function setup_preview_buttons_from_template(student_template_data) {
-    // console.log("student template data =", student_template_data);
-    ModalFactory.create({
-        title: getString('preview_email', 'local_earlyalert'),
-        type: ModalFactory.types.CANCEL,
-        body: Templates.render('local_earlyalert/preview_student_email', {
-            name: student_template_data.template_name,
-            student_name: student_template_data.student_name,
-            subject: student_template_data.templateEmailSubject,
-            message: student_template_data.templateEmailContent,
-            instructor_name: ''
-        }),
-        large: true,
-    }).then(modal => {
-        modal.show();
-    });
+
+        ModalFactory.create({
+            title: getString('preview_email', 'local_earlyalert'),
+            type: ModalFactory.types.CANCEL,
+            body: Templates.render('local_earlyalert/preview_student_email', {
+                name: student_template_data.template_name,
+                student_name: student_template_data.student_name,
+                subject: student_template_data.templateEmailSubject,
+                message: student_template_data.templateEmailContent,
+                instructor_name: ''
+            }),
+            large: true,
+
+        }).done(modal => {
+            modal.show();
+            current_modal = modal;
+            // modal.getRoot().on(ModalEvents.cancel, function(){
+            //     current_modal.getRoot().remove();
+            // });
+
+            return current_modal;
+        });
+
 }
 function setup_send_emails(student_template_cache_array) {
     const send_button = document.getElementById('early-alert-send-button1');
@@ -567,9 +596,12 @@ function create_notification_dialog(student_template_cache_array) {
 function get_users2() {
    selectBox.init('#search', 'earlyalert_get_users', "Select a user");
    // On search change, navigate to a url with the user_id as a parameter
-    document.getElementById('search').addEventListener('change', function (event) {
-        window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + search.value;
-    });
+    let search = document.getElementById('search');
+    if (search) {
+        document.getElementById('search').addEventListener('change', function (event) {
+            window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + search.value;
+        });
+    }
 }
 /**
  * Get users from the search input
