@@ -87,6 +87,7 @@ $string['preview'] = 'Preview';
 $string['selected_alert_based_on'] = 'You are selecting an alert based on a';
 $string['send_alert_based_on'] = 'Send an alert based on';
 $string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
+$string['view_message'] = 'View Message Details';
 
 
 /* Email template */

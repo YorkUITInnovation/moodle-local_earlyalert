@@ -64,4 +64,13 @@ $functions = array(
         'capabilities' => '',
         'ajax' => true
     ),
+    'earlyalert_get_message' => array(
+        'classname' => 'local_earlyalert_course_overview_ws',
+        'methodname' => 'get_message',
+        'classpath' => 'local/earlyalert/classes/external/course_overview_ws.php',
+        'description' => 'Returns subject and body from email template',
+        'type' => 'read',
+        'capabilities' => '',
+        'ajax' => true
+    ),
 );

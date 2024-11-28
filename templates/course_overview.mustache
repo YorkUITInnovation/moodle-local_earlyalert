@@ -31,8 +31,13 @@
                                 <div class="card-body">
                                     {{#logs}}
                                         <div class="row">
-                                            <div class="col-md-8">
+                                            <div class="col-md-6">
                                                 {{message_type}}
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-primary btn-sm btn-early-alert-preview-message" data-logid="{{id}}">
+                                                    {{#str}}view_message, local_earlyalert{{/str}}
+                                                </button>
                                             </div>
                                             <div class="col-md-4 d-flex justify-content-end">
                                                 <table class="table table-borderless table-sm">
