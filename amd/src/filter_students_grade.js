@@ -43,7 +43,7 @@ function alert_type_button() {
 function filter_students_by_grade_select() {
 
     // Get the s delected grade value from the dropdown
-    const grade_select = document.getElementById('id_early_alert_filter_grade_select');
+    const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
     const course_id = document.getElementById('early_alert_filter_course_id').value;
     const course_name = document.getElementById('early_alert_course_name').value;
     const alert_type = document.getElementById('early-alert-alert-type').value;
@@ -169,10 +169,14 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     document.getElementById('early-alert-student-results').innerHTML = html;
                     Templates.runTemplateJS(js);
                     // set default grade letter selected
-                    let grade_select = document.getElementById('id_early_alert_filter_grade_select');
-                    grade_select.value = grade_letter_id;
-                    // setup listener
-                    filter_students_by_grade_select();
+                    if (alert_type === 'grade') {
+                        let grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
+                        grade_select.value = grade_letter_id;
+                        // setup listener for filtering students by grade drop down
+                        filter_students_by_grade_select();
+                    }
+
+
                     // we're not doing any more
                     // check_all_student_grades(selected_students);
                     check_allnone_listener(selected_students);
@@ -181,7 +185,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     const cachedArray = JSON.parse(cachedArrayElement.value);
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
-                            console.log(result);
                             if (cachedArray.includes(result.templateKey)){
                                 let finalMessage = {
                                     subject: result.subject,
@@ -197,7 +200,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         }
                     });
                     finalCache.set('course_name', course_name);
-
                     setup_preview_emails(finalCache);
                 })
                 .catch(function (error) {
@@ -273,8 +275,11 @@ function setup_preview_emails(templateCache) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
-        const grade_select = document.getElementById('id_early_alert_filter_grade_select');
-        let selected_grade = grade_select.options[grade_select.selectedIndex].text;
+        if (alert_type === 'grade') { // we only use grade/select etc in this alert type
+            const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
+            let selected_grade = grade_select.options[grade_select.selectedIndex].text;
+        }
+
         let templateObj = {};
         if (checkbox) {
 
@@ -324,16 +329,143 @@ function setup_preview_emails(templateCache) {
         }
         // console.log("template email content:", templateEmailContent);
 
+        var assignment_title = '';
+
         var params = {
             studentname: student_name_arr,
             assignmentgrade: assigngrade,
-            assignmenttitle: document.getElementById('early-alert-assignment-title') ? document.getElementById('early-alert-assignment-title').value : '',
+            assignmenttitle: templateCache.get('assignment_title'),
             coursename: templateCache.get('course_name'),
-            customgrade: grade_select.options[grade_select.selectedIndex].text,
+            //customgrade: grade_select?.options[grade_select.selectedIndex].text, // Ellio has the fix for this - I SAW IT!
             defaultgrade: "D+"
         };
+        //console.log("passing these params to adduserinfo:", params);
+        templateEmailContent = addUserInfo(templateEmailContent, params );
 
-        // console.log("passing these params to adduserinfo:", params);
+        // console.log("template email content post-addUserInfo:", templateEmailContent);
+
+        // assemble record data for individual buttons which includes student and template data
+        record_data.student_id = student_id;
+        record_data.student_name = student_name;
+        record_data.course_name = templateCache.get('course_name');
+        record_data.templateEmailSubject = templateEmailSubject;
+        record_data.templateEmailContent = templateEmailContent;
+        record_data.template_id = templateObj.templateid;
+        record_data.revision_id = templateObj.revision_id;
+        record_data.triggered_from_user_id = templateObj.triggered_from_user_id;
+        record_data.target_user_id = student_id;
+        record_data.course_id = templateObj.course_id;
+        record_data.instructor_id = templateObj.instructor_id;
+        record_data.assignment_name = params.assignmenttitle;
+        record_data.actual_grade = assigngrade;
+
+        // case where previews are just added to grade alert type and missed exam etc
+        if (alert_type !== 'assign') {
+            button.addEventListener('click', function () {
+                setup_preview_buttons_from_template(record_data)
+            });
+        }
+        // add record to student_template_cache_array to have data to submit / email
+        // console.log("record data =", record_data);
+        student_template_cache_array.push(record_data);
+
+    });
+    // case where assignment titles are taken from user input
+    if (alert_type === 'assign') // we have to setup the assignment title before previewing! maybe force the user ?
+    {
+        const assignment_input = document.getElementById('early-alert-assignment-title');
+        assignment_input.addEventListener('focusout', function(evt) {
+            var assignment_title = document.getElementById('early-alert-assignment-title').value;
+            if (assignment_title) {
+                templateCache.set('assignment_title', assignment_title);
+                console.log('setting up more modals with titles');
+                setup_preview_emails_with_titles(templateCache); // call back function
+            }
+        });
+
+    }
+    // once we have all the data we can setup the emails to submit with the template cache data and student ids BUT we have to manage and select the users if they are checked/unchceked
+    setup_send_emails(student_template_cache_array);
+}
+
+function setup_preview_emails_with_titles(templateCache) {
+    // console.log("template cache = ", templateCache);
+    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
+    // Get the early-alert-alert-type value
+    const alert_type = document.getElementById('early-alert-alert-type').value;
+    // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
+    //console.log("template cache:", templateCache);
+    // store ALL the student data and template cache etc when its processed
+    let student_template_cache_array = [];
+    preview_buttons.forEach(function (button) {
+        let record_data = {};
+        const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
+        const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
+        if (alert_type === 'grade') { // we only use grade/select etc in this alert type
+            const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
+            let selected_grade = grade_select.options[grade_select.selectedIndex].text;
+        }
+
+        let templateObj = {};
+        if (checkbox) {
+
+            // now, access the parent <tr> element (the table row)
+            const table_row = checkbox.parentNode;
+            // extract the student name from the second <td> element within the table row
+            const student_name_td = table_row.nextElementSibling;
+            // fix and parse the name
+            const student_lname_fname = student_name_td.firstChild;
+            var student_name_arr = [];
+            var student_name = "";
+            student_lname_fname.data.split(/\s*,\s*/).forEach(function(me) {
+                student_name_arr.push(me);
+            });
+            student_name = student_name_arr[1] + ' ' + student_name_arr[0];
+            // console.log(student_name);
+            var student_id = checkbox.getAttribute('data-student-id');
+            const studentCampusAttr = checkbox.getAttribute('data-student-campus');
+            const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
+            const studentMajorAttr = checkbox.getAttribute('data-student-major');
+            var facTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr;
+            var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
+            var templateEmailContent = '';
+            var templateEmailSubject = '';
+
+            if (templateCache.has(deptTemplateKey)){
+                // console.log("department cache found:", templateCache.get(deptTemplateKey));
+                templateEmailSubject = templateCache.get(deptTemplateKey).subject;
+                templateEmailContent = templateCache.get(deptTemplateKey).message;
+                templateObj = templateCache.get(deptTemplateKey);
+            } else if (templateCache.has(facTemplateKey)) {
+                // console.log("faculty cache found:", templateCache.get(facTemplateKey));
+                templateEmailSubject = templateCache.get(facTemplateKey).subject;
+                templateEmailContent = templateCache.get(facTemplateKey).message;
+                templateObj = templateCache.get(facTemplateKey);
+            } else {
+                templateEmailSubject = 'Template not found';
+                templateEmailContent = 'Template not found';
+            }
+
+        } else {
+            // console.log("couldn't find checkbox :/");
+        }
+
+        if (assigngrade){
+            // console.log("assign grade: ", assigngrade);
+        }
+        // console.log("template email content:", templateEmailContent);
+
+        var assignment_title = '';
+
+        var params = {
+            studentname: student_name_arr,
+            assignmentgrade: assigngrade,
+            assignmenttitle: templateCache.get('assignment_title'),
+            coursename: templateCache.get('course_name'),
+            //customgrade: grade_select?.options[grade_select.selectedIndex].text, // Ellio has the fix for this - I SAW IT!
+            defaultgrade: "D+"
+        };
+        //console.log("passing these params to adduserinfo:", params);
         templateEmailContent = addUserInfo(templateEmailContent, params );
 
         // console.log("template email content post-addUserInfo:", templateEmailContent);
@@ -355,13 +487,13 @@ function setup_preview_emails(templateCache) {
 
         button.addEventListener('click', function () {
             setup_preview_buttons_from_template(record_data)
+
         });
         // add record to student_template_cache_array to have data to submit / email
         // console.log("record data =", record_data);
         student_template_cache_array.push(record_data);
 
     });
-    // once we have all the data we can setup the emails to submit with the template cache data and student ids BUT we have to manage and select the users if they are checked/unchceked
     setup_send_emails(student_template_cache_array);
 }
 
@@ -432,12 +564,51 @@ function create_notification_dialog(student_template_cache_array) {
     });
 }
 
-function get_users() {
+function get_users2() {
    selectBox.init('#search', 'earlyalert_get_users', "Select a user");
    // On search change, navigate to a url with the user_id as a parameter
     document.getElementById('search').addEventListener('change', function (event) {
         window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + search.value;
     });
+}
+/**
+ * Get users from the search input
+ */
+function get_users() {
+    const inputElement = document.getElementById('search');
+    if (inputElement){ // element exists and available on that specific page tha requires it else nope
+        const datalistElement = document.getElementById('early-alert-impersonate');
+
+        // Event listener for input element
+        inputElement.addEventListener('input', function (event) {
+            const query = event.target.value;
+            var get_users = ajax.call([{
+                methodname: 'organization_users_get',
+                args: {
+                    name: query
+                }
+            }]);
+            get_users[0].done(function (users) {
+                // console.log(users);
+                datalistElement.innerHTML = '';
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.text = user.firstname + ' ' + user.lastname;
+                    datalistElement.appendChild(option);
+                });
+                // When a selection is made, reload the page with the user_id as a parameter
+                inputElement.addEventListener('change', function (event) {
+                    window.location.href = window.location.href + '?user_id=' + event.target.value;
+                });
+
+            }).fail(function (e) {
+                alert(e);
+                // fail gracefully somehow :'( ;
+            });
+        });
+    }
+
 }
 
 function addUserInfo(emailText, params) {
