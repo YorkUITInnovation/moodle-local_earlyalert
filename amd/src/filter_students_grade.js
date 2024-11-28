@@ -311,9 +311,10 @@ function setup_preview_emails(templateCache) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
+        let selected_grade = '';
         if (alert_type === 'grade') { // we only use grade/select etc in this alert type
             const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
-            let selected_grade = grade_select.options[grade_select.selectedIndex].text;
+            selected_grade = grade_select.options[grade_select.selectedIndex].text;
         }
 
         let templateObj = {};
@@ -372,9 +373,10 @@ function setup_preview_emails(templateCache) {
             assignmentgrade: assigngrade,
             assignmenttitle: templateCache.get('assignment_title'),
             coursename: templateCache.get('course_name'),
-            //customgrade: grade_select?.options[grade_select.selectedIndex].text, // Ellio has the fix for this - I SAW IT!
+            customgrade: selected_grade ? selected_grade : 'D+',
             defaultgrade: "D+"
         };
+
         //console.log("passing these params to adduserinfo:", params);
         templateEmailContent = addUserInfo(templateEmailContent, params );
 
@@ -425,9 +427,10 @@ function setup_preview_emails_with_titles(templateCache) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
+        let selected_grade = '';
         if (alert_type === 'grade') { // we only use grade/select etc in this alert type
             const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
-            let selected_grade = grade_select.options[grade_select.selectedIndex].text;
+            selected_grade = grade_select.options[grade_select.selectedIndex].text;
         }
 
         let templateObj = {};
@@ -486,7 +489,7 @@ function setup_preview_emails_with_titles(templateCache) {
             assignmentgrade: assigngrade,
             assignmenttitle: templateCache.get('assignment_title'),
             coursename: templateCache.get('course_name'),
-            //customgrade: grade_select?.options[grade_select.selectedIndex].text, // Ellio has the fix for this - I SAW IT!
+            customgrade: selected_grade ? selected_grade : 'D+',
             defaultgrade: "D+"
         };
         //console.log("passing these params to adduserinfo:", params);
@@ -610,7 +613,7 @@ function addUserInfo(emailText, params) {
         '[firstname]',
         '[fullname]',
         '[usergrade]',
-        '[mailgrade]',
+        '[grade]',
         '[coursetitle]',
         '[assignmenttitle]'
     ];
@@ -618,6 +621,7 @@ function addUserInfo(emailText, params) {
     // Build replacement info
     let uniqueMatches = {};
     for (let i = 0; i < textReplace.length; i++) {
+        console.log("checking for:",textReplace[i]);
         if (emailText.includes(textReplace[i])) {
             // Perform action for each unique match found
             switch (i) {
@@ -633,12 +637,12 @@ function addUserInfo(emailText, params) {
                     break;
                 case 2:
                     // usergrade action
-                    let userGradeText = params.assignmentgrade || (params.defaultgrade ? params.defaultgrade : '{GRADE NOT PROVIDED/FOUND}');
+                    let userGradeText = params.assignmentgrade || '{USER GRADE NOT PROVIDED/FOUND}';
                     uniqueMatches[i] = userGradeText;
                     break;
                 case 3:
-                    // defaultgrade acton
-                    let defaultGradeText = params.defaultgrade || '{DEFAULT GRADE NOT PROVIDED/FOUND}';
+                    // grade acton
+                    let defaultGradeText = params.customgrade || (params.defaultgrade ? params.defaultgrade : '{GRADE NOT PROVIDED/FOUND}');
                     uniqueMatches[i] = defaultGradeText;
                     break;
                 case 4:
