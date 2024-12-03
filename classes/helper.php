@@ -210,7 +210,7 @@ class helper
                 $users = enrol_get_course_users($course_id, true); // returns user objects of those enrolled in course
                 foreach ($users as $student) {
                     // Get the student's grade for the given course ID.
-                    //$grade = grade_get_course_grade($student->id, $course_id);
+                    $grade = grade_get_course_grade($student->id, $course_id);
                     $grade = new \stdClass();
                     $grade->grade = 1;
                     // Get student campus, faculty, major
@@ -301,6 +301,27 @@ class helper
         $teacher = $DB->get_record('role', array('shortname' => 'teacher'), 'id');
         // SQL to get user roles based on the editing_teacher and teacher role IDs.
         $sql = "SELECT * FROM {role_assignments} WHERE userid = ? AND roleid IN ($editing_teacher->id, $teacher->id)";
+        // Get user roles.
+        if ($userroles = $DB->get_records_sql($sql, array($USER->id))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * Check if the current user is a student.
+     *
+     * @return bool
+     */
+    public static function is_student()
+    {
+        global $USER, $DB;
+        // Get Role ID for student.
+        $student = $DB->get_record('role', array('shortname' => 'student'), 'id');
+        // SQL to get user roles based on the editing_teacher and teacher role IDs.
+        $sql = "SELECT * FROM {role_assignments} WHERE userid = ? AND roleid IN ($student->id, $student->id)";
         // Get user roles.
         if ($userroles = $DB->get_records_sql($sql, array($USER->id))) {
             return true;

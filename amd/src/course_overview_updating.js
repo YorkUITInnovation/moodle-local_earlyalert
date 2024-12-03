@@ -2,6 +2,7 @@ import ajax from 'core/ajax';
 import Templates from 'core/templates';
 import ModalFactory from 'core/modal_factory';
 import {get_string as getString} from 'core/str';
+import {add as addToast} from 'core/toast';
 
 export const init = () => {
     update_student_status_for_advisor();
@@ -28,8 +29,17 @@ function update_student_status_for_instructor() {
                 }
             }])[0].then(function (response) {
                 console.log(response);
+                // Show Toast notification
+                addToast(getString('advised_success_toast', 'local_earlyalert'), {
+                    delay: 10000,
+                    closeButton: true,
+                });
             }).catch(function (error) {
                 console.error('Failed to update student status:', error);
+                addToast(getString('advised_failed_toast', 'local_earlyalert'), {
+                    delay: 10000,
+                    closeButton: true,
+                });
             });
         });
     });
@@ -53,8 +63,17 @@ function update_student_status_for_advisor() {
                 }
             }])[0].then(function (response) {
                 console.log(response);
+                // Show Toast notification
+                addToast(getString('advised_success_toast', 'local_earlyalert'), {
+                    delay: 10000,
+                    closeButton: true,
+                });
             }).catch(function (error) {
                 console.error('Failed to update student status:', error);
+                addToast(getString('advised_failed_toast', 'local_earlyalert'), {
+                    delay: 10000,
+                    closeButton: true,
+                });
             });
         });
     });
