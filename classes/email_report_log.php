@@ -195,7 +195,7 @@ CONST GRADE_A = 1;
         $this->user_read = $result->user_read ?? 0;
         $this->course_id = $result->course_id ?? 0;
         $this->instructor_id = $result->instructor_id ?? 0;
-        $this->assignment_name = $result->assignment_id ?? 0;
+        $this->assignment_name = $result->assignment_name ?? '';
         $this->trigger_grade = $result->trigger_grade ?? '';
         $this->actual_grade = $result->actual_grade ?? 0;
         $this->student_advised_by_advisor = $result->student_advised_by_advisor ?? 0;
@@ -293,7 +293,8 @@ CONST GRADE_A = 1;
         return $this->course_id;
     }
 
-    public function get_trigger_grade_letter() {
+    public function get_trigger_grade_letter(): string {
+        file_put_contents('/var/www/moodledata/trigger_grade.txt', $this->trigger_grade);
         switch ($this->trigger_grade) {
             case self::GRADE_F:
                 return 'F';
@@ -406,7 +407,6 @@ CONST GRADE_A = 1;
     public function get_unit_information(): \stdClass|false
     {
         global $DB;
-
 
         if ($this->department_id) {
             $sql = "Select

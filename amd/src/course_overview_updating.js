@@ -49,12 +49,13 @@ function update_student_status_for_advisor() {
     // Select all checkboxes with the class .checkbox-advisor-followup
     const checkboxes = document.querySelectorAll('.checkbox-advisor-followup');
 
-    // Loop through each checkbox and add an event listener
+// Loop through each checkbox and add an event listener
     checkboxes.forEach(function (checkbox) {
         checkbox.addEventListener('change', function () {
             const logId = this.getAttribute('data-logid');
+            // Check if this checkbox is checked
             const status = this.checked ? 1 : 0;
-
+            // Perform the AJAX call for the checkbox that was changed
             ajax.call([{
                 methodname: 'earlyalert_update_student_status_advisor',
                 args: {

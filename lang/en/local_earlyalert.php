@@ -67,6 +67,7 @@ $string['grade_instructions'] = '<ul>
 <ul><li>Note that this is the letter grade that will appear in the email. </li></ul>
 </li>
 </ul>';
+$string['lookup_student'] = 'Lookup Student';
 $string['low_grade'] = 'Low grade';
 $string['manage_roles'] = 'Manage Roles';
 $string['manage_templates'] = 'Manage Templates';
@@ -81,6 +82,14 @@ $string['select_students'] ='Select the students to whom you would like a {$a} a
 You can preview the message by clicking on the “preview” button prior to sending.';
 $string['showgrades'] = 'Show Grades';
 $string['student_lookup'] = 'Student Lookup';
+$string['student_lookup_help'] = '<ul><li>You can search for a student using their student number (SISID) or Name</li>
+<li>You can wildcard (*) the name if required, and then select the correct student from the list </li>
+</ul>';
+$string['student_lookup_instructions'] = '<ul>
+<li>Please find the student’s course enrolments below. If a course <span class="text-danger">appears in red</span>, an alert has been raised.</li>
+    <li>Click on the course name to view the type of alert and additional details </li>
+    <li>To indicate that you have spoken to the student about a specific course, check off the appropriate box under “advising status”</li>
+    </ul>';
 $string['preview_email'] = 'Preview';
 $string['raise_an_alert'] = 'Raise an Alert';
 $string['send'] = 'Send';

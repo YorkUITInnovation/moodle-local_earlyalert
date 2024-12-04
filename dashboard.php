@@ -1,9 +1,6 @@
 <?php
 global $CFG, $OUTPUT, $PAGE, $DB, $USER;
 require_once("../../config.php");
-require_once($CFG->libdir . "/externallib.php");
-require_once("../../../html/enrol/externallib.php");
-
 
 use local_earlyalert\base;
 use local_earlyalert\helper;
