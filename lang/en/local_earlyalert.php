@@ -67,6 +67,7 @@ $string['grade_instructions'] = '<ul>
 <ul><li>Note that this is the letter grade that will appear in the email. </li></ul>
 </li>
 </ul>';
+$string['lookup_student'] = 'Lookup Student';
 $string['low_grade'] = 'Low grade';
 $string['manage_roles'] = 'Manage Roles';
 $string['manage_templates'] = 'Manage Templates';
@@ -81,6 +82,14 @@ $string['select_students'] ='Select the students to whom you would like a {$a} a
 You can preview the message by clicking on the “preview” button prior to sending.';
 $string['showgrades'] = 'Show Grades';
 $string['student_lookup'] = 'Student Lookup';
+$string['student_lookup_help'] = '<ul><li>You can search for a student using their student number (SISID) or Name</li>
+<li>You can wildcard (*) the name if required, and then select the correct student from the list </li>
+</ul>';
+$string['student_lookup_instructions'] = '<ul>
+<li>Please find the student’s course enrolments below. If a course <span class="text-danger">appears in red</span>, an alert has been raised.</li>
+    <li>Click on the course name to view the type of alert and additional details </li>
+    <li>To indicate that you have spoken to the student about a specific course, check off the appropriate box under “advising status”</li>
+    </ul>';
 $string['preview_email'] = 'Preview';
 $string['process_mail_queue'] = 'Process Early Alert queue';
 $string['raise_an_alert'] = 'Raise an Alert';
@@ -91,7 +100,6 @@ $string['send_alert_based_on'] = 'Send an alert based on';
 $string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
 $string['view_message'] = 'View Message Details';
 
-
 /* Email template */
 $string['preview_email_greeting'] = 'Hello';
 $string['send_email'] = 'Send Email';
@@ -99,6 +107,10 @@ $string['send_dialog_text'] = 'Are you sure you want to send the alert emails to
 $string['sent_dialog_text'] = 'Thank you. This message has been scheduled to be sent to {$a} students.';
 $string['cancel'] = 'Cancel';
 $string['could_not_send_email'] = 'Sorry an error occured and we could not send the emails';
+
+/* Toast messages */
+$string['advised_success_toast'] = 'Advised option updated successfully';
+$string['advised_failed_toast'] = 'Advised option not saved, conatact your administrator';
 
 /*LDAP Setting*/
 $string['pluginsettings'] = 'Plugin Settings';

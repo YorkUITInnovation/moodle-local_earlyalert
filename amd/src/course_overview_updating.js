@@ -2,6 +2,7 @@ import ajax from 'core/ajax';
 import Templates from 'core/templates';
 import ModalFactory from 'core/modal_factory';
 import {get_string as getString} from 'core/str';
+import {add as addToast} from 'core/toast';
 
 export const init = () => {
     update_student_status_for_advisor();
@@ -28,8 +29,17 @@ function update_student_status_for_instructor() {
                 }
             }])[0].then(function (response) {
                 console.log(response);
+                // Show Toast notification
+                addToast(getString('advised_success_toast', 'local_earlyalert'), {
+                    delay: 10000,
+                    closeButton: true,
+                });
             }).catch(function (error) {
                 console.error('Failed to update student status:', error);
+                addToast(getString('advised_failed_toast', 'local_earlyalert'), {
+                    delay: 10000,
+                    closeButton: true,
+                });
             });
         });
     });
@@ -39,12 +49,13 @@ function update_student_status_for_advisor() {
     // Select all checkboxes with the class .checkbox-advisor-followup
     const checkboxes = document.querySelectorAll('.checkbox-advisor-followup');
 
-    // Loop through each checkbox and add an event listener
+// Loop through each checkbox and add an event listener
     checkboxes.forEach(function (checkbox) {
         checkbox.addEventListener('change', function () {
             const logId = this.getAttribute('data-logid');
+            // Check if this checkbox is checked
             const status = this.checked ? 1 : 0;
-
+            // Perform the AJAX call for the checkbox that was changed
             ajax.call([{
                 methodname: 'earlyalert_update_student_status_advisor',
                 args: {
@@ -53,8 +64,17 @@ function update_student_status_for_advisor() {
                 }
             }])[0].then(function (response) {
                 console.log(response);
+                // Show Toast notification
+                addToast(getString('advised_success_toast', 'local_earlyalert'), {
+                    delay: 10000,
+                    closeButton: true,
+                });
             }).catch(function (error) {
                 console.error('Failed to update student status:', error);
+                addToast(getString('advised_failed_toast', 'local_earlyalert'), {
+                    delay: 10000,
+                    closeButton: true,
+                });
             });
         });
     });

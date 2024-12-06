@@ -1,0 +1,28 @@
+<div class="row">
+    <div class="col-md-12">
+        {{#str}}student_lookup_help, local_earlyalert{{/str}}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <label for="search" class="col-form-label">
+            {{#str}}lookup_student, local_earlyalert{{/str}}
+        </label>
+        <select id="earlyalert-student-search" name="search" class="form-control">
+        </select>
+    </div>
+</div>
+{{#userid}}
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{lastname}}, {{firstname}} ({{idnumber}})</h3>
+                </div>
+                <div class="card-body">
+                    {{> local_earlyalert/student_lookup_courses}}
+                </div>
+            </div>
+        </div>
+    </div>
+{{/userid}}

@@ -1,9 +1,6 @@
 <?php
 global $CFG, $OUTPUT, $PAGE, $DB, $USER;
 require_once("../../config.php");
-require_once($CFG->libdir . "/externallib.php");
-require_once("../../../html/enrol/externallib.php");
-
 
 use local_earlyalert\base;
 use local_earlyalert\helper;
@@ -20,6 +17,11 @@ $PAGE->requires->js_call_amd('local_earlyalert/course_overview', 'init');
 
 $impersonate = has_capability('local/earlyalert:impersonate', $context, $USER->id);
 $teacher = helper::is_teacher();
+$student = helper::is_student();
+
+if ($student) {
+    redirect($CFG->wwwroot . '/earlyalert/student_dashboard');
+}
 
 if (!$impersonate && !$teacher) {
     redirect($CFG->wwwroot . '/my');
