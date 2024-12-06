@@ -82,6 +82,7 @@ You can preview the message by clicking on the “preview” button prior to sen
 $string['showgrades'] = 'Show Grades';
 $string['student_lookup'] = 'Student Lookup';
 $string['preview_email'] = 'Preview';
+$string['process_mail_queue'] = 'Process Early Alert queue';
 $string['raise_an_alert'] = 'Raise an Alert';
 $string['send'] = 'Send';
 $string['preview'] = 'Preview';
