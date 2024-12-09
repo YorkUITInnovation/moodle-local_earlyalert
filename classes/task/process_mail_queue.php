@@ -7,6 +7,11 @@
  */
 namespace local_earlyalert\task;
 
+
+global $CFG;
+
+require_once($CFG->dirroot . '/message/lib.php');
+
 use local_earlyalert\email_report_log;
 use local_etemplate\email;
 use local_etemplate\emails;
@@ -71,6 +76,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                     try {
                         if ($DB->update_record('local_earlyalert_report_log', $emailtoprocess)) {
                             mtrace("Alert flagged as sent");
+                            send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body);
                         }
                     } catch (Exception $e) {
                         mtrace("Error updating report log table: " . $e->getMessage());
@@ -83,6 +89,24 @@ class process_mail_queue extends \core\task\scheduled_task {
         } else {
             mtrace("No emails need to be processed");
         }
+    }
+
+    public function send_moodle_notification($userfrom, $userto, $subject, $body ){
+
+        // Create a new message object.
+        $message = new \core\message\message();
+        $message->component = 'early_alert';
+        $message->name = 'Early Alert Notification';
+        $message->userfrom = $userfrom; // The user sending the message.
+        $message->userto = $userto; // The user receiving the message.
+        $message->subject = $subject;
+        $message->fullmessage = $body;
+        $message->fullmessageformat = FORMAT_HTML;
+        $message->fullmessagehtml = $body;
+        //$message->smallmessage = 'This is a short message.';
+        $message->notification = 1; // This is a notification.
+
+        $messageid = message_send($message);
     }
 
 }
