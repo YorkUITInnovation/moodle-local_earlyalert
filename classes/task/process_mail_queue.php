@@ -76,7 +76,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                     try {
                         if ($DB->update_record('local_earlyalert_report_log', $emailtoprocess)) {
                             mtrace("Alert flagged as sent");
-                            send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body);
+                            $this->send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body);
                         }
                     } catch (Exception $e) {
                         mtrace("Error updating report log table: " . $e->getMessage());
@@ -95,7 +95,7 @@ class process_mail_queue extends \core\task\scheduled_task {
 
         // Create a new message object.
         $message = new \core\message\message();
-        $message->component = 'early_alert';
+        $message->component = 'local_earlyalert';
         $message->name = 'Early Alert Notification';
         $message->userfrom = $userfrom; // The user sending the message.
         $message->userto = $userto; // The user receiving the message.
