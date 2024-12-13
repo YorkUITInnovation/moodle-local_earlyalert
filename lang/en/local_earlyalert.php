@@ -122,3 +122,6 @@ $string['ldap_password'] = 'LDAP User Password';
 $string['earlyalert:impersonate'] = 'Impersonate users';
 $string['earlyalert:student_lookup'] = 'Student Lookup';
 $string['earlyalert:view_reports'] = 'View Reports';
+
+// Message provider
+$string['messageprovider:earlyalert_notification'] = 'Early Alert Notification';

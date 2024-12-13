@@ -146,5 +146,23 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         // Earlyalert savepoint reached.
         upgrade_plugin_savepoint(true, 2024112621, 'local', 'earlyalert');
     }
+    // add message provider for earlyalert notifications
+    if ($oldversion < 2024121201) {
+
+        // Define table message_providers to be updated.
+        $table = new xmldb_table('message_providers');
+
+        // Insert new record into message_providers table.
+        $record = new stdClass();
+        $record->name = 'earlyalert_notification';
+        $record->component = 'local_earlyalert';
+        $record->capability = null;
+
+        // Insert the record.
+        $DB->insert_record('message_providers', $record);
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 2024121201, 'local', 'earlyalert');
+    }
     return true;
 }

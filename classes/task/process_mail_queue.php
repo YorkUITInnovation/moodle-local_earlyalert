@@ -62,6 +62,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                 );
                 $subject = $prepare_template->subject;
                 $body = $prepare_template->message;
+                $course_id = $emailstoprocess->course_id;
                 mtrace("attempting to send mail with this info:");
                 mtrace("student = " . print_r($student, TRUE));
                 mtrace("instructor id = " . print_r($email->get_instructor_id(), TRUE));
@@ -76,7 +77,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                     try {
                         if ($DB->update_record('local_earlyalert_report_log', $emailtoprocess)) {
                             mtrace("Alert flagged as sent");
-                            $this->send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body);
+                            $this->send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body, $course_id);
                         }
                     } catch (Exception $e) {
                         mtrace("Error updating report log table: " . $e->getMessage());
@@ -91,22 +92,27 @@ class process_mail_queue extends \core\task\scheduled_task {
         }
     }
 
-    public function send_moodle_notification($userfrom, $userto, $subject, $body ){
+    public function send_moodle_notification($userfrom, $userto, $subject, $body, $course_id){
 
+        mtrace("sending moodle notification to user: " . $userto . " from " . $userfrom);
         // Create a new message object.
         $message = new \core\message\message();
         $message->component = 'local_earlyalert';
-        $message->name = 'Early Alert Notification';
+        $message->name = 'earlyalert_notification';
         $message->userfrom = $userfrom; // The user sending the message.
         $message->userto = $userto; // The user receiving the message.
         $message->subject = $subject;
         $message->fullmessage = $body;
         $message->fullmessageformat = FORMAT_HTML;
         $message->fullmessagehtml = $body;
-        //$message->smallmessage = 'This is a short message.';
-        $message->notification = 1; // This is a notification.
-
+        $message->smallmessage = 'An email alert with '. $subject . ' has been sent to you';
+        $message->notification = 1; // This is a system generated notification.
+        $message->courseid = $course_id;
         $messageid = message_send($message);
+        mtrace("message id: " . $messageid);
+        if ($messageid) {
+            mtrace("Message sent to user: " . $userto . ' with message id: ' . $messageid);
+        }
     }
 
 }
