@@ -8,8 +8,11 @@ use local_earlyalert\helper;
 use local_earlyalert\email_report_log;
 
 require_login(1, false);
-
+// Check if user has access to early alert
 $context = context_system::instance();
+if (!has_capability('local/earlyalert:access_early_alert', $context)) {
+    redirect($CFG->wwwroot . '/my');
+}
 
 // Load AMD module
 $PAGE->requires->js_call_amd('local_earlyalert/student_lookup', 'init');

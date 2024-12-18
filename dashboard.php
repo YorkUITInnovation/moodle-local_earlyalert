@@ -8,6 +8,10 @@ use local_earlyalert\helper;
 require_login(1, false);
 
 $context = context_system::instance();
+// Check if user has access to early alert
+if (!has_capability('local/earlyalert:access_early_alert', $context)) {
+    redirect($CFG->wwwroot . '/my');
+}
 // Load CSS
 $PAGE->requires->css('/local/earlyalert/css/styles.css');
 // Load AMD module

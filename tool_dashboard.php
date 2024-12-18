@@ -8,6 +8,10 @@ use local_earlyalert\helper;
 require_login(1, false);
 
 $context = context_system::instance();
+// Check if user has access to early alert
+if (!has_capability('local/earlyalert:access_early_alert', $context)) {
+    redirect($CFG->wwwroot . '/my');
+}
 
 // Load AMD module
 //$PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
