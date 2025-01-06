@@ -79,6 +79,12 @@ echo base::page(
     get_string('student_lookup', 'local_earlyalert')
 );
 
+$event = \local_earlyalert\event\earlyalert_viewed::create(array(
+    'context' => \context_system::instance(),
+    'relateduserid' => $USER->id
+));
+$event->trigger();
+
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_earlyalert/student_lookup', $combined_courses);
 

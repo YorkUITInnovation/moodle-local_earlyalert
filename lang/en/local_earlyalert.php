@@ -50,6 +50,7 @@ $string['course_overview_render_instructions'] = '<ul>
   <li>Click on the student’s name to see the alert type(s) and details.</li>
   <li>To indicate that a student has followed up with you, check off the appropriate box under “advising status”.</li>
 </ul>';
+$string['earlyalert_viewed'] = 'Early Alert Viewed';
 $string['exam_instructions'] = '<ul>
 <li>These messages inform students of a missed exam that threatens their success in the course  
 </li>

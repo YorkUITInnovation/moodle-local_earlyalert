@@ -44,6 +44,12 @@ if (has_capability('local/earlyalert:view_reports', $context, $USER->id)) {
     $data->reports = true;
 }
 
+$event = \local_earlyalert\event\earlyalert_viewed::create(array(
+    'context' => \context_system::instance(),
+    'relateduserid' => $USER->id
+));
+$event->trigger();
+
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_earlyalert/tools_dashboard', $data);
 
