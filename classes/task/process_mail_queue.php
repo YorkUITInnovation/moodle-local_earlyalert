@@ -86,10 +86,10 @@ class process_mail_queue extends \core\task\scheduled_task {
                                 $this->send_moodle_notification($email->get_instructor_id(), $advisor, $subject, $body, $course_id);
                             }
                         }
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                         mtrace("Error updating report log table: " . $e->getMessage());
                     }
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     // Log or handle the exception in some way
                     mtrace('Error sending email: ' . $e->getMessage());
                 }
