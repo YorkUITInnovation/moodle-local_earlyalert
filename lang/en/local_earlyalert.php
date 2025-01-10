@@ -72,6 +72,7 @@ $string['lookup_student'] = 'Lookup Student';
 $string['low_grade'] = 'Low grade';
 $string['manage_roles'] = 'Manage Roles';
 $string['manage_templates'] = 'Manage Templates';
+$string['message_to_advisors'] = 'You are receiving this email because you are the advisor for the following student(s) who has/have been identified as at risk in one or more of their courses. Please follow up with the student(s) as soon as possible.' . "\n\n";
 $string['missed_assignment'] = 'Missed Assignment';
 $string['missed_exam'] = 'Missed Exam';
 $string['my_courses'] = 'My Courses';

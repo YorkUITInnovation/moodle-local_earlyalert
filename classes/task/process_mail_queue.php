@@ -49,6 +49,8 @@ class process_mail_queue extends \core\task\scheduled_task {
                 $email = new email_report_log($emailtoprocess->id);
                 //get template info
                 $template = new email($email->get_templateid());
+                // Get Adivsors that should be notified for the email
+                $advisors = $template->get_unit_advisors();
                 // Build info to send email
                 $student = $email->get_student();
                 $prepare_template = email::replace_message_placeholders(
@@ -69,7 +71,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                 mtrace("subject = " . print_r($subject, TRUE));
                 mtrace("body = " . print_r($body, TRUE));
                 try {
-                    if (!email_to_user($student, $email->get_instructor_id(), $subject, $body, $body)) {
+                    if (!$this->send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body, $course_id)) {
                         throw new Exception('Failed to send email');
                     }
                     mtrace("Alert sent to " . $email->getTargetUserId());
@@ -77,7 +79,12 @@ class process_mail_queue extends \core\task\scheduled_task {
                     try {
                         if ($DB->update_record('local_earlyalert_report_log', $emailtoprocess)) {
                             mtrace("Alert flagged as sent");
-                            $this->send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body, $course_id);
+                            //$this->send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body, $course_id);
+                            // Now send to advisors
+                            foreach ($advisors as $key => $advisor) {
+                                $body = get_string('message_to_advisors', 'local_earlyalert') . $body;
+                                $this->send_moodle_notification($email->get_instructor_id(), $advisor, $subject, $body, $course_id);
+                            }
                         }
                     } catch (Exception $e) {
                         mtrace("Error updating report log table: " . $e->getMessage());
@@ -112,7 +119,9 @@ class process_mail_queue extends \core\task\scheduled_task {
         mtrace("message id: " . $messageid);
         if ($messageid) {
             mtrace("Message sent to user: " . $userto . ' with message id: ' . $messageid);
+            return true;
         }
+        return false;
     }
 
 }

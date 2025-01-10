@@ -370,7 +370,7 @@ CONST GRADE_A = 1;
     public function get_student(): \stdClass|false
     {
         global $DB;
-        if ($student = $DB->get_record('user', array('id' => $this->target_user_id),'id,firstname,lastname,idnumber,email')) {
+        if ($student = $DB->get_record('user', array('id' => $this->target_user_id))) {
             $sql = "Select
                         uid.data As major
                     From
@@ -385,7 +385,7 @@ CONST GRADE_A = 1;
             }
             return $student;
         }
-        return $DB->get_record('user', array('id' => $this->target_user_id),'id,firstname,lastname,idnumber,email');
+        return $DB->get_record('user', array('id' => $this->target_user_id));
     }
 
     /**
@@ -396,7 +396,7 @@ CONST GRADE_A = 1;
     public function get_instructor(): \stdClass|false
     {
         global $DB;
-        return $DB->get_record('user', array('id' => $this->instructor_id),'firstname,lastname,idnumber,email');
+        return $DB->get_record('user', array('id' => $this->instructor_id));
     }
 
     /**
