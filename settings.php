@@ -23,5 +23,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext('earlyalert_ldapuser', get_string('ldap_user', 'local_earlyalert'), '', ''));
     /*Ldap server user password*/
     $settings->add(new admin_setting_configpasswordunmask('earlyalert_ldappwd', get_string('ldap_password', 'local_earlyalert'), '', ''));
+    // Send emails to advisors
+    $settings->add(new admin_setting_configcheckbox('earlyalert_sendemailtoadvisors', get_string('send_email_to_advisors', 'local_earlyalert'), '', 0));
     
 }

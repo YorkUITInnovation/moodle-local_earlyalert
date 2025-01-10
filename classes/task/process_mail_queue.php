@@ -38,7 +38,7 @@ class process_mail_queue extends \core\task\scheduled_task {
      * Execute the scheduled task.
      */
     public function execute() {
-        global $DB;
+        global $DB, $CFG;
 
     	//lets do some stuff here!
         $where = 'date_message_sent = ?';
@@ -81,9 +81,11 @@ class process_mail_queue extends \core\task\scheduled_task {
                             mtrace("Alert flagged as sent");
                             //$this->send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body, $course_id);
                             // Now send to advisors
-                            foreach ($advisors as $key => $advisor) {
-                                $body = get_string('message_to_advisors', 'local_earlyalert') . $body;
-                                $this->send_moodle_notification($email->get_instructor_id(), $advisor, $subject, $body, $course_id);
+                            if ($CFG->earlyalert_sendemailtoadvisors == true) {
+                                foreach ($advisors as $key => $advisor) {
+                                    $body = get_string('message_to_advisors', 'local_earlyalert') . $body;
+                                    $this->send_moodle_notification($email->get_instructor_id(), $advisor, $subject, $body, $course_id);
+                                }
                             }
                         }
                     } catch (\Exception $e) {

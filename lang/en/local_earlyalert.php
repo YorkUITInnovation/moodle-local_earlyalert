@@ -82,6 +82,7 @@ $string['name'] = 'Name';
 $string['select_grade'] = 'Default Grade';
 $string['select_students'] ='Select the students to whom you would like a {$a} alert to be sent by using the checkbox(es) below.<br><br>
 You can preview the message by clicking on the “preview” button prior to sending.';
+$string['send_email_to_advisors'] = 'Send email to advisors?';
 $string['showgrades'] = 'Show Grades';
 $string['student_lookup'] = 'Student Lookup';
 $string['student_lookup_help'] = '<ul><li>You can search for a student using their student number (SISID) or Name</li>
