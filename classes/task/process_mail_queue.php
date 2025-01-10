@@ -72,7 +72,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                 mtrace("body = " . print_r($body, TRUE));
                 try {
                     if (!$this->send_moodle_notification($email->get_instructor_id(), $email->getTargetUserId(), $subject, $body, $course_id)) {
-                        throw new Exception('Failed to send email');
+                        throw new \Exception('Failed to send email');
                     }
                     mtrace("Alert sent to " . $email->getTargetUserId());
                     $emailtoprocess->date_message_sent = time();
