@@ -103,25 +103,29 @@ class process_mail_queue extends \core\task\scheduled_task {
 
         mtrace("sending moodle notification to user: " . $userto . " from " . $userfrom);
         // Create a new message object.
-        $message = new \core\message\message();
-        $message->component = 'local_earlyalert';
-        $message->name = 'earlyalert_notification';
-        $message->userfrom = $userfrom; // The user sending the message.
-        $message->userto = $userto; // The user receiving the message.
-        $message->subject = $subject;
-        $message->fullmessage = $body;
-        $message->fullmessageformat = FORMAT_HTML;
-        $message->fullmessagehtml = $body;
-        $message->smallmessage = 'An email alert with '. $subject . ' has been sent to you';
-        $message->notification = 1; // This is a system generated notification.
-        $message->courseid = $course_id;
-        $messageid = message_send($message);
-        mtrace("message id: " . $messageid);
-        if ($messageid) {
-            mtrace("Message sent to user: " . $userto . ' with message id: ' . $messageid);
-            return true;
+        try {
+            $message = new \core\message\message();
+            $message->component = 'local_earlyalert';
+            $message->name = 'earlyalert_notification';
+            $message->userfrom = $userfrom; // The user sending the message.
+            $message->userto = $userto; // The user receiving the message.
+            $message->subject = $subject;
+            $message->fullmessage = $body;
+            $message->fullmessageformat = FORMAT_HTML;
+            $message->fullmessagehtml = $body;
+            $message->smallmessage = 'An email alert with '. $subject . ' has been sent to you';
+            $message->notification = 1; // This is a system generated notification.
+            $message->courseid = $course_id;
+            $messageid = message_send($message);
+            mtrace("message id: " . $messageid);
+            if ($messageid) {
+                mtrace("Message sent to user: " . $userto . ' with message id: ' . $messageid);
+                return true;
+            }
+        } catch (\Exception $e) {
+            mtrace("Error creating message object: " . $e->getMessage());
+            return false;
         }
-        return false;
     }
 
 }
