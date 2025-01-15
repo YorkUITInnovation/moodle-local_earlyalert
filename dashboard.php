@@ -24,7 +24,7 @@ $teacher = helper::is_teacher();
 $student = helper::is_student();
 
 if ($student) {
-    redirect($CFG->wwwroot . '/earlyalert/student_dashboard');
+    redirect($CFG->wwwroot . '/my');
 }
 
 if (!$impersonate && !$teacher) {
