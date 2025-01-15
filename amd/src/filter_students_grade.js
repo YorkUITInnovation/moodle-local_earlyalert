@@ -59,7 +59,7 @@ function filter_students_by_grade_select() {
 
 function filter_students_by_assignment() {
 
-    console.log('filter students assignment');
+
     // Get the s delected grade value from the dropdown
     const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
     const course_id = document.getElementById('early_alert_filter_course_id').value;
@@ -69,10 +69,8 @@ function filter_students_by_assignment() {
     // setup listener for drop down selection
     const assignment_input = document.getElementById('early-alert-assignment-title');
     assignment_input.addEventListener('focusout', function(evt) {
-        console.log('setting up listener for assign');
         var assignment_title = document.getElementById('early-alert-assignment-title').value;
         if (assignment_title) {
-            console.log('we got a title');
             setup_filter_students_by_grade(course_id, '9', course_name, alert_type, teacher_user_id, assignment_title);
         }
     });
@@ -144,15 +142,26 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
             grades_response.forEach(result => {
                 if (typeof result === 'object') {
-                    if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.major)) {
-                        templates.push(result.campus + "_" + result.faculty + "_" + result.major);
+                    if (!templates.includes('course_' + course_id)) {
+                        templates.push('course_' + course_id);
                     }
+
+                    if (!templates.includes(result.campus)) {
+                        templates.push(result.campus);
+                    }
+
                     if (!templates.includes(result.campus + "_" + result.faculty)) {
                         templates.push(result.campus + "_" + result.faculty);
                     }
+
+                    if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.major)) {
+                        templates.push(result.campus + "_" + result.faculty + "_" + result.major);
+                    }
+
                     result.faculty = result.faculty ? result.faculty : '';
                     result.major = result.major ? result.major : '';
                     result.campus = result.campus ? result.campus : '';
+                    result.courseid = course_id;
                     display_data.student_rows[row].students[col] = result;
                     col++;
                     if (col === num_cols) {
@@ -182,7 +191,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 display_data.exam = true;
             }
             display_data.fullname = course_name;
-            // console.log( display_data);
             // Render the template with display_data
             Templates.render('local_earlyalert/course_student_list', display_data)
                 .then(function (html, js) {
@@ -228,7 +236,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     if (alert_type === 'assign') // we have to setup the assignment title before previewing!
                     {
                         finalCache.set('assignment_title',assignment_title );
-                        console.log('setting up previews with titles ');
+
                         if (assignment_title){ // there is a case where previews were setup without titles then dont create modals
                             setup_preview_emails_with_titles(finalCache); // call back function
                         }
@@ -334,18 +342,31 @@ function setup_preview_emails(templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-            // console.log(student_name);
+
             var student_id = checkbox.getAttribute('data-student-id');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
+            const courseIdAttr = checkbox.getAttribute('data-courseid');
+            var courseTemplateKey = 'course_' + courseIdAttr;
+            var campusTemplateKey = studentCampusAttr;
             var facTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr;
             var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            if (templateCache.has(deptTemplateKey)){
-                // console.log("department cache found:", templateCache.get(deptTemplateKey));
+            if (templateCache.has(courseTemplateKey)){
+                //console.log("course cache found:", templateCache.get(courseTemplateKey));
+                templateEmailSubject = templateCache.get(courseTemplateKey).subject;
+                templateEmailContent = templateCache.get(courseTemplateKey).message;
+                templateObj = templateCache.get(courseTemplateKey);
+            } else if (templateCache.has(campusTemplateKey)) {
+                // console.log("department cache found:", templateCache.get(campusTemplateKey));
+                templateEmailSubject = templateCache.get(campusTemplateKey).subject;
+                templateEmailContent = templateCache.get(campusTemplateKey).message;
+                templateObj = templateCache.get(campusTemplateKey);
+            } else if (templateCache.has(deptTemplateKey)) {
+                // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                 templateEmailContent = templateCache.get(deptTemplateKey).message;
                 templateObj = templateCache.get(deptTemplateKey);
@@ -458,13 +479,19 @@ function setup_preview_emails_with_titles(templateCache) {
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
+            var campusTemplateKey = studentCampusAttr;
             var facTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr;
             var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            if (templateCache.has(deptTemplateKey)){
+            if (templateCache.has(campusTemplateKey)){
                 // console.log("department cache found:", templateCache.get(deptTemplateKey));
+                templateEmailSubject = templateCache.get(campusTemplateKey).subject;
+                templateEmailContent = templateCache.get(campusTemplateKey).message;
+                templateObj = templateCache.get(campusTemplateKey);
+            } else if (templateCache.has(deptTemplateKey)) {
+                // console.log("faculty cache found:", templateCache.get(facTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                 templateEmailContent = templateCache.get(deptTemplateKey).message;
                 templateObj = templateCache.get(deptTemplateKey);
@@ -518,7 +545,6 @@ function setup_preview_emails_with_titles(templateCache) {
         record_data.actual_grade = assigngrade;
         record_data.trigger_grade = selected_grade_value;
 
-        console.log('checking button onclick: ', button.onclick);
         button.addEventListener('click', function () {
             setup_preview_buttons_from_template(record_data);
         });
@@ -628,7 +654,6 @@ function addUserInfo(emailText, params) {
     // Build replacement info
     let uniqueMatches = {};
     for (let i = 0; i < textReplace.length; i++) {
-        console.log("checking for:",textReplace[i]);
         if (emailText.includes(textReplace[i])) {
             // Perform action for each unique match found
             switch (i) {

@@ -41,9 +41,9 @@ class local_earlyalert_course_grades_ws extends external_api
             )
         );
         $mdlStudents = helper::get_moodle_grades_by_course($id);
+        unset($mdlStudents[$teacher_user_id]);
 
         $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'id,firstname,lastname,email');
-        file_put_contents('/var/www/moodledata/temp/teacher.txt', print_r($teacher, TRUE));
 
         $students = [];
         $i = 0;
@@ -95,7 +95,7 @@ class local_earlyalert_course_grades_ws extends external_api
 //            }
             $i++;
         }
-        file_put_contents('/var/www/moodledata/temp/students.txt', print_r($students, TRUE));
+
         return $students;
     }
 
@@ -151,111 +151,116 @@ class local_earlyalert_course_grades_ws extends external_api
         // Get teacher
         $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'firstname,lastname,email');
 
+        // Get course idnumber to get faculty course name and course number
+        $course = $DB->get_record('course', array('id' => $courseid), 'idnumber');
+        // Convert course idnumber to array by _
+        $course_idnumber = explode('_', $course->idnumber);
+        // Capture faculty, course name and course number
+        $course_faculty = $course_idnumber[1];
+        $course_name = $course_idnumber[2];
+        $course_number = $course_idnumber[4];
+        // Get course email template
+
         $facultytemplates = '';
         $depttemplates = '';
 
         $mdlGrades = helper::get_moodle_grades_by_course($courseid);
+        unset($mdlGrades[$teacher_user_id]);
         //lets cache all possible email templates based off of these students...
         $templateCache = array();
+        $i = 1;
         foreach ($mdlGrades as $student) {
             if ($sva_data = $DB->get_record('svadata', array('sisid' => $student['idnumber']))) {
                 $student['faculty'] = $sva_data->faculty;
                 $student['campus'] = $sva_data->campus;
             }
             $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
+            // Get student Language
+            $lang = $student_record->lang;
 
-            //check if template is already defined
-            if (!isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major']]) || !isset($templateCache[$student['campus'] . "_" . $student['faculty']])) {
-                //get all templates for this campus/faculty/major combo
-                if ($campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']))) {
-                    //campus exists
+            $course_template = $DB->get_record('local_et_email',
+                array('lang' => $lang,
+                    'faculty' => $course_faculty,
+                    'course' => $course_name,
+                    'coursenumber' => $course_number,
+                    'message_type' => $alert_type,
+                    'active' => 1,
+                    'deleted' => 0)
+            );
+
+            if ($course_template) {
+                if (!isset($templateCache['course_' . $courseid])) {
+                    $email = new \local_etemplate\email($course_template->id);
+                    $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
+                    $templateCache['course_' . $courseid] = array(
+                        'templateKey' => 'course_' . $courseid,
+                        'subject' => $template_data->subject,
+                        'message' => $template_data->message,
+                        'templateid' => $template_data->templateid,
+                        'revision_id' => $template_data->revision_id,
+                        'course_id' => $courseid,
+                        'instructor_id' => $template_data->instructor_id,
+                        'triggered_from_user_id' => $template_data->triggered_from_user_id
+                    );
                 }
+            } else {
+                //check if template is already defined
+                if (
+                    !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major']]) ||
+                    !isset($templateCache[$student['campus'] . "_" . $student['faculty']]) ||
+                    !isset($templateCache[$student['campus']])
+                ) {
+                    // Set up campus, faculty and department
+                    $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
+                    $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
+                    $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
 
-                if ($faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id))) {
+                    $campustemplate = false;
+                    $facultytemplate = false;
+                    $depttemplate = false;
+                    // Get various email templates
+                    $campustemplate = $DB->get_record('local_et_email',
+                        array('lang' => $lang, 'unit' => $campus->id, 'context' => 'CAMPUS', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
+                    $facultytemplate = $DB->get_record('local_et_email',
+                        array('lang' => $lang, 'unit' => $faculty->id, 'context' => 'UNIT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
+                    $depttemplate = $DB->get_record('local_et_email',
+                        array('lang' => $lang, 'unit' => $department->id, 'context' => 'DEPT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
 
-                    // faculty exists
-                    // Now check to see if an email template exists based on the unit, active, deleted and alert_type
-
-                    if ($facultytemplates = $DB->get_records('local_et_email',
-                        array('unit' => $faculty->id, 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0,))) {
-                        //faculty template exists
-                        foreach ($facultytemplates as $factemp) {
-                            $email = new \local_etemplate\email($factemp->id);
-                            $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                            $templateCache[$student['campus'] . "_" . $student['faculty']] = array(
-                                'templateKey' => $student['campus'] . "_" . $student['faculty'],
-                                'subject' => $template_data->subject,
-                                'message' => $template_data->message,
-                                'templateid' => $template_data->templateid,
-                                'revision_id' => $template_data->revision_id,
-                                'course_id' => $courseid,
-                                'instructor_id' => $template_data->instructor_id,
-                                'triggered_from_user_id' => $template_data->triggered_from_user_id
-                            );
-                        }
-                    } else {
-                        if ($catchalltemplates = $DB->get_records('local_et_email',
-                            array('unit' => $faculty->id, 'message_type' => email::MESSAGE_TYPE_CATCHALL, 'active' => 1, 'deleted' => 0))) {
-                            //catchall template exists
-                            foreach ($catchalltemplates as $catchalltemp) {
-                                $email = new \local_etemplate\email($catchalltemp->id);
-                                $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                                $templateCache[$student['campus'] . "_" . $student['faculty']] = array(
-                                    'templateKey' => $student['campus'] . "_" . $student['faculty'],
-                                    'subject' => $template_data->subject,
-                                    'message' => $template_data->message,
-                                    'templateid' => $template_data->templateid,
-                                    'revision_id' => $template_data->revision_id,
-                                    'course_id' => $courseid,
-                                    'instructor_id' => $template_data->instructor_id,
-                                    'triggered_from_user_id' => $template_data->triggered_from_user_id
-                                );
-                            }
-                        }
+                    // Check which of the aboves are true;
+                    $templateKey = [];
+                    $template = false;
+                    if ($campustemplate) {
+                        $templateKey[$i] = $student['campus'];
+                        $template[$i] = $campustemplate;
                     }
-                }
-                if ($department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id))) {
-                    // department exists
-                    if ($depttemplates = $DB->get_records('local_et_email',
-                        array('unit' => $faculty->id . "_" . $department->id, 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0))) {
-                        //department template exists
-                        foreach ($depttemplates as $depttemp) {
-                            $email = new \local_etemplate\email($depttemp->id);
-                            $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                            $templateCache[$student['campus'] . "_" . $student['faculty']. "_" . $student['major']] = array(
-                                'templateKey' => $student['campus'] . "_" . $student['faculty']. "_" . $student['major'],
-                                'subject' => $template_data->subject,
-                                'message' => $template_data->message,
-                                'templateid' => $template_data->templateid,
-                                'revision_id' => $template_data->revision_id,
-                                'course_id' => $courseid,
-                                'instructor_id' => $template_data->instructor_id,
-                                'triggered_from_user_id' => $template_data->triggered_from_user_id
-                            );
-                        }
-                    } else {
-                        if ($catchalltemplates = $DB->get_records('local_et_email',
-                            array('unit' => $faculty->id . "_" . $department->id, 'message_type' => email::MESSAGE_TYPE_CATCHALL, 'active' => 1, 'deleted' => 0))) {
-                            //catchall template exists
-                            foreach ($catchalltemplates as $catchalltemp) {
-                                $email = new \local_etemplate\email($catchalltemp->id);
-                                $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                                $templateCache[$student['campus'] . "_" . $student['faculty']. "_" . $student['major']] = array(
-                                    'templateKey' => $student['campus'] . "_" . $student['faculty']. "_" . $student['major'],
-                                    'subject' => $template_data->subject,
-                                    'message' => $template_data->message,
-                                    'templateid' => $template_data->templateid,
-                                    'revision_id' => $template_data->revision_id,
-                                    'course_id' => $courseid,
-                                    'instructor_id' => $template_data->instructor_id,
-                                    'triggered_from_user_id' => $template_data->triggered_from_user_id
-                                );
-                            }
-                        }
+                    if ($facultytemplate) {
+                        $templateKey[$i] = $student['campus'] . "_" . $student['faculty'];
+                        $template[$i] = $facultytemplate;
+                    }
+                    if ($depttemplate) {
+                        $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'];
+                        $template[$i] = $depttemplate;
+                    }
+
+                    if (!empty($templateKey)) {
+                        $email = new \local_etemplate\email($template[$i]->id);
+                        $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
+                        $templateCache[$templateKey[$i]] = array(
+                            'templateKey' => $templateKey[$i],
+                            'subject' => $template_data->subject,
+                            'message' => $template_data->message,
+                            'templateid' => $template_data->templateid,
+                            'revision_id' => $template_data->revision_id,
+                            'course_id' => $courseid,
+                            'instructor_id' => $template_data->instructor_id,
+                            'triggered_from_user_id' => $template_data->triggered_from_user_id
+                        );
                     }
                 }
             }
+            $i++;
         }
+
         return $templateCache;
     }
 
