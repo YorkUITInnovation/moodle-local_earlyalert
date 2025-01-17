@@ -187,12 +187,8 @@ class local_earlyalert_course_grades_ws extends external_api
                     'active' => 1,
                     'deleted' => 0)
             );
-            file_put_contents('/var/www/moodledata/temp/etemplate.log', print_r($course_template, true), FILE_APPEND);
-            file_put_contents('/var/www/moodledata/temp/etemplate.log', $student['faculty'], FILE_APPEND);
+
             if ($course_template && $course_template->faculty == $student['faculty']) {
-                if ($student['faculty'] == 'GL') {
-                    file_put_contents('/var/www/moodledata/temp/studentfaculty.log', $student['faculty'], FILE_APPEND);
-                }
                 if (!isset($templateCache['course_' . $courseid])) {
                     $email = new \local_etemplate\email($course_template->id);
                     $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
@@ -202,6 +198,7 @@ class local_earlyalert_course_grades_ws extends external_api
                         'message' => $template_data->message,
                         'templateid' => $template_data->templateid,
                         'revision_id' => $template_data->revision_id,
+                        'faculty' => $course_template->faculty,
                         'course_id' => $courseid,
                         'instructor_id' => $template_data->instructor_id,
                         'triggered_from_user_id' => $template_data->triggered_from_user_id
@@ -256,6 +253,7 @@ class local_earlyalert_course_grades_ws extends external_api
                             'templateid' => $template_data->templateid,
                             'revision_id' => $template_data->revision_id,
                             'course_id' => $courseid,
+                            'faculty' => '',
                             'instructor_id' => $template_data->instructor_id,
                             'triggered_from_user_id' => $template_data->triggered_from_user_id
                         );
