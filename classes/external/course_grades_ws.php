@@ -198,7 +198,6 @@ class local_earlyalert_course_grades_ws extends external_api
                         'message' => $template_data->message,
                         'templateid' => $template_data->templateid,
                         'revision_id' => $template_data->revision_id,
-                        'faculty' => $course_template->faculty,
                         'course_id' => $courseid,
                         'instructor_id' => $template_data->instructor_id,
                         'triggered_from_user_id' => $template_data->triggered_from_user_id
@@ -253,7 +252,6 @@ class local_earlyalert_course_grades_ws extends external_api
                             'templateid' => $template_data->templateid,
                             'revision_id' => $template_data->revision_id,
                             'course_id' => $courseid,
-                            'faculty' => '',
                             'instructor_id' => $template_data->instructor_id,
                             'triggered_from_user_id' => $template_data->triggered_from_user_id
                         );
