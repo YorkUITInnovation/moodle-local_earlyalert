@@ -485,7 +485,7 @@ function setup_preview_emails_with_titles(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            if (templateCache.has(campusTemplateKey)){
+            if (templateCache.has(campusTemplateKey) && studentFacultyAttr == templateCache.faculty){
                 // console.log("department cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusTemplateKey).message;
