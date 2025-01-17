@@ -188,7 +188,7 @@ class local_earlyalert_course_grades_ws extends external_api
                     'deleted' => 0)
             );
 
-            if ($course_template) {
+            if ($course_template && $course_template->faculty == $student['faculty']) {
                 if (!isset($templateCache['course_' . $courseid])) {
                     $email = new \local_etemplate\email($course_template->id);
                     $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
