@@ -187,7 +187,8 @@ class local_earlyalert_course_grades_ws extends external_api
                     'active' => 1,
                     'deleted' => 0)
             );
-
+            file_put_contents('/var/www/moodledata/temp/etemplate.log', print_r($course_template, true), FILE_APPEND);
+            file_put_contents('/var/www/moodledata/temp/etemplate.log', $student['faculty'], FILE_APPEND);
             if ($course_template && $course_template->faculty == $student['faculty']) {
                 if (!isset($templateCache['course_' . $courseid])) {
                     $email = new \local_etemplate\email($course_template->id);
