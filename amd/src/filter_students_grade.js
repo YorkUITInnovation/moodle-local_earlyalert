@@ -355,7 +355,7 @@ function setup_preview_emails(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            if (templateCache.has(courseTemplateKey)){
+            if (templateCache.has(courseTemplateKey) && studentFacultyAttr == templateCache.faculty){
                 //console.log("course cache found:", templateCache.get(courseTemplateKey));
                 templateEmailSubject = templateCache.get(courseTemplateKey).subject;
                 templateEmailContent = templateCache.get(courseTemplateKey).message;
