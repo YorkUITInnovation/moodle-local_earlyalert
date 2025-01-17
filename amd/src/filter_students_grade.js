@@ -354,7 +354,8 @@ function setup_preview_emails(templateCache) {
             var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
-            console.log('Faculty:', templateCache.get(courseTemplateKey).faculty);
+
+            console.log('Faculty:', templateCache);
             if (templateCache.has(courseTemplateKey) && studentFacultyAttr == templateCache.get(courseTemplateKey).faculty){
                 //console.log("course cache found:", templateCache.get(courseTemplateKey));
                 templateEmailSubject = templateCache.get(courseTemplateKey).subject;
@@ -484,7 +485,7 @@ function setup_preview_emails_with_titles(templateCache) {
             var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
-console.log('Faculty:', templateCache.get(courseTemplateKey).faculty);
+            console.log('Faculty:', templateCache);
             if (templateCache.has(campusTemplateKey) && studentFacultyAttr == templateCache.get(courseTemplateKey).faculty){
                 // console.log("department cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
