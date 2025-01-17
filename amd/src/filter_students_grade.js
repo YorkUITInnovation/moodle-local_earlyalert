@@ -23,7 +23,7 @@ function alert_type_button() {
             let teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
             // console.log('teacher_user_id:', teacher_user_id);
             // Get student list based on alert type
-            setup_filter_students_by_grade(course_id, 9, course_name, alert_type,teacher_user_id);
+            setup_filter_students_by_grade(course_id, 9, course_name, alert_type, teacher_user_id);
         }
     });
 }
@@ -68,13 +68,14 @@ function filter_students_by_assignment() {
     const teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
     // setup listener for drop down selection
     const assignment_input = document.getElementById('early-alert-assignment-title');
-    assignment_input.addEventListener('focusout', function(evt) {
+    assignment_input.addEventListener('focusout', function (evt) {
         var assignment_title = document.getElementById('early-alert-assignment-title').value;
         if (assignment_title) {
             setup_filter_students_by_grade(course_id, '9', course_name, alert_type, teacher_user_id, assignment_title);
         }
     });
 }
+
 /**
  * Fetches the student list based on the course_id and grade_letter_id
  * @param course_id
@@ -82,7 +83,7 @@ function filter_students_by_assignment() {
  * @param course_name
  * @param alert_type
  */
-function setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id, assignment_title="") {
+function setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id, assignment_title = "") {
     let selected_students = [];
     // convert course_id into an integer
     course_id = parseInt(course_id);
@@ -108,11 +109,10 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             });
 
 
-
         // Fetch student list and templates
         var get_grades_and_templates = ajax.call([
-            { methodname: 'earlyalert_course_grades_percent_get', args: { id: course_id, grade_letter_id: grade_letter_id, "teacher_user_id": teacher_user_id } },
-            { methodname: 'earlyalert_course_student_templates', args: { "teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type } }
+            {methodname: 'earlyalert_course_grades_percent_get', args: {id: course_id, grade_letter_id: grade_letter_id, "teacher_user_id": teacher_user_id}},
+            {methodname: 'earlyalert_course_student_templates', args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type}}
         ]);
 
         const finalCache = new Map();
@@ -217,7 +217,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     const cachedArray = JSON.parse(cachedArrayElement.value);
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
-                            if (cachedArray.includes(result.templateKey)){
+                            if (cachedArray.includes(result.templateKey)) {
                                 let finalMessage = {
                                     subject: result.subject,
                                     message: result.message,
@@ -235,14 +235,13 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     // case where assignment titles are taken from user input
                     if (alert_type === 'assign') // we have to setup the assignment title before previewing!
                     {
-                        finalCache.set('assignment_title',assignment_title );
+                        finalCache.set('assignment_title', assignment_title);
 
-                        if (assignment_title){ // there is a case where previews were setup without titles then dont create modals
+                        if (assignment_title) { // there is a case where previews were setup without titles then dont create modals
                             setup_preview_emails_with_titles(finalCache); // call back function
                         }
 
-                    }
-                    else { // for other alert types
+                    } else { // for other alert types
                         setup_preview_emails(finalCache);
                     }
                 })
@@ -271,12 +270,12 @@ function check_all_student_grades(selected_students) {
 }
 
 // function to save to hidden field on submit if anyone unchecks student records
-function check_individual_students_checkboxes_for_submit(){
+function check_individual_students_checkboxes_for_submit() {
     let selected_students = [];
     const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
     const student_checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']");
     student_checkboxes.forEach(function (checkbox) {
-        if (checkbox.checked){
+        if (checkbox.checked) {
             selected_students.push(checkbox.getAttribute('data-student-id'));
         }
     });
@@ -338,7 +337,7 @@ function setup_preview_emails(templateCache) {
             const student_lname_fname = student_name_td.firstChild;
             var student_name_arr = [];
             var student_name = "";
-            student_lname_fname.data.split(/\s*,\s*/).forEach(function(me) {
+            student_lname_fname.data.split(/\s*,\s*/).forEach(function (me) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
@@ -350,21 +349,21 @@ function setup_preview_emails(templateCache) {
             const courseIdAttr = checkbox.getAttribute('data-courseid');
             var courseTemplateKey = 'course_' + courseIdAttr;
             var campusTemplateKey = studentCampusAttr;
-            var facTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr;
-            var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
+            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr;
+            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            if (templateCache.has(courseTemplateKey)){
-                //console.log("course cache found:", templateCache.get(courseTemplateKey));
-                templateEmailSubject = templateCache.get(courseTemplateKey).subject;
-                templateEmailContent = templateCache.get(courseTemplateKey).message;
-                templateObj = templateCache.get(courseTemplateKey);
-            } else if (templateCache.has(campusTemplateKey)) {
+            if (templateCache.has(campusTemplateKey)) {
                 // console.log("department cache found:", templateCache.get(campusTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusTemplateKey).message;
                 templateObj = templateCache.get(campusTemplateKey);
+            } else if (templateCache.has(courseTemplateKey)) {
+                //console.log("course cache found:", templateCache.get(courseTemplateKey));
+                templateEmailSubject = templateCache.get(courseTemplateKey).subject;
+                templateEmailContent = templateCache.get(courseTemplateKey).message;
+                templateObj = templateCache.get(courseTemplateKey);
             } else if (templateCache.has(deptTemplateKey)) {
                 // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
@@ -384,7 +383,7 @@ function setup_preview_emails(templateCache) {
             // console.log("couldn't find checkbox :/");
         }
 
-        if (assigngrade){
+        if (assigngrade) {
             // console.log("assign grade: ", assigngrade);
         }
         // console.log("template email content:", templateEmailContent);
@@ -401,7 +400,7 @@ function setup_preview_emails(templateCache) {
         };
 
         //console.log("passing these params to adduserinfo:", params);
-        templateEmailContent = addUserInfo(templateEmailContent, params );
+        templateEmailContent = addUserInfo(templateEmailContent, params);
 
         // console.log("template email content post-addUserInfo:", templateEmailContent);
 
@@ -470,7 +469,7 @@ function setup_preview_emails_with_titles(templateCache) {
             const student_lname_fname = student_name_td.firstChild;
             var student_name_arr = [];
             var student_name = "";
-            student_lname_fname.data.split(/\s*,\s*/).forEach(function(me) {
+            student_lname_fname.data.split(/\s*,\s*/).forEach(function (me) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
@@ -480,12 +479,12 @@ function setup_preview_emails_with_titles(templateCache) {
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
             var campusTemplateKey = studentCampusAttr;
-            var facTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr;
-            var deptTemplateKey = studentCampusAttr  + '_'  + studentFacultyAttr  + '_'  + studentMajorAttr;
+            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr;
+            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            if (templateCache.has(campusTemplateKey)){
+            if (templateCache.has(campusTemplateKey)) {
                 // console.log("department cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusTemplateKey).message;
@@ -509,7 +508,7 @@ function setup_preview_emails_with_titles(templateCache) {
             // console.log("couldn't find checkbox :/");
         }
 
-        if (assigngrade){
+        if (assigngrade) {
             // console.log("assign grade: ", assigngrade);
         }
         // console.log("template email content:", templateEmailContent);
@@ -525,7 +524,7 @@ function setup_preview_emails_with_titles(templateCache) {
             defaultgrade: "D+"
         };
         //console.log("passing these params to adduserinfo:", params);
-        templateEmailContent = addUserInfo(templateEmailContent, params );
+        templateEmailContent = addUserInfo(templateEmailContent, params);
 
         // console.log("template email content post-addUserInfo:", templateEmailContent);
 
@@ -553,32 +552,35 @@ function setup_preview_emails_with_titles(templateCache) {
     });
     setup_send_emails(student_template_cache_array);
 }
+
 var current_modal = null;
+
 function setup_preview_buttons_from_template(student_template_data) {
 
-        ModalFactory.create({
-            title: getString('preview_email', 'local_earlyalert'),
-            type: ModalFactory.types.CANCEL,
-            body: Templates.render('local_earlyalert/preview_student_email', {
-                name: student_template_data.template_name,
-                student_name: student_template_data.student_name,
-                subject: student_template_data.templateEmailSubject,
-                message: student_template_data.templateEmailContent,
-                instructor_name: ''
-            }),
-            large: true,
+    ModalFactory.create({
+        title: getString('preview_email', 'local_earlyalert'),
+        type: ModalFactory.types.CANCEL,
+        body: Templates.render('local_earlyalert/preview_student_email', {
+            name: student_template_data.template_name,
+            student_name: student_template_data.student_name,
+            subject: student_template_data.templateEmailSubject,
+            message: student_template_data.templateEmailContent,
+            instructor_name: ''
+        }),
+        large: true,
 
-        }).done(modal => {
-            modal.show();
-            current_modal = modal;
-            // modal.getRoot().on(ModalEvents.cancel, function(){
-            //     current_modal.getRoot().remove();
-            // });
+    }).done(modal => {
+        modal.show();
+        current_modal = modal;
+        // modal.getRoot().on(ModalEvents.cancel, function(){
+        //     current_modal.getRoot().remove();
+        // });
 
-            return current_modal;
-        });
+        return current_modal;
+    });
 
 }
+
 function setup_send_emails(student_template_cache_array) {
     const send_button = document.getElementById('early-alert-send-button1');
     const send_button2 = document.getElementById('early-alert-send-button2');
@@ -590,7 +592,7 @@ function setup_send_emails(student_template_cache_array) {
     });
 }
 
-function maintain_student_template_data_for_submit(student_template_cache_array){
+function maintain_student_template_data_for_submit(student_template_cache_array) {
     check_individual_students_checkboxes_for_submit();
     var student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
     // remove students from template cache if they have been unchecked
@@ -621,7 +623,8 @@ function create_notification_dialog(student_template_cache_array) {
         sendEmail[0].done(function () {
             // success
             sendEmail[0].then(result => {
-                notification.alert('Email', getString('sent_dialog_text', 'local_earlyalert', result));}
+                    notification.alert('Email', getString('sent_dialog_text', 'local_earlyalert', result));
+                }
             );
         }).fail(function () {
             notification.alert(could_not_send_email);
@@ -630,8 +633,8 @@ function create_notification_dialog(student_template_cache_array) {
 }
 
 function get_users() {
-   selectBox.init('#search', 'earlyalert_get_users', "Select a user");
-   // On search change, navigate to a url with the user_id as a parameter
+    selectBox.init('#search', 'earlyalert_get_users', "Select a user");
+    // On search change, navigate to a url with the user_id as a parameter
     let search = document.getElementById('search');
     if (search) {
         document.getElementById('search').addEventListener('change', function (event) {
