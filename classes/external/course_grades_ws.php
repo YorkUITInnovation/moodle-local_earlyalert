@@ -260,7 +260,7 @@ class local_earlyalert_course_grades_ws extends external_api
             }
             $i++;
         }
-        file_put_contents('/var/www/moodledata/temp/etemplate_cache.json', json_encode($templateCache));
+        file_put_contents('/var/www/moodledata/temp/etemplate_cache.json', json_encode($templateCache, JSON_PRETTY_PRINT));
 
         return $templateCache;
     }
