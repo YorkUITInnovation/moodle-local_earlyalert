@@ -79,7 +79,7 @@ if ($alert_type) {
 if ($show_grades) {
     $course_data['show_grades'] = $show_grades;
 }
-if ($impersonate && !$teacher) {
+if ($impersonate) {
     $course_data['impersonate'] = true;
 }
 
