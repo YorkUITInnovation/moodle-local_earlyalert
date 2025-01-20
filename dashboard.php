@@ -23,7 +23,7 @@ $impersonate = has_capability('local/earlyalert:impersonate', $context, $USER->i
 $teacher = helper::is_teacher();
 $student = helper::is_student();
 
-if ($student) {
+if ($student) { //future functionality
     redirect($CFG->wwwroot . '/my');
 }
 
