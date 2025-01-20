@@ -352,7 +352,7 @@ CONST GRADE_A = 1;
 
     public function get_date_sent(): string
     {
-        return $this->timecreated_hr;
+        return userdate($this->timecreated);
     }
     /**
      * @return timecreated - bigint (18)
