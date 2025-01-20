@@ -27,7 +27,7 @@ $student = helper::is_student();
 //    redirect($CFG->wwwroot . '/my');
 //}
 
-if (!$impersonate && !$teacher) {
+if (!$impersonate || !$teacher) {
     redirect($CFG->wwwroot . '/my');
 }
 
