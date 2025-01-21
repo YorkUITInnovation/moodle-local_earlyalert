@@ -27,6 +27,7 @@ class local_earlyalert_users_ws extends external_api
 
     public static function get_users($search="") {
         global $DB;
+        raise_memory_limit(MEMORY_UNLIMITED);
         $params = self::validate_parameters(self::get_users_parameters(), array('search' => $search));
         if (strlen($search) >= 3) {
             $sql = "select * from {user} u where ";
@@ -47,6 +48,7 @@ class local_earlyalert_users_ws extends external_api
             $users[$i]['label'] = $u->firstname . ' ' . $u->lastname . ' - ' . $u->email . ' (' . $u->idnumber . ')';
             $i++;
         }
+        raise_memory_limit(MEMORY_STANDARD);
         return $users;
     }
 

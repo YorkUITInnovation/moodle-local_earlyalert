@@ -32,7 +32,7 @@ class local_earlyalert_course_overview_ws extends external_api
     public static function get_course_overview($id)
     {
         global $CFG, $USER, $DB, $PAGE;
-
+        raise_memory_limit(MEMORY_UNLIMITED);
         //Parameter validation
         $params = self::validate_parameters(self::get_course_overview_parameters(), array(
                 'id' => $id
@@ -103,7 +103,7 @@ class local_earlyalert_course_overview_ws extends external_api
 
             $i++;
         }
-
+        raise_memory_limit(MEMORY_STANDARD);
         return ['students' => $results];
     }
 

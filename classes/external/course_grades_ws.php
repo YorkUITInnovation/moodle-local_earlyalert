@@ -33,6 +33,7 @@ class local_earlyalert_course_grades_ws extends external_api
     {
         // TODO: restrict by grade id if exists
         global $DB;
+        raise_memory_limit(MEMORY_UNLIMITED);
         $params = self::validate_parameters(
             self::get_course_grades_percent_parameters(), array(
                 'id' => $id,
@@ -95,7 +96,7 @@ class local_earlyalert_course_grades_ws extends external_api
 //            }
             $i++;
         }
-
+        raise_memory_limit(MEMORY_STANDARD);
         return $students;
     }
 
@@ -134,6 +135,7 @@ class local_earlyalert_course_grades_ws extends external_api
     public static function get_course_student_templates($courseid, $alert_type, $teacher_user_id)
     {
         global $DB;
+        raise_memory_limit(MEMORY_UNLIMITED);
         // Convert alert type to int based on constants in email class
         switch ($alert_type) {
             case 'grade':
@@ -260,7 +262,7 @@ class local_earlyalert_course_grades_ws extends external_api
             }
             $i++;
         }
-
+        raise_memory_limit(MEMORY_STANDARD);
         return $templateCache;
     }
 
