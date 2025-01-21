@@ -109,14 +109,27 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             });
 
 
+        const finalCache = new Map();
+
+        ajax.call({
+            methodname: 'earlyalert_course_grades_percent_get',
+            args: {"id": course_id, "grade_letter_id": grade_letter_id, "teacher_user_id": teacher_user_id},
+        }, (error) => {
+            console.error('Error fetching grades:', error);
+        });
+
+        ajax.call({
+            methodname: 'earlyalert_course_student_templates',
+            args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type},
+        }, (error) => {
+            console.error('Error fetching templates:', error);
+        });
+
         // Fetch student list and templates
         var get_grades_and_templates = ajax.call([
             {methodname: 'earlyalert_course_grades_percent_get', args: {"id": course_id, "grade_letter_id": grade_letter_id, "teacher_user_id": teacher_user_id}},
             {methodname: 'earlyalert_course_student_templates', args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type}}
         ]);
-
-        const finalCache = new Map();
-
         Promise.all(get_grades_and_templates)
             .then(([grades_response, templates_response]) => {
 
