@@ -111,17 +111,17 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
         const finalCache = new Map();
 
-        ajax.call({
+        ajax.call([{
             methodname: 'earlyalert_course_grades_percent_get',
-            args: {"id": course_id, "grade_letter_id": grade_letter_id, "teacher_user_id": teacher_user_id},
-        }, (error) => {
+            args: {"id": course_id, "grade_letter_id": grade_letter_id, "teacher_user_id": teacher_user_id}
+        }])[0].fail((error) => {
             console.error('Error fetching grades:', error);
         });
 
-        ajax.call({
+        ajax.call([{
             methodname: 'earlyalert_course_student_templates',
-            args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type},
-        }, (error) => {
+            args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type}
+        }])[0].fail((error) => {
             console.error('Error fetching templates:', error);
         });
 
