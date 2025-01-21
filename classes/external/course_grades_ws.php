@@ -71,8 +71,8 @@ class local_earlyalert_course_grades_ws extends external_api
                             sva.campus,
                             sva.academicyear
                         From
-                            moodle.mdl_svadata sva Inner Join
-                            moodle.mdl_user u On sva.sisid = u.idnumber
+                            {mdl_svadata} sva Inner Join
+                            {mdl_user} u On sva.sisid = u.idnumber
                         Where
                             u.id =" . $value;
                     $sva_data = $DB->get_record_sql($sql);

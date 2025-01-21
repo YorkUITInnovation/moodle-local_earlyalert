@@ -117,7 +117,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
         const finalCache = new Map();
 
-        Promise.all(get_grades_and_templates).then(([grades_response, templates_response]) => {
+        Promise.all(get_grades_and_templates)
+            .then(([grades_response, templates_response]) => {
 
             // Reformat the data to display in a grid
             let num_students = grades_response.length;
@@ -248,8 +249,19 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 .catch(function (error) {
                     console.error('Failed to render template:', error);
                 });
-        });
-
+        })
+            .catch(error => {
+                console.error('Error fetching grades and templates:', error);
+                if (error.message) {
+                    console.error('Error message:', error.message);
+                }
+                if (error.stack) {
+                    console.error('Error stack:', error.stack);
+                }
+                if (error.response) {
+                    console.error('Error response:', error.response);
+                }
+            });
     }
 }
 
