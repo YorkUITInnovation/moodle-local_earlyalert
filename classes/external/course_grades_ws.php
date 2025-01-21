@@ -31,73 +31,64 @@ class local_earlyalert_course_grades_ws extends external_api
 
     public static function get_course_grades_percent($id, $grade_letter_id, $teacher_user_id)
     {
-        // TODO: restrict by grade id if exists
         global $DB;
         raise_memory_limit(MEMORY_UNLIMITED);
-        $params = self::validate_parameters(
-            self::get_course_grades_percent_parameters(), array(
-                'id' => $id,
-                'grade_letter_id' => $grade_letter_id,
-                'teacher_user_id' => $teacher_user_id
-            )
-        );
-        $mdlStudents = helper::get_moodle_grades_by_course($id);
-        unset($mdlStudents[$teacher_user_id]);
 
-        $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'id,firstname,lastname,email');
+        try {
+            $params = self::validate_parameters(
+                self::get_course_grades_percent_parameters(), array(
+                    'id' => $id,
+                    'grade_letter_id' => $grade_letter_id,
+                    'teacher_user_id' => $teacher_user_id
+                )
+            );
 
-        $students = [];
-        $i = 0;
-        $filter_students = false;
-        $filter_me_out = false;
+            $mdlStudents = helper::get_moodle_grades_by_course($id);
+            unset($mdlStudents[$teacher_user_id]);
 
-//        if ($grade_letter_id > 0) {
-//            // get grade ranges and filter students
-//            $mdlGradeRanges = helper::get_moodle_grade_percent_range($grade_letter_id);
-//            $filter_students = true;
-//            $filter_me_out = true;
-//        }
-        foreach ($mdlStudents as $student) {
-            foreach ($student as $key => $value) { // only those filtered
+            $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'id,firstname,lastname,email');
 
-                $students[$i]['teacher_firstname'] = $teacher->firstname;
-                $students[$i]['teacher_lastname'] = $teacher->lastname;
-                $students[$i]['teacher_email'] = $teacher->email;
+            $students = [];
+            $i = 0;
+            $filter_students = false;
+            $filter_me_out = false;
 
-                if ($key === 'id') {
-                    // Get faculty and campus from svadata table
-                    $sql = "Select
-                            sva.faculty,
-                            sva.campus,
-                            sva.academicyear
-                        From
-                            {svadata} sva Inner Join
-                            {user} u On sva.sisid = u.idnumber
-                        Where
-                            u.id =" . $value;
-                    $sva_data = $DB->get_record_sql($sql);
-                    $students[$i]['faculty'] = $sva_data->faculty;
-                    $students[$i]['campus'] = $sva_data->campus;
+            foreach ($mdlStudents as $student) {
+                foreach ($student as $key => $value) {
+                    $students[$i]['teacher_firstname'] = $teacher->firstname;
+                    $students[$i]['teacher_lastname'] = $teacher->lastname;
+                    $students[$i]['teacher_email'] = $teacher->email;
+
+                    if ($key === 'id') {
+                        $sql = "SELECT
+                                sva.faculty,
+                                sva.campus,
+                                sva.academicyear
+                            FROM
+                                {svadata} sva
+                            INNER JOIN
+                                {user} u ON sva.sisid = u.idnumber
+                            WHERE
+                                u.id = :userid";
+                        $sva_data = $DB->get_record_sql($sql, array('userid' => $value));
+                        $students[$i]['faculty'] = $sva_data->faculty;
+                        $students[$i]['campus'] = $sva_data->campus;
+                    }
+
+                    if ($key != 'faculty' && $key != 'campus') {
+                        $students[$i][$key] = $value;
+                    }
                 }
-
-                // Remove the faculty key from the array
-                if ($key == 'faculty' || $key == 'campus') {
-                    // Do noting
-                } else {
-                    $students[$i][$key] = $value;
-                }
-
-//                if ($filter_students && $key == 'grade' && (float)$value >= $mdlGradeRanges['min'] && (float)$value <= $mdlGradeRanges['max']) {
-//                    $filter_me_out = false;   // we want to keep this student
-//                }
+                $i++;
             }
-//            if ($filter_students && $filter_me_out) {
-//                unset($students[$i]);
-//            }
-            $i++;
+
+            raise_memory_limit(MEMORY_STANDARD);
+            return $students;
+
+        } catch (Exception $e) {
+            error_log('Error in get_course_grades_percent: ' . $e->getMessage());
+            throw new moodle_exception('errorprocessingrequest', 'local_earlyalert', '', null, $e->getMessage());
         }
-        raise_memory_limit(MEMORY_STANDARD);
-        return $students;
     }
 
 
