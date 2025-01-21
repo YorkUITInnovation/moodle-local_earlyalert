@@ -20,7 +20,6 @@ $PAGE->requires->js_call_amd('local_earlyalert/course_overview', 'init');
 
 
 $impersonate = has_capability('local/earlyalert:impersonate', $context, $USER->id);
-
 $teacher = helper::is_teacher();
 $student = helper::is_student();
 
@@ -64,7 +63,7 @@ if ($teacher || $is_impersonating) {
 }
 
 // Add impersonting user name to $course_data if $is_impersonating is true
-if ($impersonate && $user_id != $USER->id) {
+if ($is_impersonating) {
     $course_data['impersonated_user'] = $impersonated_user->firstname . ' ' . $impersonated_user->lastname;
 }
 //print_object($course_data);
