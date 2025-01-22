@@ -85,7 +85,7 @@ class local_earlyalert_course_grades_ws extends external_api
             raise_memory_limit(MEMORY_STANDARD);
             return $students;
 
-        } catch (Exception $e) {
+        } catch (Exception $e) { //error log
             error_log('Error in get_course_grades_percent: ' . $e->getMessage());
             throw new moodle_exception('errorprocessingrequest', 'local_earlyalert', '', null, $e->getMessage());
         }
