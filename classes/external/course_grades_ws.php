@@ -32,7 +32,7 @@ class local_earlyalert_course_grades_ws extends external_api
     public static function get_course_grades_percent($id, $grade_letter_id, $teacher_user_id)
     {
         global $DB;
-        raise_memory_limit(MEMORY_UNLIMITED);
+        //raise_memory_limit(MEMORY_UNLIMITED);
 
         try {
             $params = self::validate_parameters(
@@ -82,7 +82,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 $i++;
             }
 
-            raise_memory_limit(MEMORY_STANDARD);
+            //raise_memory_limit(MEMORY_STANDARD);
             return $students;
 
         } catch (Exception $e) { //error log
@@ -126,7 +126,7 @@ class local_earlyalert_course_grades_ws extends external_api
     public static function get_course_student_templates($courseid, $alert_type, $teacher_user_id)
     {
         global $DB;
-        raise_memory_limit(MEMORY_UNLIMITED);
+        //raise_memory_limit(MEMORY_UNLIMITED);
         try {
             // Convert alert type to int based on constants in email class
             switch ($alert_type) {
@@ -254,7 +254,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 }
                 $i++;
             }
-        raise_memory_limit(MEMORY_STANDARD);
+        //raise_memory_limit(MEMORY_STANDARD);
         return $templateCache;
         }
         catch (Exception $e) {
