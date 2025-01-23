@@ -60,7 +60,9 @@ class local_earlyalert_course_grades_ws extends external_api
                     $students[$i]['teacher_email'] = $teacher->email;
 
                     if ($key === 'id') {
-                        $sql = "SELECT
+                        $table_exists = $DB->get_manager()->table_exists('svadata');
+                        if ($table_exists) {
+                            $sql = "SELECT
                                 sva.faculty,
                                 sva.campus,
                                 sva.academicyear
@@ -70,7 +72,16 @@ class local_earlyalert_course_grades_ws extends external_api
                                 {user} u ON sva.sisid = u.idnumber
                             WHERE
                                 u.id = :userid";
-                        $sva_data = $DB->get_record_sql($sql, array('userid' => $value));
+                            $sva_data = $DB->get_record_sql($sql, array('userid' => $value));
+                        }
+                        else {
+                            // Mock data in case the table doesn't exist
+                            $sva_data = (object) [
+                                'faculty' => 'Mock Faculty',
+                                'campus' => 'Mock Campus',
+                                'academicyear' => 'Mock Academic Year'
+                            ];
+                        }
                         $students[$i]['faculty'] = $sva_data->faculty;
                         $students[$i]['campus'] = $sva_data->campus;
                     }
