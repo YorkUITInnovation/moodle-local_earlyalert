@@ -31,73 +31,75 @@ class local_earlyalert_course_grades_ws extends external_api
 
     public static function get_course_grades_percent($id, $grade_letter_id, $teacher_user_id)
     {
-        // TODO: restrict by grade id if exists
         global $DB;
-        raise_memory_limit(MEMORY_UNLIMITED);
-        $params = self::validate_parameters(
-            self::get_course_grades_percent_parameters(), array(
-                'id' => $id,
-                'grade_letter_id' => $grade_letter_id,
-                'teacher_user_id' => $teacher_user_id
-            )
-        );
-        $mdlStudents = helper::get_moodle_grades_by_course($id);
-        unset($mdlStudents[$teacher_user_id]);
+        //raise_memory_limit(MEMORY_UNLIMITED);
 
-        $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'id,firstname,lastname,email');
+        try {
+            $params = self::validate_parameters(
+                self::get_course_grades_percent_parameters(), array(
+                    'id' => $id,
+                    'grade_letter_id' => $grade_letter_id,
+                    'teacher_user_id' => $teacher_user_id
+                )
+            );
 
-        $students = [];
-        $i = 0;
-        $filter_students = false;
-        $filter_me_out = false;
+            $mdlStudents = helper::get_moodle_grades_by_course($id);
+            unset($mdlStudents[$teacher_user_id]);
 
-//        if ($grade_letter_id > 0) {
-//            // get grade ranges and filter students
-//            $mdlGradeRanges = helper::get_moodle_grade_percent_range($grade_letter_id);
-//            $filter_students = true;
-//            $filter_me_out = true;
-//        }
-        foreach ($mdlStudents as $student) {
-            foreach ($student as $key => $value) { // only those filtered
+            $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'id,firstname,lastname,email');
 
-                $students[$i]['teacher_firstname'] = $teacher->firstname;
-                $students[$i]['teacher_lastname'] = $teacher->lastname;
-                $students[$i]['teacher_email'] = $teacher->email;
+            $students = [];
+            $i = 0;
+            $filter_students = false;
+            $filter_me_out = false;
 
-                if ($key === 'id') {
-                    // Get faculty and campus from svadata table
-                    $sql = "Select
-                            sva.faculty,
-                            sva.campus,
-                            sva.academicyear
-                        From
-                            {svadata} sva Inner Join
-                            {user} u On sva.sisid = u.idnumber
-                        Where
-                            u.id =" . $value;
-                    $sva_data = $DB->get_record_sql($sql);
-                    $students[$i]['faculty'] = $sva_data->faculty;
-                    $students[$i]['campus'] = $sva_data->campus;
+            foreach ($mdlStudents as $student) {
+                foreach ($student as $key => $value) {
+                    $students[$i]['teacher_firstname'] = $teacher->firstname;
+                    $students[$i]['teacher_lastname'] = $teacher->lastname;
+                    $students[$i]['teacher_email'] = $teacher->email;
+
+                    if ($key === 'id') {
+                        $table_exists = $DB->get_manager()->table_exists('svadata');
+                        if ($table_exists) {
+                            $sql = "SELECT
+                                sva.faculty,
+                                sva.campus,
+                                sva.academicyear
+                            FROM
+                                {svadata} sva
+                            INNER JOIN
+                                {user} u ON sva.sisid = u.idnumber
+                            WHERE
+                                u.id = :userid";
+                            $sva_data = $DB->get_record_sql($sql, array('userid' => $value));
+                        }
+                        else {
+                            // Mock data in case the table doesn't exist
+                            $sva_data = (object) [
+                                'faculty' => 'Mock Faculty',
+                                'campus' => 'Mock Campus',
+                                'academicyear' => 'Mock Academic Year'
+                            ];
+                        }
+                        $students[$i]['faculty'] = $sva_data->faculty;
+                        $students[$i]['campus'] = $sva_data->campus;
+                    }
+
+                    if ($key != 'faculty' && $key != 'campus') {
+                        $students[$i][$key] = $value;
+                    }
                 }
-
-                // Remove the faculty key from the array
-                if ($key == 'faculty' || $key == 'campus') {
-                    // Do noting
-                } else {
-                    $students[$i][$key] = $value;
-                }
-
-//                if ($filter_students && $key == 'grade' && (float)$value >= $mdlGradeRanges['min'] && (float)$value <= $mdlGradeRanges['max']) {
-//                    $filter_me_out = false;   // we want to keep this student
-//                }
+                $i++;
             }
-//            if ($filter_students && $filter_me_out) {
-//                unset($students[$i]);
-//            }
-            $i++;
+
+            //raise_memory_limit(MEMORY_STANDARD);
+            return $students;
+
+        } catch (Exception $e) { //error log
+            error_log('Error in get_course_grades_percent: ' . $e->getMessage());
+            throw new moodle_exception('errorprocessingrequest', 'local_earlyalert', '', null, $e->getMessage());
         }
-        raise_memory_limit(MEMORY_STANDARD);
-        return $students;
     }
 
 
@@ -135,120 +137,68 @@ class local_earlyalert_course_grades_ws extends external_api
     public static function get_course_student_templates($courseid, $alert_type, $teacher_user_id)
     {
         global $DB;
-        raise_memory_limit(MEMORY_UNLIMITED);
-        // Convert alert type to int based on constants in email class
-        switch ($alert_type) {
-            case 'grade':
-                $alert_type = email::MESSAGE_TYPE_GRADE;
-                break;
-            case 'assign':
-                $alert_type = email::MESSAGE_TYPE_ASSIGNMENT;
-                break;
-            case 'exam':
-                $alert_type = email::MESSAGE_TYPE_EXAM;
-                break;
-            default:
-                $alert_type = email::MESSAGE_TYPE_CATCHALL;
-        }
-        // Get teacher
-        $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'firstname,lastname,email');
-
-        // Get course idnumber to get faculty course name and course number
-        $course = $DB->get_record('course', array('id' => $courseid), 'idnumber');
-        // Convert course idnumber to array by _
-        $course_idnumber = explode('_', $course->idnumber);
-        // Capture faculty, course name and course number
-        $course_faculty = $course_idnumber[1];
-        $course_name = $course_idnumber[2];
-        $course_number = $course_idnumber[4];
-        // Get course email template
-
-        $facultytemplates = '';
-        $depttemplates = '';
-
-        $mdlGrades = helper::get_moodle_grades_by_course($courseid);
-        unset($mdlGrades[$teacher_user_id]);
-        //lets cache all possible email templates based off of these students...
-        $templateCache = array();
-        $i = 1;
-        foreach ($mdlGrades as $student) {
-            if ($sva_data = $DB->get_record('svadata', array('sisid' => $student['idnumber']))) {
-                $student['faculty'] = $sva_data->faculty;
-                $student['campus'] = $sva_data->campus;
+        //raise_memory_limit(MEMORY_UNLIMITED);
+        try {
+            // Convert alert type to int based on constants in email class
+            switch ($alert_type) {
+                case 'grade':
+                    $alert_type = email::MESSAGE_TYPE_GRADE;
+                    break;
+                case 'assign':
+                    $alert_type = email::MESSAGE_TYPE_ASSIGNMENT;
+                    break;
+                case 'exam':
+                    $alert_type = email::MESSAGE_TYPE_EXAM;
+                    break;
+                default:
+                    $alert_type = email::MESSAGE_TYPE_CATCHALL;
             }
-            $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
-            // Get student Language
-            $lang = $student_record->lang;
+            // Get teacher
+            $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'firstname,lastname,email');
 
-            $course_template = $DB->get_record('local_et_email',
-                array('lang' => $lang,
-                    'faculty' => $course_faculty,
-                    'course' => $course_name,
-                    'coursenumber' => $course_number,
-                    'message_type' => $alert_type,
-                    'active' => 1,
-                    'deleted' => 0)
-            );
+            // Get course idnumber to get faculty course name and course number
+            $course = $DB->get_record('course', array('id' => $courseid), 'idnumber');
+            // Convert course idnumber to array by _
+            $course_idnumber = explode('_', $course->idnumber);
+            // Capture faculty, course name and course number
+            $course_faculty = $course_idnumber[1];
+            $course_name = $course_idnumber[2];
+            $course_number = $course_idnumber[4];
+            // Get course email template
 
-            if ($course_template->faculty == $student['faculty']) {
-                if (!isset($templateCache['course_' . $courseid])) {
-                    $email = new \local_etemplate\email($course_template->id);
-                    $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                    $templateCache['course_' . $courseid] = array(
-                        'templateKey' => 'course_' . $courseid,
-                        'subject' => $template_data->subject,
-                        'message' => $template_data->message,
-                        'templateid' => $template_data->templateid,
-                        'revision_id' => $template_data->revision_id,
-                        'course_id' => $courseid,
-                        'instructor_id' => $template_data->instructor_id,
-                        'triggered_from_user_id' => $template_data->triggered_from_user_id
-                    );
+            $facultytemplates = '';
+            $depttemplates = '';
+
+            $mdlGrades = helper::get_moodle_grades_by_course($courseid);
+            unset($mdlGrades[$teacher_user_id]);
+            //lets cache all possible email templates based off of these students...
+            $templateCache = array();
+            $i = 1;
+            foreach ($mdlGrades as $student) {
+                if ($sva_data = $DB->get_record('svadata', array('sisid' => $student['idnumber']))) {
+                    $student['faculty'] = $sva_data->faculty;
+                    $student['campus'] = $sva_data->campus;
                 }
-            } else {
-                //check if template is already defined
-                if (
-                    !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major']]) ||
-                    !isset($templateCache[$student['campus'] . "_" . $student['faculty']]) ||
-                    !isset($templateCache[$student['campus']])
-                ) {
-                    // Set up campus, faculty and department
-                    $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
-                    $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
-                    $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
+                $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
+                // Get student Language
+                $lang = $student_record->lang;
 
-                    $campustemplate = false;
-                    $facultytemplate = false;
-                    $depttemplate = false;
-                    // Get various email templates
-                    $campustemplate = $DB->get_record('local_et_email',
-                        array('lang' => $lang, 'unit' => $campus->id, 'context' => 'CAMPUS', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
-                    $facultytemplate = $DB->get_record('local_et_email',
-                        array('lang' => $lang, 'unit' => $faculty->id, 'context' => 'UNIT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
-                    $depttemplate = $DB->get_record('local_et_email',
-                        array('lang' => $lang, 'unit' => $department->id, 'context' => 'DEPT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
+                $course_template = $DB->get_record('local_et_email',
+                    array('lang' => $lang,
+                        'faculty' => $course_faculty,
+                        'course' => $course_name,
+                        'coursenumber' => $course_number,
+                        'message_type' => $alert_type,
+                        'active' => 1,
+                        'deleted' => 0)
+                );
 
-                    // Check which of the aboves are true;
-                    $templateKey = [];
-                    $template = false;
-                    if ($campustemplate) {
-                        $templateKey[$i] = $student['campus'];
-                        $template[$i] = $campustemplate;
-                    }
-                    if ($facultytemplate) {
-                        $templateKey[$i] = $student['campus'] . "_" . $student['faculty'];
-                        $template[$i] = $facultytemplate;
-                    }
-                    if ($depttemplate) {
-                        $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'];
-                        $template[$i] = $depttemplate;
-                    }
-
-                    if (!empty($templateKey)) {
-                        $email = new \local_etemplate\email($template[$i]->id);
+                if ($course_template->faculty == $student['faculty']) {
+                    if (!isset($templateCache['course_' . $courseid])) {
+                        $email = new \local_etemplate\email($course_template->id);
                         $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                        $templateCache[$templateKey[$i]] = array(
-                            'templateKey' => $templateKey[$i],
+                        $templateCache['course_' . $courseid] = array(
+                            'templateKey' => 'course_' . $courseid,
                             'subject' => $template_data->subject,
                             'message' => $template_data->message,
                             'templateid' => $template_data->templateid,
@@ -258,12 +208,70 @@ class local_earlyalert_course_grades_ws extends external_api
                             'triggered_from_user_id' => $template_data->triggered_from_user_id
                         );
                     }
+                } else {
+                    //check if template is already defined
+                    if (
+                        !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major']]) ||
+                        !isset($templateCache[$student['campus'] . "_" . $student['faculty']]) ||
+                        !isset($templateCache[$student['campus']])
+                    ) {
+                        // Set up campus, faculty and department
+                        $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
+                        $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
+                        $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
+
+                        $campustemplate = false;
+                        $facultytemplate = false;
+                        $depttemplate = false;
+                        // Get various email templates
+                        $campustemplate = $DB->get_record('local_et_email',
+                            array('lang' => $lang, 'unit' => $campus->id, 'context' => 'CAMPUS', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
+                        $facultytemplate = $DB->get_record('local_et_email',
+                            array('lang' => $lang, 'unit' => $faculty->id, 'context' => 'UNIT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
+                        $depttemplate = $DB->get_record('local_et_email',
+                            array('lang' => $lang, 'unit' => $department->id, 'context' => 'DEPT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
+
+                        // Check which of the aboves are true;
+                        $templateKey = [];
+                        $template = false;
+                        if ($campustemplate) {
+                            $templateKey[$i] = $student['campus'];
+                            $template[$i] = $campustemplate;
+                        }
+                        if ($facultytemplate) {
+                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'];
+                            $template[$i] = $facultytemplate;
+                        }
+                        if ($depttemplate) {
+                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'];
+                            $template[$i] = $depttemplate;
+                        }
+
+                        if (!empty($templateKey)) {
+                            $email = new \local_etemplate\email($template[$i]->id);
+                            $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
+                            $templateCache[$templateKey[$i]] = array(
+                                'templateKey' => $templateKey[$i],
+                                'subject' => $template_data->subject,
+                                'message' => $template_data->message,
+                                'templateid' => $template_data->templateid,
+                                'revision_id' => $template_data->revision_id,
+                                'course_id' => $courseid,
+                                'instructor_id' => $template_data->instructor_id,
+                                'triggered_from_user_id' => $template_data->triggered_from_user_id
+                            );
+                        }
+                    }
                 }
+                $i++;
             }
-            $i++;
-        }
-        raise_memory_limit(MEMORY_STANDARD);
+        //raise_memory_limit(MEMORY_STANDARD);
         return $templateCache;
+        }
+        catch (Exception $e) {
+            error_log('Error in get_course_student_templates: ' . $e->getMessage());
+            throw new moodle_exception('errorprocessingrequest', 'local_earlyalert', '', null, $e->getMessage());
+        }
     }
 
     /**
