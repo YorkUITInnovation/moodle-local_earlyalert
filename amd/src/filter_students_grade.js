@@ -111,7 +111,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
         const finalCache = new Map();
 
-        ajax.call([{
+        /*ajax.call([{
             methodname: 'earlyalert_course_grades_percent_get',
             args: {"id": course_id, "grade_letter_id": grade_letter_id, "teacher_user_id": teacher_user_id}
         }])[0].fail((error) => {
@@ -123,7 +123,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type}
         }])[0].fail((error) => {
             console.error('Error fetching templates:', error);
-        });
+        });*/
 
         // Fetch student list and templates
         var get_grades_and_templates = ajax.call([
