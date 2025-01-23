@@ -200,7 +200,7 @@ class helper
         require_once($CFG->dirroot . '/grade/querylib.php');
         require_once($CFG->dirroot . '/lib/grade/grade_item.php');
         require_once($CFG->dirroot . '/lib/enrollib.php');
-        require_once("../../../html/enrol/externallib.php");
+        require_once($CFG->dirroot . "/enrol/externallib.php");
 
 
         try {
