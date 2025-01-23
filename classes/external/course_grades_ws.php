@@ -134,9 +134,18 @@ class local_earlyalert_course_grades_ws extends external_api
         return new external_multiple_structure(self::get_course_grades_percent_details());
     }
 
-    public static function get_course_student_templates($courseid, $alert_type, $teacher_user_id)
+    public static function get_course_student_templates($id, $alert_type, $teacher_user_id)
     {
         global $DB;
+        $params = self::validate_parameters(
+            self::get_course_student_templates_parameters(), array(
+                'id' => $id,
+                'alert_type' => $alert_type,
+                'teacher_user_id' => $teacher_user_id
+            )
+        );
+
+        $courseid = $id;
         //raise_memory_limit(MEMORY_UNLIMITED);
         try {
             // Convert alert type to int based on constants in email class
@@ -281,7 +290,7 @@ class local_earlyalert_course_grades_ws extends external_api
     public static function get_course_student_templates_parameters()
     {
         return new external_function_parameters(array(
-            'id' => new external_value(PARAM_INT, 'Course id', VALUE_OPTIONAL, -1),
+            'id' => new external_value(PARAM_INT, 'Course id', VALUE_OPTIONAL, 0),
             'alert_type' => new external_value(PARAM_TEXT, 'Alert type; grade, assign, exam', VALUE_OPTIONAL, 'grade'),
             'teacher_user_id' => new external_value(PARAM_INT, 'User id of teacher', VALUE_OPTIONAL, 0)
         ));
