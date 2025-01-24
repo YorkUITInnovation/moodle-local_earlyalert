@@ -45,17 +45,30 @@ class update_campus extends \core\task\scheduled_task
             $LDAP = new ldap();
             // Let's first get the profile field called
             $campus_profile_field = $DB->get_record('user_info_field', ['shortname' => 'campus']);
+            if (!$campus_profile_field) {
+                mtrace('Campus profile field not found.');
+                return false;
+            }
             // Get all Markham Students
             $markham_streams = explode("\n", $CFG->earlyalert_markham_streams);
             $markham_students = $LDAP->get_users_based_on_stream($markham_streams);
-            mtrace('Markham students');
+            if (empty($markham_students)) {
+                mtrace('Markham students not found.');
+                return false;
+            }
+            mtrace('Markham students!');
             // Unset count
             unset($markham_streams['count']);
             // Get Glendon students
-            $glendon_students = $LDAP->get_users_based_on_faculty('GL');
-            mtrace('Glendon students');
+            $glendon_students = $LDAP->get_users_based_on_faculty('GL'); // TODO: hardcoded GL for now
+            if (empty($glendon_students)) {
+                mtrace('Glendon students not found.');
+                return false;
+            }
+            mtrace('Glendon students!');
             // Unset count
             unset($glendon_students['count']);
+
             // Merge both into one array
             $merged_students = array_merge($markham_students, $glendon_students);
             for ($i = 0; $i < count($merged_students); $i++) {

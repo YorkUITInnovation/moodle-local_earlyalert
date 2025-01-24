@@ -104,6 +104,8 @@ $string['selected_alert_based_on'] = 'You are selecting an alert based on a';
 $string['send_alert_based_on'] = 'Send an alert based on';
 $string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
 $string['view_message'] = 'View Message Details';
+$string['update_campus'] = 'Update Campus profile field';
+
 
 /* Email template */
 $string['preview_email_greeting'] = 'Hello';
