@@ -54,11 +54,10 @@ class ldap
 
             $ldap_rdn = 'uid=' . $CFG->earlyalert_ldapuser . ',ou=Applications,dc=yorku,dc=ca'; // ldap rdn or dn
             $ldap_pass = $CFG->earlyalert_ldappwd; // associated password
-
             // binding to ldap server
             $this->ldap_bind = @ldap_bind($this->ldap_conn, $ldap_rdn, $ldap_pass);
             if (!$this->ldap_bind) {
-                throw new \Exception("Could not bind to LDAP server.");
+                throw new \Exception("Could not bind to LDAP server." . ldap_error($this->ldap_conn));
             }
         } catch (\Exception $e) {
             die($e->getMessage());
@@ -246,7 +245,7 @@ class ldap
     public function get_user_info($uid, $cn = false)
     {
         try {
-            $filter = '(&(uid=' . $uid . '))';
+            $filter = '(&(pycyin=' . $uid . '))';
             $search_results = ldap_search($this->get_ldap_conn(), self::PEOPLE_DN,
                 $filter);
             $results = ldap_get_entries($this->get_ldap_conn(), $search_results);
@@ -263,6 +262,12 @@ class ldap
                 $faculty = $results[0]['pyemploymentunit1'][0];
             }
 
+            if (isset($results[0]['pystream'][0])) {
+                $stream = $results[0]['pystream'][0];
+            } else {
+                $stream = 'NO';
+            }
+
             if ($cn) {
                 //Get course in Moodle if it exists
                 $grade = $this->get_moodle_grade($cn, $results[0]['pycyin'][0]);
@@ -277,6 +282,7 @@ class ldap
                 'email' => $email,
                 'sisid' => $results[0]['pycyin'][0],
                 'faculty' => $faculty,
+                'stream' => $stream,
                 'mayatype' => $results[0]['pymayatype'][0],
                 'grade' => $grade
             );
@@ -295,12 +301,19 @@ class ldap
                 $filter);
             $results = ldap_get_entries($this->get_ldap_conn(), $search_results);
 
+            if (isset($results[0]['pystream'][0])) {
+                $stream = $results[0]['pystream'][0];
+            } else {
+                $stream = 'NO';
+            }
+
             $user = array(
                 'lastname' => $results[0]['sn'][0],
                 'firstname' => $results[0]['givenname'][0],
                 'email' => $results[0]['pypreferredmail'][0],
                 'sisid' => $results[0]['pycyin'][0],
                 'faculty' => $results[0]['pyfaculty'][0],
+                'stream' => $stream,
                 'courses' => $results[0]['pycourse'],
                 'username' => $results[0]['uid'],
             );
