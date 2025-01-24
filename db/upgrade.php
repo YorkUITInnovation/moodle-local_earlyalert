@@ -151,7 +151,7 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
 
         // Define field campus to be added to user_info_field.
         $table = new xmldb_table('user_info_field');
-        $field = new xmldb_field('campus', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, 'default_campus', 'shortname');
+        $field = new xmldb_field('campus', XMLDB_TYPE_CHAR, '255', null, null, null, 'default_campus', 'shortname');
 
         // Conditionally launch add field campus.
         if (!$dbman->field_exists($table, $field)) {
