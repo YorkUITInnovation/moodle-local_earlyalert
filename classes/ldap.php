@@ -242,6 +242,55 @@ class ldap
         }
     }
 
+    /**
+     * @param $streams array
+     * @return array|false|void
+     */
+    public function get_users_based_on_stream($streams)
+    {
+        if (count($streams) < 1) {
+            return false;
+        }
+        try {
+            $filter = '(|';
+            for ($i = 0; $i < count($streams); $i++) {
+                $filter .= '(pystream=' . $streams[$i] . ')';
+            }
+            $filter .= ')';
+            $search_results = ldap_search($this->get_ldap_conn(), self::PEOPLE_DN,
+                $filter);
+            $results = ldap_get_entries($this->get_ldap_conn(), $search_results);
+
+            return $results;
+
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    /**
+     * @param $faculty string
+     * @return array|false|void
+     */
+    public function get_users_based_on_faculty($faculty)
+    {
+        if (empty($faculty)) {
+            echo 'No faculty';
+            return false;
+        }
+        try {
+            $filter = '(pyFaculty=' . $faculty . ')';
+            $search_results = ldap_search($this->get_ldap_conn(), self::PEOPLE_DN,
+                $filter);
+            $results = ldap_get_entries($this->get_ldap_conn(), $search_results);
+
+            return $results;
+
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
     public function get_user_info($uid, $cn = false)
     {
         try {

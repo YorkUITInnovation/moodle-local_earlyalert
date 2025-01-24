@@ -17,5 +17,14 @@ $tasks = array(
         'day' => '*',
         'month' => '*',
         'dayofweek' => '*'
+    ),
+    array(
+        'classname' => 'local_earlyalert\task\update_campus',
+        'blocking' => 0,
+        'minute' => '*',
+        'hour' => '5',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*'
     )
 );
