@@ -146,20 +146,5 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         // Earlyalert savepoint reached.
         upgrade_plugin_savepoint(true, 2024112621, 'local', 'earlyalert');
     }
-
-    if ($oldversion < 2024112622) {
-
-        // Define field campus to be added to user_info_field.
-        $table = new xmldb_table('user_info_field');
-        $field = new xmldb_field('campus', XMLDB_TYPE_CHAR, '255', null, null, null, 'default_campus', 'shortname');
-
-        // Conditionally launch add field campus.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Earlyalert savepoint reached.
-        upgrade_plugin_savepoint(true, 2024112622, 'local', 'earlyalert');
-    }
     return true;
 }
