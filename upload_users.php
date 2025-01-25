@@ -50,8 +50,9 @@ for ($i = $from; $i < $to; $i++) {
     ob_flush();
     flush();
     print_object(count($data));
+    $x = 1;
     foreach ($data as $rows) {
-        echo 'Processing row ' . $i . '<br>';
+        echo 'Processing row ' . $x . '<br>';
         // first check if teh user exists based on the idnumber
         $user = $DB->get_record('user', ['idnumber' => $rows['idnumber']]);
         echo 'User found with id ' . $user->id . '<br>';
@@ -118,6 +119,7 @@ for ($i = $from; $i < $to; $i++) {
         }
         ob_flush();
         flush();
+        $x++;
     }
 }
 
