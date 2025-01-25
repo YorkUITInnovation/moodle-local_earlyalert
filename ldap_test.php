@@ -36,6 +36,9 @@ if (!$campus_profile_field) {
 // Get Glendon students
 $glendon_students = $LDAP->get_users_based_on_faculty('GL'); // TODO: hardcoded GL for now
 print_object($glendon_students);
+
+
+
 die;
 mtrace('Glendon students!');
 // Unset count
