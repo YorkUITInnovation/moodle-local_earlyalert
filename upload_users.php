@@ -72,7 +72,7 @@ foreach ($data as $rows) {
         $user->mnethostid = 1;
         $user->timecreated = time();
         $newuserid = $DB->insert_record('user', $user);
-        echo 'User created with id ' . $newuserid . '<br>';
+        echo 'User created with id ' . $newuserid . '(' . $rows['idnumber'] . ')<br>';
         $user = $DB->get_record('user', ['id' => $newuserid]);
     }
 
@@ -92,7 +92,7 @@ foreach ($data as $rows) {
         $faculty_data->data = $rows['profile_field_ldapfaculty'];
         $faculty_data->dataformat = 0;
         $faculty_data->data = $DB->insert_record('user_info_data', $faculty_data);
-        echo 'Faculty data created for ' . $user->id . '<br>';
+        echo 'Faculty data created for ' . $user->id . '(' . $user->idnumber . ')<br>';
     } else {
         $params = [
             'userid' => $user->id,
@@ -101,7 +101,7 @@ foreach ($data as $rows) {
             'dataformat' => 0,
         ];
         $DB->set_field('user_info_data', 'data', $rows['profile_field_ldapfaculty'], ['id' => $faculty_data->id]);
-        echo 'Faculty data updated for ' . $user->id . '<br>';
+        echo 'Faculty data updated for ' . $user->id . '(' . $user->idnumber . ')<br>';
     }
 
     // If the major data is not set, then we need to create the major profile field
@@ -115,7 +115,7 @@ foreach ($data as $rows) {
         echo 'Major data created for ' . $user->id . '<br>';
     } else {
         $DB->set_field('user_info_data', 'data', $rows['profile_field_ldapmajor'], ['id' => $major_data->id]);
-        echo 'Major data updated for ' . $user->id . '<br>';
+        echo 'Major data updated for ' . $user->id . '(' . $user->idnumber . ')<br>';
     }
     ob_flush();
     flush();
