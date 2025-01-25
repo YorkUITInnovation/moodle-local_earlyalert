@@ -318,10 +318,14 @@ class helper
 
         if (in_array($stream, $streams)) {
             $campus = 'MK';
-        } else if ($stream == 'GL' || $faculty == 'GL') {
+        } else if ($stream == 'GL') {
             $campus = 'GL';
         } else {
-            $campus = 'YK';
+            if ($faculty == 'GL') {
+                $campus = 'GL';
+            } else {
+                $campus = 'YK';
+            }
         }
 
         return $campus;
