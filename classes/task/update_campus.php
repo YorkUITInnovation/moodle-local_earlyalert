@@ -66,6 +66,11 @@ class update_campus extends \core\task\scheduled_task
             $glendon_students = $glendon_students ?: [];
             // Merge both into one array
             $merged_students = array_merge($markham_students, $glendon_students);
+
+            if(empty($merged_students)) {
+                mtrace('no students found students not found.');
+                return false;
+            }
             for ($i = 0; $i < count($merged_students); $i++) {
                 // Get user from pyCyin number
                 $student = $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id');
@@ -79,14 +84,16 @@ class update_campus extends \core\task\scheduled_task
                     mtrace('Data field updated for ' . $merged_students[$i]['pycyin'][0]);
                 } else {
                     // Create the data field
-                    $params = [
-                        'userid' => $student->id,
-                        'fieldid' => $campus_profile_field->id,
-                        'data' => $merged_students[$i]['pycyin'][0],
-                        'dataformat' => 0,
-                    ];
-                    $DB->insert_record('user_info_data', $params);
-                    mtrace('Data field inserted for ' . $merged_students[$i]['pycyin'][0]);
+                    if (isset($student->id) && $student->id != 0) {
+                        $params = [
+                            'userid' => $student->id,
+                            'fieldid' => $campus_profile_field->id,
+                            'data' => $merged_students[$i]['pycyin'][0],
+                            'dataformat' => 0,
+                        ];
+                        $DB->insert_record('user_info_data', $params);
+                        mtrace('Data field inserted for ' . $merged_students[$i]['pycyin'][0]);
+                    }
                 }
             }
         } catch (\Exception $e) {
