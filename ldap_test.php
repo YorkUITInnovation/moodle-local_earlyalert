@@ -49,10 +49,9 @@ if (empty($merged_students)) {
     return false;
 }
 for ($i = 0; $i < count($merged_students); $i++) {
-    // Get user from pyCyin number
-    $student = $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id');
+
     // Only perform 220258760if student exists in Moodle
-    if (!$student) {
+    if ($student != $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id')) {
         mtrace('User does not exist in Moodle: ' . $merged_students[$i]['pycyin'][0]);
         continue;
     } else {
@@ -60,11 +59,20 @@ for ($i = 0; $i < count($merged_students); $i++) {
         if (isset($merged_students[$i]['pystream'][0])) {
             echo 'Processing ' . $merged_students[$i]['pycyin'][0] . '<br>';
             echo 'Stream: ' . $merged_students[$i]['pystream'][0] . '<br>';
-            $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
-            echo 'Campus: ' . $campus . '<br>';
+            if ($merged_students[$i]['pystream'][0] == 'NO') {
+                $campus = helper::get_campus_from_stream($merged_students[$i]['pyfaculty'][0]);
+            } else {
+                $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
+            }
         } else {
-            $campus = 'YK';
+            if ($merged_students[$i]['pystream'][0] == 'NO') {
+                $campus = helper::get_campus_from_stream($merged_students[$i]['pyfaculty'][0]);
+            } else {
+                $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
+            }
         }
+
+        echo 'Campus: ' . $campus . '<br>';
         // Check to see if the profile data is set.
         if ($campus_data = $DB->get_record('user_info_data', ['userid' => $student->id, 'fieldid' => $campus_profile_field->id], '*')) {
             $DB->set_field('user_info_data', 'data', $campus, ['id' => $campus_data->id]);
