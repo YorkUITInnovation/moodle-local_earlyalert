@@ -185,10 +185,7 @@ class local_earlyalert_course_grades_ws extends external_api
             $templateCache = array();
             $i = 1;
             foreach ($mdlGrades as $student) {
-                if ($sva_data = $DB->get_record('svadata', array('sisid' => $student['idnumber']))) {
-                    $student['faculty'] = $sva_data->faculty;
-                    $student['campus'] = $sva_data->campus;
-                }
+
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
                 $lang = $student_record->lang;

@@ -204,11 +204,20 @@ class helper
 
 
         try {
+            // Start the LDAP connection in case we need it
+            $LDAP = new ldap();
+            // Set profile field ids
+            $campus_profile_field = new \stdClass();
+            if ($campus_profile_field != $DB->get_record('user_profile_field', ['shortname' => 'campus'], 'id')) {
+                $campus_profile_field->id = 0;
+            }
+
             $students = array();
             if (isset($course_id)) {
                 // Pull student from enrolments.
                 $users = enrol_get_course_users($course_id, true); // returns user objects of those enrolled in course
                 foreach ($users as $student) {
+                    $mdl_user = $DB->get_record('user', ['id' => $student->id]);
                     // Get the student's grade for the given course ID.
                     $grade = grade_get_course_grade($student->id, $course_id);
                     $grade = new \stdClass();
@@ -219,18 +228,31 @@ class helper
                             LEFT JOIN {user_info_field} uif on uid.fieldid=uif.id
                             WHERE uid.userid = ?
                             and uif.shortname = ?
-                    ", array($student->id, 'campus'))){
+                    ", array($student->id, 'campus'))) {
                         //has campus
                         $studentcampus = $campus->campus;
                     } else {
-                        $studentcampus = '';
+                        // Get user info from ldap
+                        $student_info = $LDAP->get_student_info($mdl_user->idnumber);
+                        $campus = helper::get_campus_from_stream($student_info['stream']);
+                        if ($campus_profile_field->id != 0) {
+                            // Create the data field
+                            $params = [
+                                'userid' => $student->id,
+                                'fieldid' => $campus_profile_field->id,
+                                'data' => $campus,
+                                'dataformat' => 0,
+                            ];
+                            $DB->insert_record('user_info_data', $params);
+                        }
+                        $studentcampus = $campus;
                     }
                     if ($faculty = $DB->get_record_sql("SELECT uid.data AS 'faculty'
                             FROM {user_info_data} uid
                             LEFT JOIN {user_info_field} uif on uid.fieldid=uif.id
                             WHERE uid.userid = ?
                             and uif.shortname = ?
-                    ", array($student->id, 'ldapfaculty'))){
+                    ", array($student->id, 'ldapfaculty'))) {
                         //has faculty
                         $studentfaculty = $faculty->faculty;
                     } else {
@@ -241,7 +263,7 @@ class helper
                             LEFT JOIN {user_info_field} uif on uid.fieldid=uif.id
                             WHERE uid.userid = ?
                             and uif.shortname = ?
-                    ", array($student->id, 'ldapmajor'))){
+                    ", array($student->id, 'ldapmajor'))) {
                         //has major
                         $studentmajor = $major->major;
                     } else {
@@ -250,7 +272,7 @@ class helper
                     if ($grade->grade) {
                         // Convert the grade to a percentage and format it as a decimal number with two places.
                         //$grade = ($grade->grade / $grade->item->grademax) * 100;
-                        $student_grade = number_format((float)$grade,'2');
+                        $student_grade = number_format((float)$grade, '2');
                         $students[$student->id] = [
                             'id' => $student->id,
                             'course_id' => $course_id,
@@ -272,14 +294,38 @@ class helper
         }
     }
 
-    public static function get_moodle_grade_percent_range($grade_letter_id){
+    /**
+     * @param $stream string
+     * @return string
+     */
+    public static function get_campus_from_stream($stream)
+    {
+        global $CFG, $DB;
+        $streams = explode("\n", $CFG->earlyalert_markham_streams);
+
+        if (in_array($stream, $streams)) {
+            $campus = 'MK';
+        } else if ($stream == 'GL') {
+            $campus = 'GL';
+        } else {
+            $campus = 'YK';
+        }
+
+        return $campus;
+    }
+
+    /**
+     * @param $grade_letter_id
+     * @return array|mixed|void
+     */
+    public static function get_moodle_grade_percent_range($grade_letter_id)
+    {
         try {
             $grade_letters = new \local_earlyalert\grade_letters();
             $grade_ranges = $grade_letters->get_grade_percentage_range();
-           if ($grade_letter_id > 0 && isset($grade_ranges[$grade_letter_id])) {
+            if ($grade_letter_id > 0 && isset($grade_ranges[$grade_letter_id])) {
                 return $grade_ranges[$grade_letter_id];
-            }
-           else return [];
+            } else return [];
 
         } catch (\Exception $e) {
             base::debug_to_console('it died');

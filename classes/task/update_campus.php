@@ -13,6 +13,7 @@ global $CFG;
 
 
 use local_earlyalert\ldap;
+use local_earlyalert\helper;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -78,9 +79,11 @@ class update_campus extends \core\task\scheduled_task
                     mtrace('User has no id in ldap: ' . $merged_students[$i]['pycyin'][0]);
                     continue;
                 }
+                // Get campus from ldap
+                $campus = helper::get_campus_from_stream($merged_students[$i]['stream'][0]);
                 // Check to see if the profile data is set.
                 if ($campus_data = $DB->get_record('user_info_data', ['userid' => $student->id, 'fieldid' => $campus_profile_field->id], '*')) {
-                    $DB->set_field('user_info_data', 'data', $merged_students[$i]['pystream'][0], ['id' => $campus_data->id]);
+                    $DB->set_field('user_info_data', 'data', $campus, ['id' => $campus_data->id]);
                     mtrace('Data field updated for ' . $merged_students[$i]['pycyin'][0]);
                 } else {
                     // Create the data field
@@ -88,7 +91,7 @@ class update_campus extends \core\task\scheduled_task
                         $params = [
                             'userid' => $student->id,
                             'fieldid' => $campus_profile_field->id,
-                            'data' => $merged_students[$i]['pycyin'][0],
+                            'data' => $campus,
                             'dataformat' => 0,
                         ];
                         $DB->insert_record('user_info_data', $params);
