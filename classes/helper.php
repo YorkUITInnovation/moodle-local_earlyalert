@@ -289,7 +289,7 @@ class helper
             }
             return $students;
         } catch (\Exception $e) {
-            base::debug_to_console('it died');
+            base::debug_to_console('it died'. $e->getMessage());
             die($e->getMessage());
         }
     }
@@ -328,7 +328,7 @@ class helper
             } else return [];
 
         } catch (\Exception $e) {
-            base::debug_to_console('it died');
+            base::debug_to_console('it died'. $e->getMessage());
             die($e->getMessage());
         }
     }
