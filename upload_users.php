@@ -41,13 +41,19 @@ function parse_csv($file_path)
     return $data;
 }
 
+
 echo $OUTPUT->header();
 raise_memory_limit(MEMORY_UNLIMITED);
 //for ($i = $from; $i < $to; $i++) {
+ob_start();
 $data = parse_csv('users-eclass.csv');
+ob_flush();
+flush();
+print_object(count($data));
 foreach ($data as $rows) {
     // first check if teh user exists based on the idnumber
     $user = $DB->get_record('user', ['idnumber' => $rows['idnumber']]);
+    echo 'User found with id ' . $user->id . '<br>';
     if (!$user) {
         // Create user based on columns username through country
         $user = new stdClass();
@@ -64,6 +70,7 @@ foreach ($data as $rows) {
         $user->mnethostid = 1;
         $user->timecreated = time();
         $newuserid = $DB->insert_record('user', $user);
+        echo 'User created with id ' . $newuserid . '<br>';
         $user = $DB->get_record('user', ['id' => $newuserid]);
     }
 
@@ -83,8 +90,16 @@ foreach ($data as $rows) {
         $faculty_data->data = $rows['profile_field_ldapfaculty'];
         $faculty_data->dataformat = 0;
         $faculty_data->data = $DB->insert_record('user_info_data', $faculty_data);
+        echo 'Faculty data created for ' . $user->id . '<br>';
     } else {
+        $params = [
+            'userid' => $user->id,
+            'fieldid' => $faculty_profile_field->id,
+            'data' => $rows['profile_field_ldapfaculty'],
+            'dataformat' => 0,
+        ];
         $DB->set_field('user_info_data', 'data', $rows['profile_field_ldapfaculty'], ['id' => $faculty_data->id]);
+        echo 'Faculty data updated for ' . $user->id . '<br>';
     }
 
     // If the major data is not set, then we need to create the major profile field
@@ -95,8 +110,10 @@ foreach ($data as $rows) {
         $major_data->data = $rows['profile_field_ldapmajor'];
         $major_data->dataformat = 0;
         $major_data->data = $DB->insert_record('user_info_data', $major_data);
+        echo 'Major data created for ' . $user->id . '<br>';
     } else {
         $DB->set_field('user_info_data', 'data', $rows['profile_field_ldapmajor'], ['id' => $major_data->id]);
+        echo 'Major data updated for ' . $user->id . '<br>';
     }
 //    }
 }
