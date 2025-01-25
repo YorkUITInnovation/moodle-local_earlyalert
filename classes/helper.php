@@ -235,7 +235,7 @@ class helper
                         $studentcampus = $campus->campus;
                     } else {
                         // Get user info from ldap
-                        if ($mdl_user && $campus_profile_field->id != 0) {
+                        if (!empty($mdl_user) && $campus_profile_field->id != 0) {
                             // get user profile record if ldap found a user
                             $user_profile = profile_user_record($mdl_user->id);
                             $student_info = $LDAP->get_student_info($mdl_user->idnumber);
