@@ -105,6 +105,7 @@ $string['send_alert_based_on'] = 'Send an alert based on';
 $string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
 $string['view_message'] = 'View Message Details';
 $string['update_campus'] = 'Update Campus profile field';
+$string['no_courses'] = 'No Courses found';
 
 
 /* Email template */

@@ -29,6 +29,15 @@
         </div>
     {{/impersonated_user}}
 {{/impersonate}}
+{{^rows}}
+    <div class="row">
+        <div class="col">
+            <div class="alert alert-info">
+                <b>{{#str}}no_courses, local_earlyalert{{/str}}</b>
+            </div>
+        </div>
+    </div>
+{{/rows}}
 {{#rows}}
     <div class="row">
         <div class="col">
