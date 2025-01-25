@@ -219,8 +219,7 @@ class helper
                 // Pull student from enrolments.
                 $users = enrol_get_course_users($course_id, true); // returns user objects of those enrolled in course
                 foreach ($users as $student) {
-                    $mdl_user = $DB->get_record('user', ['id' => $student->id]);
-                    $user_profile = profile_user_record($mdl_user->id);
+                    $mdl_user = $DB->get_record('user', ['id' => $student->id]); // get moodle user
                     // Get the student's grade for the given course ID.
                     $grade = grade_get_course_grade($student->id, $course_id);
                     $grade = new \stdClass();
@@ -236,9 +235,13 @@ class helper
                         $studentcampus = $campus->campus;
                     } else {
                         // Get user info from ldap
-                        $student_info = $LDAP->get_student_info($mdl_user->idnumber);
-                        $campus = helper::get_campus_from_stream($student_info['stream']);
-                        if ($campus_profile_field->id != 0) {
+                        if ($mdl_user && $campus_profile_field->id != 0) {
+                            // get user profile record if ldap found a user
+                            $user_profile = profile_user_record($mdl_user->id);
+                            $student_info = $LDAP->get_student_info($mdl_user->idnumber);
+
+                            // try getting campus from stream
+                            $campus = helper::get_campus_from_stream($student_info['stream']);
 
                             // Create the data field
                             $params = new \stdClass();
