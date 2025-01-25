@@ -75,7 +75,7 @@ class update_campus extends \core\task\scheduled_task
             for ($i = 0; $i < count($merged_students); $i++) {
                 // Get user from pyCyin number
                 $student = $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id');
-                // Only perform if student exists in Moodle
+                // Only perform 220258760if student exists in Moodle
                 if (!$student) {
                     mtrace('User does not exist in Moodle: ' . $merged_students[$i]['pycyin'][0]);
                     continue;
