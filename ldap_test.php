@@ -43,8 +43,7 @@ $markham_students = $markham_students ?: [];
 $glendon_students = $glendon_students ?: [];
 // Merge both into one array
 $merged_students = array_merge($markham_students, $glendon_students);
-print_object($merged_students);
-die;
+
 if (empty($merged_students)) {
     mtrace('no students found students not found.');
     return false;
@@ -59,7 +58,10 @@ for ($i = 0; $i < count($merged_students); $i++) {
     } else {
         // Get campus from ldap
         if (isset($merged_students[$i]['pystream'][0])) {
+            echo 'Processing ' . $merged_students[$i]['pycyin'][0] . '<br>';
+            echo 'Stream: ' . $merged_students[$i]['pystream'][0] . '<br>';
             $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
+            echo 'Campus: ' . $campus . '<br>';
         } else {
             $campus = 'YK';
         }
