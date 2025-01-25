@@ -2,8 +2,8 @@
 
 namespace local_earlyalert;
 
-
 use core\event\role_assigned;
+use FastRoute\RouteParser\Std;
 
 class helper
 {
@@ -201,23 +201,25 @@ class helper
         require_once($CFG->dirroot . '/lib/grade/grade_item.php');
         require_once($CFG->dirroot . '/lib/enrollib.php');
         require_once($CFG->dirroot . "/enrol/externallib.php");
+        require_once($CFG->dirroot. "/user/profile/lib.php");
 
 
         try {
             // Start the LDAP connection in case we need it
             $LDAP = new ldap();
             // Set profile field ids
-            $campus_profile_field = new \stdClass();
-            if ($campus_profile_field != $DB->get_record('user_profile_field', ['shortname' => 'campus'], 'id')) {
-                $campus_profile_field->id = 0;
-            }
+//            $campus_profile_field = new \stdClass();
+//            if ($campus_profile_field != $DB->get_record('user_profile_field', ['shortname' => 'campus'], 'id')) {
+//                $campus_profile_field->id = 0;
+//            }
+            $campus_profile_field = $DB->get_record('user_info_field', ['shortname' => 'campus']);
 
             $students = array();
             if (isset($course_id)) {
                 // Pull student from enrolments.
                 $users = enrol_get_course_users($course_id, true); // returns user objects of those enrolled in course
                 foreach ($users as $student) {
-                    $mdl_user = $DB->get_record('user', ['id' => $student->id]);
+                    $mdl_user = $DB->get_record('user', ['id' => $student->id]); // get moodle user
                     // Get the student's grade for the given course ID.
                     $grade = grade_get_course_grade($student->id, $course_id);
                     $grade = new \stdClass();
@@ -233,17 +235,27 @@ class helper
                         $studentcampus = $campus->campus;
                     } else {
                         // Get user info from ldap
-                        $student_info = $LDAP->get_student_info($mdl_user->idnumber);
-                        $campus = helper::get_campus_from_stream($student_info['stream']);
-                        if ($campus_profile_field->id != 0) {
+                        if (!empty($mdl_user) && $campus_profile_field->id != 0) {
+                            // get user profile record if ldap found a user
+                            $user_profile = profile_user_record($mdl_user->id);
+                            $student_info = $LDAP->get_student_info($mdl_user->idnumber);
+
+                            // try getting campus from stream
+                            $campus = helper::get_campus_from_stream($student_info['stream']);
+
                             // Create the data field
-                            $params = [
-                                'userid' => $student->id,
-                                'fieldid' => $campus_profile_field->id,
-                                'data' => $campus,
-                                'dataformat' => 0,
-                            ];
-                            $DB->insert_record('user_info_data', $params);
+                            $params = new \stdClass();
+                            $params->userid = $mdl_user->id;
+                            $params->profile_field_shortname = 'campus';
+                            $params->data = $campus;
+                            profile_save_data($params);
+//                            $params = [
+//                                'userid' => $student->id,
+//                                'fieldid' => $campus_profile_field->id,
+//                                'data' => $campus,
+//                                'dataformat' => 0,
+//                            ];
+//                            $DB->insert_record('user_info_data', $params);
                         }
                         $studentcampus = $campus;
                     }
@@ -289,8 +301,7 @@ class helper
             }
             return $students;
         } catch (\Exception $e) {
-            base::debug_to_console('it died');
-            die($e->getMessage());
+            throw new \moodle_exception('errorcode', 'local_earlyalerts', '', null, $e->getMessage() . "\n" . $e->getTraceAsString());
         }
     }
 
@@ -328,7 +339,7 @@ class helper
             } else return [];
 
         } catch (\Exception $e) {
-            base::debug_to_console('it died');
+            base::debug_to_console('it died'. $e->getMessage());
             die($e->getMessage());
         }
     }
