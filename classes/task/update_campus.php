@@ -68,34 +68,40 @@ class update_campus extends \core\task\scheduled_task
             // Merge both into one array
             $merged_students = array_merge($markham_students, $glendon_students);
 
-            if(empty($merged_students)) {
+            if (empty($merged_students)) {
                 mtrace('no students found students not found.');
                 return false;
             }
             for ($i = 0; $i < count($merged_students); $i++) {
                 // Get user from pyCyin number
                 $student = $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id');
-                if (empty($student->id)) {
-                    mtrace('User has no id in ldap: ' . $merged_students[$i]['pycyin'][0]);
+                // Only perform if student exists in Moodle
+                if (!$student) {
+                    mtrace('User does not exist in Moodle: ' . $merged_students[$i]['pycyin'][0]);
                     continue;
-                }
-                // Get campus from ldap
-                $campus = helper::get_campus_from_stream($merged_students[$i]['stream'][0]);
-                // Check to see if the profile data is set.
-                if ($campus_data = $DB->get_record('user_info_data', ['userid' => $student->id, 'fieldid' => $campus_profile_field->id], '*')) {
-                    $DB->set_field('user_info_data', 'data', $campus, ['id' => $campus_data->id]);
-                    mtrace('Data field updated for ' . $merged_students[$i]['pycyin'][0]);
                 } else {
-                    // Create the data field
-                    if (isset($student->id) && $student->id != 0) {
-                        $params = [
-                            'userid' => $student->id,
-                            'fieldid' => $campus_profile_field->id,
-                            'data' => $campus,
-                            'dataformat' => 0,
-                        ];
-                        $DB->insert_record('user_info_data', $params);
-                        mtrace('Data field inserted for ' . $merged_students[$i]['pycyin'][0]);
+                    // Get campus from ldap
+                    if (isset($merged_students[$i]['pystream'][0])) {
+                        $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
+                    } else {
+                        $campus = 'YK';
+                    }
+                    // Check to see if the profile data is set.
+                    if ($campus_data = $DB->get_record('user_info_data', ['userid' => $student->id, 'fieldid' => $campus_profile_field->id], '*')) {
+                        $DB->set_field('user_info_data', 'data', $campus, ['id' => $campus_data->id]);
+                        mtrace('Data field updated for ' . $merged_students[$i]['pycyin'][0]);
+                    } else {
+                        // Create the data field
+                        if (isset($student->id) && $student->id != 0) {
+                            $params = [
+                                'userid' => $student->id,
+                                'fieldid' => $campus_profile_field->id,
+                                'data' => $campus,
+                                'dataformat' => 0,
+                            ];
+                            $DB->insert_record('user_info_data', $params);
+                            mtrace('Data field inserted for ' . $merged_students[$i]['pycyin'][0]);
+                        }
                     }
                 }
             }
