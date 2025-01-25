@@ -290,7 +290,7 @@ class helper
             return $students;
         } catch (\Exception $e) {
             base::debug_to_console('it died'. $e->getMessage());
-            die($e->getMessage());
+            throw new \moodle_exception('errorcode', 'local_earlyalerts', '', null, $e->getMessage() . "\n" . $e->getTraceAsString());
         }
     }
 
