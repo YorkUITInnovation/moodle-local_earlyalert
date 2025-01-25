@@ -59,7 +59,7 @@ foreach ($data as $rows) {
     if (!$user) {
         // Create user based on columns username through country
         $user = new stdClass();
-        $user->username = $rows['username'];
+        $user->username = $rows['username'] ? $rows['username'] : $rows['idnumber'];
         $user->auth = 'saml2';
         $user->firstname = $rows['firstname'];
         $user->lastname = $rows['lastname'];
