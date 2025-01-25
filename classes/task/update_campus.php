@@ -52,28 +52,27 @@ class update_campus extends \core\task\scheduled_task
             // Get all Markham Students
             $markham_streams = explode("\n", $CFG->earlyalert_markham_streams);
             $markham_students = $LDAP->get_users_based_on_stream($markham_streams);
-            if (empty($markham_students)) {
-                mtrace('Markham students not found.');
-                return false;
-            }
+
             mtrace('Markham students!');
             // Unset count
             unset($markham_streams['count']);
             // Get Glendon students
             $glendon_students = $LDAP->get_users_based_on_faculty('GL'); // TODO: hardcoded GL for now
-            if (empty($glendon_students)) {
-                mtrace('Glendon students not found.');
-                return false;
-            }
+
             mtrace('Glendon students!');
             // Unset count
             unset($glendon_students['count']);
-
+            $markham_students = $markham_students ?: [];
+            $glendon_students = $glendon_students ?: [];
             // Merge both into one array
             $merged_students = array_merge($markham_students, $glendon_students);
             for ($i = 0; $i < count($merged_students); $i++) {
                 // Get user from pyCyin number
                 $student = $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id');
+                if (empty($student->id)) {
+                    mtrace('User has no id in ldap: ' . $merged_students[$i]['pycyin'][0]);
+                    continue;
+                }
                 // Check to see if the profile data is set.
                 if ($campus_data = $DB->get_record('user_info_data', ['userid' => $student->id, 'fieldid' => $campus_profile_field->id], '*')) {
                     $DB->set_field('user_info_data', 'data', $merged_students[$i]['pystream'][0], ['id' => $campus_data->id]);
