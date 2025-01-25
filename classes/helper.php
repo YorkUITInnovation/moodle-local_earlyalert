@@ -236,7 +236,7 @@ class helper
                     } else {
                         // Get user info from ldap
                         if (!empty($mdl_user) && !empty($mdl_user->id) && !empty($mdl_user->idnumber) && $campus_profile_field->id != 0) {
-                            var_dump(print_r($mdl_user));
+
                             // get user profile record if ldap found a user
                             $user_profile = profile_user_record($mdl_user->id);
                             $student_info = $LDAP->get_student_info($mdl_user->idnumber);
@@ -245,19 +245,19 @@ class helper
                             $campus = helper::get_campus_from_stream($student_info['stream']);
 
                             // Create the data field
-                            $params = new \stdClass();
-                            $params->userid = intVal($mdl_user->id);
-                            $params->profile_field_shortname = 'campus';
-                            $params->data = $campus;
-                            var_dump(print_r($params));
-                            profile_save_data($params);
-//                            $params = [
-//                                'userid' => $student->id,
-//                                'fieldid' => $campus_profile_field->id,
-//                                'data' => $campus,
-//                                'dataformat' => 0,
-//                            ];
-//                            $DB->insert_record('user_info_data', $params);
+//                            $params = new \stdClass();
+//                            $params->userid = intVal($mdl_user->id);
+//                            $params->profile_field_shortname = 'campus';
+//                            $params->data = $campus;
+//                            profile_save_data($params);
+
+                            $params = [
+                                'userid' => $student->id,
+                                'fieldid' => $campus_profile_field->id,
+                                'data' => $campus,
+                                'dataformat' => 0,
+                            ];
+                            $DB->insert_record('user_info_data', $params);
                         }
                         $studentcampus = $campus;
                     }
