@@ -50,7 +50,9 @@ $data = parse_csv('users-eclass.csv');
 ob_flush();
 flush();
 print_object(count($data));
+$i = 1;
 foreach ($data as $rows) {
+    echo 'Processing row ' . $i . '<br>';
     // first check if teh user exists based on the idnumber
     $user = $DB->get_record('user', ['idnumber' => $rows['idnumber']]);
     echo 'User found with id ' . $user->id . '<br>';
@@ -115,6 +117,9 @@ foreach ($data as $rows) {
         $DB->set_field('user_info_data', 'data', $rows['profile_field_ldapmajor'], ['id' => $major_data->id]);
         echo 'Major data updated for ' . $user->id . '<br>';
     }
+    ob_flush();
+    flush();
+    $i++;
 //    }
 }
 
