@@ -19,6 +19,7 @@ base::page(
 );
 
 echo $OUTPUT->header();
+raise_memory_limit(MEMORY_UNLIMITED);
 $LDAP = new ldap();
 // Let's first get the profile field called
 $campus_profile_field = $DB->get_record('user_info_field', ['shortname' => 'campus']);
@@ -81,4 +82,5 @@ for ($i = 0; $i < count($merged_students); $i++) {
         }
     }
 }
+raise_memory_limit(MEMORY_STANDARD);
 echo $OUTPUT->footer();
