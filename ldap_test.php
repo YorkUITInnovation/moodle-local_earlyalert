@@ -67,7 +67,7 @@ for ($i = 0; $i < count($merged_students); $i++) {
                 if ($merged_students[$i]['pystream'][0] == 'NO') {
                     $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0], $merged_students[$i]['pyfaculty'][0]);
                 } else {
-                    $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0],,$merged_students[$i]['pyfaculty'][0]);
+                    $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0],$merged_students[$i]['pyfaculty'][0]);
                 }
             }
 
