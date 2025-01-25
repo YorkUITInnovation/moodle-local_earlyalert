@@ -236,6 +236,7 @@ class helper
                     } else {
                         // Get user info from ldap
                         if (!empty($mdl_user) && !empty($mdl_user->id) && $campus_profile_field->id != 0) {
+                            error_log('Error in get_moodle_grades_by_course: ' . 'user: ' . var_dump($mdl_user) . '|| campus profile field id: '.$campus_profile_field->id);
                             // get user profile record if ldap found a user
                             $user_profile = profile_user_record($mdl_user->id);
                             $student_info = $LDAP->get_student_info($mdl_user->idnumber);
