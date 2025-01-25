@@ -86,16 +86,17 @@ $course_data['teacher_user_id'] = $user_id;
 
 if ($teacher || $is_impersonating) {
     $course_data_for_grades = [];
-// Prepare course data fro grades
-    $i = 0;
-    for ($x = 0; !empty($course_data) && $x < count($course_data['rows']); $x++) {
-        foreach ($course_data['rows'][$x]['courses'] as $course) {
-            $course_data_for_grades[$i] = $course;
-            $i++;
+    // Prepare course data fro grades
+    if (!empty($course_data) && array_key_exists('rows', $course_data)) {
+        for ($x = 0; $x < count($course_data['rows']); $x++) {
+            foreach ($course_data['rows'][$x]['courses'] as $course) {
+                $course_data_for_grades[$i] = $course;
+                $i++;
+            }
         }
     }
 
-// get course names and ids
+    // get course names and ids
     $course_data_for_display = [];
     foreach ($course_data_for_grades as $c) {
         $course_data_for_display[$c->id] = $c->fullname;
