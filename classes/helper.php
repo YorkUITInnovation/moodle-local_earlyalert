@@ -208,10 +208,11 @@ class helper
             // Start the LDAP connection in case we need it
             $LDAP = new ldap();
             // Set profile field ids
-            $campus_profile_field = new \stdClass();
-            if ($campus_profile_field != $DB->get_record('user_profile_field', ['shortname' => 'campus'], 'id')) {
-                $campus_profile_field->id = 0;
-            }
+//            $campus_profile_field = new \stdClass();
+//            if ($campus_profile_field != $DB->get_record('user_profile_field', ['shortname' => 'campus'], 'id')) {
+//                $campus_profile_field->id = 0;
+//            }
+            $campus_profile_field = $DB->get_record('user_info_field', ['shortname' => 'campus']);
 
             $students = array();
             if (isset($course_id)) {
@@ -297,7 +298,6 @@ class helper
             }
             return $students;
         } catch (\Exception $e) {
-            base::debug_to_console('it died'. $e->getMessage());
             throw new \moodle_exception('errorcode', 'local_earlyalerts', '', null, $e->getMessage() . "\n" . $e->getTraceAsString());
         }
     }
