@@ -11,7 +11,7 @@ global $CFG, $OUTPUT, $PAGE, $DB, $USER;
 require_login(1, false);
 
 $context = context_system::instance();
-$from = optional_param('from', 0, PARAM_INT);
+$from = optional_param('from', 1, PARAM_INT);
 $to = optional_param('10', 10, PARAM_INT);
 base::page(
     new moodle_url('/local/organization/campuses.php'),
