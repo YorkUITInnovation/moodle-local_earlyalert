@@ -51,48 +51,49 @@ if (empty($merged_students)) {
 mtrace('Total students found: ' . count($merged_students));
 $student = new stdClass();
 for ($i = 0; $i < count($merged_students); $i++) {
-
-    // Only perform 220258760if student exists in Moodle
-    if ($student = $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id')) {
-        // Get campus from ldap
-        if (isset($merged_students[$i]['pystream'][0])) {
-            echo 'Processing ' . $merged_students[$i]['pycyin'][0] . '<br>';
-            echo 'Stream: ' . $merged_students[$i]['pystream'][0] . '<br>';
-            if ($merged_students[$i]['pystream'][0] == 'NO') {
-                $campus = helper::get_campus_from_stream($merged_students[$i]['pyfaculty'][0]);
+    if (isset($merged_students[$i]['pycyin'][0])) {
+        // Only perform 220258760if student exists in Moodle
+        if ($student = $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id')) {
+            // Get campus from ldap
+            if (isset($merged_students[$i]['pystream'][0])) {
+                echo 'Processing ' . $merged_students[$i]['pycyin'][0] . '<br>';
+                echo 'Stream: ' . $merged_students[$i]['pystream'][0] . '<br>';
+                if ($merged_students[$i]['pystream'][0] == 'NO') {
+                    $campus = helper::get_campus_from_stream($merged_students[$i]['pyfaculty'][0]);
+                } else {
+                    $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
+                }
             } else {
-                $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
+                if ($merged_students[$i]['pystream'][0] == 'NO') {
+                    $campus = helper::get_campus_from_stream($merged_students[$i]['pyfaculty'][0]);
+                } else {
+                    $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
+                }
             }
-        } else {
-            if ($merged_students[$i]['pystream'][0] == 'NO') {
-                $campus = helper::get_campus_from_stream($merged_students[$i]['pyfaculty'][0]);
+
+            echo 'Campus: ' . $campus . '<br>';
+            // Check to see if the profile data is set.
+            if ($campus_data = $DB->get_record('user_info_data', ['userid' => $student->id, 'fieldid' => $campus_profile_field->id], '*')) {
+                $DB->set_field('user_info_data', 'data', $campus, ['id' => $campus_data->id]);
+                mtrace('Data field updated for ' . $merged_students[$i]['pycyin'][0]);
             } else {
-                $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
+                // Create the data field
+                if (isset($student->id) && $student->id != 0) {
+                    $params = [
+                        'userid' => $student->id,
+                        'fieldid' => $campus_profile_field->id,
+                        'data' => $campus,
+                        'dataformat' => 0,
+                    ];
+                    $DB->insert_record('user_info_data', $params);
+                    mtrace('Data field inserted for ' . $merged_students[$i]['pycyin'][0]);
+                }
             }
-        }
 
-        echo 'Campus: ' . $campus . '<br>';
-        // Check to see if the profile data is set.
-        if ($campus_data = $DB->get_record('user_info_data', ['userid' => $student->id, 'fieldid' => $campus_profile_field->id], '*')) {
-            $DB->set_field('user_info_data', 'data', $campus, ['id' => $campus_data->id]);
-            mtrace('Data field updated for ' . $merged_students[$i]['pycyin'][0]);
         } else {
-            // Create the data field
-            if (isset($student->id) && $student->id != 0) {
-                $params = [
-                    'userid' => $student->id,
-                    'fieldid' => $campus_profile_field->id,
-                    'data' => $campus,
-                    'dataformat' => 0,
-                ];
-                $DB->insert_record('user_info_data', $params);
-                mtrace('Data field inserted for ' . $merged_students[$i]['pycyin'][0]);
-            }
+            mtrace('User does not exist in Moodle: ' . $merged_students[$i]['pycyin'][0]);
+            continue;
         }
-
-    } else {
-        mtrace('User does not exist in Moodle: ' . $merged_students[$i]['pycyin'][0]);
-        continue;
     }
 }
 raise_memory_limit(MEMORY_STANDARD);
