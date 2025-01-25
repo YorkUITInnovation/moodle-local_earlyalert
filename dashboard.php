@@ -103,8 +103,6 @@ if ($teacher || $is_impersonating) {
     }
 }
 
-var_dump(helper::get_moodle_grades_by_course(19));
-
 echo base::page(
     new moodle_url('/local/earlyalert/dashboard.php'),
     get_string('my_courses', 'local_earlyalert'),

@@ -236,7 +236,7 @@ class helper
                     } else {
                         // Get user info from ldap
                         if (!empty($mdl_user) && !empty($mdl_user->id) && !empty($mdl_user->idnumber) && $campus_profile_field->id != 0) {
-                            base::debug_to_console($mdl_user);
+                            var_dump($mdl_user);
                             // get user profile record if ldap found a user
                             $user_profile = profile_user_record($mdl_user->id);
                             $student_info = $LDAP->get_student_info($mdl_user->idnumber);
