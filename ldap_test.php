@@ -27,12 +27,12 @@ if (!$campus_profile_field) {
     return false;
 }
 // Get all Markham Students
-$markham_streams = explode("\n", $CFG->earlyalert_markham_streams);
-$markham_students = $LDAP->get_users_based_on_stream($markham_streams);
-
-mtrace('Markham students!');
+//$markham_streams = explode("\n", $CFG->earlyalert_markham_streams);
+//$markham_students = $LDAP->get_users_based_on_stream($markham_streams);
+//
+//mtrace('Markham students!');
 // Unset count
-unset($markham_streams['count']);
+//unset($markham_streams['count']);
 // Get Glendon students
 $glendon_students = $LDAP->get_users_based_on_faculty('GL'); // TODO: hardcoded GL for now
 print_object($glendon_students);
