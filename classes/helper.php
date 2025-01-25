@@ -311,7 +311,7 @@ class helper
      * @param $stream string
      * @return string
      */
-    public static function get_campus_from_stream($stream)
+    public static function get_campus_from_stream($stream, $faculty = '')
     {
         global $CFG, $DB;
         $streams = explode("\n", $CFG->earlyalert_markham_streams);
@@ -321,7 +321,11 @@ class helper
         } else if ($stream == 'GL') {
             $campus = 'GL';
         } else {
-            $campus = 'YK';
+            if ($faculty == 'GL') {
+                $campus = 'GL';
+            } else {
+                $campus = 'YK';
+            }
         }
 
         return $campus;
