@@ -73,7 +73,7 @@ class update_campus extends \core\task\scheduled_task
                 return false;
             }
             mtrace('Total students found: ' . count($merged_students));
-            $student = new stdClass();
+            $student = new \stdClass();
             for ($i = 0; $i < count($merged_students); $i++) {
                 if (isset($merged_students[$i]['pycyin'][0])) {
                     // Only perform 220258760if student exists in Moodle
