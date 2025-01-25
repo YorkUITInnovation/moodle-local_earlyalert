@@ -53,10 +53,7 @@ $student = new stdClass();
 for ($i = 0; $i < count($merged_students); $i++) {
 
     // Only perform 220258760if student exists in Moodle
-    if ($student != $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id')) {
-        mtrace('User does not exist in Moodle: ' . $merged_students[$i]['pycyin'][0]);
-        continue;
-    } else {
+    if ($student = $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id')) {
         // Get campus from ldap
         if (isset($merged_students[$i]['pystream'][0])) {
             echo 'Processing ' . $merged_students[$i]['pycyin'][0] . '<br>';
@@ -92,6 +89,10 @@ for ($i = 0; $i < count($merged_students); $i++) {
                 mtrace('Data field inserted for ' . $merged_students[$i]['pycyin'][0]);
             }
         }
+
+    } else {
+        mtrace('User does not exist in Moodle: ' . $merged_students[$i]['pycyin'][0]);
+        continue;
     }
 }
 raise_memory_limit(MEMORY_STANDARD);
