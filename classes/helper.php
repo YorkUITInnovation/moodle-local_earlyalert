@@ -235,7 +235,8 @@ class helper
                         $studentcampus = $campus->campus;
                     } else {
                         // Get user info from ldap
-                        if (!empty($mdl_user) && $campus_profile_field->id != 0) {
+                        if (!empty($mdl_user) && !empty($mdl_user->id) && !empty($mdl_user->idnumber) && $campus_profile_field->id != 0) {
+                            base::debug_to_console($mdl_user);
                             // get user profile record if ldap found a user
                             $user_profile = profile_user_record($mdl_user->id);
                             $student_info = $LDAP->get_student_info($mdl_user->idnumber);
@@ -245,7 +246,7 @@ class helper
 
                             // Create the data field
                             $params = new \stdClass();
-                            $params->userid = $mdl_user->id;
+                            $params->userid = intVal($mdl_user->id);
                             $params->profile_field_shortname = 'campus';
                             $params->data = $campus;
                             profile_save_data($params);
