@@ -48,6 +48,7 @@ if (empty($merged_students)) {
     mtrace('no students found students not found.');
     return false;
 }
+mtrace('Total students found: ' . count($merged_students));
 for ($i = 0; $i < count($merged_students); $i++) {
 
     // Only perform 220258760if student exists in Moodle
