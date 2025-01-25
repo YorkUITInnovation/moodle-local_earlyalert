@@ -279,6 +279,7 @@ class ldap
             return false;
         }
         try {
+            echo 'What the F?';
             $filter = '(pyFaculty=' . $faculty . ')';
             $search_results = ldap_search($this->get_ldap_conn(), self::PEOPLE_DN,
                 $filter);
