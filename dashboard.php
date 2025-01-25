@@ -61,7 +61,6 @@ if ($teacher || $is_impersonating) {
 } else {
     $course_data = [];
 }
-
 // Add impersonting user name to $course_data if $is_impersonating is true
 if ($is_impersonating) {
     $course_data['impersonated_user'] = $impersonated_user->firstname . ' ' . $impersonated_user->lastname;
@@ -89,7 +88,7 @@ if ($teacher || $is_impersonating) {
     $course_data_for_grades = [];
 // Prepare course data fro grades
     $i = 0;
-    for ($x = 0; $x < count($course_data['rows']); $x++) {
+    for ($x = 0; !empty($course_data) && $x < count($course_data['rows']); $x++) {
         foreach ($course_data['rows'][$x]['courses'] as $course) {
             $course_data_for_grades[$i] = $course;
             $i++;
