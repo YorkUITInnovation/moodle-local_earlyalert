@@ -59,13 +59,13 @@ for ($i = 0; $i < count($merged_students); $i++) {
                 echo 'Processing ' . $merged_students[$i]['pycyin'][0] . '<br>';
                 echo 'Stream: ' . $merged_students[$i]['pystream'][0] . '<br>';
                 if ($merged_students[$i]['pystream'][0] == 'NO') {
-                    $campus = helper::get_campus_from_stream($merged_students[$i]['pyfaculty'][0]);
+                    $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0],$merged_students[$i]['pyfaculty'][0]);
                 } else {
                     $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
                 }
             } else {
                 if ($merged_students[$i]['pystream'][0] == 'NO') {
-                    $campus = helper::get_campus_from_stream($merged_students[$i]['pyfaculty'][0]);
+                    $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0], $merged_students[$i]['pyfaculty'][0]);
                 } else {
                     $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
                 }
