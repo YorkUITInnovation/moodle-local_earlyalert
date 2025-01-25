@@ -19,7 +19,8 @@ base::page(
     get_string('campuses', 'local_organization')
 );
 
-function parse_csv($file_path) {
+function parse_csv($file_path)
+{
     $header = [];
     $data = [];
 
@@ -42,62 +43,62 @@ function parse_csv($file_path) {
 
 echo $OUTPUT->header();
 raise_memory_limit(MEMORY_UNLIMITED);
-for ($i = $from; $i < $to; $i++) {
-    $data = parse_csv('data_part_' . $i . '.csv');
-    foreach ($data as $rows) {
-        // first check if teh user exists based on the idnumber
-        $user = $DB->get_record('user', ['idnumber' => $rows['idnumber']]);
-        if (!$user) {
-          // Create user based on columns username through country
-            $user = new stdClass();
-            $user->username = $rows['username'];
-            $user->auth = 'saml2';
-            $user->firstname = $rows['firstname'];
-            $user->lastname = $rows['lastname'];
-            $user->email = $rows['email'];
-            $user->idnumber = $rows['idnumber'];
-            $user->city = $rows['city'];
-            $user->country = $rows['country'];
-            $user->lang = 'en';
-            $user->confirmed = 1;
-            $user->mnethostid = 1;
-            $user->timecreated = time();
-            $newuserid = $DB->insert_record('user', $user);
-            $user = $DB->get_record('user', ['id' => $newuserid]);
-        }
-
-
-        $faculty_profile_field = $DB->get_record('user_info_field', ['shortname' => 'ldapfaculty']);
-        $major_profile_field = $DB->get_record('user_info_field', ['shortname' => 'ldapmajor']);
-
-        $faculty_data = $DB->get_record('user_info_data', ['userid' => $user->id, 'fieldid' => $faculty_profile_field->id]);
-        $major_data = $DB->get_record('user_info_data', ['userid' => $user->id, 'fieldid' => $major_profile_field->id]);
-
-
-        // If the faculty data is not set, then we need to create the faculty profile field
-        if (!$faculty_data) {
-            $faculty_data = new stdClass();
-            $faculty_data->userid = $user->id;
-            $faculty_data->fieldid = $faculty_profile_field->id;
-            $faculty_data->data = $rows['profile_field_ldapfaculty'];
-            $faculty_data->dataformat = 0;
-            $faculty_data->data = $DB->insert_record('user_info_data', $faculty_data);
-        } else {
-            $DB->set_field('user_info_data', 'data', $rows['profile_field_ldapfaculty'], ['id' => $faculty_data->id]);
-        }
-
-        // If the major data is not set, then we need to create the major profile field
-        if (!$major_data) {
-            $major_data = new stdClass();
-            $major_data->userid = $user->id;
-            $major_data->fieldid = $major_profile_field->id;
-            $major_data->data = $rows['profile_field_ldapmajor'];
-            $major_data->dataformat = 0;
-            $major_data->data = $DB->insert_record('user_info_data', $major_data);
-        } else {
-            $DB->set_field('user_info_data', 'data', $rows['profile_field_ldapmajor'], ['id' => $major_data->id]);
-        }
+//for ($i = $from; $i < $to; $i++) {
+$data = parse_csv('users-eclass.csv');
+foreach ($data as $rows) {
+    // first check if teh user exists based on the idnumber
+    $user = $DB->get_record('user', ['idnumber' => $rows['idnumber']]);
+    if (!$user) {
+        // Create user based on columns username through country
+        $user = new stdClass();
+        $user->username = $rows['username'];
+        $user->auth = 'saml2';
+        $user->firstname = $rows['firstname'];
+        $user->lastname = $rows['lastname'];
+        $user->email = $rows['email'];
+        $user->idnumber = $rows['idnumber'];
+        $user->city = $rows['city'];
+        $user->country = $rows['country'];
+        $user->lang = 'en';
+        $user->confirmed = 1;
+        $user->mnethostid = 1;
+        $user->timecreated = time();
+        $newuserid = $DB->insert_record('user', $user);
+        $user = $DB->get_record('user', ['id' => $newuserid]);
     }
+
+
+    $faculty_profile_field = $DB->get_record('user_info_field', ['shortname' => 'ldapfaculty']);
+    $major_profile_field = $DB->get_record('user_info_field', ['shortname' => 'ldapmajor']);
+
+    $faculty_data = $DB->get_record('user_info_data', ['userid' => $user->id, 'fieldid' => $faculty_profile_field->id]);
+    $major_data = $DB->get_record('user_info_data', ['userid' => $user->id, 'fieldid' => $major_profile_field->id]);
+
+
+    // If the faculty data is not set, then we need to create the faculty profile field
+    if (!$faculty_data) {
+        $faculty_data = new stdClass();
+        $faculty_data->userid = $user->id;
+        $faculty_data->fieldid = $faculty_profile_field->id;
+        $faculty_data->data = $rows['profile_field_ldapfaculty'];
+        $faculty_data->dataformat = 0;
+        $faculty_data->data = $DB->insert_record('user_info_data', $faculty_data);
+    } else {
+        $DB->set_field('user_info_data', 'data', $rows['profile_field_ldapfaculty'], ['id' => $faculty_data->id]);
+    }
+
+    // If the major data is not set, then we need to create the major profile field
+    if (!$major_data) {
+        $major_data = new stdClass();
+        $major_data->userid = $user->id;
+        $major_data->fieldid = $major_profile_field->id;
+        $major_data->data = $rows['profile_field_ldapmajor'];
+        $major_data->dataformat = 0;
+        $major_data->data = $DB->insert_record('user_info_data', $major_data);
+    } else {
+        $DB->set_field('user_info_data', 'data', $rows['profile_field_ldapmajor'], ['id' => $major_data->id]);
+    }
+//    }
 }
 
 raise_memory_limit(MEMORY_STANDARD);
