@@ -242,7 +242,7 @@ class helper
                             $student_info = $LDAP->get_student_info($mdl_user->idnumber);
 
                             // try getting campus from stream
-                            $campus = helper::get_campus_from_stream($student_info['stream']);
+                            $campus = helper::get_campus_from_stream($student_info['pystream']);
 
                             // Create the data field
 //                            $params = new \stdClass();
@@ -301,6 +301,7 @@ class helper
                     }
                 }
             }
+            file_put_contents('/var/www/moodledata/temp/student_grades.log', print_r($students, true));
             return $students;
         } catch (\Exception $e) {
             throw new \moodle_exception('errorcode', 'local_earlyalerts', '', null, $e->getMessage() . "\n" . $e->getTraceAsString());
