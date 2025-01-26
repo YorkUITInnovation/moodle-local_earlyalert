@@ -301,7 +301,7 @@ class helper
                     }
                 }
             }
-            file_put_contents('/var/www/moodledata/temp/student_grades.log', print_r($students, true));
+
             return $students;
         } catch (\Exception $e) {
             throw new \moodle_exception('errorcode', 'local_earlyalerts', '', null, $e->getMessage() . "\n" . $e->getTraceAsString());
