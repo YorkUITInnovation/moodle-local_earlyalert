@@ -39,6 +39,8 @@ class local_earlyalert_course_overview_ws extends external_api
             )
         );
 
+        file_put_contents('/var/www/moodledata/temp/params.txt', print_r($params, true));
+
         //Context validation
         //OPTIONAL but in most web service it should present
         $context = \context_system::instance();
