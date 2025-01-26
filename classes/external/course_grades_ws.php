@@ -197,6 +197,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 file_put_contents('/var/www/moodledata/temp/course_template_params.txt', print_r($course_template_params, true) . "\n", FILE_APPEND);
                 // Get course email template
                 $course_template = $DB->get_record('local_et_email', $course_template_params);
+                file_put_contents('/var/www/moodledata/temp/course_template.txt', print_r($course_template, true) . "\n", FILE_APPEND);
 
                 if ($course_template->faculty == $student['faculty']) {
                     if (!isset($templateCache['course_' . $courseid])) {
