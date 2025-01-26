@@ -85,7 +85,7 @@ class update_campus extends \core\task\scheduled_task
                             if ($merged_students[$i]['pystream'][0] == 'NO') {
                                 $campus = helper::get_campus_from_stream('', $merged_students[$i]['pyfaculty'][0]);
                             } else {
-                                if (in_array($merged_students[$i]['pystream'][0], $markham_streams)) {
+                                if (in_array(trim(strtoupper($merged_students[$i]['pystream'][0])), array_map('strtoupper', array_map('trim', $markham_streams)))) {
                                     $campus = helper::get_campus_from_stream($merged_students[$i]['pystream'][0]);
                                 } else {
                                     $campus = helper::get_campus_from_stream('', $merged_students[$i]['pyfaculty'][0]);
