@@ -160,8 +160,6 @@ class local_earlyalert_course_grades_ws extends external_api
                 case 'exam':
                     $alert_type = email::MESSAGE_TYPE_EXAM;
                     break;
-                default:
-                    $alert_type = email::MESSAGE_TYPE_CATCHALL;
             }
             // Get teacher
             $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'firstname,lastname,email');
@@ -189,16 +187,16 @@ class local_earlyalert_course_grades_ws extends external_api
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
                 $lang = $student_record->lang;
-
-                $course_template = $DB->get_record('local_et_email',
-                    array('lang' => $lang,
-                        'faculty' => $course_faculty,
-                        'course' => $course_name,
-                        'coursenumber' => $course_number,
-                        'message_type' => $alert_type,
-                        'active' => 1,
-                        'deleted' => 0)
-                );
+                $course_template_params = array('lang' => $lang,
+                    'faculty' => $course_faculty,
+                    'course' => $course_name,
+                    'coursenumber' => $course_number,
+                    'message_type' => $alert_type,
+                    'active' => 1,
+                    'deleted' => 0);
+                file_put_contents('/var/www/moodledata/temp/course_template_params.txt', print_r($course_template_params, true) . "\n", FILE_APPEND);
+                // Get course email template
+                $course_template = $DB->get_record('local_et_email', $course_template_params);
 
                 if ($course_template->faculty == $student['faculty']) {
                     if (!isset($templateCache['course_' . $courseid])) {
