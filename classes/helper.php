@@ -244,13 +244,7 @@ class helper
                             // try getting campus from stream
                             $campus = helper::get_campus_from_stream($student_info['pystream']);
 
-                            // Create the data field
-//                            $params = new \stdClass();
-//                            $params->userid = intVal($mdl_user->id);
-//                            $params->profile_field_shortname = 'campus';
-//                            $params->data = $campus;
-//                            profile_save_data($params);
-
+                            // Update campus profile field
                             $params = [
                                 'userid' => $student->id,
                                 'fieldid' => $campus_profile_field->id,
