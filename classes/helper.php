@@ -311,10 +311,9 @@ class helper
         global $CFG, $DB;
         $streams = explode("\n", $CFG->earlyalert_markham_streams);
 
-        if (in_array($stream, $streams)) {
+        if (in_array(trim(strtoupper($stream)), array_map('strtoupper', array_map('trim', $streams)))) {
             $campus = 'MK';
-        } else if ($stream == 'GL') {
-            $campus = 'GL';
+            return $campus;
         } else {
             if ($faculty == 'GL') {
                 $campus = 'GL';
