@@ -262,7 +262,7 @@ class ldap
 
             }
             $filter .= ')';
-            print_object($filter);
+
             $search_results = ldap_search($this->get_ldap_conn(), self::PEOPLE_DN,
                 $filter);
             $results = ldap_get_entries($this->get_ldap_conn(), $search_results);
