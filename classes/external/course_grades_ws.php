@@ -145,7 +145,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 'teacher_user_id' => $teacher_user_id
             )
         );
-
+        file_put_contents('/var/www/moodledata/temp/params.txt', print_r($params, true) . "\n", FILE_APPEND);
         $courseid = $id;
         //raise_memory_limit(MEMORY_UNLIMITED);
         try {
