@@ -367,7 +367,7 @@ CONST GRADE_A = 1;
      * @return \stdClass|false
      * @throws \dml_exception
      */
-    public function get_student(): \stdClass|false
+    public function get_student()
     {
         global $DB;
         if ($student = $DB->get_record('user', array('id' => $this->target_user_id))) {
@@ -394,7 +394,7 @@ CONST GRADE_A = 1;
      * @return \stdClass|false
      * @throws \dml_exception
      */
-    public function get_instructor(): \stdClass|false
+    public function get_instructor()
     {
         global $DB;
         return $DB->get_record('user', array('id' => $this->instructor_id));
@@ -405,7 +405,7 @@ CONST GRADE_A = 1;
      * @return \stdClass|false
      * @throws \dml_exception
      */
-    public function get_unit_information(): \stdClass|false
+    public function get_unit_information()
     {
         global $DB;
 
@@ -443,7 +443,9 @@ CONST GRADE_A = 1;
         return $DB->get_record_sql($sql);
 
     }
-
+    /**
+     * @return $messageTypes - string
+     */
     public function get_message_type(): string
     {
         $TEMPLATE = new \local_etemplate\email($this->template_id);
