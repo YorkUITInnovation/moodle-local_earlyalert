@@ -372,20 +372,21 @@ CONST GRADE_A = 1;
         global $DB;
         if ($student = $DB->get_record('user', array('id' => $this->target_user_id))) {
             $sql = "Select
-                        uid.data As major
-                    From
-                        {user_info_data} uid Inner Join
-                        {user_info_field} uif On uid.fieldid = uif.id Inner Join
-                        {user} u On u.id = uid.userid
-                    Where
-                        uid.userid = " . $this->target_user_id . " And
-                        uif.shortname = 'ldapmajor'";
+                    uid.data As major
+                From
+                    {user_info_data} uid Inner Join
+                    {user_info_field} uif On uid.fieldid = uif.id Inner Join
+                    {user} u On u.id = uid.userid
+                Where
+                    uid.userid = " . $this->target_user_id . " And
+                    uif.shortname = 'ldapmajor'";
             if ($student_info = $DB->get_record_sql($sql)) {
                 $student->major = $student_info->major;
             }
             return $student;
         }
-        return $DB->get_record('user', array('id' => $this->target_user_id));
+        //return $DB->get_record('user', array('id' => $this->target_user_id));
+        return false;
     }
 
     /**
