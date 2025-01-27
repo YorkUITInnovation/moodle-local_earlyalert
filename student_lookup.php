@@ -21,7 +21,7 @@ $user_id = optional_param('user_id', 0, PARAM_INT);
 
 $course_data = [];
 if ($user_id) {
-    if (!$courses = enrol_get_users_courses($user_id)) {
+    if (!$courses = enrol_get_users_courses($user_id, ['onlyactive' => true])) {
         base::debug_to_console('no course'); //add no course mustache message
     }
 

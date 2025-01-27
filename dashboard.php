@@ -51,7 +51,7 @@ if ($user_id != $USER->id) {
 $show_grades = $CFG->earlyalert_showgrades;
 
 if ($teacher || $is_impersonating) {
-    if (!$courses = enrol_get_users_courses($user_id)) {
+    if (!$courses = enrol_get_users_courses($user_id, ['onlyactive' => true])) {
         base::debug_to_console('no course'); //add no course mustache message
     }
 }

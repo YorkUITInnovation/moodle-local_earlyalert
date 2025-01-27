@@ -399,7 +399,7 @@ class ldap
 
             if ($course = $DB->get_record('course', ['idnumber' => $cn])) {
                 if ($student = $DB->get_record('user', ['idnumber' => $sisid])) {
-                    if ($enrolments = enrol_get_users_courses($student->id)) {
+                    if ($enrolments = enrol_get_users_courses($student->id, ['onlyactive' => true])) {
                         foreach ($enrolments as $e) {
                             if ($e->idnumber == $cn) {
                                 $grade = grade_get_course_grade($student->id,
