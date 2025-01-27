@@ -170,7 +170,7 @@ CONST GRADE_A = 1;
 
     public function __construct($id = 0)
     {
-        global $CFG, $DB, $DB;
+        global $CFG, $DB;
 
         $this->table = 'local_earlyalert_report_log';
 
@@ -294,7 +294,7 @@ CONST GRADE_A = 1;
     }
 
     public function get_trigger_grade_letter(): string {
-        file_put_contents('/var/www/moodledata/trigger_grade.txt', $this->trigger_grade);
+        //file_put_contents('/var/www/moodledata/trigger_grade.txt', $this->trigger_grade);
         switch ($this->trigger_grade) {
             case self::GRADE_F:
                 return 'F';
@@ -334,8 +334,10 @@ CONST GRADE_A = 1;
     {
         return $this->assignment_name;
     }
-
-    public function get_trigger_grade(): int|null
+    /**
+     * @return int|null
+     */
+    public function get_trigger_grade()
     {
         return $this->trigger_grade;
     }
