@@ -66,7 +66,7 @@ $string['grade_instructions'] = '<ul>
     <ul><li>The default has been set to a D+.</li></ul>
 </li> 
 <li>Should you wish to adjust this for your course, please use the selector below.
-<ul><li>Note that this is the letter grade that will appear in the email. </li></ul>
+<ul><li>Note that this is the letter grade that will appear in the email (e.g. you are averaging a D+ or less)</li></ul>
 </li>
 </ul>';
 $string['lookup_student'] = 'Lookup Student';
