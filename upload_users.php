@@ -53,7 +53,6 @@ for ($i = $from; $i < $to; $i++) {
     $x = 1;
     foreach ($data as $rows) {
         echo 'Processing row ' . $x . '<br>';
-        file_put_contents('/var/www/moodledata/temp/users-eclass.log', print_r($rows, true), FILE_APPEND);
         // first check if teh user exists based on the idnumber
 //        $user = $DB->get_record('user', ['idnumber' => $rows['idnumber']]);
 //        echo 'User found with id ' . $user->id . '<br>';
