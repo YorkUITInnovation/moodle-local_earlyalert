@@ -3,18 +3,37 @@ import Templates from 'core/templates';
 import {get_string as getString} from 'core/str';
 
 export const init = () => {
-    get_course_overview_students();
-
+    observeCourseOverviewButtons();
 };
 
-function get_course_overview_students() {
-    // When button with class btn-course-overview is clicked
+// add mutation observer that lets us know when the course overview buttons are added to the page
+function observeCourseOverviewButtons() {
+    const targetNode = document.getElementById('early-alert-student-results');
+    const config = { childList: true, subtree: true };
+
+    const callback = function(mutationsList, observer) {
+        for (let mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                addCourseOverviewButtonListener();
+            }
+        }
+    };
+
+    const observer = new MutationObserver(callback);
+    observer.observe(targetNode, config);
+
+    // Initial call to add listeners to existing buttons
+    addCourseOverviewButtonListener();
+}
+
+function addCourseOverviewButtonListener() {
+    // find all buttons with class btn-course-overview
     // Get the course id from the button data-course-id attribute
     // Call the ajax function with the course id
     // Display the students in the course
-    const courseOverviewButton = document.querySelector('.btn-course-overview');
-    if (courseOverviewButton) {
-        courseOverviewButton.addEventListener('click', function() {
+    const courseOverviewButtons = document.querySelectorAll('.btn-course-overview');
+    courseOverviewButtons.forEach(button => {
+        button.addEventListener('click', function() {
             const courseId = this.getAttribute('data-course_id');
             //Show loader
             Templates.render('local_earlyalert/loader', {})
@@ -50,10 +69,5 @@ function get_course_overview_students() {
                 console.error('Failed to get course students:', error);
             });
         });
-    } else {
-        console.error('Course overview button not found');
-        return;
-    }
-
-
+    });
 }
