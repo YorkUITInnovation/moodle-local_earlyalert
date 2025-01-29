@@ -294,7 +294,6 @@ CONST GRADE_A = 1;
     }
 
     public function get_trigger_grade_letter(): string {
-        //file_put_contents('/var/www/moodledata/trigger_grade.txt', $this->trigger_grade);
         switch ($this->trigger_grade) {
             case self::GRADE_F:
                 return 'F';
