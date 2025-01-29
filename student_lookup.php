@@ -28,6 +28,16 @@ if ($user_id) {
     $course_data = helper::get_courses_in_acadyear_by_row($courses);
 // Initialize an empty array to hold the combined courses
     $combined_courses = [];
+    // flag to show checkbox enabled or disabled for teacher/advisor
+    $combined_courses['disabled_advisor'] = false;
+    $combined_courses['disabled_instructor'] = false;
+
+    if (helper::is_teacher()) {
+        $combined_courses['disabled_advisor'] = true;
+    }
+    else {
+        $combined_courses['disabled_instructor'] = true;
+    }
 
 // Loop through the original array and extract the courses
     foreach ($course_data['rows'] as $row) {

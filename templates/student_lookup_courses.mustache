@@ -48,17 +48,19 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex justify-content-center">
-                                                <input type="checkbox" disabled class="checkbox-instructor-followup"
+                                                <input type="checkbox" class="checkbox-instructor-followup"
                                                        data-logid="{{id}}"
-                                                       {{#student_advised_by_instructor}}checked{{/student_advised_by_instructor}}>
+                                                       {{#student_advised_by_instructor}}checked{{/student_advised_by_instructor}}
+                                                       {{#disabled_instructor}}disabled{{/disabled_instructor}}>
                                             </div>
 
                                         </td>
                                         <td>
                                             <div class="d-flex justify-content-center">
-                                                <input type="checkbox" class="checkbox-advisor-followup"
-                                                       data-logid="{{id}}"
-                                                       {{#student_advised_by_advisor}}checked{{/student_advised_by_advisor}}>
+                                                <input  type="checkbox" class="checkbox-advisor-followup"
+                                                        data-logid="{{id}}"
+                                                        {{#student_advised_by_advisor}}checked{{/student_advised_by_advisor}}>
+                                                        {{#disabled_advisor}}disabled{{/disabled_advisor}}>
                                             </div>
                                         </td>
                                     </tr>
