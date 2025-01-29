@@ -127,7 +127,7 @@ $string['ldap_user'] = 'LDAP User';
 $string['ldap_password'] = 'LDAP User Password';
 
 // Capabilities
-$string['earlyalert:access_early_alert'] = 'Access Early Alert (Should be for teachers)';
+$string['earlyalert:access_early_alert'] = 'Access Early Alert';
 $string['earlyalert:impersonate'] = 'Impersonate users';
 $string['earlyalert:student_lookup'] = 'Student Lookup';
 $string['earlyalert:view_reports'] = 'View Reports';
