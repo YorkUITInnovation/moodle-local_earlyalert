@@ -314,10 +314,25 @@ function check_allnone_listener(selected_students) {
         student_ids_selected.value = JSON.stringify(selected_students);
     });
 }
-
+// needed to watch for changes in the dom to setup the preview buttons
 function setup_preview_emails(templateCache) {
-    // console.log("template cache = ", templateCache);
-    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
+    const observer = new MutationObserver((mutationsList, observer) => {
+        for (let mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
+                if (preview_buttons.length > 0) {
+                    observer.disconnect(); // Stop observing once the elements are found
+                    initialize_preview_buttons(preview_buttons, templateCache);
+                }
+            }
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+
+function initialize_preview_buttons(preview_buttons, templateCache) {
+
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
