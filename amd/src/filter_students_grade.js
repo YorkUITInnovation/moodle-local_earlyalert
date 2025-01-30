@@ -245,7 +245,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     } else { // for other alert types
                         console.log('Other alert types eg low grade, missed exam etc');
                         console.log(finalCache);
-                        setup_preview_emails(finalCache);
+                        initialize_preview_buttons(finalCache);
                     }
                 })
                 .catch(function (error) {
@@ -343,15 +343,17 @@ function setup_preview_emails(templateCache) {
     }
 }
 
-function initialize_preview_buttons(preview_buttons, templateCache) {
+function initialize_preview_buttons(templateCache) {
 
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-    //console.log("template cache:", templateCache);
+    console.log("template cache:", templateCache);
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
     console.log('Setting up previews');
+    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
+    console.log(preview_buttons);
     preview_buttons.forEach(function (button) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
