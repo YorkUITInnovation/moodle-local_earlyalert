@@ -443,6 +443,7 @@ function setup_preview_emails(templateCache) {
         // case where previews are just added to grade alert type and missed exam etc
         if (alert_type !== 'assign') {
             button.addEventListener('click', function () {
+                console.log('Data sent to template from template cache:', record_data);
                 setup_preview_buttons_from_template(record_data);
             });
         }
@@ -590,7 +591,7 @@ function setup_preview_emails_with_titles(templateCache) {
 var current_modal = null;
 
 function setup_preview_buttons_from_template(student_template_data) {
-
+    console.log('Modal created with: '.student_template_data);
     ModalFactory.create({
         title: getString('preview_email', 'local_earlyalert'),
         type: ModalFactory.types.CANCEL,
