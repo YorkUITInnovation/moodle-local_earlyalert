@@ -117,8 +117,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
         ]);
         Promise.all(get_grades_and_templates)
             .then(([grades_response, templates_response]) => {
-                console.log('grade response1: ' . grades_response);
-                console.log('template response1: ' . templates_response);
+                console.log('grade response1: ' , grades_response);
+                console.log('template response1: ' , templates_response);
             // Reformat the data to display in a grid
             let num_students = grades_response.length;
             // console.log('Number of students returned: ' + num_students);
@@ -141,7 +141,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             let col = 0;
 
             grades_response.forEach(result => {
-                console.log('grade each: ' . result)
+                console.log('grade each: ' , result)
                 if (typeof result === 'object') {
                     if (!templates.includes('course_' + course_id)) {
                         templates.push('course_' + course_id);
@@ -216,7 +216,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
                     const cachedArrayElement = document.getElementById('early-alert-template-cache');
                     const cachedArray = JSON.parse(cachedArrayElement.value);
-                    console.log('Cached array' .cachedArray);
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
                             if (cachedArray.includes(result.templateKey)) {
@@ -330,8 +329,8 @@ function setup_preview_emails(templateCache) {
                 if (preview_buttons.length > 0) {
                     observer.disconnect(); // Stop observing once the elements are found
                     console.log('Initializing preview buttons since its ready');
-                    console.log('Amt of buttons: ' .preview_buttons.length);
-                    console.log('template Cache: ' .templateCache );
+                    console.log('Amt of buttons: ' , preview_buttons.length);
+                    console.log('template Cache: ' , templateCache );
                     initialize_preview_buttons(preview_buttons, templateCache);
                 }
             }
@@ -366,10 +365,10 @@ function initialize_preview_buttons(preview_buttons, templateCache) {
         if (checkbox) {
             // now, access the parent <tr> element (the table row)
             const table_row = checkbox.parentNode;
-            console.log('Preview table row:' . table_row);
+            console.log('Preview table row:', table_row);
             // extract the student name from the second <td> element within the table row
             const student_name_td = table_row.nextElementSibling;
-            console.log('Student name td: '. student_name_td);
+            console.log('Student name td: ', student_name_td);
             // fix and parse the name
             const student_lname_fname = student_name_td.firstChild;
             var student_name_arr = [];
@@ -378,7 +377,7 @@ function initialize_preview_buttons(preview_buttons, templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-            console.log('Student name '. student_name);
+            console.log('Student name ', student_name);
 
             var student_id = checkbox.getAttribute('data-student-id');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
@@ -616,7 +615,7 @@ function setup_preview_emails_with_titles(templateCache) {
 var current_modal = null;
 
 function setup_preview_buttons_from_template(student_template_data) {
-    console.log('Modal created with: '.student_template_data);
+    console.log('Modal created with: ',student_template_data);
     ModalFactory.create({
         title: getString('preview_email', 'local_earlyalert'),
         type: ModalFactory.types.CANCEL,
