@@ -366,6 +366,26 @@ class helper
         }
     }
 
+    /**
+     * Check if the current user is an advisor for early alerts.
+     *
+     * @return bool
+     */
+    public static function is_advisor()
+    {
+        global $USER, $DB;
+        // Get role ID for advisor.
+        $advisor = $DB->get_record('role', array('shortname' => 'ea_advisor'), 'id');
+        // SQL to get user roles based on the editing_teacher and teacher role IDs.
+        $sql = "SELECT * FROM {role_assignments} WHERE userid = ? AND roleid IN ($advisor->id)";
+        // Get user roles.
+        if ($userroles = $DB->get_records_sql($sql, array($USER->id))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     /**
      * Check if the current user is a student.

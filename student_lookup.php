@@ -29,14 +29,15 @@ if ($user_id) {
 // Initialize an empty array to hold the combined courses
     $combined_courses = [];
     // flag to show checkbox enabled or disabled for teacher/advisor
-    $combined_courses['disabled_advisor'] = false;
-    $combined_courses['disabled_instructor'] = false;
+    $combined_courses['disabled_advisor'] = true;
+    $combined_courses['disabled_instructor'] = true;
 
-    if (helper::is_teacher()) {
-        $combined_courses['disabled_advisor'] = true;
-    }
-    else {
-        $combined_courses['disabled_instructor'] = true;
+// Check user roles and set flags accordingly
+    if (helper::is_advisor()) {
+        $combined_courses['disabled_advisor'] = false; // advisors see the advisor checkbox
+        $combined_courses['disabled_instructor'] = true; // advisors do not see the instructor checkbox
+    } else if (helper::is_teacher()) {
+        $combined_courses['disabled_instructor'] = false; // only teachers see the instructor checkbox
     }
 
 // Loop through the original array and extract the courses
