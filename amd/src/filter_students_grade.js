@@ -447,6 +447,7 @@ function initialize_preview_buttons(templateCache) {
         };
 
         console.log("passing these params to adduserinfo:", params);
+        console.log("email content before modifications: ", templateEmailContent);
         var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
          console.log("template email content post-addUserInfo:", changedTemplateEmailContent);
 
@@ -586,6 +587,7 @@ function setup_preview_emails_with_titles(templateCache) {
         };
         //console.log("passing these params to adduserinfo:", params);
         console.log("passing these params to adduserinfo:", params);
+        console.log("email content before modifications: ", templateEmailContent);
         var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
         console.log("template email content post-addUserInfo:", changedTemplateEmailContent);
 
