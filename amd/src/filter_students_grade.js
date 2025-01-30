@@ -318,27 +318,22 @@ function check_allnone_listener(selected_students) {
         student_ids_selected.value = JSON.stringify(selected_students);
     });
 }
-// needed to watch for changes in the dom to setup the preview buttons
+// needed to watch for changes in the dom for early-alert-student-results data'
 function setup_preview_emails(templateCache) {
     console.log('why is preview emails not being called?');
-    const observer = new MutationObserver((mutationsList, observer) => {
-        console.log('MutationObserver triggered');
+
+    const targetNode = document.getElementById('early-alert-student-results');
+    const config = { childList: true, subtree: true };
+
+    const callback = function(mutationsList, observer) {
         for (let mutation of mutationsList) {
             if (mutation.type === 'childList') {
-                console.log('Child list mutation detected');
-                const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
-                if (preview_buttons.length > 0) {
-                    observer.disconnect(); // Stop observing once the elements are found
-                    console.log('Initializing preview buttons since its ready');
-                    console.log('Amt of buttons: ' , preview_buttons.length);
-                    console.log('template Cache: ' , templateCache );
-                    initialize_preview_buttons(preview_buttons, templateCache);
-                }
+                initialize_preview_buttons(preview_buttons, templateCache);
             }
         }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+    };
+    const observer = new MutationObserver(callback);
+    observer.observe(targetNode, config);
 }
 
 function initialize_preview_buttons(preview_buttons, templateCache) {
