@@ -322,6 +322,9 @@ function setup_preview_emails(templateCache) {
                 const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
                 if (preview_buttons.length > 0) {
                     observer.disconnect(); // Stop observing once the elements are found
+                    console.log('Initializing preview buttons since its ready');
+                    console.log('Amt of buttons: ' .preview_buttons.length);
+                    console.log('template Cache: ' .templateCache );
                     initialize_preview_buttons(preview_buttons, templateCache);
                 }
             }
