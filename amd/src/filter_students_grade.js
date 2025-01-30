@@ -317,8 +317,10 @@ function check_allnone_listener(selected_students) {
 // needed to watch for changes in the dom to setup the preview buttons
 function setup_preview_emails(templateCache) {
     const observer = new MutationObserver((mutationsList, observer) => {
+        console.log('MutationObserver triggered');
         for (let mutation of mutationsList) {
             if (mutation.type === 'childList') {
+                console.log('Child list mutation detected');
                 const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
                 if (preview_buttons.length > 0) {
                     observer.disconnect(); // Stop observing once the elements are found
