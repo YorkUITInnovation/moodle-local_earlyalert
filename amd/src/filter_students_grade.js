@@ -324,6 +324,7 @@ function setup_preview_emails(templateCache) {
     //console.log("template cache:", templateCache);
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
+    console.log('Setting up previews');
     preview_buttons.forEach(function (button) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
@@ -338,11 +339,12 @@ function setup_preview_emails(templateCache) {
 
         let templateObj = {};
         if (checkbox) {
-
             // now, access the parent <tr> element (the table row)
             const table_row = checkbox.parentNode;
+            console.log('Preview table row:' . table_row);
             // extract the student name from the second <td> element within the table row
             const student_name_td = table_row.nextElementSibling;
+            console.log('Student name td: '. student_name_td);
             // fix and parse the name
             const student_lname_fname = student_name_td.firstChild;
             var student_name_arr = [];
@@ -351,6 +353,7 @@ function setup_preview_emails(templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
+            console.log('Student name '. student_name);
 
             var student_id = checkbox.getAttribute('data-student-id');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
