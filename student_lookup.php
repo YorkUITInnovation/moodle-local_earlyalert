@@ -32,6 +32,8 @@ if ($user_id) {
     $combined_courses['disabled_advisor'] = true;
     $combined_courses['disabled_instructor'] = true;
 
+    base::debug_to_console('Advisor: '. helper::is_advisor());
+    base::debug_to_console('Instructor: '. helper::is_teacher());
 // Check user roles and set flags accordingly
     if (helper::is_advisor()) { // takes precedence over teacher and only show advisor checkbox
         $combined_courses['disabled_advisor'] = false; // advisors see the advisor checkbox
