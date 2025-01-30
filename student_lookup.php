@@ -39,9 +39,13 @@ if ($user_id) {
         $combined_courses['disabled_advisor'] = false; // advisors see the advisor checkbox
         $combined_courses['disabled_instructor'] = true; // advisors do not see the instructor checkbox
     }
-    if (helper::is_teacher() && !helper::is_advisor()) {
+    if (helper::is_teacher() && !helper::is_advisor()) { // teacher/instructor can see instructor checkbox
         $combined_courses['disabled_advisor'] = true; // may have been set before in the is_advisor if block
         $combined_courses['disabled_instructor'] = false; // only teachers see the instructor checkbox
+    }
+    if (is_siteadmin()) { // site admin can see both
+        $combined_courses['disabled_advisor'] = false; // site admins see the advisor checkbox
+        $combined_courses['disabled_instructor'] = false; // site admins see the instructor checkbox
     }
 
 // Loop through the original array and extract the courses
