@@ -117,7 +117,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
         ]);
         Promise.all(get_grades_and_templates)
             .then(([grades_response, templates_response]) => {
-
+                console.log('grade response1: ' . grades_response);
+                console.log('template response1: ' . templates_response);
             // Reformat the data to display in a grid
             let num_students = grades_response.length;
             // console.log('Number of students returned: ' + num_students);
@@ -140,7 +141,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             let col = 0;
 
             grades_response.forEach(result => {
-                console.log('grade response: ' . result)
+                console.log('grade each: ' . result)
                 if (typeof result === 'object') {
                     if (!templates.includes('course_' + course_id)) {
                         templates.push('course_' + course_id);
