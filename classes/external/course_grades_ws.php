@@ -50,19 +50,16 @@ class local_earlyalert_course_grades_ws extends external_api
 
             $students = [];
             $i = 0;
-            $filter_students = false;
-            $filter_me_out = false;
-
             foreach ($mdlStudents as $student) {
                 foreach ($student as $key => $value) {
                     $students[$i]['teacher_firstname'] = $teacher->firstname;
                     $students[$i]['teacher_lastname'] = $teacher->lastname;
                     $students[$i]['teacher_email'] = $teacher->email;
-                    $students[$i][$key] = $value;
+
                 }
+                $students[$i][$key] = $value;
                 $i++;
             }
-
             //raise_memory_limit(MEMORY_STANDARD);
             return $students;
 

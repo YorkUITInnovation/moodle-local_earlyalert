@@ -216,7 +216,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
                     const cachedArrayElement = document.getElementById('early-alert-template-cache');
                     const cachedArray = JSON.parse(cachedArrayElement.value);
-                    console.log(cachedArray);
+                    console.log('Cached array' .cachedArray);
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
                             if (cachedArray.includes(result.templateKey)) {
