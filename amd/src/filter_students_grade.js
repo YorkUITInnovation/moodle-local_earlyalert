@@ -326,8 +326,10 @@ function setup_preview_emails(templateCache) {
     const config = { childList: true, subtree: true };
 
     const callback = function(mutationsList, observer) {
+        console.log('Call back to build buttons');
         for (let mutation of mutationsList) {
             if (mutation.type === 'childList') {
+                const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
                 initialize_preview_buttons(preview_buttons, templateCache);
             }
         }
