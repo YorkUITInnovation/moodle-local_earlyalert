@@ -447,16 +447,15 @@ function initialize_preview_buttons(templateCache) {
         };
 
         console.log("passing these params to adduserinfo:", params);
-        templateEmailContent = addUserInfo(templateEmailContent, params);
-
-         console.log("template email content post-addUserInfo:", templateEmailContent);
+        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
+         console.log("template email content post-addUserInfo:", changedTemplateEmailContent);
 
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
         record_data.student_name = student_name;
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
-        record_data.templateEmailContent = templateEmailContent;
+        record_data.templateEmailContent = changedTemplateEmailContent;
         record_data.template_id = templateObj.templateid;
         record_data.revision_id = templateObj.revision_id;
         record_data.triggered_from_user_id = templateObj.triggered_from_user_id;
@@ -586,7 +585,9 @@ function setup_preview_emails_with_titles(templateCache) {
             defaultgrade: "D+"
         };
         //console.log("passing these params to adduserinfo:", params);
-        templateEmailContent = addUserInfo(templateEmailContent, params);
+        console.log("passing these params to adduserinfo:", params);
+        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
+        console.log("template email content post-addUserInfo:", changedTemplateEmailContent);
 
         // console.log("template email content post-addUserInfo:", templateEmailContent);
 
@@ -595,7 +596,7 @@ function setup_preview_emails_with_titles(templateCache) {
         record_data.student_name = student_name;
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
-        record_data.templateEmailContent = templateEmailContent;
+        record_data.templateEmailContent = changedTemplateEmailContent;
         record_data.template_id = templateObj.templateid;
         record_data.revision_id = templateObj.revision_id;
         record_data.triggered_from_user_id = templateObj.triggered_from_user_id;
