@@ -33,10 +33,12 @@ if ($user_id) {
     $combined_courses['disabled_instructor'] = true;
 
 // Check user roles and set flags accordingly
-    if (helper::is_advisor()) {
+    if (helper::is_advisor()) { // takes precedence over teacher and only show advisor checkbox
         $combined_courses['disabled_advisor'] = false; // advisors see the advisor checkbox
         $combined_courses['disabled_instructor'] = true; // advisors do not see the instructor checkbox
-    } else if (helper::is_teacher()) {
+    }
+    if (helper::is_teacher() && !helper::is_advisor()) {
+        $combined_courses['disabled_advisor'] = true; // may have been set before in the is_advisor if block
         $combined_courses['disabled_instructor'] = false; // only teachers see the instructor checkbox
     }
 
