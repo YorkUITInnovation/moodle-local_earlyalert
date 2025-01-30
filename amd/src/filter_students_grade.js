@@ -322,20 +322,25 @@ function check_allnone_listener(selected_students) {
 function setup_preview_emails(templateCache) {
     console.log('why is preview emails not being called?');
 
-    const targetNode = document.getElementById('early-alert-student-results');
-    const config = { childList: true, subtree: true };
-
-    const callback = function(mutationsList, observer) {
-        console.log('Call back to build buttons');
-        for (let mutation of mutationsList) {
-            if (mutation.type === 'childList') {
-                const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
-                initialize_preview_buttons(preview_buttons, templateCache);
+    const targetNode = document.getElementById('early-alert-send-button2');
+    if (!targetNode) {
+        console.error('button not found');
+    } else {
+        const config = { childList: true, subtree: true };
+        const callback = function(mutationsList, observer) {
+            console.log('Callback function called');
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
+                    initialize_preview_buttons(preview_buttons, templateCache);
+                }
             }
-        }
-    };
-    const observer = new MutationObserver(callback);
-    observer.observe(targetNode, config);
+        };
+
+        const observer = new MutationObserver(callback);
+        observer.observe(targetNode, config);
+        console.log('MutationObserver set up');
+    }
 }
 
 function initialize_preview_buttons(preview_buttons, templateCache) {
