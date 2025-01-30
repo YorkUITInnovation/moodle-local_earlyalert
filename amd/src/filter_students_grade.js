@@ -370,10 +370,8 @@ function initialize_preview_buttons(templateCache) {
         if (checkbox) {
             // now, access the parent <tr> element (the table row)
             const table_row = checkbox.parentNode;
-            console.log('Preview table row:', table_row);
             // extract the student name from the second <td> element within the table row
             const student_name_td = table_row.nextElementSibling;
-            console.log('Student name td: ', student_name_td);
             // fix and parse the name
             const student_lname_fname = student_name_td.firstChild;
             var student_name_arr = [];
@@ -448,10 +446,10 @@ function initialize_preview_buttons(templateCache) {
             defaultgrade: "D+"
         };
 
-        //console.log("passing these params to adduserinfo:", params);
+        console.log("passing these params to adduserinfo:", params);
         templateEmailContent = addUserInfo(templateEmailContent, params);
 
-        // console.log("template email content post-addUserInfo:", templateEmailContent);
+         console.log("template email content post-addUserInfo:", templateEmailContent);
 
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
