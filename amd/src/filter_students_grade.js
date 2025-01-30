@@ -140,6 +140,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             let col = 0;
 
             grades_response.forEach(result => {
+                console.log('grade response: ' . result)
                 if (typeof result === 'object') {
                     if (!templates.includes('course_' + course_id)) {
                         templates.push('course_' + course_id);
@@ -214,6 +215,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
                     const cachedArrayElement = document.getElementById('early-alert-template-cache');
                     const cachedArray = JSON.parse(cachedArrayElement.value);
+                    console.log(cachedArray);
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
                             if (cachedArray.includes(result.templateKey)) {
@@ -241,6 +243,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         }
 
                     } else { // for other alert types
+                        console.log('Other alert types eg low grade, missed exam etc');
+                        console.log(finalCache);
                         setup_preview_emails(finalCache);
                     }
                 })
