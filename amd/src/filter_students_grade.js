@@ -213,7 +213,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     // we're not doing any more
                     // check_all_student_grades(selected_students);
                     check_allnone_listener(selected_students);
-                    finalCache.clear();
                     const cachedArrayElement = document.getElementById('early-alert-template-cache');
                     const cachedArray = JSON.parse(cachedArrayElement.value);
                     templates_response.forEach(result => {
@@ -244,7 +243,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     } else { // for other alert types
                         console.log('Other alert types eg low grade, missed exam etc');
                         console.log(finalCache);
-                        initialize_preview_buttons(finalCache);
+                        setup_preview_buttons(finalCache);
                     }
                 })
                 .catch(function (error) {
@@ -317,32 +316,8 @@ function check_allnone_listener(selected_students) {
         student_ids_selected.value = JSON.stringify(selected_students);
     });
 }
-// needed to watch for changes in the dom for early-alert-student-results data'
-function setup_preview_emails(templateCache) {
-    console.log('why is preview emails not being called?');
 
-    const targetNode = document.getElementById('early-alert-send-button2');
-    if (!targetNode) {
-        console.error('button not found');
-    } else {
-        const config = { childList: true, subtree: true };
-        const callback = function(mutationsList, observer) {
-            console.log('Callback function called');
-            for (let mutation of mutationsList) {
-                if (mutation.type === 'childList') {
-                    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
-                    initialize_preview_buttons(preview_buttons, templateCache);
-                }
-            }
-        };
-
-        const observer = new MutationObserver(callback);
-        observer.observe(targetNode, config);
-        console.log('MutationObserver set up');
-    }
-}
-
-function initialize_preview_buttons(templateCache) {
+function setup_preview_buttons(templateCache) {
 
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
