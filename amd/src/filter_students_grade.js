@@ -368,6 +368,13 @@ function setup_preview_buttons(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
+            console.log('Course template key:', courseTemplateKey);
+            console.log('Campus template key:', campusTemplateKey);
+            console.log('Faculty template key:', facTemplateKey);
+            console.log('Department template key:', deptTemplateKey);
+
+            console.log('New Template cache:', templateCache);
+
             if (templateCache.has(campusTemplateKey)) {
                 // console.log("department cache found:", templateCache.get(campusTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
@@ -508,6 +515,11 @@ function setup_preview_emails_with_titles(templateCache) {
             var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr+ '_' + studentLangAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
+
+            console.log('PET Course template key:', courseTemplateKey);
+            console.log('PET Campus template key:', campusTemplateKey);
+            console.log('PET Faculty template key:', facTemplateKey);
+            console.log('PET Department template key:', deptTemplateKey);
 
             if (templateCache.has(campusTemplateKey)) {
                 // console.log("department cache found:", templateCache.get(campusTemplateKey));

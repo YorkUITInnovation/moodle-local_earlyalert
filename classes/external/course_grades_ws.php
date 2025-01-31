@@ -154,7 +154,7 @@ class local_earlyalert_course_grades_ws extends external_api
 
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
-                $lang = $student['lang'];
+                $lang = strtoupper($student['lang']);
                 $course_template_params = array('lang' => $lang,
                     'faculty' => $course_faculty,
                     'course' => $course_name,
