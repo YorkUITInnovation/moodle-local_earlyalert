@@ -393,6 +393,12 @@ function initialize_preview_buttons(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
+            console.log('Course template key:', courseTemplateKey);
+            console.log('Campus template key:', campusTemplateKey);
+            console.log('Faculty template key:', facTemplateKey);
+            console.log('Department template key:', deptTemplateKey);
+
+
             if (templateCache.has(campusTemplateKey)) {
                 // console.log("department cache found:", templateCache.get(campusTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
@@ -453,6 +459,7 @@ function initialize_preview_buttons(templateCache) {
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
         record_data.student_name = student_name;
+        record_data.student_lang = studentLangAttr;
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
         record_data.templateEmailContent = changedTemplateEmailContent;
