@@ -32,14 +32,6 @@ function alert_type_button() {
 /**
  * Adds students with grades
  */
-// function filter_students_by_default_grade() {
-//
-//     // Get course id from the hidden input field wiht id early_alert_filter_course_id
-//     const course_id = document.getElementById('early_alert_filter_course_id').value;
-//     // initial default setup of student list
-//     setup_filter_students_by_grade(course_id, 9); // extract this 9 from php which might be configurable in the future
-//
-// }
 
 function filter_students_by_grade_select() {
 
@@ -117,8 +109,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
         ]);
         Promise.all(get_grades_and_templates)
             .then(([grades_response, templates_response]) => {
-                console.log('grade response1: ' , grades_response);
-                console.log('template response1: ' , templates_response);
+                // console.log('grade response1: ' , grades_response);
+                // console.log('template response1: ' , templates_response);
             // Reformat the data to display in a grid
             let num_students = grades_response.length;
             // console.log('Number of students returned: ' + num_students);
@@ -141,7 +133,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             let col = 0;
 
             grades_response.forEach(result => {
-                console.log('grade each: ' , result)
+                // Generating keys for templates with course_id, lang, and idnumber - each template is pulled/created for a student based on their campus/lang/facutly/major
                 if (typeof result === 'object') {
                     if (!templates.includes('course_' + course_id + '_' + result.lang + '_' + result.idnumber)) {
                         var course_lang = 'course_' + course_id + '_' + result.lang + '_' + result.idnumber;
@@ -222,7 +214,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
-                            console.log(templates_response);
                             if (cachedArray.includes(result.templateKey)) {
                                 let finalMessage = {
                                     subject: result.subject,
@@ -247,8 +238,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         }
 
                     } else { // for other alert types
-                        console.log('Other alert types eg low grade, missed exam etc');
-                        console.log(finalCache);
+                        // built templates with template keys sent to setup previews
                         setup_preview_buttons(finalCache);
                     }
                 })
@@ -328,10 +318,10 @@ function setup_preview_buttons(templateCache) {
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-    console.log("template cache:", templateCache);
+    //console.log("template cache:", templateCache);
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
-    console.log('Setting up previews');
+    //console.log('Setting up previews');
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     preview_buttons.forEach(function (button) {
         let record_data = {};
@@ -359,7 +349,6 @@ function setup_preview_buttons(templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-            console.log('Student name ', student_name);
 
             var student_id = checkbox.getAttribute('data-student-id');
             var student_idnumber = checkbox.getAttribute('data-student-idnumber');
@@ -368,6 +357,7 @@ function setup_preview_buttons(templateCache) {
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
             const studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
+            // uses data found in the checkbox element attributes to create a key to find the template
             var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
             var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr + '_' + student_idnumber;
             var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr + '_' + student_idnumber;
@@ -375,42 +365,43 @@ function setup_preview_buttons(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            console.log('Course template key:', courseTemplateKey);
-            console.log('Campus template key:', campusTemplateKey);
-            console.log('Faculty template key:', facTemplateKey);
-            console.log('Department template key:', deptTemplateKey);
+            // console.log('Course template key:', courseTemplateKey);
+            // console.log('Campus template key:', campusTemplateKey);
+            // console.log('Faculty template key:', facTemplateKey);
+            // console.log('Department template key:', deptTemplateKey);
+            //
+            // console.log('New Template cache:', templateCache);
 
-            console.log('New Template cache:', templateCache);
-
+            // templateCache is checked for the template key and if found the email subject and content are set
             if (templateCache.has(campusTemplateKey)) {
                 // console.log("department cache found:", templateCache.get(campusTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusTemplateKey).message;
                 templateObj = templateCache.get(campusTemplateKey);
             }
-            else if (templateCache.has(facTemplateKey)) {
-                if (templateCache.has(deptTemplateKey)) {
+            else if (templateCache.has(facTemplateKey)) { // if campus template not found, check faculty template
+                if (templateCache.has(deptTemplateKey)) { // if faculty template not found but has department template use it
                     // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                     templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                     templateEmailContent = templateCache.get(deptTemplateKey).message;
                     templateObj = templateCache.get(deptTemplateKey);
-                } else {
+                } else { // revert to faculty template
                     // console.log("faculty cache found:", templateCache.get(facTemplateKey));
                     templateEmailSubject = templateCache.get(facTemplateKey).subject;
                     templateEmailContent = templateCache.get(facTemplateKey).message;
                     templateObj = templateCache.get(facTemplateKey);
                 }
-            } else if (templateCache.has(deptTemplateKey)) {
+            } else if (templateCache.has(deptTemplateKey)) { // if faculty template not found, check department template
                 // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                 templateEmailContent = templateCache.get(deptTemplateKey).message;
                 templateObj = templateCache.get(deptTemplateKey);
-            } else if (templateCache.has(courseTemplateKey)) {
+            } else if (templateCache.has(courseTemplateKey)) { // lastly check for course template
                 //console.log("course cache found:", templateCache.get(courseTemplateKey));
                 templateEmailSubject = templateCache.get(courseTemplateKey).subject;
                 templateEmailContent = templateCache.get(courseTemplateKey).message;
                 templateObj = templateCache.get(courseTemplateKey);
-            } else {
+            } else { // if no templates are found, set default values
                 templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';
             }
@@ -418,11 +409,6 @@ function setup_preview_buttons(templateCache) {
         } else {
             // console.log("couldn't find checkbox :/");
         }
-
-        if (assigngrade) {
-            // console.log("assign grade: ", assigngrade);
-        }
-        // console.log("template email content:", templateEmailContent);
 
         var assignment_title = '';
 
@@ -435,7 +421,7 @@ function setup_preview_buttons(templateCache) {
             defaultgrade: "D+"
         };
 
-        console.log("passing these params to adduserinfo:", params);
+        // console.log("passing these params to adduserinfo:", params);
         var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);         
 
         // assemble record data for individual buttons which includes student and template data
@@ -457,12 +443,11 @@ function setup_preview_buttons(templateCache) {
         // case where previews are just added to grade alert type and missed exam etc
         if (alert_type !== 'assign') {
             button.addEventListener('click', function () {
-                console.log('Data sent to template from template cache:', record_data);
+                //console.log('Data sent to template from template cache:', record_data);
                 setup_preview_buttons_from_template(record_data);
             });
         }
         // add record to student_template_cache_array to have data to submit / email
-        // console.log("record data =", record_data);
         student_template_cache_array.push(record_data);
 
     });
@@ -508,7 +493,7 @@ function setup_preview_emails_with_titles(templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-            // console.log(student_name);
+
             var student_id = checkbox.getAttribute('data-student-id');
             var student_idnumber = checkbox.getAttribute('data-student-idnumber');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
@@ -523,10 +508,10 @@ function setup_preview_emails_with_titles(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            console.log('PET Course template key:', courseTemplateKey);
-            console.log('PET Campus template key:', campusTemplateKey);
-            console.log('PET Faculty template key:', facTemplateKey);
-            console.log('PET Department template key:', deptTemplateKey);
+            // console.log('PET Course template key:', courseTemplateKey);
+            // console.log('PET Campus template key:', campusTemplateKey);
+            // console.log('PET Faculty template key:', facTemplateKey);
+            // console.log('PET Department template key:', deptTemplateKey);
 
             if (templateCache.has(campusTemplateKey)) {
                 // console.log("department cache found:", templateCache.get(campusTemplateKey));
@@ -564,11 +549,6 @@ function setup_preview_emails_with_titles(templateCache) {
             // console.log("couldn't find checkbox :/");
         }
 
-        if (assigngrade) {
-            // console.log("assign grade: ", assigngrade);
-        }
-        // console.log("template email content:", templateEmailContent);
-
         var assignment_title = '';
 
         var params = {
@@ -580,11 +560,7 @@ function setup_preview_emails_with_titles(templateCache) {
             defaultgrade: "D+"
         };
         //console.log("passing these params to adduserinfo:", params);
-        console.log("passing these params to adduserinfo:", params);
-        console.log("email content before modifications: ", templateEmailContent);
         var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
-        console.log("template email content post-addUserInfo:", changedTemplateEmailContent);
-
         // console.log("template email content post-addUserInfo:", templateEmailContent);
 
         // assemble record data for individual buttons which includes student and template data
@@ -615,7 +591,7 @@ function setup_preview_emails_with_titles(templateCache) {
 var current_modal = null;
 
 function setup_preview_buttons_from_template(student_template_data) {
-    console.log('Modal created with: ',student_template_data);
+    //console.log('Modal created with: ',student_template_data);
     ModalFactory.create({
         title: getString('preview_email', 'local_earlyalert'),
         type: ModalFactory.types.CANCEL,
@@ -631,10 +607,6 @@ function setup_preview_buttons_from_template(student_template_data) {
     }).done(modal => {
         modal.show();
         current_modal = modal;
-        // modal.getRoot().on(ModalEvents.cancel, function(){
-        //     current_modal.getRoot().remove();
-        // });
-
         return current_modal;
     });
 

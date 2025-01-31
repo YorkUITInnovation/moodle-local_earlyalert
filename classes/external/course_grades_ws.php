@@ -234,8 +234,6 @@ class local_earlyalert_course_grades_ws extends external_api
                             'triggered_from_user_id' => $template_data->triggered_from_user_id
                         );
                     }
-
-
                 }
 
                 $i++;
