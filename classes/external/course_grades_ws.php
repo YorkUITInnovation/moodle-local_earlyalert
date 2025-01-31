@@ -50,8 +50,6 @@ class local_earlyalert_course_grades_ws extends external_api
 
             $students = [];
             $i = 0;
-            $filter_students = false;
-            $filter_me_out = false;
 
             foreach ($mdlStudents as $student) {
                 foreach ($student as $key => $value) {

@@ -108,7 +108,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 console.error('Failed to render template:', error);
             });
 
-        const finalCache = new Map();
+        var finalCache = new Map();
 
         // Fetch student list and templates
         var get_grades_and_templates = ajax.call([
@@ -117,7 +117,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
         ]);
         Promise.all(get_grades_and_templates)
             .then(([grades_response, templates_response]) => {
-
+                console.log('grade response1: ' , grades_response);
+                console.log('template response1: ' , templates_response);
             // Reformat the data to display in a grid
             let num_students = grades_response.length;
             // console.log('Number of students returned: ' + num_students);
@@ -140,6 +141,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             let col = 0;
 
             grades_response.forEach(result => {
+                console.log('grade each: ' , result)
                 if (typeof result === 'object') {
                     if (!templates.includes('course_' + course_id)) {
                         templates.push('course_' + course_id);
@@ -211,7 +213,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     // we're not doing any more
                     // check_all_student_grades(selected_students);
                     check_allnone_listener(selected_students);
-
+                    finalCache.clear();
                     const cachedArrayElement = document.getElementById('early-alert-template-cache');
                     const cachedArray = JSON.parse(cachedArrayElement.value);
                     templates_response.forEach(result => {
@@ -235,13 +237,14 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     if (alert_type === 'assign') // we have to setup the assignment title before previewing!
                     {
                         finalCache.set('assignment_title', assignment_title);
-
                         if (assignment_title) { // there is a case where previews were setup without titles then dont create modals
                             setup_preview_emails_with_titles(finalCache); // call back function
                         }
 
                     } else { // for other alert types
-                        setup_preview_emails(finalCache);
+                        console.log('Other alert types eg low grade, missed exam etc');
+                        console.log(finalCache);
+                        initialize_preview_buttons(finalCache);
                     }
                 })
                 .catch(function (error) {
@@ -314,37 +317,41 @@ function check_allnone_listener(selected_students) {
         student_ids_selected.value = JSON.stringify(selected_students);
     });
 }
-// needed to watch for changes in the dom to setup the preview buttons
+// needed to watch for changes in the dom for early-alert-student-results data'
 function setup_preview_emails(templateCache) {
-    const observer = new MutationObserver((mutationsList, observer) => {
-        console.log('MutationObserver triggered');
-        for (let mutation of mutationsList) {
-            if (mutation.type === 'childList') {
-                console.log('Child list mutation detected');
-                const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
-                if (preview_buttons.length > 0) {
-                    observer.disconnect(); // Stop observing once the elements are found
-                    console.log('Initializing preview buttons since its ready');
-                    console.log('Amt of buttons: ' .preview_buttons.length);
-                    console.log('template Cache: ' .templateCache );
+    console.log('why is preview emails not being called?');
+
+    const targetNode = document.getElementById('early-alert-send-button2');
+    if (!targetNode) {
+        console.error('button not found');
+    } else {
+        const config = { childList: true, subtree: true };
+        const callback = function(mutationsList, observer) {
+            console.log('Callback function called');
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
                     initialize_preview_buttons(preview_buttons, templateCache);
                 }
             }
-        }
-    });
+        };
 
-    observer.observe(document.body, { childList: true, subtree: true });
+        const observer = new MutationObserver(callback);
+        observer.observe(targetNode, config);
+        console.log('MutationObserver set up');
+    }
 }
 
-function initialize_preview_buttons(preview_buttons, templateCache) {
+function initialize_preview_buttons(templateCache) {
 
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
     // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-    //console.log("template cache:", templateCache);
+    console.log("template cache:", templateCache);
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
     console.log('Setting up previews');
+    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     preview_buttons.forEach(function (button) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
@@ -361,10 +368,8 @@ function initialize_preview_buttons(preview_buttons, templateCache) {
         if (checkbox) {
             // now, access the parent <tr> element (the table row)
             const table_row = checkbox.parentNode;
-            console.log('Preview table row:' . table_row);
             // extract the student name from the second <td> element within the table row
             const student_name_td = table_row.nextElementSibling;
-            console.log('Student name td: '. student_name_td);
             // fix and parse the name
             const student_lname_fname = student_name_td.firstChild;
             var student_name_arr = [];
@@ -373,7 +378,7 @@ function initialize_preview_buttons(preview_buttons, templateCache) {
                 student_name_arr.push(me);
             });
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-            console.log('Student name '. student_name);
+            console.log('Student name ', student_name);
 
             var student_id = checkbox.getAttribute('data-student-id');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
@@ -440,17 +445,17 @@ function initialize_preview_buttons(preview_buttons, templateCache) {
             defaultgrade: "D+"
         };
 
-        //console.log("passing these params to adduserinfo:", params);
-        templateEmailContent = addUserInfo(templateEmailContent, params);
-
-        // console.log("template email content post-addUserInfo:", templateEmailContent);
+        console.log("passing these params to adduserinfo:", params);
+        console.log("email content before modifications: ", templateEmailContent);
+        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
+         console.log("template email content post-addUserInfo:", changedTemplateEmailContent);
 
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
         record_data.student_name = student_name;
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
-        record_data.templateEmailContent = templateEmailContent;
+        record_data.templateEmailContent = changedTemplateEmailContent;
         record_data.template_id = templateObj.templateid;
         record_data.revision_id = templateObj.revision_id;
         record_data.triggered_from_user_id = templateObj.triggered_from_user_id;
@@ -581,7 +586,10 @@ function setup_preview_emails_with_titles(templateCache) {
             defaultgrade: "D+"
         };
         //console.log("passing these params to adduserinfo:", params);
-        templateEmailContent = addUserInfo(templateEmailContent, params);
+        console.log("passing these params to adduserinfo:", params);
+        console.log("email content before modifications: ", templateEmailContent);
+        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
+        console.log("template email content post-addUserInfo:", changedTemplateEmailContent);
 
         // console.log("template email content post-addUserInfo:", templateEmailContent);
 
@@ -590,7 +598,7 @@ function setup_preview_emails_with_titles(templateCache) {
         record_data.student_name = student_name;
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
-        record_data.templateEmailContent = templateEmailContent;
+        record_data.templateEmailContent = changedTemplateEmailContent;
         record_data.template_id = templateObj.templateid;
         record_data.revision_id = templateObj.revision_id;
         record_data.triggered_from_user_id = templateObj.triggered_from_user_id;
@@ -613,7 +621,7 @@ function setup_preview_emails_with_titles(templateCache) {
 var current_modal = null;
 
 function setup_preview_buttons_from_template(student_template_data) {
-    console.log('Modal created with: '.student_template_data);
+    console.log('Modal created with: ',student_template_data);
     ModalFactory.create({
         title: getString('preview_email', 'local_earlyalert'),
         type: ModalFactory.types.CANCEL,
