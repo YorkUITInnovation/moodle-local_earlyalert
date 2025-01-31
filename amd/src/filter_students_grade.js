@@ -398,6 +398,7 @@ function initialize_preview_buttons(templateCache) {
             console.log('Faculty template key:', facTemplateKey);
             console.log('Department template key:', deptTemplateKey);
 
+            console.log('New Template cache:', templateCache);
 
             if (templateCache.has(campusTemplateKey)) {
                 // console.log("department cache found:", templateCache.get(campusTemplateKey));
@@ -541,7 +542,7 @@ function setup_preview_emails_with_titles(templateCache) {
             var templateEmailSubject = '';
 
             console.log('PET Course template key:', courseTemplateKey);
-            console.log('PETCampus template key:', campusTemplateKey);
+            console.log('PET Campus template key:', campusTemplateKey);
             console.log('PET Faculty template key:', facTemplateKey);
             console.log('PET Department template key:', deptTemplateKey);
 
