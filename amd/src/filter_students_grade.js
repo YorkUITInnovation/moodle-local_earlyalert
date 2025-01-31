@@ -143,23 +143,23 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             grades_response.forEach(result => {
                 console.log('grade each: ' , result)
                 if (typeof result === 'object') {
-                    if (!templates.includes('course_' + course_id + '_' + result.lang)) {
-                        var course_lang = 'course_' + course_id + '_' + result.lang;
+                    if (!templates.includes('course_' + course_id + '_' + result.lang + '_' + result.idnumber)) {
+                        var course_lang = 'course_' + course_id + '_' + result.lang + '_' + result.idnumber;
                         templates.push(course_lang);
                     }
 
-                    if (!templates.includes(result.campus + '_' + result.lang)) {
-                        var campus_lang = result.campus + '_' + result.lang;
+                    if (!templates.includes(result.campus + '_' + result.lang + '_' + result.idnumber)) {
+                        var campus_lang = result.campus + '_' + result.lang + '_' + result.idnumber;
                         templates.push(campus_lang);
                     }
 
-                    if (!templates.includes(result.campus + "_" + result.faculty + '_' + result.lang)) {
-                       var campus_fac_lang = result.campus + "_" + result.faculty + '_' + result.lang;
+                    if (!templates.includes(result.campus + "_" + result.faculty + '_' + result.lang + '_' + result.idnumber)) {
+                       var campus_fac_lang = result.campus + "_" + result.faculty + '_' + result.lang + '_' + result.idnumber;
                         templates.push(campus_fac_lang);
                     }
 
-                    if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.majo + '_' + result.lang)) {
-                        var campus_fac_maj_lang = result.campus + "_" + result.faculty + "_" + result.major + '_' + result.lang;
+                    if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.majo + '_' + result.lang + '_' + result.idnumber)) {
+                        var campus_fac_maj_lang = result.campus + "_" + result.faculty + "_" + result.major + '_' + result.lang + '_' + result.idnumber;
                         templates.push(campus_fac_maj_lang);
                     }
 
@@ -362,15 +362,16 @@ function setup_preview_buttons(templateCache) {
             console.log('Student name ', student_name);
 
             var student_id = checkbox.getAttribute('data-student-id');
+            var student_idnumber = checkbox.getAttribute('data-student-idnumber');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
             const studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
-            var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr;
-            var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr;
-            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr;
-            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr + '_' + studentLangAttr;
+            var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr + '_' + studentLangAttr + '_' + student_idnumber;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
@@ -509,15 +510,16 @@ function setup_preview_emails_with_titles(templateCache) {
             student_name = student_name_arr[1] + ' ' + student_name_arr[0];
             // console.log(student_name);
             var student_id = checkbox.getAttribute('data-student-id');
+            var student_idnumber = checkbox.getAttribute('data-student-idnumber');
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
             const studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
-            var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr;
-            var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr;
-            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr;
-            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr+ '_' + studentLangAttr;
+            var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr+ '_' + studentLangAttr + '_' + student_idnumber;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
