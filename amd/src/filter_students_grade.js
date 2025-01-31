@@ -379,11 +379,12 @@ function initialize_preview_buttons(preview_buttons, templateCache) {
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
+            const studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
-            var courseTemplateKey = 'course_' + courseIdAttr;
-            var campusTemplateKey = studentCampusAttr;
-            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr;
-            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr;
+            var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr;
+            var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr;
+            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr;
+            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr + '_' + studentLangAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
@@ -519,11 +520,12 @@ function setup_preview_emails_with_titles(templateCache) {
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
+            const studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
-            var courseTemplateKey = 'course_' + courseIdAttr;
-            var campusTemplateKey = studentCampusAttr;
-            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr;
-            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr;
+            var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr;
+            var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr;
+            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr;
+            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr+ '_' + studentLangAttr;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 

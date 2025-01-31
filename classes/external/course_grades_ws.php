@@ -85,6 +85,7 @@ class local_earlyalert_course_grades_ws extends external_api
             'first_name' => new external_value(PARAM_TEXT, 'User first name', false),
             'last_name' => new external_value(PARAM_TEXT, 'User last name', false),
             'grade' => new external_value(PARAM_TEXT, 'grade', false),
+            'lang' => new external_value(PARAM_TEXT, 'lang', false),
             'idnumber' => new external_value(PARAM_TEXT, 'idnumber', false),
             'campus' => new external_value(PARAM_TEXT, 'User campus', false),
             'faculty' => new external_value(PARAM_TEXT, 'User faculty', false),
@@ -155,7 +156,7 @@ class local_earlyalert_course_grades_ws extends external_api
 
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
-                $lang = $student_record->lang;
+                $lang = $student['lang'];
                 $course_template_params = array('lang' => $lang,
                     'faculty' => $course_faculty,
                     'course' => $course_name,
@@ -168,13 +169,13 @@ class local_earlyalert_course_grades_ws extends external_api
                 $course_template = $DB->get_record('local_et_email', $course_template_params);
 
 
-                if ($course_template->faculty == $student['faculty']) {
+                if ($course_template && $course_template->faculty == $student['faculty']) {
 
-                    if (!isset($templateCache['course_' . $courseid])) {
+                    if (!isset($templateCache['course_' . $courseid . '_' . $lang])) {
                         $email = new \local_etemplate\email($course_template->id);
                         $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                        $templateCache['course_' . $courseid] = array(
-                            'templateKey' => 'course_' . $courseid,
+                        $templateCache['course_' . $courseid . '_' . $lang] = array(
+                            'templateKey' => 'course_' . $courseid . '_' . $lang,
                             'subject' => $template_data->subject,
                             'message' => $template_data->message,
                             'templateid' => $template_data->templateid,
@@ -187,9 +188,9 @@ class local_earlyalert_course_grades_ws extends external_api
                 } else {
                     //check if template is already defined
                     if (
-                        !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major']]) ||
-                        !isset($templateCache[$student['campus'] . "_" . $student['faculty']]) ||
-                        !isset($templateCache[$student['campus']])
+                        !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang]) ||
+                        !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . '_' . $lang]) ||
+                        !isset($templateCache[$student['campus'] . '_' . $lang])
                     ) {
                         // Set up campus, faculty and department
                         $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
@@ -211,19 +212,19 @@ class local_earlyalert_course_grades_ws extends external_api
                         $templateKey = [];
                         $template = false;
                         if ($campustemplate) {
-                            $templateKey[$i] = $student['campus'];
+                            $templateKey[$i] = $student['campus'] . '_' . $lang;
                             $template[$i] = $campustemplate;
                         }
                         if ($facultytemplate) {
-                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'];
+                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . '_' . $lang;
                             $template[$i] = $facultytemplate;
                         }
                         if ($depttemplate) {
-                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'];
+                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang;
                             $template[$i] = $depttemplate;
                         }
 
-                        if (!empty($templateKey)) {
+                        if (!empty($templateKey[$i])) {
                             $email = new \local_etemplate\email($template[$i]->id);
                             $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
                             $templateCache[$templateKey[$i]] = array(
@@ -238,14 +239,15 @@ class local_earlyalert_course_grades_ws extends external_api
                             );
                         }
                     }
+
                 }
+
                 $i++;
             }
-        //raise_memory_limit(MEMORY_STANDARD);
+            //raise_memory_limit(MEMORY_STANDARD);
 
-        return $templateCache;
-        }
-        catch (Exception $e) {
+            return $templateCache;
+        } catch (Exception $e) {
             error_log('Error in get_course_student_templates: ' . $e->getMessage());
             throw new moodle_exception('errorprocessingrequest', 'local_earlyalert', '', null, $e->getMessage());
         }

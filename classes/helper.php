@@ -287,6 +287,7 @@ class helper
                             'first_name' => $student->firstname,
                             'last_name' => $student->lastname,
                             'grade' => $student_grade,
+                            'lang' => $mdl_user->lang ? $mdl_user->lang : 'en',
                             'idnumber' => $student->idnumber,
                             'campus' => $studentcampus,
                             'faculty' => $studentfaculty,
