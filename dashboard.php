@@ -90,7 +90,7 @@ if ($teacher || $is_impersonating) {
     if (!empty($course_data) && array_key_exists('rows', $course_data)) {
         for ($x = 0; $x < count($course_data['rows']); $x++) {
             foreach ($course_data['rows'][$x]['courses'] as $course) {
-                $course_data_for_grades[$i] = $course;
+                $course_data_for_grades[$x] = $course;
                 $i++;
             }
         }

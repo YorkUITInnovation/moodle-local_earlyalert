@@ -158,7 +158,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         templates.push(campus_fac_lang);
                     }
 
-                    if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.majo + '_' + result.lang + '_' + result.idnumber)) {
+                    if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.major + '_' + result.lang + '_' + result.idnumber)) {
                         var campus_fac_maj_lang = result.campus + "_" + result.faculty + "_" + result.major + '_' + result.lang + '_' + result.idnumber;
                         templates.push(campus_fac_maj_lang);
                     }
