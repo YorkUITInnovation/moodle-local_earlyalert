@@ -147,16 +147,19 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         templates.push('course_' + course_id);
                     }
 
-                    if (!templates.includes(result.campus)) {
-                        templates.push(result.campus);
+                    if (!templates.includes(result.campus + '_' + result.lang)) {
+                        var campus_lang = result.campus + '_' + result.lang;
+                        templates.push(campus_lang);
                     }
 
-                    if (!templates.includes(result.campus + "_" + result.faculty)) {
-                        templates.push(result.campus + "_" + result.faculty);
+                    if (!templates.includes(result.campus + "_" + result.faculty + '_' + result.lang)) {
+                       var campus_fac_lang = result.campus + "_" + result.faculty + '_' + result.lang;
+                        templates.push(campus_fac_lang);
                     }
 
-                    if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.major)) {
-                        templates.push(result.campus + "_" + result.faculty + "_" + result.major);
+                    if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.majo + '_' + result.lang)) {
+                        var campus_fac_maj_lang = result.campus + "_" + result.faculty + "_" + result.major + '_' + result.lang;
+                        templates.push(campus_fac_maj_lang);
                     }
 
                     result.faculty = result.faculty ? result.faculty : '';
@@ -215,8 +218,10 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     check_allnone_listener(selected_students);
                     const cachedArrayElement = document.getElementById('early-alert-template-cache');
                     const cachedArray = JSON.parse(cachedArrayElement.value);
+
                     templates_response.forEach(result => {
                         if (typeof result === 'object') {
+                            console.log(templates_response);
                             if (cachedArray.includes(result.templateKey)) {
                                 let finalMessage = {
                                     subject: result.subject,
@@ -380,7 +385,8 @@ function setup_preview_buttons(templateCache) {
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusTemplateKey).message;
                 templateObj = templateCache.get(campusTemplateKey);
-            } else if (templateCache.has(facTemplateKey)) {
+            }
+            else if (templateCache.has(facTemplateKey)) {
                 if (templateCache.has(deptTemplateKey)) {
                     // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                     templateEmailSubject = templateCache.get(deptTemplateKey).subject;
