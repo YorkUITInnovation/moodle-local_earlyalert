@@ -108,7 +108,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 console.error('Failed to render template:', error);
             });
 
-        const finalCache = new Map();
+        var finalCache = new Map();
 
         // Fetch student list and templates
         var get_grades_and_templates = ajax.call([
@@ -213,7 +213,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     // we're not doing any more
                     // check_all_student_grades(selected_students);
                     check_allnone_listener(selected_students);
-
+                    finalCache.clear();
                     const cachedArrayElement = document.getElementById('early-alert-template-cache');
                     const cachedArray = JSON.parse(cachedArrayElement.value);
                     templates_response.forEach(result => {
@@ -237,7 +237,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     if (alert_type === 'assign') // we have to setup the assignment title before previewing!
                     {
                         finalCache.set('assignment_title', assignment_title);
-
                         if (assignment_title) { // there is a case where previews were setup without titles then dont create modals
                             setup_preview_emails_with_titles(finalCache); // call back function
                         }
@@ -353,7 +352,6 @@ function initialize_preview_buttons(templateCache) {
     let student_template_cache_array = [];
     console.log('Setting up previews');
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
-    console.log(preview_buttons);
     preview_buttons.forEach(function (button) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
