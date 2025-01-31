@@ -540,6 +540,11 @@ function setup_preview_emails_with_titles(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
+            console.log('PET Course template key:', courseTemplateKey);
+            console.log('PETCampus template key:', campusTemplateKey);
+            console.log('PET Faculty template key:', facTemplateKey);
+            console.log('PET Department template key:', deptTemplateKey);
+
             if (templateCache.has(campusTemplateKey)) {
                 // console.log("department cache found:", templateCache.get(campusTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
