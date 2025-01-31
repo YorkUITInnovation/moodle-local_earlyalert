@@ -459,7 +459,6 @@ function initialize_preview_buttons(templateCache) {
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
         record_data.student_name = student_name;
-        record_data.student_lang = studentLangAttr;
         record_data.course_name = templateCache.get('course_name');
         record_data.templateEmailSubject = templateEmailSubject;
         record_data.templateEmailContent = changedTemplateEmailContent;
