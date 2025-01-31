@@ -384,7 +384,7 @@ function initialize_preview_buttons(templateCache) {
             const studentCampusAttr = checkbox.getAttribute('data-student-campus');
             const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
-            const studentLangAttr = checkbox.getAttribute('data-student-lang');
+            var studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
             var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr;
             var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr;
