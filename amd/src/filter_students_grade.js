@@ -726,7 +726,8 @@ function addUserInfo(emailText, params) {
                 case 1:
                     // fullname action
                     let targetUser = params.studentname[1] ? `${params.studentname[1]} ${params.studentname[0]}` : '{USER_NOT_FOUND}';
-                    uniqueMatches[i] = targetUser;
+                    // uniqueMatches[i] = targetUser;
+                    uniqueMatches[i] = getString('first_name_template_greeting', 'local_earlyalert');
                     break;
                 case 2:
                     // usergrade action
