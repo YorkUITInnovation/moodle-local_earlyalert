@@ -169,11 +169,11 @@ class local_earlyalert_course_grades_ws extends external_api
 
                 if ($course_template && $course_template->faculty == $student['faculty']) {
 
-                    if (!isset($templateCache['course_' . $courseid . '_' . $lang])) {
+                    if (!isset($templateCache['course_' . $courseid . '_' . $lang . '_'. $student['idnumber']])) {
                         $email = new \local_etemplate\email($course_template->id);
                         $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                        $templateCache['course_' . $courseid . '_' . $lang] = array(
-                            'templateKey' => 'course_' . $courseid . '_' . $lang,
+                        $templateCache['course_' . $courseid . '_' . $lang. '_'. $student['idnumber']] = array(
+                            'templateKey' => 'course_' . $courseid . '_' . $lang . '_'. $student['idnumber'],
                             'subject' => $template_data->subject,
                             'message' => $template_data->message,
                             'templateid' => $template_data->templateid,
@@ -186,9 +186,9 @@ class local_earlyalert_course_grades_ws extends external_api
                 } else {
                     //check if template is already defined
                     if (
-                        !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang]) ||
-                        !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . '_' . $lang]) ||
-                        !isset($templateCache[$student['campus'] . '_' . $lang])
+                        !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang . '_' . $student['idnumber']]) ||
+                        !isset($templateCache[$student['campus'] . "_" . $student['faculty'] . '_' . $lang . '_' . $student['idnumber']]) ||
+                        !isset($templateCache[$student['campus'] . '_' . $lang . '_' . $student['idnumber']])
                     ) {
                         // Set up campus, faculty and department
                         $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
@@ -210,15 +210,15 @@ class local_earlyalert_course_grades_ws extends external_api
                         $templateKey = [];
                         $template = false;
                         if ($campustemplate) {
-                            $templateKey[$i] = $student['campus'] . '_' . $lang;
+                            $templateKey[$i] = $student['campus'] . '_' . $lang . '_' . $student['idnumber'];
                             $template[$i] = $campustemplate;
                         }
                         if ($facultytemplate) {
-                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . '_' . $lang;
+                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . '_' . $lang. '_' . $student['idnumber'];
                             $template[$i] = $facultytemplate;
                         }
                         if ($depttemplate) {
-                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang;
+                            $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang . '_' . $student['idnumber'];
                             $template[$i] = $depttemplate;
                         }
 
@@ -233,7 +233,8 @@ class local_earlyalert_course_grades_ws extends external_api
                                 'revision_id' => $template_data->revision_id,
                                 'course_id' => $courseid,
                                 'instructor_id' => $template_data->instructor_id,
-                                'triggered_from_user_id' => $template_data->triggered_from_user_id
+                                'triggered_from_user_id' => $template_data->triggered_from_user_id,
+                                'idnumber' => $student['idnumber']
                             );
                         }
                     }
