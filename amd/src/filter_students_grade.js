@@ -434,9 +434,7 @@ function setup_preview_buttons(templateCache) {
         };
 
         console.log("passing these params to adduserinfo:", params);
-        console.log("email content before modifications: ", templateEmailContent);
-        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
-         console.log("template email content post-addUserInfo:", changedTemplateEmailContent);
+        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);         
 
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
