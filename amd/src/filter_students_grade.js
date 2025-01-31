@@ -720,7 +720,8 @@ function addUserInfo(emailText, params) {
                 case 0:
                     // firstname action
                     let firstNameText = params.studentname[1] ? params.studentname[1] : '{USER_NOT_FOUND}';
-                    uniqueMatches[i] = firstNameText;
+                    // uniqueMatches[i] = firstNameText;
+                    uniqueMatches[i] = getString('first_name_template_greeting', 'local_earlyalert');
                     break;
                 case 1:
                     // fullname action
