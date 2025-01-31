@@ -233,13 +233,11 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         }
                     });
                     finalCache.set('course_name', course_name);
-                    console.log('Course name Final Cache: ',finalCache);
                     // case where assignment titles are taken from user input
                     if (alert_type === 'assign') // we have to setup the assignment title before previewing!
                     {
                         finalCache.set('assignment_title', assignment_title);
                         if (assignment_title) { // there is a case where previews were setup without titles then dont create modals
-                            console.log('Assignment Final Cache: ',finalCache);
                             setup_preview_emails_with_titles(finalCache); // call back function
                         }
 
