@@ -143,8 +143,9 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             grades_response.forEach(result => {
                 console.log('grade each: ' , result)
                 if (typeof result === 'object') {
-                    if (!templates.includes('course_' + course_id)) {
-                        templates.push('course_' + course_id);
+                    if (!templates.includes('course_' + course_id + '_' + result.lang)) {
+                        var course_lang = 'course_' + course_id + '_' + result.lang;
+                        templates.push(course_lang);
                     }
 
                     if (!templates.includes(result.campus + '_' + result.lang)) {
