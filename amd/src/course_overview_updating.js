@@ -28,7 +28,6 @@ function update_student_status_for_instructor() {
                     status: status
                 }
             }])[0].then(function (response) {
-                console.log(response);
                 // Show Toast notification
                 addToast(getString('advised_success_toast', 'local_earlyalert'), {
                     delay: 10000,
@@ -63,7 +62,6 @@ function update_student_status_for_advisor() {
                     status: status
                 }
             }])[0].then(function (response) {
-                console.log(response);
                 // Show Toast notification
                 addToast(getString('advised_success_toast', 'local_earlyalert'), {
                     delay: 10000,

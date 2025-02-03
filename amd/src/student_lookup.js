@@ -18,7 +18,7 @@ function get_users() {
     let search = document.getElementById('earlyalert-student-search');
     if (search) {
         document.getElementById('earlyalert-student-search').addEventListener('change', function (event) {
-            console.log(search.value);
+            //console.log(search.value);
             window.location.href = config.wwwroot + '/local/earlyalert/student_lookup.php?user_id=' + search.value;
         });
     }

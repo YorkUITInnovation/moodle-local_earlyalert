@@ -53,7 +53,6 @@ function addCourseOverviewButtonListener() {
                     id: courseId
                 }
             }])[0].then(function (response) {
-                console.log(response);
                 // Hide loader
                 // Render the course overview template
                 Templates.render('local_earlyalert/course_overview', response)
