@@ -62,6 +62,9 @@ class local_earlyalert_course_grades_ws extends external_api
             }
 
             //raise_memory_limit(MEMORY_STANDARD);
+            usort($students, function($a, $b) {
+                return strcmp($a['last_name'], $b['last_name']);
+            });
             return $students;
 
         } catch (Exception $e) { //error log

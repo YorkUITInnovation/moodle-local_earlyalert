@@ -83,7 +83,7 @@ $string['my_tools'] = 'My Tools';
 $string['name'] = 'Name';
 $string['select_grade'] = 'Default Grade';
 $string['select_students'] ='Select the students to whom you would like a {$a} alert to be sent by using the checkbox(es) below.<br><br>
-You can preview the message by clicking on the “preview” button prior to sending.';
+You can preview the message by clicking on the “preview” button prior to sending.<br><em>N.B. Graduate Students and Teaching Assistants may appear here – please disregard them.</em>';
 $string['send_email_to_advisors'] = 'Send email to advisors?';
 $string['showgrades'] = 'Show Grades';
 $string['student_lookup'] = 'Student Lookup';

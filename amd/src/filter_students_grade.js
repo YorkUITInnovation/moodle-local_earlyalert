@@ -114,6 +114,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
             // Reformat the data to display in a grid
             let num_students = grades_response.length;
             // console.log('Number of students returned: ' + num_students);
+            // Calculate the number of rows and columns for the grid
             let num_rows = Math.min(3, Math.ceil(num_students / 3));
             let num_cols = Math.ceil(num_students / num_rows);
             let display_data = {
