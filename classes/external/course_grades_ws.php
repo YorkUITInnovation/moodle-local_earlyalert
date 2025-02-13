@@ -160,7 +160,7 @@ class local_earlyalert_course_grades_ws extends external_api
             foreach ($mdlGrades as $student) {
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
-                $lang = strtoupper($student['lang']);
+                $lang = $student['lang'];
                 // Business rule in webservice! If student does not have a language in English or French, default to English
                 // Array of allowed languages (ISO 639-1 codes and variations)
                 $allowed_languages = ['en', 'fr', 'fr-CA', 'en-CA', 'en-US', 'fr-FR'];
