@@ -161,10 +161,18 @@ class local_earlyalert_course_grades_ws extends external_api
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
                 $lang = strtoupper($student['lang']);
+
                 // Business rule in webservice! If student does not have a language in English or French, default to English
                 // Array of allowed languages (ISO 639-1 codes and variations)
-                $allowed_languages = ['EN', 'FR', 'FR-CA', 'EN-CA', 'EN-US', 'FR-FR'];
-                if (!in_array($lang, $allowed_languages)) {
+                $allowed_en_languages = ['EN', 'EN-CA', 'EN-US'];
+                $allowed_fr_languages = ['FR', 'FR-CA', 'FR-FR'];
+                if (in_array($lang, $allowed_en_languages)){
+                    $lang = 'EN';
+                }
+                else if(in_array($lang, $allowed_fr_languages)) {
+                    $lang = 'FR';
+                }
+                else  { // any other language
                     $lang = 'EN';
                 }
                 $student_idnumber = $student['idnumber'];
