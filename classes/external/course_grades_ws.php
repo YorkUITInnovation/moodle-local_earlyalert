@@ -59,7 +59,7 @@ class local_earlyalert_course_grades_ws extends external_api
                     if ($key == 'lang') {
                         $students[$i]['lang'] = self::process_lang_for_templates($students[$i]);
                     }
-                    $students[$i][$key] = $value;
+                    else $students[$i][$key] = $value;
 
                 }
                 $i++;
