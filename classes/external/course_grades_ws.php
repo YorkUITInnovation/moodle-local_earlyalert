@@ -56,7 +56,11 @@ class local_earlyalert_course_grades_ws extends external_api
                     $students[$i]['teacher_firstname'] = $teacher->firstname;
                     $students[$i]['teacher_lastname'] = $teacher->lastname;
                     $students[$i]['teacher_email'] = $teacher->email;
+                    if ($key == 'lang') {
+                        $students[$i]['lang'] = self::process_lang_for_templates($students[$i]);
+                    }
                     $students[$i][$key] = $value;
+
                 }
                 $i++;
             }
@@ -160,21 +164,8 @@ class local_earlyalert_course_grades_ws extends external_api
             foreach ($mdlGrades as $student) {
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
-                $lang = strtoupper($student['lang']);
+                $lang = self::process_lang_for_templates($student);
 
-                // Business rule in webservice! If student does not have a language in English or French, default to English
-                // Array of allowed languages (ISO 639-1 codes and variations)
-                $allowed_en_languages = ['EN', 'EN-CA', 'EN-US'];
-                $allowed_fr_languages = ['FR', 'FR-CA', 'FR-FR'];
-                if (in_array($lang, $allowed_en_languages)){
-                    $lang = 'EN';
-                }
-                else if(in_array($lang, $allowed_fr_languages)) {
-                    $lang = 'FR';
-                }
-                else  { // any other language
-                    $lang = 'EN';
-                }
                 $student_idnumber = $student['idnumber'];
                 $course_template_params = array('lang' => $lang,
                     'faculty' => $course_faculty,
@@ -264,6 +255,22 @@ class local_earlyalert_course_grades_ws extends external_api
         }
     }
 
+    private function process_lang_for_templates($student): string
+    {
+        $lang = strtoupper($student['lang']);
+        // Business rule in webservice! If student does not have a language in English or French, default to English
+        // Array of allowed languages (ISO 639-1 codes and variations)
+        $allowed_en_languages = ['EN', 'EN-CA', 'EN-US'];
+        $allowed_fr_languages = ['FR', 'FR-CA', 'FR-FR'];
+        if (in_array($lang, $allowed_en_languages)) {
+            $lang = 'EN';
+        } else if (in_array($lang, $allowed_fr_languages)) {
+            $lang = 'FR';
+        } else { // any other language
+            $lang = 'EN';
+        }
+        return $lang;
+    }
     /**
      * Returns users parameters
      * @return external_function_parameters
