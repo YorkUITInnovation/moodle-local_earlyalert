@@ -255,7 +255,7 @@ class local_earlyalert_course_grades_ws extends external_api
         }
     }
 
-    private function process_lang_for_templates($student): string
+    private static function process_lang_for_templates($student): string
     {
         $lang = strtoupper($student['lang']);
         // Business rule in webservice! If student does not have a language in English or French, default to English
