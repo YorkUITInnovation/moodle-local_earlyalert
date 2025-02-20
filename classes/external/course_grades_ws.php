@@ -161,7 +161,12 @@ class local_earlyalert_course_grades_ws extends external_api
             //lets cache all possible email templates based off of these students...
             $templateCache = array();
             $i = 1;
+
+            $debug = "";
+
             foreach ($mdlGrades as $student) {
+                // Get student record
+                $debug .= "student: " . $student['idnumber'] . "\n";
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
                 $lang = self::process_lang_for_templates($student);
@@ -178,8 +183,8 @@ class local_earlyalert_course_grades_ws extends external_api
                 // Get course email template
                 $course_template = $DB->get_record('local_et_email', $course_template_params);
 
-
                 if ($course_template && $course_template->faculty == $student['faculty']) {
+                    $debug .= "course_template: " . $course_template->id . "\n";
 
                     $email = new \local_etemplate\email($course_template->id);
                     $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
@@ -195,12 +200,16 @@ class local_earlyalert_course_grades_ws extends external_api
                     );
 
                 } else {
+
                     //check if template is already defined
                     // Set up campus, faculty and department
                     $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
-                    $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
-                    $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
+                    $debug .= "campus: " . $campus->id . "\n";
 
+                    $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
+                    $debug .= "fac: " . $faculty->id . $faculty->shortname. "\n";
+                    $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
+                    $deubg .= "dept: " . $department->id . "\n";
                     $campustemplate = false;
                     $facultytemplate = false;
                     $depttemplate = false;
@@ -217,14 +226,17 @@ class local_earlyalert_course_grades_ws extends external_api
                     $template = false;
                     if ($campustemplate) {
                         $templateKey[$i] = $student['campus'] . '_' . $lang . '_' . $student_idnumber;
+                        $debug .= "campus_template_key: " . $templateKey[$i] . "\n";
                         $template[$i] = $campustemplate;
                     }
                     if ($facultytemplate) {
                         $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . '_' . $lang . '_' . $student_idnumber;
+                        $debug .= "faculty_template_key: " . $templateKey[$i] . "\n";
                         $template[$i] = $facultytemplate;
                     }
                     if ($depttemplate) {
                         $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang . '_' . $student_idnumber;
+                        $debug .= "dept_template_key: " . $templateKey[$i] . "\n";
                         $template[$i] = $depttemplate;
                     }
 
@@ -242,9 +254,14 @@ class local_earlyalert_course_grades_ws extends external_api
                             'triggered_from_user_id' => $template_data->triggered_from_user_id
                         );
                     }
+                    else{
+                        error_log('No template found for ' . $debug );
+                    }
                 }
 
                 $i++;
+                // for debug
+
             }
             //raise_memory_limit(MEMORY_STANDARD);
 
