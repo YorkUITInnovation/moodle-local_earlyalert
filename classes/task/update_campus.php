@@ -80,8 +80,8 @@ class update_campus extends \core\task\scheduled_task
                     if ($student = $DB->get_record('user', ['idnumber' => $merged_students[$i]['pycyin'][0]], 'id')) {
                         // Get campus from ldap
                         if (isset($merged_students[$i]['pystream'][0])) {
-                            echo 'Processing ' . $merged_students[$i]['pycyin'][0] . '<br>';
-                            echo 'Stream: ' . $merged_students[$i]['pystream'][0] . '<br>';
+                            mtrace('Processing ' . $merged_students[$i]['pycyin'][0]);
+                            mtrace('Stream: ' . $merged_students[$i]['pystream'][0]);
                             if ($merged_students[$i]['pystream'][0] == 'NO') {
                                 $campus = helper::get_campus_from_stream('', $merged_students[$i]['pyfaculty'][0]);
                             } else {
@@ -96,7 +96,7 @@ class update_campus extends \core\task\scheduled_task
                             $campus = helper::get_campus_from_stream('', $merged_students[$i]['pyfaculty'][0]);
                         }
 
-                        echo 'Campus: ' . $campus . '<br>';
+                        mtrace('Campus: ' . $campus);
                         // Check to see if the profile data is set.
                         if ($campus_data = $DB->get_record('user_info_data', ['userid' => $student->id, 'fieldid' => $campus_profile_field->id], '*')) {
                             $DB->set_field('user_info_data', 'data', $campus, ['id' => $campus_data->id]);
