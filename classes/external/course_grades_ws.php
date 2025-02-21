@@ -17,9 +17,9 @@ class local_earlyalert_course_grades_ws extends external_api
     public static function get_course_grades_percent_parameters()
     {
         return new external_function_parameters(array(
-                'id' => new external_value(PARAM_INT, 'Course id', VALUE_OPTIONAL, -1),
-                'grade_letter_id' => new external_value(PARAM_INT, 'Grade letter id', VALUE_OPTIONAL, -1),
-                'teacher_user_id' => new external_value(PARAM_INT, 'User id of teacher', VALUE_OPTIONAL, -1),
+                'id' => new external_value(PARAM_INT, 'Course id', VALUE_DEFAULT, -1),
+                'grade_letter_id' => new external_value(PARAM_INT, 'Grade letter id', VALUE_DEFAULT, -1),
+                'teacher_user_id' => new external_value(PARAM_INT, 'User id of teacher', VALUE_DEFAULT, -1),
             )
         );
     }
@@ -32,7 +32,6 @@ class local_earlyalert_course_grades_ws extends external_api
     public static function get_course_grades_percent($id, $grade_letter_id, $teacher_user_id)
     {
         global $DB;
-        //raise_memory_limit(MEMORY_UNLIMITED);
 
         try {
             $params = self::validate_parameters(
@@ -57,6 +56,7 @@ class local_earlyalert_course_grades_ws extends external_api
                     $students[$i]['teacher_lastname'] = $teacher->lastname;
                     $students[$i]['teacher_email'] = $teacher->email;
                     if ($key == 'lang') {
+                        $students[$i]['lang'] = $value;
                         $students[$i]['lang'] = self::process_lang_for_templates($students[$i]);
                     }
                     else $students[$i][$key] = $value;
@@ -64,8 +64,6 @@ class local_earlyalert_course_grades_ws extends external_api
                 }
                 $i++;
             }
-
-            //raise_memory_limit(MEMORY_STANDARD);
             usort($students, function($a, $b) {
                 return strcmp($a['last_name'], $b['last_name']);
             });
@@ -166,7 +164,9 @@ class local_earlyalert_course_grades_ws extends external_api
 
             foreach ($mdlGrades as $student) {
                 // Get student record
-                $debug .= "student: " . $student['idnumber'] . "\n";
+                if ($student['idnumber'] != '219782523') {
+                    continue;
+                }
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
                 $lang = self::process_lang_for_templates($student);
@@ -184,8 +184,6 @@ class local_earlyalert_course_grades_ws extends external_api
                 $course_template = $DB->get_record('local_et_email', $course_template_params);
 
                 if ($course_template && $course_template->faculty == $student['faculty']) {
-                    $debug .= "course_template: " . $course_template->id . "\n";
-
                     $email = new \local_etemplate\email($course_template->id);
                     $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
                     $templateCache['course_' . $courseid . '_' . $lang . '_' . $student_idnumber] = array(
@@ -203,40 +201,42 @@ class local_earlyalert_course_grades_ws extends external_api
 
                     //check if template is already defined
                     // Set up campus, faculty and department
+                    error_log("Student: " . $student['idnumber'] . " Campus: " . $student['campus'] . " Faculty: " . $student['faculty'] . " Major: " . $student['major']);
                     $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
-                    $debug .= "campus: " . $campus->id . "\n";
-
+                    error_log('local org campus id:  ' . $campus->id);
+                    error_log('Student fac shortname from LDAP: ' . $student['faculty']);
                     $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
-                    $debug .= "fac: " . $faculty->id . $faculty->shortname. "\n";
+                    error_log('local org Faculty id: ' . $faculty->id);
+                    error_log('Student dept/mjr from LDAP: ' . $student['major']);
                     $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
-                    $deubg .= "dept: " . $department->id . "\n";
+                    error_log("Campus: " . $campus->id . " Faculty: " . $faculty->id . " Department: " . $department->id);
                     $campustemplate = false;
                     $facultytemplate = false;
                     $depttemplate = false;
+
                     // Get various email templates
                     $campustemplate = $DB->get_record('local_et_email',
                         array('lang' => $lang, 'unit' => $campus->id, 'context' => 'CAMPUS', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
+                    error_log('Campus template id: ' . $campustemplate->id);
                     $facultytemplate = $DB->get_record('local_et_email',
                         array('lang' => $lang, 'unit' => $faculty->id, 'context' => 'UNIT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
+                    error_log("Faculty template id: " . $facultytemplate->id);
                     $depttemplate = $DB->get_record('local_et_email',
                         array('lang' => $lang, 'unit' => $department->id, 'context' => 'DEPT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
-
+                    error_log("Department template id: " . $depttemplate->id);
                     // Check which of the aboves are true;
                     $templateKey = [];
                     $template = false;
                     if ($campustemplate) {
                         $templateKey[$i] = $student['campus'] . '_' . $lang . '_' . $student_idnumber;
-                        $debug .= "campus_template_key: " . $templateKey[$i] . "\n";
                         $template[$i] = $campustemplate;
                     }
                     if ($facultytemplate) {
                         $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . '_' . $lang . '_' . $student_idnumber;
-                        $debug .= "faculty_template_key: " . $templateKey[$i] . "\n";
                         $template[$i] = $facultytemplate;
                     }
                     if ($depttemplate) {
                         $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang . '_' . $student_idnumber;
-                        $debug .= "dept_template_key: " . $templateKey[$i] . "\n";
                         $template[$i] = $depttemplate;
                     }
 
@@ -255,7 +255,7 @@ class local_earlyalert_course_grades_ws extends external_api
                         );
                     }
                     else{
-                        error_log('No template found for ' . $debug );
+                        error_log('No template found for ' . $student_idnumber );
                     }
                 }
 
@@ -295,9 +295,9 @@ class local_earlyalert_course_grades_ws extends external_api
     public static function get_course_student_templates_parameters()
     {
         return new external_function_parameters(array(
-            'id' => new external_value(PARAM_INT, 'Course id', VALUE_OPTIONAL, 0),
-            'alert_type' => new external_value(PARAM_TEXT, 'Alert type; grade, assign, exam', VALUE_OPTIONAL, 'grade'),
-            'teacher_user_id' => new external_value(PARAM_INT, 'User id of teacher', VALUE_OPTIONAL, 0)
+            'id' => new external_value(PARAM_INT, 'Course id', VALUE_DEFAULT, 0),
+            'alert_type' => new external_value(PARAM_TEXT, 'Alert type; grade, assign, exam', VALUE_DEFAULT, 'grade'),
+            'teacher_user_id' => new external_value(PARAM_INT, 'User id of teacher', VALUE_DEFAULT, 0)
         ));
     }
 

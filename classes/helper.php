@@ -221,7 +221,7 @@ class helper
                 foreach ($users as $student) {
                     $mdl_user = $DB->get_record('user', ['id' => $student->id]); // get moodle user
                     // Get the student's grade for the given course ID.
-                    $grade = grade_get_course_grade($student->id, $course_id);
+                    //$grade = grade_get_course_grade($student->id, $course_id);
                     $grade = new \stdClass();
                     $grade->grade = 1;
                     // Get student campus, faculty, major
@@ -280,7 +280,7 @@ class helper
                     if ($grade->grade) {
                         // Convert the grade to a percentage and format it as a decimal number with two places.
                         //$grade = ($grade->grade / $grade->item->grademax) * 100;
-                        $student_grade = number_format((float)$grade, '2');
+                        $student_grade = number_format((float)$grade->grade, '2');
                         $students[$student->id] = [
                             'id' => $student->id,
                             'course_id' => $course_id,
