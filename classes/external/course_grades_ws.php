@@ -160,13 +160,8 @@ class local_earlyalert_course_grades_ws extends external_api
             $templateCache = array();
             $i = 1;
 
-            $debug = "";
-
             foreach ($mdlGrades as $student) {
                 // Get student record
-                if ($student['idnumber'] != '219782523') {
-                    continue;
-                }
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
                 $lang = self::process_lang_for_templates($student);
@@ -201,15 +196,9 @@ class local_earlyalert_course_grades_ws extends external_api
 
                     //check if template is already defined
                     // Set up campus, faculty and department
-                    error_log("Student: " . $student['idnumber'] . " Campus: " . $student['campus'] . " Faculty: " . $student['faculty'] . " Major: " . $student['major']);
                     $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
-                    error_log('local org campus id:  ' . $campus->id);
-                    error_log('Student fac shortname from LDAP: ' . $student['faculty']);
                     $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
-                    error_log('local org Faculty id: ' . $faculty->id);
-                    error_log('Student dept/mjr from LDAP: ' . $student['major']);
                     $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
-                    error_log("Campus: " . $campus->id . " Faculty: " . $faculty->id . " Department: " . $department->id);
                     $campustemplate = false;
                     $facultytemplate = false;
                     $depttemplate = false;
@@ -217,13 +206,10 @@ class local_earlyalert_course_grades_ws extends external_api
                     // Get various email templates
                     $campustemplate = $DB->get_record('local_et_email',
                         array('lang' => $lang, 'unit' => $campus->id, 'context' => 'CAMPUS', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
-                    error_log('Campus template id: ' . $campustemplate->id);
                     $facultytemplate = $DB->get_record('local_et_email',
                         array('lang' => $lang, 'unit' => $faculty->id, 'context' => 'UNIT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
-                    error_log("Faculty template id: " . $facultytemplate->id);
                     $depttemplate = $DB->get_record('local_et_email',
                         array('lang' => $lang, 'unit' => $department->id, 'context' => 'DEPT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
-                    error_log("Department template id: " . $depttemplate->id);
                     // Check which of the aboves are true;
                     $templateKey = [];
                     $template = false;
@@ -239,7 +225,6 @@ class local_earlyalert_course_grades_ws extends external_api
                         $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang . '_' . $student_idnumber;
                         $template[$i] = $depttemplate;
                     }
-
                     if (!empty($templateKey[$i])) {
                         $email = new \local_etemplate\email($template[$i]->id);
                         $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
@@ -255,13 +240,10 @@ class local_earlyalert_course_grades_ws extends external_api
                         );
                     }
                     else{
-                        error_log('No template found for ' . $student_idnumber );
+                        error_log("No template found for student: " . $student['idnumber'] . "| Campus: " . $student['campus'] . "| Faculty: " . $student['faculty'] . "| Major: " . $student['major']);
                     }
                 }
-
                 $i++;
-                // for debug
-
             }
             //raise_memory_limit(MEMORY_STANDARD);
 
