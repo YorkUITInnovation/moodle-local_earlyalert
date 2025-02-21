@@ -56,8 +56,7 @@ class local_earlyalert_course_grades_ws extends external_api
                     $students[$i]['teacher_lastname'] = $teacher->lastname;
                     $students[$i]['teacher_email'] = $teacher->email;
                     if ($key == 'lang') {
-                        $students[$i]['lang'] = $value;
-                        $students[$i]['lang'] = self::process_lang_for_templates($students[$i]);
+                        $students[$i]['lang'] = self::process_lang_for_templates($value);
                     }
                     else $students[$i][$key] = $value;
 
@@ -164,7 +163,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 // Get student record
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
-                $lang = self::process_lang_for_templates($student);
+                $lang = self::process_lang_for_templates($student['lang']);
 
                 $student_idnumber = $student['idnumber'];
                 $course_template_params = array('lang' => $lang,
@@ -254,9 +253,9 @@ class local_earlyalert_course_grades_ws extends external_api
         }
     }
 
-    private static function process_lang_for_templates($student): string
+    private static function process_lang_for_templates($lang): string
     {
-        $lang = strtoupper($student['lang']);
+        $lang = strtoupper($lang);
         // Business rule in webservice! If student does not have a language in English or French, default to English
         // Array of allowed languages (ISO 639-1 codes and variations)
         $allowed_en_languages = ['EN', 'EN-CA', 'EN-US'];
