@@ -16,6 +16,23 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
+    'local/earlyalert:view_reports_teacher' => array(
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW
+        )
+    ),
+    'local/earlyalert:edit_reports' => array(
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW
+        )
+    ),
     'local/earlyalert:student_lookup' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'read',

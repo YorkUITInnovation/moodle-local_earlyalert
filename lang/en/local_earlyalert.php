@@ -26,8 +26,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Early Alert';
+$string['actions'] = 'Actions';
 $string['adashboard'] = 'Admin Dashboard';
 $string['adjust_default_grade'] = 'Adjust Default Grade';
+$string['advisors'] = 'Advisors';
 $string['alerts_raised'] = 'Alerts raised';
 $string['assignment_instructions'] = '<ul>
 <li>These messages inform students of a missed assignment that threatens their success in the course 
@@ -39,6 +41,8 @@ $string['assignment_instructions'] = '<ul>
 $string['assignment_title'] = 'Assignment Title';
 $string['assignment_title_required'] = 'Please add an assignment title before previewing or sending';
 $string['available_alert_types'] = 'Available alert types';
+$string['cohort'] = 'Cohort';
+$string['cohort_help'] = 'Select the cohort to which the query applies.';
 $string['course_list'] = 'Course List';
 $string['course_overview'] = 'Course Overview';
 $string['course_overview_instructions'] = '<ul>
@@ -50,16 +54,16 @@ $string['course_overview_render_instructions'] = '<ul>
   <li>Click on the student’s name to see the alert type(s) and details.</li>
   <li>To indicate that a student has followed up with you, check off the appropriate box under “advising status”.</li>
 </ul>';
+$string['description'] = 'Description';
 $string['early_alert'] = 'Early Alert';
 $string['earlyalert_viewed'] = 'Early Alert Viewed';
 $string['exam_instructions'] = '<ul>
 <li>These messages inform students of a missed exam that threatens their success in the course  
 </li>
 </ul>';
-$string['idashboard'] = 'Instructor Dashboard';
-$string['impersonate_user'] = 'Send on behalf of';
-$string['impersonating_user'] = 'Impersonating User';
+$string['filter'] = 'Filter';
 $string['generate_reports'] = 'Generate Reports';
+$string['generated_reports'] = 'Generated Reports';
 $string['grade'] = 'Grade';
 $string['grade_instructions'] = '<ul>
 <li>Grades messages inform students they are averaging below a certain letter grade.
@@ -69,6 +73,9 @@ $string['grade_instructions'] = '<ul>
 <ul><li>Note that this is the letter grade that will appear in the email (e.g. you are averaging a D+ or less)</li></ul>
 </li>
 </ul>';
+$string['idashboard'] = 'Instructor Dashboard';
+$string['impersonate_user'] = 'Send on behalf of';
+$string['impersonating_user'] = 'Impersonating User';
 $string['lookup_student'] = 'Lookup Student';
 $string['low_grade'] = 'Low grade';
 $string['manage_roles'] = 'Manage Roles';
@@ -81,6 +88,8 @@ $string['my_courses'] = 'My Courses';
 $string['my_list_of_students'] = 'My List of Students';
 $string['my_tools'] = 'My Tools';
 $string['name'] = 'Name';
+$string['new'] = 'New';
+$string['reset'] = 'Reset';
 $string['select_grade'] = 'Default Grade';
 $string['select_students'] ='Select the students to whom you would like a {$a} alert to be sent by using the checkbox(es) below.<br><br>
 You can preview the message by clicking on the “preview” button prior to sending.<br><em>N.B. Graduate Students and Teaching Assistants may appear here – please disregard them.</em>';
@@ -95,6 +104,7 @@ $string['student_lookup_instructions'] = '<ul>
 <li>Click on the course name to view the type of alert and additional details</li>
 <li>To indicate that you have spoken to the student about a specific course, check off the appropriate box under “advising status”</li>
 </ul>';
+$string['sqlquery'] = 'SQL Query';
 $string['preview_email'] = 'Preview';
 $string['process_mail_queue'] = 'Process Early Alert queue';
 $string['raise_an_alert'] = 'Raise an Alert';
@@ -103,7 +113,9 @@ $string['preview'] = 'Preview';
 $string['selected_alert_based_on'] = 'You are selecting an alert based on a';
 $string['send_alert_based_on'] = 'Send an alert based on';
 $string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
+$string['teachers'] = 'Teachers';
 $string['view_message'] = 'View Message Details';
+$string['view_reports'] = 'View Reports';
 $string['update_campus'] = 'Update Campus profile field';
 $string['no_courses'] = 'No Courses found';
 
@@ -126,11 +138,19 @@ $string['ldap_url'] = 'LDAP Url';
 $string['ldap_user'] = 'LDAP User';
 $string['ldap_password'] = 'LDAP User Password';
 
+// Readonly database settings
+$string['readonly_database'] = 'Readonly Database';
+$string['readonly_database_description'] = 'Configure the readonly database user and password for Early Alert.';
+$string['dbuser'] = 'Database User';
+$string['dbpassword'] = 'Database Password';
+
 // Capabilities
 $string['earlyalert:access_early_alert'] = 'Access Early Alert';
+$string['earlyalert:edit_reports'] = 'Create/edit Reports';
 $string['earlyalert:impersonate'] = 'Impersonate users';
 $string['earlyalert:student_lookup'] = 'Student Lookup';
 $string['earlyalert:view_reports'] = 'View Reports';
+$string['earlyalert:view_reports_teacher'] = 'View Reports (Teacher)';
 
 // Message provider
 $string['messageprovider:earlyalert_notification'] = 'Early Alert Notification';

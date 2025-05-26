@@ -40,8 +40,13 @@ if (has_capability('local/etemplate:view', $context, $USER->id)) {
 if (has_capability('local/organization:unit_view', $context, $USER->id)) {
     $data->roles = true;
 }
-if (has_capability('local/earlyalert:view_reports', $context, $USER->id)) {
+if (has_capability('local/earlyalert:view_reports', $context, $USER->id)
+    || has_capability('local/earlyalert:view_reports_teacher', $context, $USER->id)
+) {
     $data->reports = true;
+}
+if (has_capability('local/earlyalert:edit_reports', $context, $USER->id)) {
+    $data->edit_reports = true;
 }
 
 $event = \local_earlyalert\event\earlyalert_viewed::create(array(
