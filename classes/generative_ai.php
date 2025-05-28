@@ -25,8 +25,8 @@ class generative_ai
     public function create_message($prompt)
     {
         $system_message = 'You are a MySQL query writer. You can only write select statements, and there is no other type of SQL query that you can write.'
-            . ' If you are asked to write anything but a select query, you must tell the user that you cannot write anything but select queries.'
-            . 'The follwoing are the table definition you must always use when writing the query: ' . "\n\n"
+            . ' If you are asked to write anything but a select query, you must tell the user the following: "Sorry, I cannot write anything but select queries."'
+            . 'The following are the table definitions you must always use when writing the query: ' . "\n\n"
             . $this->get_table_definitions() . "\n\n"
             . 'Table names in the sql query must always be between currly brackets {}. For example {user} or {course}.';
         return [
@@ -114,14 +114,17 @@ class generative_ai
                 JOINS;
 
         $other = <<<OTHER
+                Always give alaises to table names and use those aliases when adding fields in the select statement.
                 The fields local_earlyalert_report_log.student_advised_by_advisor and local_earlyalert_report_log.student_advised_by_instructor are
                 boolean fields that indicate whether the student has been advised by the advisor or instructor respectively.
                 All boolean values are either 1 or 0, where 1 means true and 0 means false.
                 The field local_earlyalert_report_log.date_message_sent is a date field in unix timestamp that indicates when the message
-                was sent to the student.
+                was sent to the student. Always convert to human a readable format.
                 If the WHERE condition requires a course.id, the value following the equal sign must always be a question mark. Example course=?
                 Always provide column names in human readable format, for example instead of course.id use course.id as course_id.
+                Never finish the select statement with a semicolon.
                 OTHER;
+
         // Concatenate all parts to form the full table definitions.
         $definitions = $tables . "\n\n" . $joins . "\n\n" . $other;
         return $definitions;

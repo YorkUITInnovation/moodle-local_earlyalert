@@ -2,90 +2,74 @@
 
 namespace local_earlyalert;
 
-require_once($CFG->libdir . '/tablelib.php');
-require_once($CFG->libdir . "/externallib.php");
+use local_earlyalert\generative_ai;
 
-class reports_table extends \table_sql
+class table
 {
-
+    // Private properties
+    private $sql;
+    private $from;
+    private $to;
+    private $columns = [];
+    private $headers = [];
 
     /**
-     * grade_table constructor.
-     * @param $uniqueid
+     * Constructor for the table class.
+     *
+     * @param string $sql The SQL query to be executed.
+     * @param int $from The starting index for pagination (default is 0).
+     * @param int $to The ending index for pagination (default is 20).
      */
-    public function __construct($uniqueid, string $sql_query)
+    public function __construct(string $sql, int $from = 0, int $to = 20)
     {
-        GLOBAL $USER;
-        parent::__construct($uniqueid);
-
-        // Define the columns to be displayed
-        $columns = $this->extract_columns_from_sql($sql_query);
-        $this->define_columns($columns);
-
-        // Define the headers for the columns
-        $headers = $this->replace_underscores_with_spaces($columns);
-        $this->define_headers($headers);
+        $this->sql = $sql;
+        $this->from = $from;
+        $this->to = $to;
+        $this->columns = $this->get_columns();
+        $this->headers = $this->get_headers();
     }
 
+    private function get_columns(): array
+    {
+        // Extract columns from the SQL query
+        $columns = $this->extract_columns_from_sql($this->sql);
+        return $columns;
+    }
+
+    private function get_headers(): array
+    {
+        $headers = $this->replace_underscores_with_spaces($this->columns);
+        return $headers;
+    }
+
+    public function set_columns(array $columns): void
+    {
+        $this->columns = $columns;
+    }
+
+
     /**
-     * I override the parent method to allow for custom SQL queries without WHERE conditions.
-     * Query the db. Store results in the table object for use by build_table.
+     * Executes a SQL query and returns the result as a stdClass object.
+     * The object contains 'success' (boolean), 'data' (array of records), and 'error' (string, if any).
      *
-     * @param int $pagesize size of page for paginated displayed table.
-     * @param bool $useinitialsbar do you want to use the initials bar. Bar
-     * will only be used if there is a fullname column defined for the table.
+     * @param string $sql The SQL query to execute.
+     * @param array $params Parameters for the SQL query.
+     * @return \stdClass Object containing the result of the query execution.
      */
-    function query_db($pagesize, $useinitialsbar = true)
+    public function execute_query(string $sql, array $params =[]): \stdClass
     {
         global $DB;
-        if (!$this->is_downloading()) {
-            if ($this->countsql === NULL) {
-                $this->countsql = 'SELECT COUNT(1) FROM ' . $this->sql->from;
-                // Only if there is a where statement in the sql, we add it to the countsql.
-                if ($this->sql->where) {
-                    $this->countsql .= ' WHERE ' . $this->sql->where;
-                }
-                $this->countparams = $this->sql->params;
-            }
-            $grandtotal = $DB->count_records_sql($this->countsql, $this->countparams);
-            if ($useinitialsbar && !$this->is_downloading()) {
-                $this->initialbars(true);
-            }
-
-            list($wsql, $wparams) = $this->get_sql_where();
-            if ($wsql) {
-                $this->countsql .= ' AND ' . $wsql;
-                $this->countparams = array_merge($this->countparams, $wparams);
-
-                $this->sql->where .= ' AND ' . $wsql;
-                $this->sql->params = array_merge($this->sql->params, $wparams);
-
-                $total = $DB->count_records_sql($this->countsql, $this->countparams);
-            } else {
-                $total = $grandtotal;
-            }
-
-            $this->pagesize($pagesize, $total);
+        $result = new \stdClass();
+        $result->success = false;
+        $result->data = [];
+        try {
+            $result->data = $DB->get_records_sql($sql, $params);
+            $result->headers = $this->headers;
+            $result->success = true;
+        } catch (\dml_exception $e) {
+            $result->error = $e->getMessage();
         }
-
-        // Fetch the attempts
-        $sort = $this->get_sql_sort();
-        if ($sort) {
-            $sort = "ORDER BY $sort";
-        }
-        $sql = "SELECT
-                {$this->sql->fields}
-                FROM {$this->sql->from}";
-        if ($this->sql->where) {
-            $sql .= " WHERE {$this->sql->where}";
-        }
-        $sql .= "{$sort}";
-
-        if (!$this->is_downloading()) {
-            $this->rawdata = $DB->get_records_sql($sql, $this->sql->params, $this->get_page_start(), $this->get_page_size());
-        } else {
-            $this->rawdata = $DB->get_records_sql($sql, $this->sql->params);
-        }
+        return $result;
     }
 
     /**
@@ -95,7 +79,8 @@ class reports_table extends \table_sql
      * @param string $sql The SQL SELECT query.
      * @return array Array of column names (using aliases if present, otherwise the column name).
      */
-    public function extract_columns_from_sql(string $sql) {
+    public function extract_columns_from_sql(string $sql)
+    {
         $columns = [];
         // Match the SELECT ... FROM part
         if (preg_match('/select\s+(.*?)\s+from\s+/is', $sql, $matches)) {
@@ -124,9 +109,10 @@ class reports_table extends \table_sql
      * @param array $array The input array of strings.
      * @return array The array with underscores replaced by spaces.
      */
-    public function replace_underscores_with_spaces(array $array) {
+    public function replace_underscores_with_spaces(array $columns)
+    {
         $result = [];
-        foreach ($array as $item) {
+        foreach ($columns as $item) {
             $result[] = str_replace('_', ' ', $item);
         }
         return $result;
@@ -139,7 +125,8 @@ class reports_table extends \table_sql
      * @param string $sql The SQL SELECT query.
      * @return array Associative array with keys 'fields', 'from', and 'where'.
      */
-    public function split_sql_select_statement(string $sql): \stdClass {
+    public function split_sql_select_statement(string $sql): \stdClass
+    {
         $result = new \stdClass();
         $result->fields = '';
         $result->from = '';
@@ -174,5 +161,18 @@ class reports_table extends \table_sql
         }
         return $result;
     }
-}
 
+    /**
+     * Return a stdClass object with the columns and column name
+     * @param string $sql The SQL SELECT query.
+     */
+    public function get_columns_object_from_sql(string $sql): \stdClass
+    {
+        $columns = $this->extract_columns_from_sql($sql);
+        $columns_object = new \stdClass();
+        foreach ($columns as $column) {
+            $columns_object->{$column} = $this->replace_underscores_with_spaces($column);
+        }
+        return $columns_object;
+    }
+}
