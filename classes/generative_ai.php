@@ -114,12 +114,13 @@ class generative_ai
                 JOINS;
 
         $other = <<<OTHER
+                Always include the local_earlyalert_report_log.id field as the first field in the select statement.
                 Always give alaises to table names and use those aliases when adding fields in the select statement.
                 The fields local_earlyalert_report_log.student_advised_by_advisor and local_earlyalert_report_log.student_advised_by_instructor are
-                boolean fields that indicate whether the student has been advised by the advisor or instructor respectively.
-                All boolean values are either 1 or 0, where 1 means true and 0 means false.
-                The field local_earlyalert_report_log.date_message_sent is a date field in unix timestamp that indicates when the message
-                was sent to the student. Always convert to human a readable format.
+                boolean fields that indicate whether the student has been advised by the advisor or instructor respectively. The boolean values are either 1 or 0, where 1 means true and 0 means false.
+                If the query requires to show the student id, use user.idnumber as student_id.
+                If the query requires to show a course, always use the course.shortname as course
+                The field local_earlyalert_report_log.date_message_sent is a date field in unix timestamp. Always convert to human a readable format.
                 If the WHERE condition requires a course.id, the value following the equal sign must always be a question mark. Example course=?
                 Always provide column names in human readable format, for example instead of course.id use course.id as course_id.
                 Never finish the select statement with a semicolon.

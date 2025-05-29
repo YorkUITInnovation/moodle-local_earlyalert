@@ -1,0 +1,37 @@
+<div class="row">
+    <div class="col">
+        <table class="table table-striped  table-bordered">
+            <thead class="thead-dark">
+            <tr>
+                {{#headers}}
+                    <th>{{name}}</th>
+                {{/headers}}
+            </tr>
+            </thead>
+            <tbody>
+            {{#rows}}
+                <tr>
+                    {{#cells}}
+                        <td>{{value}}</td>
+                    {{/cells}}
+                </tr>
+            {{/rows}}
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                {{#pagination}}
+                    <li class="page-item"><a class="page-link" href="{{value}}">{{label}}}</a></li>
+                {{/pagination}}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+
+
+

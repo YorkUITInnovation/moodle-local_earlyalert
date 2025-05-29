@@ -57,6 +57,7 @@ $string['course_overview_render_instructions'] = '<ul>
 $string['description'] = 'Description';
 $string['early_alert'] = 'Early Alert';
 $string['earlyalert_viewed'] = 'Early Alert Viewed';
+$string['error'] = 'Error:';
 $string['exam_instructions'] = '<ul>
 <li>These messages inform students of a missed exam that threatens their success in the course  
 </li>
