@@ -15,8 +15,13 @@
             <label for="search" class="col-form-label">
                 {{#str}}impersonate_user, local_earlyalert{{/str}}
             </label>
-            <select id="search" name="search" class="form-control">
-            </select>
+            <select id="search" name="search" class="form-control"></select>
+        </div>
+        <div class="col-md-3">
+            <label for="course-search" class="col-form-label">
+                {{#str}}course_list, local_earlyalert{{/str}}
+            </label>
+            <select id="course-search" name="course-search" class="form-control"></select>
         </div>
     </div>
     {{#impersonated_user}}
@@ -28,6 +33,16 @@
             </div>
         </div>
     {{/impersonated_user}}
+{{/impersonate}}
+{{^impersonate}}
+    <div class="row">
+        <div class="col-md-3">
+            <label for="course-search" class="col-form-label">
+                {{#str}}course_list, local_earlyalert{{/str}}
+            </label>
+            <select id="course-search" name="course-search" class="form-control"></select>
+        </div>
+    </div>
 {{/impersonate}}
 {{^rows}}
     <div class="row">
@@ -43,6 +58,7 @@
         <div class="col">
             <div class="card-deck">
                 {{#courses}}
+                    {{#is_selected}}
                     <div class="card">
                         <div class="card-header">
                             <h6>{{fullname}}</h6>
@@ -52,7 +68,7 @@
                                 <b>{{#str}}available_alert_types, local_earlyalert{{/str}}</b>
                             </div>
                             <h5>{{#str}}send_alert_based_on, local_earlyalert{{/str}}</h5>
-                            <div class="card-deck">
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-6 g-4">
 
                                 <div class="card" style="">
                                     <div class="card-body d-flex justify-content-center align-items-center">
@@ -114,6 +130,7 @@
                             {{#str}}course_overview_instructions, local_earlyalert{{/str}}
                         </div>
                     </div>
+                    {{/is_selected}}
                 {{/courses}}
             </div>
         </div>

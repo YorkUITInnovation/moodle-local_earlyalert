@@ -1,5 +1,6 @@
 // File: amd/src/select_box.js
 import ajax from 'core/ajax';
+import {get_string as getString} from 'core/str';
 
 const selectBox = {
     init: function(selector, method, placeholder) {
@@ -25,7 +26,6 @@ const selectBox = {
         const opt = document.createElement('option');
         opt.value = '';
         opt.textContent = placeholder;
-
         searchInput.addEventListener('input', function () {
             const searchTerm = searchInput.value;
             if (searchTerm.length < 3) return; // Minimum 3 characters to search
@@ -52,7 +52,7 @@ const selectBox = {
                     select.innerHTML = '';
                 }
             } else {
-                select.innerHTML = '';
+                select.innerHTML = 'test';
                 select.appendChild(opt);
             }
 
@@ -69,12 +69,43 @@ const selectBox = {
             });
         }
 
+        // Helper: update label with selected option
+        function updateLabelWithSelectedOption() {
+            const label = selectElement.labels[0];
+            if (label && selectElement.selectedIndex > 0) {
+                const selectedText = selectElement.options[selectElement.selectedIndex].textContent;
+                getString('impersonate_user', 'local_earlyalert', selectedText).then(function(labelText) { // Use getString to translate the label text and resolve it
+                    label.textContent = labelText;
+                    console.log('resolved label text:', labelText);
+                });
+            }
+        }
+
         if (selectElement.hasAttribute('multiple')) {
             selectElement.addEventListener('change', function () {
                 const selectedOptions = Array.from(selectElement.selectedOptions).map(opt => opt.value);
+                // updateLabelWithSelectedOption();
+            });
+        } else {
+            // Add change event for single select to reload page with user_id
+            selectElement.addEventListener('change', function () {
+                const selectedUserId = selectElement.value;
+                //updateLabelWithSelectedOption();
+                if (selectedUserId) {
+                    // Reload the page with user_id as a query parameter
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('user_id', selectedUserId);
+                    // Remove course_id if present, so course list refreshes
+                    url.searchParams.delete('course_id');
+                    window.location.href = url.toString();
+                }
             });
         }
+
+        // On page load, update label if a user is already selected
+        updateLabelWithSelectedOption();
     }
 };
 
 export default selectBox;
+
