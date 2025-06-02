@@ -134,3 +134,11 @@ $string['earlyalert:view_reports'] = 'View Reports';
 
 // Message provider
 $string['messageprovider:earlyalert_notification'] = 'Early Alert Notification';
+
+// Azure OpenAI Settings
+$string['azureopenai_settings'] = 'Azure OpenAI Settings';
+$string['azureopenai_apikey'] = 'Azure OpenAI API Key';
+$string['azureopenai_endpoint'] = 'Azure OpenAI Endpoint';
+$string['azureopenai_version'] = 'Azure OpenAI API Version';
+$string['azureopenai_deployment'] = 'Azure OpenAI Deployment Name';
+
