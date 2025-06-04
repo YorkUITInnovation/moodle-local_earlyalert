@@ -61,7 +61,8 @@ class table
         $result->headers = $this->headers;
         $result->data = [];
         // Basic SQL SELECT statement validation
-        $sql_trimmed = ltrim($this->sql);
+        file_put_contents('/var/www/moodledata/temp/debug_sql_query.txt', $this->sql);
+        $sql_trimmed = $this->minify_sql($this->sql);
         if (!preg_match('/^select\s+/i', $sql_trimmed) || stripos($sql_trimmed, ' from ') === false) {
             $result->error = 'Invalid SQL: Not a valid SELECT statement.';
             return $result;
@@ -84,6 +85,7 @@ class table
         } catch (\dml_exception $e) {
             $result->error = $e->getMessage();
         }
+        file_put_contents('/var/www/moodledata/temp/debug_query_results.txt', print_r($result, true));
         return $result;
     }
 
@@ -107,11 +109,6 @@ class table
         // Start with headers
         $h = 0;
         foreach ($this->headers as $header) {
-            if ($h == 0) {
-                // The first header is empty, so we skip it
-                $h++;
-                continue;
-            }
             $headers[]['name'] = $header;
         }
         // Now the rows
@@ -121,12 +118,6 @@ class table
             foreach ($this->columns as $column) {
                 // Use the column name to get the value from the record
                 $value = isset($record->{$column}) ? $record->{$column} : '';
-                // Add the cell to the row
-                if ($i == 0) {
-                    // The first cell is empty, so we skip it
-                    $i++;
-                    continue;
-                }
                 $cells[] = ['value' => $value];
 
                 $i++;
@@ -284,5 +275,59 @@ class table
         }
         return $columns_object;
     }
-}
 
+    /**
+     * Beautifies an SQL statement for easier reading.
+     * @param string $sql The SQL statement to beautify.
+     * @return string The beautified SQL statement.
+     */
+    public static function beautify_sql(string $sql): string
+    {
+        // Normalize whitespace
+        $sql = preg_replace('/\s+/', ' ', trim($sql));
+        // Keywords to break lines before (exclude FROM_UNIXTIME)
+        $keywords = [
+            'SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING', 'LIMIT', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'OUTER JOIN', 'JOIN', 'ON', 'AND', 'OR'
+        ];
+        // Add line breaks before keywords (case-insensitive), but skip FROM if part of FROM_UNIXTIME
+        foreach ($keywords as $keyword) {
+            if ($keyword === 'FROM') {
+                // Only match FROM if not followed by _UNIXTIME (negative lookahead)
+                $pattern = '/\s*FROM(?!_UNIXTIME)\s*/i';
+                $replacement = "\nFROM ";
+            } else {
+                $pattern = '/\s*' . preg_quote($keyword, '/') . '\s*/i';
+                $replacement = "\n$keyword ";
+            }
+            $sql = preg_replace($pattern, $replacement, $sql);
+        }
+        // Special handling for SELECT fields (indent each field)
+        $sql = preg_replace_callback('/SELECT\s+(.*?)\nFROM/is', function ($matches) {
+            $fields = $matches[1];
+            $fields = preg_replace('/\s*,\s*/', ",\n\t", $fields);
+            return "SELECT \n\t" . $fields . "\nFROM";
+        }, $sql);
+        // Indent lines after keywords
+        $sql = preg_replace('/\n(FROM|WHERE|ORDER BY|GROUP BY|HAVING|LIMIT|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|JOIN|ON) /i', "\n$1 \n\t", $sql);
+        // Clean up multiple newlines and trailing whitespace
+        $sql = preg_replace('/\n{2,}/', "\n", $sql);
+        $sql = preg_replace('/\s+$/m', '', $sql);
+        return trim($sql);
+    }
+
+    /**
+     * Minifies an SQL statement by removing all tabs and new lines.
+     * @param string $sql The SQL statement to minify.
+     * @return string The minified SQL statement.
+     */
+    public static function minify_sql(string $sql): string
+    {
+        // Remove all tabs and new lines
+        $sql = str_replace(["\n", "\r", "\t"], ' ', $sql);
+        // Normalize whitespace to a single space
+        $sql = preg_replace('/\s+/', ' ', $sql);
+        return trim($sql);
+    }
+
+
+}

@@ -79,55 +79,23 @@ class generative_ai
      */
     public function get_table_definitions()
     {
-        $tables = <<<SQL
-                course: id bigint(10),category bigint(10),fullname varchar(254),shortname varchar(255),idnumber varchar(100),
-                
-                course_categories: id bigint(10),name varchar(255),idnumber varchar(100),
-                
-                local_earlyalert_facspec_txt:id bigint(10),instance_id bigint(10),unit_context bigint(10),facultytext bigint(10),
-                
-                local_earlyalert_report_log: id bigint(10),template_id bigint(10),revision_id bigint(10),triggered_from_user_id bigint(10),target_user_id bigint(10),
-                
-                user_read bigint(10),course_id bigint(10),instructor_id bigint(10),assignment_name varchar(255),trigger_grade bigint(10),actual_grade bigint(10),
-                
-                student_advised_by_advisor bigint(10),student_advised_by_instructor bigint(10),date_message_sent bigint(10),timecreated bigint(10),timemodified bigint(10),
-                
-                local_et_email: id bigint(10),name varchar(255),subject varchar(255),message longtext,unit varchar(50),context varchar(8),
-                active tinyint(1),message_type tinyint(1),deleted tinyint(1),faculty varchar(4),course varchar(10),coursenumber int(8),
-                
-                local_organization_campus: id bigint(10),name varchar(255),shortname varchar(15),
-                
-                local_organization_dept: id bigint(10),unit_id bigint(10),name varchar(255),shortname varchar(15),id_number varchar(255),
-                
-                local_organization_unit: id bigint(10),campus_id bigint(10),name varchar(255),shortname varchar(15),id_number varchar(255),
-                
-                user: id bigint(10),username varchar(100),idnumber varchar(255),firstname varchar(100),lastname varchar(100),email varchar(100),lang varchar(30),
-                lastnamephonetic varchar(255),firstnamephonetic varchar(255),middlename varchar(255),alternatename varchar(255),
-                SQL;
-        $joins = <<<JOINS
-                Joins:
-                local_earlyalert_report_log to user: local_earlyalert_report_log.target_user_id = user.id
-                local_earlyalert_report_log to course: local_earlyalert_report_log.course_id = course.id
-                local_earlyalert_report_log to triggered user: local_earlyalert_report_log.triggered_from_user_id = user.id
-                local_earlyalert_report_log to instructor: local_earlyalert_report_log.instructor_id = user.id
-                local_earlyalert_report_log to email: local_earlyalert_report_log.template_id = local_et_email.id
-                JOINS;
+        global $CFG;
 
-        $other = <<<OTHER
-                Always include the local_earlyalert_report_log.id field as the first field in the select statement.
-                Always give alaises to table names and use those aliases when adding fields in the select statement.
-                The fields local_earlyalert_report_log.student_advised_by_advisor and local_earlyalert_report_log.student_advised_by_instructor are
-                boolean fields that indicate whether the student has been advised by the advisor or instructor respectively. The boolean values are either 1 or 0, where 1 means true and 0 means false.
-                If the query requires to show the student id, use user.idnumber as student_id.
-                If the query requires to show a course, always use the course.shortname as course
-                The field local_earlyalert_report_log.date_message_sent is a date field in unix timestamp. Always convert to human a readable format.
-                If the WHERE condition requires a course.id, the value following the equal sign must always be a question mark. Example course=?
-                Always provide column names in human readable format, for example instead of course.id use course.id as course_id.
-                Never finish the select statement with a semicolon.
-                OTHER;
+        // If the configuration variables are not set, return an error notification.
+        if (empty($CFG->earlyalert_reports_tables)) {
+            return 'No table definitions found in the configuration. An SQL statement cannot be created.';
+        }
 
+        $tables = "Tables:\n\n" . $CFG->earlyalert_reports_tables;
+        if (!empty($CFG->earlyalert_reports_joins)) {
+            $joins = "Joins:\n\n" . $CFG->earlyalert_reports_joins;
+        }
+        if (!empty($CFG->earlyalert_reports_other)) {
+            $other = "Other:\n\n" . $CFG->earlyalert_reports_other;
+        }
         // Concatenate all parts to form the full table definitions.
         $definitions = $tables . "\n\n" . $joins . "\n\n" . $other;
-        return $definitions;
+
+        return trim($definitions);
     }
 }

@@ -36,7 +36,7 @@ if ($prompt !== '') {
     $results = $GENAI->execute($message);
     $results = json_decode($results, true);
 
-
+print_object($results);
     $TABLE = new table($results['query']);
     $params = array();
 }
@@ -46,7 +46,7 @@ echo $OUTPUT->header();
 //echo $results['query'];
 // Add a prompt input field in a Bootstrap 4 row and column
 $form = '<div class="row justify-content-center"><div class="col-md-12">';
-$form .= '<form method="post" class="form" action="' . new moodle_url('/local/earlyalert/test_files/test_ai.php') . '" class="form-inline mb-3">';
+$form .= '<form method="post" class="form" action="' . new moodle_url('/local/earlyalert/test_ai.php') . '" class="form-inline mb-3">';
 $form .= '<div class="form-group mr-2">';
 $form .= '<label for="prompt" class="mr-2">Enter your prompt:</label>';
 $form .= '<textarea id="prompt" name="prompt" size="100" class="form-control">' . s($prompt) . '</textarea>';

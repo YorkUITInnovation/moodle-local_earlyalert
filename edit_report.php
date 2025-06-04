@@ -1,6 +1,6 @@
 <?php
 require_once('../../config.php');
-include_once('classes/forms/report.php');
+include_once('classes/forms/report_form.php');
 
 use local_organization\base;
 
@@ -17,7 +17,8 @@ if (!has_capability('local/earlyalert:edit_reports', $PAGE->context, $USER->id))
 }
 
 // Load AMD module
-//$PAGE->requires->js_call_amd('local_organization/campuses', 'init');
+$PAGE->requires->js_call_amd('local_earlyalert/create_sql_query', 'init');
+$PAGE->requires->js_call_amd('local_earlyalert/reports_preview', 'init');
 // Load CSS file
 //$PAGE->requires->css('/local/organization/css/general.css');
 
@@ -27,6 +28,7 @@ if ($id != 0) {
     $formdata = new stdClass();
     $formdata->id = 0;
     $formdata->name = '';
+    $formdata->description = '';
 }
 
 $editor_options = array(

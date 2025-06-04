@@ -60,5 +60,34 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext('earlyalert_azureopenai_endpoint', get_string('azureopenai_endpoint', 'local_earlyalert'), '', ''));
     $settings->add(new admin_setting_configtext('earlyalert_azureopenai_version', get_string('azureopenai_version', 'local_earlyalert'), '', '2024-02-15-preview'));
     $settings->add(new admin_setting_configtext('earlyalert_azureopenai_deployment', get_string('azureopenai_deployment', 'local_earlyalert'), '', ''));
+// Reports settings header
+    $settings->add(new admin_setting_heading(
+        'earlyalert_reports_heading',
+        get_string('reports_settings', 'local_earlyalert'),
+        ''
+    ));
 
+// Textarea for tables
+    $settings->add(new admin_setting_configtextarea(
+        'earlyalert_reports_tables',
+        get_string('reports_tables', 'local_earlyalert'),
+        '',
+        ''
+    ));
+
+// Textarea for joins
+    $settings->add(new admin_setting_configtextarea(
+        'earlyalert_reports_joins',
+        get_string('reports_joins', 'local_earlyalert'),
+        '',
+        ''
+    ));
+
+// Textarea for other
+    $settings->add(new admin_setting_configtextarea(
+        'earlyalert_reports_other',
+        get_string('reports_other', 'local_earlyalert'),
+        '',
+        ''
+    ));
 }
