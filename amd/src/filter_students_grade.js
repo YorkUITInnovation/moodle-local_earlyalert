@@ -7,6 +7,7 @@ import notification from 'core/notification';
 import {get_format as formatString} from 'core/str';
 import selectBox from 'local_earlyalert/select_box';
 import config from 'core/config';
+import selectCourseBox from 'local_earlyalert/select_course_box';
 
 export const init = () => {
     alert_type_button();
@@ -665,13 +666,52 @@ function create_notification_dialog(student_template_cache_array) {
 }
 
 function get_users() {
+    const params = new URLSearchParams(window.location.search);
+    let user_id = params.get('user_id');
+    // If user_id is not in URL, use the hidden input value (logged-in user)
+    if (!user_id) {
+        const teacherUserIdInput = document.getElementById('early-alert-teacher-user-id');
+        if (teacherUserIdInput) {
+            user_id = teacherUserIdInput.value;
+        }
+    }
     selectBox.init('#search', 'earlyalert_get_users', "Select a user");
-    // On search change, navigate to a url with the user_id as a parameter
+    selectCourseBox.init('#course-search', 'earlyalert_get_courses', user_id, "Select a course");
     let search = document.getElementById('search');
-    if (search) {
-        document.getElementById('search').addEventListener('change', function (event) {
-            window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + search.value;
+    let courseSearch = document.getElementById('course-search');
+
+
+    // On course change, reload page with user_id and course_id
+    courseSearch.addEventListener('change', function (event) {
+        const courseId = courseSearch.value;
+        const userId = search.value;
+        if (courseId) {
+            window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + user_id + '&course_id=' + courseId;
+        }
+    });
+    // If a user is already selected, populate courses for that user
+    if (search && courseSearch) {
+        // On user change, update courses and clear selection
+        search.addEventListener('change', function (event) {
+            const newUserId = search.value;
+            selectCourseBox.init('#course-search', 'earlyalert_get_courses', newUserId, "Select a course");
+            // Clear the course selection
+            courseSearch.value = '';
         });
+    }
+
+    // Set the selected value on courseSearch if course_id is present in URL
+    const course_id = params.get('course_id');
+    if (course_id && courseSearch) {
+        // Wait for the dropdown to be populated, then set the value
+        const setSelectedCourse = () => {
+            if (courseSearch.options.length > 1) {
+                courseSearch.value = course_id;
+            } else {
+                setTimeout(setSelectedCourse, 50);
+            }
+        };
+        setSelectedCourse();
     }
 }
 

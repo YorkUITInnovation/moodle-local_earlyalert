@@ -64,6 +64,15 @@ $functions = array(
         'capabilities' => '',
         'ajax' => true
     ),
+    'earlyalert_get_courses' => array(
+        'classname' => 'local_earlyalert_courses_ws',
+        'methodname' => 'get_courses',
+        'classpath' => 'local/earlyalert/classes/external/courses_ws.php',
+        'description' => 'user courses for a select box',
+        'type' => 'read',
+        'capabilities' => '',
+        'ajax' => true
+    ),
     'earlyalert_get_message' => array(
         'classname' => 'local_earlyalert_course_overview_ws',
         'methodname' => 'get_message',

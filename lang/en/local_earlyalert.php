@@ -63,7 +63,9 @@ $string['exam_instructions'] = '<ul>
 <li>These messages inform students of a missed exam that threatens their success in the course  
 </li>
 </ul>';
-$string['filter'] = 'Filter';
+$string['idashboard'] = 'Instructor Dashboard';
+$string['impersonate_user'] = 'Send on behalf of: {$a}';
+$string['impersonating_user'] = 'Impersonating User';
 $string['generate_reports'] = 'Generate Reports';
 $string['generated_reports'] = 'Generated Reports';
 $string['grade'] = 'Grade';
