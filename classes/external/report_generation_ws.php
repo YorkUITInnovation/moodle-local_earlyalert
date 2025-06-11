@@ -94,10 +94,10 @@ class local_earlyalert_report_generation_ws extends external_api {
         $params = json_decode($params, true);
         // Execute the query and return the results
         $TABLE = new table($query, $params, $offset, $limit);
-        file_put_contents('/var/www/moodledata/temp/debug_query.txt', print_r($TABLE, true));
+
         // Get Table HTML
         $results = $TABLE->display_table();
-file_put_contents('/var/www/moodledata/temp/debug.html', $results);
+
         return [
             'table' => $results
         ];

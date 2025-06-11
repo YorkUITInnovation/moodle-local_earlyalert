@@ -56,12 +56,13 @@ class table
     private function execute_query(): \stdClass
     {
         global $DB;
+        // First change the strict group by mode to allow for more flexible queries
+        $DB->execute("SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
         $result = new \stdClass();
         $result->status = 422; // Unprocessable Entity
         $result->headers = $this->headers;
         $result->data = [];
         // Basic SQL SELECT statement validation
-        file_put_contents('/var/www/moodledata/temp/debug_sql_query.txt', $this->sql);
         $sql_trimmed = $this->minify_sql($this->sql);
         if (!preg_match('/^select\s+/i', $sql_trimmed) || stripos($sql_trimmed, ' from ') === false) {
             $result->error = 'Invalid SQL: Not a valid SELECT statement.';
