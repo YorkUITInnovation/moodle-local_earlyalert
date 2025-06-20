@@ -10,7 +10,12 @@
                 <h2 class="mb-0">
                     <button class="btn btn-link btn-block text-left {{#has_alerts}}text-white{{/has_alerts}}" type="button" data-toggle="collapse" data-target="#collapse{{id}}" aria-expanded="false"
                             aria-controls="collapse{{id}}">
-                        {{fullname}} ({{idnumber}})
+                        <span><b>{{fullname}} ({{idnumber}})</b></span>
+                        <span class="float-right">
+                            {{#has_alerts}}
+                                <i class="fa fa-exclamation-triangle" style="font-size: 1.5em"></i>
+                            {{/has_alerts}}
+                    </span>
                     </button>
                 </h2>
             </div>
