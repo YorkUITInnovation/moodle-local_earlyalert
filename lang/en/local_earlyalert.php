@@ -57,7 +57,7 @@ $string['exam_instructions'] = '<ul>
 </li>
 </ul>';
 $string['idashboard'] = 'Instructor Dashboard';
-$string['impersonate_user'] = 'Send on behalf of';
+$string['impersonate_user'] = 'Send on behalf of: {$a}';
 $string['impersonating_user'] = 'Impersonating User';
 $string['generate_reports'] = 'Generate Reports';
 $string['grade'] = 'Grade';

@@ -4,6 +4,10 @@ namespace local_earlyalert;
 
 use core\event\role_assigned;
 use FastRoute\RouteParser\Std;
+use external_function_parameters;
+use external_multiple_structure;
+use external_single_structure;
+use external_value;
 
 class helper
 {
@@ -408,4 +412,33 @@ class helper
         }
     }
 
+    /**
+     * Test what the get_courses webservice would return for a user
+     * @param int $userid
+     * @return array
+     */
+    public static function test_get_courses_ws($userid) {
+        global $DB;
+        $courses = [];
+        if ($userid) {
+            if (!$usercourses = enrol_get_users_courses($userid, ['onlyactive' => true])) {
+                \local_earlyalert\base::debug_to_console('no course');
+            }
+            $course_data = self::get_courses_in_acadyear_by_row($usercourses);
+            // Flatten the courses into a simple array of id and fullname
+            if (!empty($course_data['rows'])) {
+                foreach ($course_data['rows'] as $row) {
+                    foreach ($row['courses'] as $course) {
+                        $courses[] = [
+                            'id' => $course->id,
+                            'fullname' => $course->fullname
+                        ];
+                    }
+                }
+            }
+        }
+        return $courses;
+    }
+
 }
+

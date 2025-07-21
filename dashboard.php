@@ -84,6 +84,17 @@ if ($impersonate) {
 
 $course_data['teacher_user_id'] = $user_id;
 
+// Set is_selected property for the selected course
+if (!empty($course_data['rows']) && $course_id) {
+    foreach ($course_data['rows'] as &$row) {
+        foreach ($row['courses'] as &$course) {
+            $course->is_selected = ($course->id == $course_id);
+        }
+    }
+    unset($row); // break reference
+    unset($course);
+}
+
 if ($teacher || $is_impersonating) {
     $course_data_for_grades = [];
     // Prepare course data fro grades
@@ -100,8 +111,11 @@ if ($teacher || $is_impersonating) {
     $course_data_for_display = [];
     foreach ($course_data_for_grades as $c) {
         $course_data_for_display[$c->id] = $c->fullname;
+
     }
 }
+
+
 
 echo base::page(
     new moodle_url('/local/earlyalert/dashboard.php'),
@@ -117,6 +131,5 @@ $event->trigger();
 
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_earlyalert/course_cards', $course_data);
-
 echo $OUTPUT->footer();
 
