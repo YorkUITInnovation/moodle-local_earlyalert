@@ -679,12 +679,11 @@ function get_users() {
     selectCourseBox.init('#course-search', 'earlyalert_get_courses', user_id, "Select a course");
     let search = document.getElementById('search');
     let courseSearch = document.getElementById('course-search');
-
+    let userId = search ? search.value : user_id; // fallback to logged-in user
 
     // On course change, reload page with user_id and course_id
     courseSearch.addEventListener('change', function (event) {
         const courseId = courseSearch.value;
-        const userId = search.value;
         if (courseId) {
             window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + user_id + '&course_id=' + courseId;
         }
