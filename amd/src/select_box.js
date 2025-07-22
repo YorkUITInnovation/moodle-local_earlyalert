@@ -10,8 +10,7 @@ const selectBox = {
         const searchInput = document.createElement('input');
         searchInput.type = 'text';
         searchInput.placeholder = placeholder;
-        // Add some margin-bottom to the select element
-        selectElement.style.marginBottom = '10px';
+
         // Add class form-control to the search input
         searchInput.classList.add('form-control');
         searchInput.style.display = 'none'; // Initially hide the search input
@@ -27,7 +26,7 @@ const selectBox = {
         opt.value = '';
         opt.textContent = placeholder;
         searchInput.addEventListener('input', function () {
-            const searchTerm = searchInput.value;
+            const searchTerm = searchInput.value || "";
             if (searchTerm.length < 3) return; // Minimum 3 characters to search
 
             ajax.call([{

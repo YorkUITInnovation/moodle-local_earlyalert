@@ -9,3 +9,10 @@
     padding-right: 20px;
 }
 
+#course-search {
+    width: max-content;
+}
+
+#search {
+    margin-bottom: 10px;
+}
