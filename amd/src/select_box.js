@@ -27,7 +27,7 @@ const selectBox = {
         opt.value = '';
         opt.textContent = placeholder;
         searchInput.addEventListener('input', function () {
-            const searchTerm = searchInput.value;
+            const searchTerm = searchInput.value || "";
             if (searchTerm.length < 3) return; // Minimum 3 characters to search
 
             ajax.call([{
