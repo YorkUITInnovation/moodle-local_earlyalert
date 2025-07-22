@@ -10,8 +10,7 @@ const selectBox = {
         const searchInput = document.createElement('input');
         searchInput.type = 'text';
         searchInput.placeholder = placeholder;
-        // Add some margin-bottom to the select element
-        selectElement.style.marginBottom = '10px';
+
         // Add class form-control to the search input
         searchInput.classList.add('form-control');
         searchInput.style.display = 'none'; // Initially hide the search input
