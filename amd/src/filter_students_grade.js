@@ -318,9 +318,8 @@ function check_allnone_listener(selected_students) {
     const customMessageTextarea = document.getElementById('early-alert-custom-message');
     const customMessagePreview = document.getElementById('custom-message-preview');
 
-    // The Bootstrap 5 accordion handles the toggle automatically through data attributes,
-    // so we only need to handle the text preview and template updates
-    if (customMessageTextarea) {
+    // Update the preview text and trigger template updates when typing
+    if (customMessageTextarea && customMessagePreview) {
         customMessageTextarea.addEventListener('input', function() {
             // Update the preview text
             const message = customMessageTextarea.value.trim();
@@ -494,7 +493,7 @@ function setup_preview_buttons(templateCache) {
         };
 
         // console.log("passing these params to adduserinfo:", params);
-        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);         
+        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
 
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
@@ -849,3 +848,5 @@ function addUserInfo(emailText, params) {
     }
     return emailText;
 }
+
+
