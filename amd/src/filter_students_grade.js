@@ -319,11 +319,11 @@ function setup_preview_buttons(templateCache) {
 
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
-    // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-    //console.log("template cache:", templateCache);
-    // store ALL the student data and template cache etc when its processed
+    // Get the custom message if entered
+    const customMessage = document.getElementById('early-alert-custom-message').value;
+    // Store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
-    //console.log('Setting up previews');
+
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     preview_buttons.forEach(function (button) {
         let record_data = {};
@@ -420,7 +420,8 @@ function setup_preview_buttons(templateCache) {
             assignmenttitle: templateCache.get('assignment_title'),
             coursename: templateCache.get('course_name'),
             customgrade: selected_grade ? selected_grade : 'D+',
-            defaultgrade: "D+"
+            defaultgrade: "D+",
+            custommessage: customMessage
         };
 
         // console.log("passing these params to adduserinfo:", params);
@@ -463,8 +464,8 @@ function setup_preview_emails_with_titles(templateCache) {
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
-    // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-    //console.log("template cache:", templateCache);
+    // Get the custom message if entered
+    const customMessage = document.getElementById('early-alert-custom-message').value;
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
     preview_buttons.forEach(function (button) {
@@ -559,7 +560,8 @@ function setup_preview_emails_with_titles(templateCache) {
             assignmenttitle: templateCache.get('assignment_title'),
             coursename: templateCache.get('course_name'),
             customgrade: selected_grade ? selected_grade : 'D+',
-            defaultgrade: "D+"
+            defaultgrade: "D+",
+            custommessage: customMessage
         };
         //console.log("passing these params to adduserinfo:", params);
         var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
@@ -722,7 +724,8 @@ function addUserInfo(emailText, params) {
         '[usergrade]',
         '[grade]',
         '[coursetitle]',
-        '[assignmenttitle]'
+        '[assignmenttitle]',
+        '[custommessage]'
     ];
 
     // Build replacement info
@@ -760,6 +763,11 @@ function addUserInfo(emailText, params) {
                     // assignmenttitle action
                     let assignmentTitleText = params.assignmenttitle || '{ASSIGNMENT TITLE NOT FOUND}';
                     uniqueMatches[i] = assignmentTitleText;
+                    break;
+                case 6:
+                    // custommessage action
+                    let customMessageText = params.custommessage || '';
+                    uniqueMatches[i] = customMessageText;
                     break;
             }
         }
