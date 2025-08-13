@@ -313,6 +313,75 @@ function check_allnone_listener(selected_students) {
         });
         student_ids_selected.value = JSON.stringify(selected_students);
     });
+
+    // Add event listener for custom message changes
+    const customMessageTextarea = document.getElementById('early-alert-custom-message');
+    const customMessagePreview = document.getElementById('custom-message-preview');
+
+    // The Bootstrap 5 accordion handles the toggle automatically through data attributes,
+    // so we only need to handle the text preview and template updates
+    if (customMessageTextarea) {
+        customMessageTextarea.addEventListener('input', function() {
+            // Update the preview text
+            const message = customMessageTextarea.value.trim();
+            customMessagePreview.textContent = message ? `: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"` : '';
+
+            // Get the current template cache
+            const alert_type = document.getElementById('early-alert-alert-type').value;
+
+            // Re-process all templates with the new custom message
+            if (alert_type === 'assign') {
+                // For assignment alert type
+                const assignmentTitle = document.getElementById('early-alert-assignment-title').value || '';
+                const templateCache = buildTemplateCache();
+                templateCache.set('assignment_title', assignmentTitle);
+                setup_preview_emails_with_titles(templateCache);
+            } else {
+                // For other alert types
+                const templateCache = buildTemplateCache();
+                setup_preview_buttons(templateCache);
+            }
+        });
+    }
+}
+
+// Helper function to rebuild the template cache
+function buildTemplateCache() {
+    const cachedArrayElement = document.getElementById('early-alert-template-cache');
+    const cachedArray = JSON.parse(cachedArrayElement.value);
+    const course_name = document.getElementById('early_alert_course_name').value;
+
+    var finalCache = new Map();
+    finalCache.set('course_name', course_name);
+
+    // We need to get the templates again
+    ajax.call([{
+        methodname: 'earlyalert_course_student_templates',
+        args: {
+            "teacher_user_id": document.getElementById('early-alert-teacher-user-id').value,
+            "id": document.getElementById('early_alert_filter_course_id').value,
+            "alert_type": document.getElementById('early-alert-alert-type').value
+        }
+    }])[0].then(templates_response => {
+        templates_response.forEach(result => {
+            if (typeof result === 'object') {
+                if (cachedArray.includes(result.templateKey)) {
+                    let finalMessage = {
+                        subject: result.subject,
+                        message: result.message,
+                        templateid: result.templateid,
+                        revision_id: result.revision_id,
+                        course_id: result.course_id,
+                        instructor_id: result.instructor_id,
+                        triggered_from_user_id: result.triggered_from_user_id,
+                    };
+                    finalCache.set(result.templateKey, finalMessage);
+                }
+            }
+        });
+    });
+
+    return finalCache;
 }
 
 function setup_preview_buttons(templateCache) {

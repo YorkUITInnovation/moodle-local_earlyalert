@@ -16,3 +16,74 @@
 #search {
     margin-bottom: 10px;
 }
+
+/* Add custom styles for the early alert pages */
+.early-alert-student-checkbox {
+    width: 1rem;
+    height: 1rem;
+}
+
+.early-alert-checkall-student-checkbox {
+    width: 1rem;
+    height: 1rem;
+}
+
+.student-lookup-table .student-course-name {
+    font-weight: bold;
+}
+
+.student-lookup-table td.student-course-table-cell,
+.student-lookup-table td.student-grade-table-cell {
+    width: 150px;
+}
+
+.student-lookup-table .active-row {
+    background-color: #e0f7fa;
+}
+
+.custom-message-container {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.custom-message-header {
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+    transition: background-color 0.2s;
+}
+
+.custom-message-header:hover {
+    background-color: #e9ecef;
+}
+
+.custom-message-icon {
+    margin-right: 10px;
+    font-weight: bold;
+    transition: transform 0.2s;
+}
+
+.custom-message-icon.expanded {
+    transform: rotate(45deg);
+}
+
+.custom-message-preview {
+    margin-left: 15px;
+    color: #6c757d;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50%;
+}
+
+.custom-message-body {
+    padding: 15px;
+    border-top: 1px solid #ddd;
+}
+
