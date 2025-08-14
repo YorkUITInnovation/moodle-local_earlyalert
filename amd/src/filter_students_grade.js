@@ -12,7 +12,54 @@ import selectCourseBox from 'local_earlyalert/select_course_box';
 export const init = () => {
     alert_type_button();
     get_users();
+    // Set up the custom message listener globally - not tied to any specific alert type
+    setup_custom_message_listener();
 };
+
+/**
+ * Sets up event listeners for the custom message textarea
+ * Updates the preview text and refreshes templates when the custom message changes
+ */
+function setup_custom_message_listener() {
+    const customMessageTextarea = document.getElementById('early-alert-custom-message');
+    const customMessagePreview = document.getElementById('custom-message-preview');
+
+    // Update the preview text when typing in the custom message textarea
+    if (customMessageTextarea && customMessagePreview) {
+        // Clear any existing event listeners by cloning and replacing
+        const newTextarea = customMessageTextarea.cloneNode(true);
+        customMessageTextarea.parentNode.replaceChild(newTextarea, customMessageTextarea);
+
+        // Add event listeners to the new textarea
+        newTextarea.addEventListener('input', function() {
+            // Just update the preview text without triggering template updates
+            const message = newTextarea.value.trim();
+            customMessagePreview.textContent = message ? `: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"` : '';
+        });
+
+        // Only update templates when focus is lost (reduces processing during typing)
+        newTextarea.addEventListener('blur', function() {
+            // Get the current template cache and re-process templates
+            const alert_type = document.getElementById('early-alert-alert-type').value;
+
+            if (alert_type === 'assign') {
+                // For assignment alert type
+                const assignmentTitle = document.getElementById('early-alert-assignment-title').value || '';
+                const templateCache = build_template_cache();
+                templateCache.set('assignment_title', assignmentTitle);
+                setup_preview_emails_with_titles(templateCache);
+            } else {
+                // For other alert types
+                const templateCache = build_template_cache();
+                setup_preview_buttons(templateCache);
+            }
+        });
+
+        // Trigger input event to update preview on initialization
+        const event = new Event('input');
+        newTextarea.dispatchEvent(event);
+    }
+}
 
 function alert_type_button() {
     // Get data-link when .early-alert-type-button link is clicked
@@ -333,9 +380,6 @@ function check_allnone_listener(selected_students) {
         });
         student_ids_selected.value = JSON.stringify(selected_students);
     });
-
-    // Set up the custom message listener
-    setup_custom_message_listener();
 }
 
 /**
@@ -343,16 +387,21 @@ function check_allnone_listener(selected_students) {
  * @param {string} title - The assignment title to validate
  * @returns {boolean} - Whether the title is valid
  */
-function setup_custom_message_listener() {
-    const customMessageTextarea = document.getElementById('early-alert-custom-message');
-    const customMessagePreview = document.getElementById('custom-message-preview');
+function validateAssignmentTitle(title) {
+    const errorElement = document.getElementById('assignment-title-error');
+    const sendButtons = document.querySelectorAll('.early-alert-send-button');
+    const previewButtons = document.querySelectorAll('.early-alert-preview-button');
 
-    // Update the preview text when typing in the custom message textarea
-    if (customMessageTextarea && customMessagePreview) {
-        customMessageTextarea.addEventListener('input', function() {
-            // Just update the preview text without triggering template updates
-            const message = customMessageTextarea.value.trim();
-            customMessagePreview.textContent = message ? `: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"` : '';
+    if (!title) {
+        // Title is required - show error and disable buttons
+        if (errorElement) {
+            errorElement.style.display = 'block';
+        }
+
+        // Disable send and preview buttons
+        sendButtons.forEach(button => {
+            button.disabled = true;
+            button.title = 'Assignment title is required';
         });
 
         // Only update templates when focus is lost (reduces processing during typing)
@@ -889,5 +938,3 @@ function addUserInfo(emailText, params) {
     }
     return emailText;
 }
-
-
