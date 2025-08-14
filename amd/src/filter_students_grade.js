@@ -51,22 +51,38 @@ function filter_students_by_grade_select() {
 }
 
 function filter_students_by_assignment() {
-
-
-    // Get the s delected grade value from the dropdown
+    // Get the selected grade value from the dropdown
     const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
     const course_id = document.getElementById('early_alert_filter_course_id').value;
     const course_name = document.getElementById('early_alert_course_name').value;
     const alert_type = document.getElementById('early-alert-alert-type').value;
     const teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
-    // setup listener for drop down selection
+
+    // Setup listener for assignment title input
     const assignment_input = document.getElementById('early-alert-assignment-title');
-    assignment_input.addEventListener('focusout', function (evt) {
-        var assignment_title = document.getElementById('early-alert-assignment-title').value;
-        if (assignment_title) {
+
+    // Add an input event listener for real-time preview of the assignment title
+    assignment_input.addEventListener('input', function() {
+        const title = assignment_input.value.trim();
+        const assignmentPreview = document.getElementById('assignment-title-preview');
+        if (assignmentPreview) {
+            assignmentPreview.textContent = title ? `: "${title.substring(0, 50)}${title.length > 50 ? '...' : ''}"` : '';
+        }
+
+        // Validate the assignment title
+        validateAssignmentTitle(title);
+    });
+
+    // Only update the full preview on focus out to reduce processing
+    assignment_input.addEventListener('focusout', function(evt) {
+        var assignment_title = assignment_input.value.trim();
+
+        // Validate the assignment title
+        if (validateAssignmentTitle(assignment_title)) {
             setup_filter_students_by_grade(course_id, '9', course_name, alert_type, teacher_user_id, assignment_title);
         }
     });
+    validateAssignmentTitle(assignment_input.value.trim());
 }
 
 /**
@@ -323,8 +339,9 @@ function check_allnone_listener(selected_students) {
 }
 
 /**
- * Sets up event listeners for the custom message textarea
- * Updates the preview text and refreshes templates when the custom message changes
+ * Validates the assignment title and updates UI accordingly
+ * @param {string} title - The assignment title to validate
+ * @returns {boolean} - Whether the title is valid
  */
 function setup_custom_message_listener() {
     const customMessageTextarea = document.getElementById('early-alert-custom-message');
@@ -447,27 +464,39 @@ function setup_preview_buttons(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
+            // console.log('Course template key:', courseTemplateKey);
+            // console.log('Campus template key:', campusTemplateKey);
+            // console.log('Faculty template key:', facTemplateKey);
+            // console.log('Department template key:', deptTemplateKey);
+            //
+            // console.log('New Template cache:', templateCache);
+
             // templateCache is checked for the template key and if found the email subject and content are set
             if (templateCache.has(campusTemplateKey)) {
+                // console.log("department cache found:", templateCache.get(campusTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusTemplateKey).message;
                 templateObj = templateCache.get(campusTemplateKey);
             }
             else if (templateCache.has(facTemplateKey)) { // if campus template not found, check faculty template
                 if (templateCache.has(deptTemplateKey)) { // if faculty template not found but has department template use it
+                    // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                     templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                     templateEmailContent = templateCache.get(deptTemplateKey).message;
                     templateObj = templateCache.get(deptTemplateKey);
                 } else { // revert to faculty template
+                    // console.log("faculty cache found:", templateCache.get(facTemplateKey));
                     templateEmailSubject = templateCache.get(facTemplateKey).subject;
                     templateEmailContent = templateCache.get(facTemplateKey).message;
                     templateObj = templateCache.get(facTemplateKey);
                 }
             } else if (templateCache.has(deptTemplateKey)) { // if faculty template not found, check department template
+                // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                 templateEmailContent = templateCache.get(deptTemplateKey).message;
                 templateObj = templateCache.get(deptTemplateKey);
             } else if (templateCache.has(courseTemplateKey)) { // lastly check for course template
+                //console.log("course cache found:", templateCache.get(courseTemplateKey));
                 templateEmailSubject = templateCache.get(courseTemplateKey).subject;
                 templateEmailContent = templateCache.get(courseTemplateKey).message;
                 templateObj = templateCache.get(courseTemplateKey);
@@ -519,6 +548,7 @@ function setup_preview_buttons(templateCache) {
         // case where previews are just added to grade alert type and missed exam etc
         if (alert_type !== 'assign') {
             button.addEventListener('click', function () {
+                //console.log('Data sent to template from template cache:', record_data);
                 setup_preview_buttons_from_template(record_data);
             });
         }
@@ -588,25 +618,35 @@ function setup_preview_emails_with_titles(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
+            // console.log('PET Course template key:', courseTemplateKey);
+            // console.log('PET Campus template key:', campusTemplateKey);
+            // console.log('PET Faculty template key:', facTemplateKey);
+            // console.log('PET Department template key:', deptTemplateKey);
+
             if (templateCache.has(campusTemplateKey)) {
+                // console.log("department cache found:", templateCache.get(campusTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusTemplateKey).message;
                 templateObj = templateCache.get(campusTemplateKey);
             } else if (templateCache.has(facTemplateKey)) {
                 if (templateCache.has(deptTemplateKey)) {
+                    // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                     templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                     templateEmailContent = templateCache.get(deptTemplateKey).message;
                     templateObj = templateCache.get(deptTemplateKey);
                 } else {
+                    // console.log("faculty cache found:", templateCache.get(facTemplateKey));
                     templateEmailSubject = templateCache.get(facTemplateKey).subject;
                     templateEmailContent = templateCache.get(facTemplateKey).message;
                     templateObj = templateCache.get(facTemplateKey);
                 }
             } else if (templateCache.has(deptTemplateKey)) {
+                // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                 templateEmailContent = templateCache.get(deptTemplateKey).message;
                 templateObj = templateCache.get(deptTemplateKey);
             } else if (templateCache.has(courseTemplateKey)) {
+                //console.log("course cache found:", templateCache.get(courseTemplateKey));
                 templateEmailSubject = templateCache.get(courseTemplateKey).subject;
                 templateEmailContent = templateCache.get(courseTemplateKey).message;
                 templateObj = templateCache.get(courseTemplateKey);
@@ -849,4 +889,5 @@ function addUserInfo(emailText, params) {
     }
     return emailText;
 }
+
 

@@ -37,9 +37,12 @@
 
         {{#assign}}
             <p>{{#str}}assignment_instructions, local_earlyalert{{/str}}</p>
-            <b>{{#str}}assignment_title, local_earlyalert{{/str}}</b>
-            <input type="text" id="early-alert-assignment-title" class="form-control" style="width: 300px;"/>
-            <p> <span class="text-danger">{{#str}}assignment_title_required, local_earlyalert{{/str}}</span></p>
+            <b>{{#str}}assignment_title, local_earlyalert{{/str}}</b><span id="assignment-title-preview" class="text-muted font-italic"></span>
+            <input type="text" id="early-alert-assignment-title" class="form-control" style="width: 300px;"
+                placeholder="Enter the assignment title (required)" required/>
+            <p id="assignment-title-error" class="text-danger" style="display: none;">
+                {{#str}}assignment_title_required, local_earlyalert{{/str}}
+            </p>
 
             <!-- Custom message field for assign context -->
             <div class="mt-3">
