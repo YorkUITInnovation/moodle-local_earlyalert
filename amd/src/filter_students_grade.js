@@ -231,6 +231,10 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         }
                     });
                     finalCache.set('course_name', course_name);
+
+                    // Store the cache globally so we can access it later when the custom message changes
+                    window.currentTemplateCache = finalCache;
+
                     // case where assignment titles are taken from user input
                     if (alert_type === 'assign') // we have to setup the assignment title before previewing!
                     {
@@ -361,34 +365,21 @@ function build_template_cache() {
     const course_name = document.getElementById('early_alert_course_name').value;
     const customMessage = document.getElementById('early-alert-custom-message')?.value || '';
 
+    // Get existing templates from the main cache
     var finalCache = new Map();
+
+    // Add the essentials
     finalCache.set('course_name', course_name);
     finalCache.set('custom_message', customMessage);
 
-    // For immediate use, get templates from any existing ones already in the DOM
-    const templateButtons = document.querySelectorAll(".early-alert-preview-button");
-    if (templateButtons.length > 0) {
-        // If templates are already displayed, extract their data
-        templateButtons.forEach(button => {
-            const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
-            if (checkbox) {
-                const studentIdnumber = checkbox.getAttribute('data-student-idnumber');
-                const studentLang = checkbox.getAttribute('data-student-lang');
-                const courseId = checkbox.getAttribute('data-courseid');
-                const studentCampus = checkbox.getAttribute('data-student-campus');
-                const studentFaculty = checkbox.getAttribute('data-student-faculty');
-                const studentMajor = checkbox.getAttribute('data-student-major');
+    // We need to preserve all existing templates in the cache
+    const currentCache = window.currentTemplateCache || {};
 
-                // Try to find templates for various key combinations
-                const keys = [
-                    `course_${courseId}_${studentLang}_${studentIdnumber}`,
-                    `${studentCampus}_${studentLang}_${studentIdnumber}`,
-                    `${studentCampus}_${studentFaculty}_${studentLang}_${studentIdnumber}`,
-                    `${studentCampus}_${studentFaculty}_${studentMajor}_${studentLang}_${studentIdnumber}`
-                ];
-
-                // We're not adding any templates here, just keeping the map structure
-                // The actual templates will be fetched when needed
+    // If we have a current cache with templates, use that as our base
+    if (currentCache && typeof currentCache.forEach === 'function') {
+        currentCache.forEach((value, key) => {
+            if (key !== 'course_name' && key !== 'custom_message' && key !== 'assignment_title') {
+                finalCache.set(key, value);
             }
         });
     }
