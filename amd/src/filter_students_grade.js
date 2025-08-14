@@ -453,7 +453,28 @@ function build_template_cache() {
     const cachedArrayElement = document.getElementById('early-alert-template-cache');
     const cachedArray = JSON.parse(cachedArrayElement.value);
     const course_name = document.getElementById('early_alert_course_name').value;
-    const customMessage = document.getElementById('early-alert-custom-message')?.value || '';
+
+    // Fix: Get custom message from visible textarea instead of by ID which might select a hidden one
+    const alert_type = document.getElementById('early-alert-alert-type').value;
+    let customMessage = '';
+
+    // Find all custom message textareas and get the value from the visible one
+    const customMessageTextareas = document.querySelectorAll('.early-alert-custom-message');
+    if (customMessageTextareas.length) {
+        // Use the first one by default, or find the visible one if there are multiple
+        customMessage = customMessageTextareas[0].value || '';
+
+        // Try to find the visible textarea based on the current alert type
+        if (customMessageTextareas.length > 1) {
+            // If there's a visible textarea, use its value
+            for (let i = 0; i < customMessageTextareas.length; i++) {
+                if (customMessageTextareas[i].offsetParent !== null) {
+                    customMessage = customMessageTextareas[i].value || '';
+                    break;
+                }
+            }
+        }
+    }
 
     // Get existing templates from the main cache
     var finalCache = new Map();
@@ -478,11 +499,12 @@ function build_template_cache() {
 }
 
 function setup_preview_buttons(templateCache) {
-
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
-    // Get the custom message if entered
-    const custom_message = document.getElementById('early-alert-custom-message').value;
+
+    // Get the custom message from the template cache
+    const custom_message = templateCache.get('custom_message') || '';
+
     // Store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
 
