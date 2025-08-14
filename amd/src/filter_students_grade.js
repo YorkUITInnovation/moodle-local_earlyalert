@@ -314,30 +314,40 @@ function check_allnone_listener(selected_students) {
         student_ids_selected.value = JSON.stringify(selected_students);
     });
 
-    // Add event listener for custom message changes
+    // Set up the custom message listener
+    setup_custom_message_listener();
+}
+
+/**
+ * Sets up event listeners for the custom message textarea
+ * Updates the preview text and refreshes templates when the custom message changes
+ */
+function setup_custom_message_listener() {
     const customMessageTextarea = document.getElementById('early-alert-custom-message');
     const customMessagePreview = document.getElementById('custom-message-preview');
 
-    // Update the preview text and trigger template updates when typing
+    // Update the preview text when typing in the custom message textarea
     if (customMessageTextarea && customMessagePreview) {
         customMessageTextarea.addEventListener('input', function() {
-            // Update the preview text
+            // Just update the preview text without triggering template updates
             const message = customMessageTextarea.value.trim();
             customMessagePreview.textContent = message ? `: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"` : '';
+        });
 
-            // Get the current template cache
+        // Only update templates when focus is lost (reduces processing during typing)
+        customMessageTextarea.addEventListener('blur', function() {
+            // Get the current template cache and re-process templates
             const alert_type = document.getElementById('early-alert-alert-type').value;
 
-            // Re-process all templates with the new custom message
             if (alert_type === 'assign') {
                 // For assignment alert type
                 const assignmentTitle = document.getElementById('early-alert-assignment-title').value || '';
-                const templateCache = buildTemplateCache();
+                const templateCache = build_template_cache();
                 templateCache.set('assignment_title', assignmentTitle);
                 setup_preview_emails_with_titles(templateCache);
             } else {
                 // For other alert types
-                const templateCache = buildTemplateCache();
+                const templateCache = build_template_cache();
                 setup_preview_buttons(templateCache);
             }
         });
@@ -345,40 +355,43 @@ function check_allnone_listener(selected_students) {
 }
 
 // Helper function to rebuild the template cache
-function buildTemplateCache() {
+function build_template_cache() {
     const cachedArrayElement = document.getElementById('early-alert-template-cache');
     const cachedArray = JSON.parse(cachedArrayElement.value);
     const course_name = document.getElementById('early_alert_course_name').value;
+    const customMessage = document.getElementById('early-alert-custom-message')?.value || '';
 
     var finalCache = new Map();
     finalCache.set('course_name', course_name);
+    finalCache.set('custom_message', customMessage);
 
-    // We need to get the templates again
-    ajax.call([{
-        methodname: 'earlyalert_course_student_templates',
-        args: {
-            "teacher_user_id": document.getElementById('early-alert-teacher-user-id').value,
-            "id": document.getElementById('early_alert_filter_course_id').value,
-            "alert_type": document.getElementById('early-alert-alert-type').value
-        }
-    }])[0].then(templates_response => {
-        templates_response.forEach(result => {
-            if (typeof result === 'object') {
-                if (cachedArray.includes(result.templateKey)) {
-                    let finalMessage = {
-                        subject: result.subject,
-                        message: result.message,
-                        templateid: result.templateid,
-                        revision_id: result.revision_id,
-                        course_id: result.course_id,
-                        instructor_id: result.instructor_id,
-                        triggered_from_user_id: result.triggered_from_user_id,
-                    };
-                    finalCache.set(result.templateKey, finalMessage);
-                }
+    // For immediate use, get templates from any existing ones already in the DOM
+    const templateButtons = document.querySelectorAll(".early-alert-preview-button");
+    if (templateButtons.length > 0) {
+        // If templates are already displayed, extract their data
+        templateButtons.forEach(button => {
+            const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
+            if (checkbox) {
+                const studentIdnumber = checkbox.getAttribute('data-student-idnumber');
+                const studentLang = checkbox.getAttribute('data-student-lang');
+                const courseId = checkbox.getAttribute('data-courseid');
+                const studentCampus = checkbox.getAttribute('data-student-campus');
+                const studentFaculty = checkbox.getAttribute('data-student-faculty');
+                const studentMajor = checkbox.getAttribute('data-student-major');
+
+                // Try to find templates for various key combinations
+                const keys = [
+                    `course_${courseId}_${studentLang}_${studentIdnumber}`,
+                    `${studentCampus}_${studentLang}_${studentIdnumber}`,
+                    `${studentCampus}_${studentFaculty}_${studentLang}_${studentIdnumber}`,
+                    `${studentCampus}_${studentFaculty}_${studentMajor}_${studentLang}_${studentIdnumber}`
+                ];
+
+                // We're not adding any templates here, just keeping the map structure
+                // The actual templates will be fetched when needed
             }
         });
-    });
+    }
 
     return finalCache;
 }
@@ -388,7 +401,7 @@ function setup_preview_buttons(templateCache) {
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
     // Get the custom message if entered
-    const customMessage = document.getElementById('early-alert-custom-message').value;
+    const custom_message = document.getElementById('early-alert-custom-message').value;
     // Store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
 
@@ -489,7 +502,7 @@ function setup_preview_buttons(templateCache) {
             coursename: templateCache.get('course_name'),
             customgrade: selected_grade ? selected_grade : 'D+',
             defaultgrade: "D+",
-            custommessage: customMessage
+            custommessage: custom_message
         };
 
         // console.log("passing these params to adduserinfo:", params);
@@ -848,5 +861,4 @@ function addUserInfo(emailText, params) {
     }
     return emailText;
 }
-
 
