@@ -405,8 +405,16 @@ function setup_preview_buttons(templateCache) {
     // Store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
 
+    // Remove any existing click event listeners from preview buttons first
     const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
-    preview_buttons.forEach(function (button) {
+    preview_buttons.forEach(button => {
+        const clone = button.cloneNode(true);
+        button.parentNode.replaceChild(clone, button);
+    });
+
+    // Now add new event listeners
+    const fresh_buttons = document.querySelectorAll(".early-alert-preview-button");
+    fresh_buttons.forEach(function (button) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
@@ -448,39 +456,27 @@ function setup_preview_buttons(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            // console.log('Course template key:', courseTemplateKey);
-            // console.log('Campus template key:', campusTemplateKey);
-            // console.log('Faculty template key:', facTemplateKey);
-            // console.log('Department template key:', deptTemplateKey);
-            //
-            // console.log('New Template cache:', templateCache);
-
             // templateCache is checked for the template key and if found the email subject and content are set
             if (templateCache.has(campusTemplateKey)) {
-                // console.log("department cache found:", templateCache.get(campusTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusTemplateKey).message;
                 templateObj = templateCache.get(campusTemplateKey);
             }
             else if (templateCache.has(facTemplateKey)) { // if campus template not found, check faculty template
                 if (templateCache.has(deptTemplateKey)) { // if faculty template not found but has department template use it
-                    // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                     templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                     templateEmailContent = templateCache.get(deptTemplateKey).message;
                     templateObj = templateCache.get(deptTemplateKey);
                 } else { // revert to faculty template
-                    // console.log("faculty cache found:", templateCache.get(facTemplateKey));
                     templateEmailSubject = templateCache.get(facTemplateKey).subject;
                     templateEmailContent = templateCache.get(facTemplateKey).message;
                     templateObj = templateCache.get(facTemplateKey);
                 }
             } else if (templateCache.has(deptTemplateKey)) { // if faculty template not found, check department template
-                // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                 templateEmailContent = templateCache.get(deptTemplateKey).message;
                 templateObj = templateCache.get(deptTemplateKey);
             } else if (templateCache.has(courseTemplateKey)) { // lastly check for course template
-                //console.log("course cache found:", templateCache.get(courseTemplateKey));
                 templateEmailSubject = templateCache.get(courseTemplateKey).subject;
                 templateEmailContent = templateCache.get(courseTemplateKey).message;
                 templateObj = templateCache.get(courseTemplateKey);
@@ -490,23 +486,28 @@ function setup_preview_buttons(templateCache) {
             }
 
         } else {
-            // console.log("couldn't find checkbox :/");
+            console.log("couldn't find checkbox");
         }
 
-        var assignment_title = '';
+        var assignment_title = templateCache.get('assignment_title') || '';
 
         var params = {
             studentname: student_name_arr,
             assignmentgrade: assigngrade,
-            assignmenttitle: templateCache.get('assignment_title'),
+            assignmenttitle: assignment_title,
             coursename: templateCache.get('course_name'),
             customgrade: selected_grade ? selected_grade : 'D+',
             defaultgrade: "D+",
             custommessage: custom_message
         };
 
-        // console.log("passing these params to adduserinfo:", params);
+        // Apply the replacements
         var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
+
+        // Double-check that [custommessage] is definitely replaced
+        if (changedTemplateEmailContent.includes('[custommessage]')) {
+            changedTemplateEmailContent = changedTemplateEmailContent.replace('[custommessage]', custom_message || '');
+        }
 
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
@@ -527,13 +528,11 @@ function setup_preview_buttons(templateCache) {
         // case where previews are just added to grade alert type and missed exam etc
         if (alert_type !== 'assign') {
             button.addEventListener('click', function () {
-                //console.log('Data sent to template from template cache:', record_data);
                 setup_preview_buttons_from_template(record_data);
             });
         }
         // add record to student_template_cache_array to have data to submit / email
         student_template_cache_array.push(record_data);
-
     });
 
     // once we have all the data we can setup the emails to submit with the template cache data and student ids BUT we have to manage and select the users if they are checked/unchceked
@@ -541,16 +540,23 @@ function setup_preview_buttons(templateCache) {
 }
 
 function setup_preview_emails_with_titles(templateCache) {
-    // console.log("template cache = ", templateCache);
-    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
     // Get the custom message if entered
     const customMessage = document.getElementById('early-alert-custom-message').value;
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
-    preview_buttons.forEach(function (button) {
-        button.removeEventListener('click', null);
+
+    // Remove any existing click event listeners from preview buttons first
+    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
+    preview_buttons.forEach(button => {
+        const clone = button.cloneNode(true);
+        button.parentNode.replaceChild(clone, button);
+    });
+
+    // Now add new event listeners
+    const fresh_buttons = document.querySelectorAll(".early-alert-preview-button");
+    fresh_buttons.forEach(function (button) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
@@ -564,7 +570,6 @@ function setup_preview_emails_with_titles(templateCache) {
 
         let templateObj = {};
         if (checkbox) {
-
             // now, access the parent <tr> element (the table row)
             const table_row = checkbox.parentNode;
             // extract the student name from the second <td> element within the table row
@@ -592,35 +597,25 @@ function setup_preview_emails_with_titles(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            // console.log('PET Course template key:', courseTemplateKey);
-            // console.log('PET Campus template key:', campusTemplateKey);
-            // console.log('PET Faculty template key:', facTemplateKey);
-            // console.log('PET Department template key:', deptTemplateKey);
-
             if (templateCache.has(campusTemplateKey)) {
-                // console.log("department cache found:", templateCache.get(campusTemplateKey));
                 templateEmailSubject = templateCache.get(campusTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusTemplateKey).message;
                 templateObj = templateCache.get(campusTemplateKey);
             } else if (templateCache.has(facTemplateKey)) {
                 if (templateCache.has(deptTemplateKey)) {
-                    // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                     templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                     templateEmailContent = templateCache.get(deptTemplateKey).message;
                     templateObj = templateCache.get(deptTemplateKey);
                 } else {
-                    // console.log("faculty cache found:", templateCache.get(facTemplateKey));
                     templateEmailSubject = templateCache.get(facTemplateKey).subject;
                     templateEmailContent = templateCache.get(facTemplateKey).message;
                     templateObj = templateCache.get(facTemplateKey);
                 }
             } else if (templateCache.has(deptTemplateKey)) {
-                // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
                 templateEmailSubject = templateCache.get(deptTemplateKey).subject;
                 templateEmailContent = templateCache.get(deptTemplateKey).message;
                 templateObj = templateCache.get(deptTemplateKey);
             } else if (templateCache.has(courseTemplateKey)) {
-                //console.log("course cache found:", templateCache.get(courseTemplateKey));
                 templateEmailSubject = templateCache.get(courseTemplateKey).subject;
                 templateEmailContent = templateCache.get(courseTemplateKey).message;
                 templateObj = templateCache.get(courseTemplateKey);
@@ -628,25 +623,27 @@ function setup_preview_emails_with_titles(templateCache) {
                 templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';
             }
-
-        } else {
-            // console.log("couldn't find checkbox :/");
         }
 
-        var assignment_title = '';
+        var assignment_title = templateCache.get('assignment_title') || '';
 
         var params = {
             studentname: student_name_arr,
             assignmentgrade: assigngrade,
-            assignmenttitle: templateCache.get('assignment_title'),
+            assignmenttitle: assignment_title,
             coursename: templateCache.get('course_name'),
             customgrade: selected_grade ? selected_grade : 'D+',
             defaultgrade: "D+",
             custommessage: customMessage
         };
-        //console.log("passing these params to adduserinfo:", params);
+
+        // Apply the replacements
         var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
-        // console.log("template email content post-addUserInfo:", templateEmailContent);
+
+        // Double-check that [custommessage] is definitely replaced
+        if (changedTemplateEmailContent.includes('[custommessage]')) {
+            changedTemplateEmailContent = changedTemplateEmailContent.replace('[custommessage]', customMessage || '');
+        }
 
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
@@ -668,8 +665,8 @@ function setup_preview_emails_with_titles(templateCache) {
             setup_preview_buttons_from_template(record_data);
         });
         student_template_cache_array.push(record_data);
-
     });
+
     setup_send_emails(student_template_cache_array);
 }
 
