@@ -21,20 +21,35 @@ export const init = () => {
  * Updates the preview text and refreshes templates when the custom message changes
  */
 function setup_custom_message_listener() {
-    const customMessageTextarea = document.getElementById('early-alert-custom-message');
-    const customMessagePreview = document.getElementById('custom-message-preview');
+    // Use class instead of ID to handle all custom message textareas
+    const customMessageTextareas = document.querySelectorAll('.early-alert-custom-message');
+    const customMessagePreviews = document.querySelectorAll('#custom-message-preview');
 
-    // Update the preview text when typing in the custom message textarea
-    if (customMessageTextarea && customMessagePreview) {
+    if (!customMessageTextareas.length || !customMessagePreviews.length) {
+        return; // No elements found, exit early
+    }
+
+    // Find the visible textarea based on the current alert type
+    const alertType = document.getElementById('early-alert-alert-type')?.value;
+
+    // Process each textarea to ensure all instances get event listeners
+    customMessageTextareas.forEach((textarea, index) => {
         // Clear any existing event listeners by cloning and replacing
-        const newTextarea = customMessageTextarea.cloneNode(true);
-        customMessageTextarea.parentNode.replaceChild(newTextarea, customMessageTextarea);
+        const newTextarea = textarea.cloneNode(true);
+        textarea.parentNode.replaceChild(newTextarea, textarea);
+
+        // Find the corresponding preview element (might be same index or need to search)
+        const previewElement = customMessagePreviews[index] || customMessagePreviews[0];
+
+        if (!previewElement) {
+            return; // Skip if no preview element found
+        }
 
         // Add event listeners to the new textarea
         newTextarea.addEventListener('input', function() {
             // Just update the preview text without triggering template updates
             const message = newTextarea.value.trim();
-            customMessagePreview.textContent = message ? `: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"` : '';
+            previewElement.textContent = message ? `: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"` : '';
         });
 
         // Only update templates when focus is lost (reduces processing during typing)
@@ -58,7 +73,7 @@ function setup_custom_message_listener() {
         // Trigger input event to update preview on initialization
         const event = new Event('input');
         newTextarea.dispatchEvent(event);
-    }
+    });
 }
 
 function alert_type_button() {
@@ -404,23 +419,32 @@ function validateAssignmentTitle(title) {
             button.title = 'Assignment title is required';
         });
 
-        // Only update templates when focus is lost (reduces processing during typing)
-        customMessageTextarea.addEventListener('blur', function() {
-            // Get the current template cache and re-process templates
-            const alert_type = document.getElementById('early-alert-alert-type').value;
-
-            if (alert_type === 'assign') {
-                // For assignment alert type
-                const assignmentTitle = document.getElementById('early-alert-assignment-title').value || '';
-                const templateCache = build_template_cache();
-                templateCache.set('assignment_title', assignmentTitle);
-                setup_preview_emails_with_titles(templateCache);
-            } else {
-                // For other alert types
-                const templateCache = build_template_cache();
-                setup_preview_buttons(templateCache);
-            }
+        previewButtons.forEach(button => {
+            button.disabled = true;
+            button.classList.add('disabled');
+            button.title = 'Assignment title is required';
         });
+
+        return false;
+    } else {
+        // Title is valid - hide error and enable buttons
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+
+        // Enable send and preview buttons
+        sendButtons.forEach(button => {
+            button.disabled = false;
+            button.title = '';
+        });
+
+        previewButtons.forEach(button => {
+            button.disabled = false;
+            button.classList.remove('disabled');
+            button.title = '';
+        });
+
+        return true;
     }
 }
 
