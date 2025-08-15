@@ -658,8 +658,10 @@ function setup_preview_buttons(templateCache) {
 function setup_preview_emails_with_titles(templateCache) {
     // Get the early-alert-alert-type value
     const alert_type = document.getElementById('early-alert-alert-type').value;
-    // Get the custom message if entered
-    const customMessage = document.getElementById('early-alert-custom-message').value;
+
+    // Get the custom message from the template cache instead of directly from DOM
+    const customMessage = templateCache.get('custom_message') || '';
+
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
 
