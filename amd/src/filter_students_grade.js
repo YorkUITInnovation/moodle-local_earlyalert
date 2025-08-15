@@ -26,11 +26,12 @@ function setup_custom_message_listener() {
     const customMessagePreviews = document.querySelectorAll('#custom-message-preview');
 
     if (!customMessageTextareas.length || !customMessagePreviews.length) {
+        console.log('No custom message textareas or previews found');
         return; // No elements found, exit early
     }
 
-    // Find the visible textarea based on the current alert type
-    const alertType = document.getElementById('early-alert-alert-type')?.value;
+    console.log('Found custom message textareas:', customMessageTextareas.length);
+    console.log('Found custom message previews:', customMessagePreviews.length);
 
     // Process each textarea to ensure all instances get event listeners
     customMessageTextareas.forEach((textarea, index) => {
@@ -42,28 +43,42 @@ function setup_custom_message_listener() {
         const previewElement = customMessagePreviews[index] || customMessagePreviews[0];
 
         if (!previewElement) {
+            console.log('No preview element found for textarea at index', index);
             return; // Skip if no preview element found
         }
 
         // Add event listeners to the new textarea
         newTextarea.addEventListener('input', function() {
-            // Just update the preview text without triggering template updates
+            // Update the preview text without triggering template updates
             const message = newTextarea.value.trim();
+            console.log('Custom message input event:', message);
+
+            // Update the preview span
             previewElement.textContent = message ? `: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"` : '';
+
+            // Update the global template cache immediately
+            if (window.currentTemplateCache) {
+                window.currentTemplateCache.set('custom_message', message);
+                console.log('Updated template cache with custom message:', message);
+            }
         });
 
         // Only update templates when focus is lost (reduces processing during typing)
         newTextarea.addEventListener('blur', function() {
             // Get the current template cache and re-process templates
+            const message = newTextarea.value.trim();
+            console.log('Custom message blur event:', message);
             const alert_type = document.getElementById('early-alert-alert-type').value;
 
             if (alert_type === 'assign') {
+                console.log('Processing assignment alert type with title:', document.getElementById('early-alert-assignment-title').value);
                 // For assignment alert type
                 const assignmentTitle = document.getElementById('early-alert-assignment-title').value || '';
                 const templateCache = build_template_cache();
                 templateCache.set('assignment_title', assignmentTitle);
                 setup_preview_emails_with_titles(templateCache);
             } else {
+                console.log('Processing other alert types');
                 // For other alert types
                 const templateCache = build_template_cache();
                 setup_preview_buttons(templateCache);
