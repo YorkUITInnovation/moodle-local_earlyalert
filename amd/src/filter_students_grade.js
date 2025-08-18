@@ -355,6 +355,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         // Insert the rendered template into the target element
                         document.getElementById('early-alert-student-results').innerHTML = html;
                         Templates.runTemplateJS(js);
+                        // (Re)attach custom message listeners now that the textarea(s) exist in DOM
+                        setup_custom_message_listener();
                         // set default grade letter selected
                         if (alert_type === 'grade') {
                             let grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
@@ -389,6 +391,10 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                             }
                         });
                         finalCache.set('course_name', course_name);
+                        // Ensure custom_message key exists even before user types so downstream lookups never get undefined
+                        if (!finalCache.has('custom_message')) {
+                            finalCache.set('custom_message', '');
+                        }
 
                         // Store the cache globally so we can access it later when the custom message changes
                         window.currentTemplateCache = finalCache;
@@ -1003,3 +1009,4 @@ function addUserInfo(emailText, params) {
     }
     return emailText;
 }
+
