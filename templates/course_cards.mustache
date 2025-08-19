@@ -64,58 +64,64 @@
                             <h6>{{fullname}}</h6>
                         </div>
                         <div class="card-body">
-                            <div class="alert alert-danger">
+                            <div class="alert alert-danger text-center">
                                 <b>{{#str}}available_alert_types, local_earlyalert{{/str}}</b>
                             </div>
                             <h5>{{#str}}send_alert_based_on, local_earlyalert{{/str}}</h5>
-                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-6 g-4">
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-6 g-5">
 
-                                <div class="card" style="">
-                                    <div class="card-body d-flex justify-content-center align-items-center">
-                                        <img src="{{config.wwwroot}}/local/earlyalert/pix/low_grade.png"
-                                             class="img-fluid" alt="Grade">
-                                    </div>
-                                    <div class="card-footer d-flex justify-content-center align-items-center">
-                                        <button
-                                                type="button"
-                                                data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
-                                        data-course_id="{{id}}"
-                                        data-name="{{fullname}}"
-                                        data-link="grade"
-                                        class="btn btn-outline-danger btn-sm early-alert-type-button"
-                                        role="button" aria-pressed="true">{{#str}}low_grade, local_earlyalert{{/str}}</button>
+                                <div class="col mb-4">
+                                    <div class="card" style="">
+                                        <div class="card-body d-flex justify-content-center align-items-center">
+                                            <img src="{{config.wwwroot}}/local/earlyalert/pix/low_grade.png"
+                                                 class="img-fluid" alt="Grade">
+                                        </div>
+                                        <div class="card-footer d-flex justify-content-center align-items-center">
+                                            <button
+                                                    type="button"
+                                                    data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
+                                            data-course_id="{{id}}"
+                                            data-name="{{fullname}}"
+                                            data-link="grade"
+                                            class="btn btn-outline-danger btn-sm early-alert-type-button"
+                                            role="button" aria-pressed="true">{{#str}}low_grade, local_earlyalert{{/str}}</button>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="card">
-                                    <div class="card-body d-flex justify-content-center align-items-center">
-                                        <img src="{{config.wwwroot}}/local/earlyalert/pix/missed_assignment.png"
-                                             class="img-fluid" alt="Assignment">
-                                    </div>
-                                    <div class="card-footer d-flex justify-content-center align-items-center">
-                                        <button type="button"
-                                                data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
-                                        sd data-course_id= "{{id}}"
-                                        data-name= "{{fullname}}"
-                                        data-link="assign"
-                                        class="btn btn-outline-danger btn-sm early-alert-type-button"
-                                        role="button" aria-pressed="true">{{#str}}missed_assignment, local_earlyalert{{/str}}</button>
+                                <div class="col mb-4">
+                                    <div class="card">
+                                        <div class="card-body d-flex justify-content-center align-items-center">
+                                            <img src="{{config.wwwroot}}/local/earlyalert/pix/missed_assignment.png"
+                                                 class="img-fluid" alt="Assignment">
+                                        </div>
+                                        <div class="card-footer d-flex justify-content-center align-items-center">
+                                            <button type="button"
+                                                    data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
+                                            sd data-course_id= "{{id}}"
+                                            data-name= "{{fullname}}"
+                                            data-link="assign"
+                                            class="btn btn-outline-danger btn-sm early-alert-type-button"
+                                            role="button" aria-pressed="true">{{#str}}missed_assignment, local_earlyalert{{/str}}</button>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="card">
-                                    <div class="card-body d-flex justify-content-center align-items-center">
-                                        <img src="{{config.wwwroot}}/local/earlyalert/pix/missed_exam.png"
-                                             class="img-fluid" alt="Exam">
-                                    </div>
-                                    <div class="card-footer d-flex justify-content-center align-items-center">
-                                        <button type="button"
-                                                data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
-                                        data-course_id= "{{id}}"
-                                        data-name= "{{fullname}}"
-                                        data-link="exam"
-                                        class="btn btn-outline-danger btn-sm early-alert-type-button"
-                                        role="button" aria-pressed="true">{{#str}}missed_exam, local_earlyalert{{/str}}</a>
+                                <div class="col mb-4">
+                                    <div class="card">
+                                        <div class="card-body d-flex justify-content-center align-items-center">
+                                            <img src="{{config.wwwroot}}/local/earlyalert/pix/missed_exam.png"
+                                                 class="img-fluid" alt="Exam">
+                                        </div>
+                                        <div class="card-footer d-flex justify-content-center align-items-center">
+                                            <button type="button"
+                                                    data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
+                                            data-course_id= "{{id}}"
+                                            data-name= "{{fullname}}"
+                                            data-link="exam"
+                                            class="btn btn-outline-danger btn-sm early-alert-type-button"
+                                            role="button" aria-pressed="true">{{#str}}missed_exam, local_earlyalert{{/str}}</a>
+                                        </div>
                                     </div>
                                 </div>
 

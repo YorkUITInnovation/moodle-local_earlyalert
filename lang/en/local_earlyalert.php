@@ -38,7 +38,7 @@ $string['assignment_instructions'] = '<ul>
 </ul>';
 $string['assignment_title'] = 'Assignment Title';
 $string['assignment_title_required'] = 'Please add an assignment title before previewing or sending';
-$string['available_alert_types'] = 'Available alert types';
+$string['available_alert_types'] = 'My available alerts';
 $string['course_list'] = 'Course List';
 $string['course_overview'] = 'Course Overview';
 $string['course_overview_instructions'] = '<ul>
