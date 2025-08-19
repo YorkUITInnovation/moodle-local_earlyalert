@@ -91,7 +91,7 @@ $string['student_lookup_help'] = '<ul><li>You can search for a student using the
 <li>You can wildcard (*) the name if required, and then select the correct student from the list </li>
 </ul>';
 $string['student_lookup_instructions'] = '<ul>
-<li>Please find the student’s course enrolments below. If a course <span class="text-danger">appears in red</span>, an alert has been raised. <strong> N.B. You may see discrepancies between this list and what is in PES, as these courses must also be active in eClass to show here.</strong></li>
+<li>Please find the student’s course enrolments below. If a course <span class="text-danger">appears in red</span>, an alert has been raised. <strong> N.B. You may see discrepancies between this list and what is in PES, as these courses must also be active in eClass to show here.</strong> If a student drops the course after receiving an alert, it will not appear here. These students will be captured via our reports.</li>
 <li>Click on the course name to view the type of alert and additional details</li>
 <li>To indicate that you have spoken to the student about a specific course, check off the appropriate box under “advising status”</li>
 </ul>';
