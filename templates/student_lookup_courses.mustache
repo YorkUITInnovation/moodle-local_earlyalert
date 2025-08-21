@@ -8,9 +8,12 @@
         <div class="card">
             <div class="card-header {{#has_alerts}}bg-danger text-white{{/has_alerts}}" id="heading{{id}}">
                 <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-left {{#has_alerts}}text-white{{/has_alerts}}" type="button" data-toggle="collapse" data-target="#collapse{{id}}" aria-expanded="false"
+                    <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center {{#has_alerts}}text-white{{/has_alerts}}" type="button" data-toggle="collapse" data-target="#collapse{{id}}" aria-expanded="false"
                             aria-controls="collapse{{id}}">
-                        {{fullname}} ({{idnumber}})
+                            <span>{{fullname}} ({{idnumber}})</span>
+                        {{#has_alerts}}
+                            <span class="ml-2"><i class="bi bi-exclamation-circle-fill text-white"></i></span>
+                        {{/has_alerts}}
                     </button>
                 </h2>
             </div>
