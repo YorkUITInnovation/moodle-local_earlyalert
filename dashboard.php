@@ -89,6 +89,19 @@ if (!empty($course_data['rows']) && $course_id) {
     foreach ($course_data['rows'] as &$row) {
         foreach ($row['courses'] as &$course) {
             $course->is_selected = ($course->id == $course_id);
+            // Check if course has students when a course is selected (for showing/hiding the results card)
+            if ($course->id == $course_id) {
+                // Just check if any students are enrolled (don't load full data - that's done via AJAX)
+                $enrolled_users = get_enrolled_users(context_course::instance($course_id), 'mod/assign:submit', 0, 'u.id', null, 0, 0, true);
+                $has_students = false;
+                foreach ($enrolled_users as $user) {
+                    if (!has_capability('moodle/course:update', context_course::instance($course_id), $user->id)) {
+                        $has_students = true;
+                        break; // Found at least one student, no need to continue
+                    }
+                }
+                $course_data['has_students'] = $has_students;
+            }
         }
     }
     unset($row); // break reference
