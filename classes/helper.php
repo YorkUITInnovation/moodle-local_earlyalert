@@ -204,7 +204,6 @@ class helper
         require_once($CFG->dirroot . '/grade/querylib.php');
         require_once($CFG->dirroot . '/lib/grade/grade_item.php');
         require_once($CFG->dirroot . '/lib/enrollib.php');
-        require_once($CFG->dirroot . "/enrol/externallib.php");
         require_once($CFG->dirroot. "/user/profile/lib.php");
 
 
@@ -224,10 +223,38 @@ class helper
                 $users = enrol_get_course_users($course_id, true); // returns user objects of those enrolled in course
                 foreach ($users as $student) {
                     $mdl_user = $DB->get_record('user', ['id' => $student->id]); // get moodle user
-                    // Get the student's grade for the given course ID.
-                    //$grade = grade_get_course_grade($student->id, $course_id);
-                    $grade = new \stdClass();
-                    $grade->grade = 1;
+
+                    // Get the student's actual grade for the given course ID if gradebook is enabled
+                    $grade = null;
+                    $student_grade = null;
+
+                    // Check if the course uses gradebook and get the actual grade
+                    $course_grade_item = $DB->get_record('grade_items',
+                        ['courseid' => $course_id, 'itemtype' => 'course'],
+                        'id,grademax,grademin'
+                    );
+
+                    if ($course_grade_item) {
+                        // Course has gradebook enabled, get the actual grade
+                        $grade = grade_get_course_grade($student->id, $course_id);
+
+                        if ($grade && $grade->grade !== null && $grade->grade !== '') {
+                            // Convert the grade to a percentage if it's not already
+                            if ($grade->item->grademax > 0) {
+                                $grade_percentage = ($grade->grade / $grade->item->grademax) * 100;
+                                $student_grade = number_format((float)$grade_percentage, 2);
+                            } else {
+                                $student_grade = number_format((float)$grade->grade, 2);
+                            }
+                        } else {
+                            // No grade recorded yet - use placeholder
+                            $student_grade = 'No Grade';
+                        }
+                    } else {
+                        // Course doesn't use gradebook or gradebook is disabled
+                        $student_grade = 'N/A';
+                    }
+
                     // Get student campus, faculty, major
                     if ($campus = $DB->get_record_sql("SELECT uid.data AS 'campus'
                             FROM {user_info_data} uid
@@ -281,23 +308,21 @@ class helper
                     } else {
                         $studentmajor = '';
                     }
-                    if ($grade->grade) {
-                        // Convert the grade to a percentage and format it as a decimal number with two places.
-                        //$grade = ($grade->grade / $grade->item->grademax) * 100;
-                        $student_grade = number_format((float)$grade->grade, '2');
-                        $students[$student->id] = [
-                            'id' => $student->id,
-                            'course_id' => $course_id,
-                            'first_name' => $student->firstname,
-                            'last_name' => $student->lastname,
-                            'grade' => $student_grade,
-                            'lang' => $mdl_user->lang ? strtoupper($mdl_user->lang) : 'EN',
-                            'idnumber' => $student->idnumber,
-                            'campus' => $studentcampus,
-                            'faculty' => $studentfaculty,
-                            'major' => $studentmajor
-                        ];
-                    }
+
+                    // Include student in results if we have any grade info (even 'No Grade' or 'N/A')
+                    // This ensures all enrolled students are shown regardless of grade status
+                    $students[$student->id] = [
+                        'id' => $student->id,
+                        'course_id' => $course_id,
+                        'first_name' => $student->firstname,
+                        'last_name' => $student->lastname,
+                        'grade' => $student_grade,
+                        'lang' => $mdl_user->lang ? strtoupper($mdl_user->lang) : 'EN',
+                        'idnumber' => $student->idnumber,
+                        'campus' => $studentcampus,
+                        'faculty' => $studentfaculty,
+                        'major' => $studentmajor
+                    ];
                 }
             }
 
