@@ -45,23 +45,46 @@ class local_earlyalert_course_grades_ws extends external_api
             $mdlStudents = helper::get_moodle_grades_by_course($id);
             unset($mdlStudents[$teacher_user_id]);
 
+            // Get grade percentage range for filtering if grade_letter_id is provided
+            $grade_range = null;
+            if ($grade_letter_id > 0) {
+                $grade_range = helper::get_moodle_grade_percent_range($grade_letter_id);
+            }
+
             $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'id,firstname,lastname,email');
 
             $students = [];
             $i = 0;
 
             foreach ($mdlStudents as $student) {
-                foreach ($student as $key => $value) {
-                    $students[$i]['teacher_firstname'] = $teacher->firstname;
-                    $students[$i]['teacher_lastname'] = $teacher->lastname;
-                    $students[$i]['teacher_email'] = $teacher->email;
-                    if ($key == 'lang') {
-                        $students[$i]['lang'] = self::process_lang_for_templates($value);
-                    }
-                    else $students[$i][$key] = $value;
+                // Apply grade filtering if a grade letter is selected
+                $include_student = true;
 
+                if ($grade_range && !empty($grade_range)) {
+                    $student_grade = $student['grade'];
+
+                    // Skip students with non-numeric grades (No Grade, N/A)
+                    if (!is_numeric($student_grade)) {
+                        $include_student = false;
+                    } else {
+                        $grade_value = (float)$student_grade;
+                        // Check if student's grade falls within the selected letter grade range
+                        $include_student = ($grade_value >= $grade_range['min'] && $grade_value <= $grade_range['max']);
+                    }
                 }
-                $i++;
+
+                if ($include_student) {
+                    foreach ($student as $key => $value) {
+                        $students[$i]['teacher_firstname'] = $teacher->firstname;
+                        $students[$i]['teacher_lastname'] = $teacher->lastname;
+                        $students[$i]['teacher_email'] = $teacher->email;
+                        if ($key == 'lang') {
+                            $students[$i]['lang'] = self::process_lang_for_templates($value);
+                        }
+                        else $students[$i][$key] = $value;
+                    }
+                    $i++;
+                }
             }
             usort($students, function($a, $b) {
                 return strcmp($a['last_name'], $b['last_name']);
@@ -309,3 +332,4 @@ class local_earlyalert_course_grades_ws extends external_api
         return new external_multiple_structure(self::get_course_student_templates_details());
     }
 }
+
