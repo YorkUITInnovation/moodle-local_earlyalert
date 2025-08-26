@@ -355,6 +355,10 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         // Insert the rendered template into the target element
                         document.getElementById('early-alert-student-results').innerHTML = html;
                         Templates.runTemplateJS(js);
+
+                        // Focus on the first student row after template is rendered
+                        focusOnFirstStudentRow();
+
                         // (Re)attach custom message listeners now that the textarea(s) exist in DOM
                         setup_custom_message_listener();
                         // set default grade letter selected
@@ -1010,3 +1014,31 @@ function addUserInfo(emailText, params) {
     return emailText;
 }
 
+/**
+ * Focuses on the first student row when the student list is rendered
+ */
+function focusOnFirstStudentRow() {
+    // Use setTimeout to ensure DOM is fully rendered
+    setTimeout(() => {
+        // Find the first student checkbox/row
+        const firstStudentCheckbox = document.querySelector('.early-alert-student-checkbox');
+
+        if (firstStudentCheckbox) {
+            const firstStudentRow = firstStudentCheckbox.closest('tr');
+
+            if (firstStudentRow) {
+                // Scroll to the first student row smoothly
+                firstStudentRow.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                // Add a subtle highlight effect to draw attention
+                firstStudentRow.classList.add('table-active');
+
+                // Focus on the first checkbox for keyboard navigation
+                firstStudentCheckbox.focus();
+            }
+        }
+    }, 100); // Small delay to ensure DOM is ready
+}
