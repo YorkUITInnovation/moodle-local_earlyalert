@@ -44,8 +44,20 @@
 .custom-message-container {
     border: 1px solid #ddd;
     border-radius: 4px;
-    margin-bottom: 15px;
-    overflow: hidden;
+    margin-top: 10px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.custom-message-container textarea {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.custom-message-container textarea:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .custom-message-header {

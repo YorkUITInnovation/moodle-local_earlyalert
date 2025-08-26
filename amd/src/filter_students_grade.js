@@ -14,6 +14,8 @@ export const init = () => {
     get_users();
     // Set up the custom message listener globally - not tied to any specific alert type
     setup_custom_message_listener();
+    // Set up toggle functionality for custom message containers
+    setup_custom_message_toggles();
 };
 
 /**
@@ -1034,4 +1036,96 @@ function focusOnCheckall() {
             check_all_none_checkbox.focus();
         }
     }, 100); // Small delay to ensure DOM is ready
+}
+
+/**
+ * Sets up toggle functionality for custom message containers using Bootstrap 4 collapse
+ */
+function setup_custom_message_toggles() {
+    // Handle toggle buttons for all alert types using Bootstrap 4 collapse
+    const toggleConfigs = [
+        {
+            buttonId: 'toggle-custom-message-grade',
+            containerId: 'custom-message-container-grade',
+            alertType: 'grade'
+        },
+        {
+            buttonId: 'toggle-custom-message-assign',
+            containerId: 'custom-message-container-assign',
+            alertType: 'assign'
+        },
+        {
+            buttonId: 'toggle-custom-message-exam',
+            containerId: 'custom-message-container-exam',
+            alertType: 'exam'
+        }
+    ];
+
+    toggleConfigs.forEach(config => {
+        const button = document.getElementById(config.buttonId);
+        const container = document.getElementById(config.containerId);
+
+        if (button && container) {
+            // Set up Bootstrap 4 collapse attributes
+            button.setAttribute('data-toggle', 'collapse');
+            button.setAttribute('data-target', `#${config.containerId}`);
+            button.setAttribute('aria-expanded', 'false');
+            button.setAttribute('aria-controls', config.containerId);
+
+            // Add Bootstrap collapse class to container
+            container.classList.add('collapse');
+
+            // Listen for Bootstrap collapse events
+            container.addEventListener('show.bs.collapse', function() {
+                // Update button when showing
+                const icon = button.querySelector('i');
+                icon.className = 'fa fa-minus';
+                button.innerHTML = '<i class="fa fa-minus"></i> Hide Custom Message';
+                button.classList.remove('btn-outline-secondary');
+                button.classList.add('btn-outline-primary');
+
+                console.log(`Show custom message for ${config.alertType}`);
+            });
+
+            container.addEventListener('shown.bs.collapse', function() {
+                // Focus on textarea after collapse animation completes
+                const textarea = container.querySelector('.early-alert-custom-message');
+                if (textarea) {
+                    textarea.focus();
+                }
+            });
+
+            container.addEventListener('hide.bs.collapse', function() {
+                // Update button when hiding
+                const icon = button.querySelector('i');
+                icon.className = 'fa fa-plus';
+                button.innerHTML = '<i class="fa fa-plus"></i> Show Custom Message';
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-outline-secondary');
+
+                console.log(`Hide custom message for ${config.alertType}`);
+            });
+
+            // Add hover effects
+            button.addEventListener('mouseenter', function() {
+                if (container.classList.contains('show')) {
+                    button.classList.add('btn-primary');
+                    button.classList.remove('btn-outline-primary');
+                } else {
+                    button.classList.add('btn-secondary');
+                    button.classList.remove('btn-outline-secondary');
+                }
+            });
+
+            button.addEventListener('mouseleave', function() {
+                if (container.classList.contains('show')) {
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-outline-primary');
+                } else {
+                    button.classList.remove('btn-secondary');
+                    button.classList.add('btn-outline-secondary');
+                }
+            });
+        }
+    });
 }
