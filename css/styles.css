@@ -96,3 +96,34 @@
     border-top: 1px solid #ddd;
 }
 
+/* Show Custom Message button styling */
+#toggle-custom-message {
+    background-color: #007bff; /* Bootstrap primary */
+    border-color: #007bff;
+    color: #fff;
+}
+#toggle-custom-message:hover,
+#toggle-custom-message:focus {
+    background-color: #0069d9; /* darken on hover */
+    border-color: #0062cc;
+    color: #fff;
+}
+/* Depressed/open state (uses aria-expanded set by JS) */
+#toggle-custom-message[aria-expanded="true"] {
+    background-color: #6c757d; /* Bootstrap secondary grey */
+    border-color: #6c757d;
+    color: #fff;
+}
+#toggle-custom-message[aria-expanded="true"]:hover,
+#toggle-custom-message[aria-expanded="true"]:focus {
+    background-color: #5a6268; /* slightly darker on hover */
+    border-color: #545b62;
+    color: #fff;
+}
+/* Ensure outline utility classes don't override our colors for this specific button */
+#toggle-custom-message.btn-outline-secondary,
+#toggle-custom-message.btn-outline-primary,
+#toggle-custom-message.btn-secondary,
+#toggle-custom-message.btn-primary {
+    color: #fff;
+}
