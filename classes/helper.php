@@ -366,7 +366,11 @@ class helper
             $grade_ranges = $grade_letters->get_grade_percentage_range();
             if ($grade_letter_id > 0 && isset($grade_ranges[$grade_letter_id])) {
                 return $grade_ranges[$grade_letter_id];
-            } else return [];
+            } else
+            {
+                // return empty array if no grade letter id or not found
+                return [];
+            }
 
         } catch (\Exception $e) {
             base::debug_to_console('it died'. $e->getMessage());

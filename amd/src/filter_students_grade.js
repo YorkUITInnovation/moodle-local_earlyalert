@@ -356,8 +356,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         document.getElementById('early-alert-student-results').innerHTML = html;
                         Templates.runTemplateJS(js);
 
-                        // Focus on the first student row after template is rendered
-                        focusOnFirstStudentRow();
+                        // Focus on the checkbox when student list is being rendered
+                        focusOnCheckall();
 
                         // (Re)attach custom message listeners now that the textarea(s) exist in DOM
                         setup_custom_message_listener();
@@ -1015,30 +1015,23 @@ function addUserInfo(emailText, params) {
 }
 
 /**
- * Focuses on the first student row when the student list is rendered
+ * Focuses on the check all/none checkbox when the student list is rendered
  */
-function focusOnFirstStudentRow() {
+function focusOnCheckall() {
     // Use setTimeout to ensure DOM is fully rendered
     setTimeout(() => {
-        // Find the first student checkbox/row
-        const firstStudentCheckbox = document.querySelector('.early-alert-student-checkbox');
+        // Find the check all/none checkbox
+        const check_all_none_checkbox = document.getElementById('early-alert-checkall-student-checkbox');
 
-        if (firstStudentCheckbox) {
-            const firstStudentRow = firstStudentCheckbox.closest('tr');
+        if (check_all_none_checkbox) {
+            // Scroll to the check all checkbox smoothly
+            check_all_none_checkbox.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
 
-            if (firstStudentRow) {
-                // Scroll to the first student row smoothly
-                firstStudentRow.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-
-                // Add a subtle highlight effect to draw attention
-                firstStudentRow.classList.add('table-active');
-
-                // Focus on the first checkbox for keyboard navigation
-                firstStudentCheckbox.focus();
-            }
+            // Focus on the checkbox for keyboard navigation
+            check_all_none_checkbox.focus();
         }
     }, 100); // Small delay to ensure DOM is ready
 }
