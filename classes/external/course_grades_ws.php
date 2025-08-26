@@ -45,7 +45,7 @@ class local_earlyalert_course_grades_ws extends external_api
             $mdlStudents = helper::get_moodle_grades_by_course($id);
             unset($mdlStudents[$teacher_user_id]);
 
-            // Get grade percentage range for filtering if grade_letter_id is provided
+            // For grade_letter_id <= 0 (e.g., -1) we do not filter by grade at all.
             $grade_range = null;
             if ($grade_letter_id > 0) {
                 $grade_range = helper::get_moodle_grade_percent_range($grade_letter_id);
@@ -57,10 +57,10 @@ class local_earlyalert_course_grades_ws extends external_api
             $i = 0;
 
             foreach ($mdlStudents as $student) {
-                // Apply grade filtering if a grade letter is selected
+                // Apply grade filtering only when a valid grade range is present
                 $include_student = true;
 
-                if ($grade_range && !empty($grade_range)) {
+                if (!is_null($grade_range) && !empty($grade_range)) {
                     $student_grade = $student['grade'];
 
                     // Skip students with non-numeric grades (No Grade, N/A)

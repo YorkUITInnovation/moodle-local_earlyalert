@@ -97,9 +97,9 @@ function alert_type_button() {
             let course_name = event.target.getAttribute('data-name');
             let course_id = event.target.getAttribute('data-course_id');
             let teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
-            // console.log('teacher_user_id:', teacher_user_id);
-            // Get student list based on alert type
-            setup_filter_students_by_grade(course_id, 9, course_name, alert_type, teacher_user_id);
+            // Choose default grade letter dynamically: 9 for grade alerts, -1 for others (no grade filter)
+            const default_grade_letter_id = (alert_type === 'grade') ? 9 : -1;
+            setup_filter_students_by_grade(course_id, default_grade_letter_id, course_name, alert_type, teacher_user_id);
         }
     });
 }
@@ -149,7 +149,8 @@ function filter_students_by_assignment() {
 
         // Validate the assignment title
         if (validateAssignmentTitle(assignment_title)) {
-            setup_filter_students_by_grade(course_id, '9', course_name, alert_type, teacher_user_id, assignment_title);
+            // For assignment alerts, do not filter by grade; pass -1 to include all students
+            setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id, assignment_title);
         }
     });
     validateAssignmentTitle(assignment_input.value.trim());
