@@ -5,17 +5,6 @@
     <div class="col">
         <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} <span class="text-danger">{{alert_type}}</span> for {{fullname}}</h3>
 
-        {{^grade}}
-        <div class="mb-3">
-            <span class="custom-message-preview text-muted font-italic mr-2"></span>
-            <button type="button" id="toggle-custom-message" class="btn btn-sm btn-outline-secondary"
-                    data-toggle="collapse" data-target="#custom-message-container"
-                    aria-expanded="false" aria-controls="custom-message-container">
-                <i class="fa fa-plus"></i> Show Custom Message
-            </button>
-        </div>
-        {{/grade}}
-
         {{#grade}}
             <p>{{#str}}grade_instructions, local_earlyalert{{/str}}</p>
             <div class="d-flex align-items-center mb-2">
@@ -64,7 +53,16 @@
         {{#exam}}
             <p>{{#str}}exam_instructions, local_earlyalert{{/str}}</p>
         {{/exam}}
-
+        {{^grade}}
+            <div class="mb-3">
+                <span class="custom-message-preview text-muted font-italic mr-2"></span>
+                <button type="button" id="toggle-custom-message" class="btn btn-sm btn-outline-secondary"
+                        data-toggle="collapse" data-target="#custom-message-container"
+                        aria-expanded="false" aria-controls="custom-message-container">
+                    <i class="fa fa-plus"></i> Show Custom Message
+                </button>
+            </div>
+        {{/grade}}
         <!-- Unified collapsible custom message container (shared by all alert types) -->
         <div id="custom-message-container" class="custom-message-container collapse">
             <textarea id="early-alert-custom-message" class="form-control early-alert-custom-message" rows="4"
