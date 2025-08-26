@@ -4,9 +4,21 @@
 <div class="row">
     <div class="col">
         <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} <span class="text-danger">{{alert_type}}</span> for {{fullname}}</h3>
+
+        {{^grade}}
+        <div class="mb-3">
+            <span class="custom-message-preview text-muted font-italic mr-2"></span>
+            <button type="button" id="toggle-custom-message" class="btn btn-sm btn-outline-secondary"
+                    data-toggle="collapse" data-target="#custom-message-container"
+                    aria-expanded="false" aria-controls="custom-message-container">
+                <i class="fa fa-plus"></i> Show Custom Message
+            </button>
+        </div>
+        {{/grade}}
+
         {{#grade}}
             <p>{{#str}}grade_instructions, local_earlyalert{{/str}}</p>
-            <div class="d-flex align-items-center mb-3">
+            <div class="d-flex align-items-center mb-2">
                 <div class="mr-3">
                     <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}</b>
                     <select id="id_early_alert_filter_grade_select"
@@ -26,63 +38,53 @@
                         <option value="1">A</option>
                     </select>
                 </div>
+                <div>
+                    <span class="custom-message-preview text-muted font-italic mr-2"></span>
+                    <button type="button" id="toggle-custom-message" class="btn btn-sm btn-outline-secondary"
+                            data-toggle="collapse" data-target="#custom-message-container"
+                            aria-expanded="false" aria-controls="custom-message-container">
+                        <i class="fa fa-plus"></i> Show Custom Message
+                    </button>
+                </div>
             </div>
         {{/grade}}
 
         {{#assign}}
             <p>{{#str}}assignment_instructions, local_earlyalert{{/str}}</p>
-            <b>{{#str}}assignment_title, local_earlyalert{{/str}}</b><span id="assignment-title-preview" class="text-muted font-italic"></span>
-            <input type="text" id="early-alert-assignment-title" class="form-control" style="width: 300px;"
-                placeholder="Enter the assignment title (required)" required/>
-            <p id="assignment-title-error" class="text-danger" style="display: none;">
-                {{#str}}assignment_title_required, local_earlyalert{{/str}}
-            </p>
-
-            <!-- Custom message field for assign context -->
-            <div class="mt-3">
-                <p>
-                    <span class="custom-message-preview text-muted font-italic"></span>
-                    <button type="button" id="toggle-custom-message-assign" class="btn btn-sm btn-outline-secondary ml-2">
-                        <i class="fa fa-plus"></i> Show Custom Message
-                    </button>
+            <div class="mb-2">
+                <b>{{#str}}assignment_title, local_earlyalert{{/str}}</b><span id="assignment-title-preview" class="text-muted font-italic"></span>
+                <input type="text" id="early-alert-assignment-title" class="form-control mt-1" style="max-width: 320px;"
+                       placeholder="Enter the assignment title (required)" required/>
+                <p id="assignment-title-error" class="text-danger" style="display: none;">
+                    {{#str}}assignment_title_required, local_earlyalert{{/str}}
                 </p>
-                <div id="custom-message-container-assign" class="custom-message-container" style="display: none;">
-                    <textarea id="early-alert-custom-message" class="form-control early-alert-custom-message" rows="4"
-                        placeholder="Enter a custom message to be included in all emails. This will replace [custommessage] in the template."></textarea>
-                    <small class="form-text text-muted">This message will be added to all selected student emails.</small>
-                </div>
             </div>
         {{/assign}}
 
         {{#exam}}
             <p>{{#str}}exam_instructions, local_earlyalert{{/str}}</p>
-
-            <!-- Custom message field for exam context -->
-            <div class="mt-3">
-                <p>
-                    <span class="custom-message-preview text-muted font-italic"></span>
-                    <button type="button" id="toggle-custom-message-exam" class="btn btn-sm btn-outline-secondary ml-2">
-                        <i class="fa fa-plus"></i> Show Custom Message
-                    </button>
-                </p>
-                <div id="custom-message-container-exam" class="custom-message-container" style="display: none;">
-                    <textarea id="early-alert-custom-message" class="form-control early-alert-custom-message" rows="4"
-                              placeholder="Enter a custom message to be included in all emails. This will replace [custommessage] in the template."></textarea>
-                    <small class="form-text text-muted">This message will be added to all selected student emails.</small>
-                </div>
-            </div>
         {{/exam}}
+
+        <!-- Unified collapsible custom message container (shared by all alert types) -->
+        <div id="custom-message-container" class="custom-message-container collapse">
+            <textarea id="early-alert-custom-message" class="form-control early-alert-custom-message" rows="4"
+                      placeholder="Enter a custom message to be included in all emails. This will replace [custommessage] in the template."></textarea>
+            <small class="form-text text-muted">This message will be added to all selected student emails.</small>
+        </div>
     </div>
 </div>
+
 <div class="row mt-2">
     <div class="col">
         <h3>{{#str}}my_list_of_students, local_earlyalert{{/str}}</h3>
         <p>{{#str}}select_students, local_earlyalert, {{alert_type}} {{/str}}</p>
-        <p><input type="checkbox" id="early-alert-checkall-student-checkbox" class="early-alert-checkall-student-checkbox"> All/None
-            <button id="early-alert-send-button1" class="btn btn-primary early-alert-send-button">Send</button>
+        <p>
+            <input type="checkbox" id="early-alert-checkall-student-checkbox" class="early-alert-checkall-student-checkbox"> All/None
+            <button id="early-alert-send-button1" class="btn btn-primary ml-2 early-alert-send-button">Send</button>
         </p>
     </div>
 </div>
+
 <!--Student list row-->
 <div class="row">
     {{#student_rows}}
@@ -109,14 +111,11 @@
                                    data-student-lang="{{lang}}"
                                    data-student-faculty="{{faculty}}"
                                    data-student-major="{{major}}"
-                                   data-courseid="{{courseid}}"
-                        ></td>
+                                   data-courseid="{{courseid}}"></td>
                         <td>{{last_name}}, {{first_name}}<br>{{idnumber}}</td>
                         <td class="early-alert-grade-column"><span class="badge badge-primary">{{grade}}</span></td>
                         <td>
-                            <button
-                                    class="btn btn-outline-primary btn-sm early-alert-preview-button"
-                            >{{#str}}preview, local_earlyalert{{/str}}</button>
+                            <button class="btn btn-outline-primary btn-sm early-alert-preview-button">{{#str}}preview, local_earlyalert{{/str}}</button>
                         </td>
                     </tr>
                 {{/students}}
@@ -128,8 +127,4 @@
 <div>
     <button id="early-alert-send-button2" class="btn btn-primary float-right early-alert-send-button">Send</button>
 </div>
-
-
-
-
 

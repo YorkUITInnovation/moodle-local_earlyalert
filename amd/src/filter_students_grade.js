@@ -361,8 +361,9 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         // Focus on the checkbox when student list is being rendered
                         focusOnCheckall();
 
-                        // (Re)attach custom message listeners now that the textarea(s) exist in DOM
+                        // (Re)attach custom message listeners and toggles now that the DOM was re-rendered
                         setup_custom_message_listener();
+                        setup_custom_message_toggles();
                         // set default grade letter selected
                         if (alert_type === 'grade') {
                             let grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
@@ -1039,93 +1040,76 @@ function focusOnCheckall() {
 }
 
 /**
- * Sets up toggle functionality for custom message containers using Bootstrap 4 collapse
+ * Sets up toggle functionality for the single custom message container
  */
 function setup_custom_message_toggles() {
-    // Handle toggle buttons for all alert types using Bootstrap 4 collapse
-    const toggleConfigs = [
-        {
-            buttonId: 'toggle-custom-message-grade',
-            containerId: 'custom-message-container-grade',
-            alertType: 'grade'
-        },
-        {
-            buttonId: 'toggle-custom-message-assign',
-            containerId: 'custom-message-container-assign',
-            alertType: 'assign'
-        },
-        {
-            buttonId: 'toggle-custom-message-exam',
-            containerId: 'custom-message-container-exam',
-            alertType: 'exam'
+    const btn = document.getElementById('toggle-custom-message');
+    const container = document.getElementById('custom-message-container');
+
+    if (!btn || !container) {
+        return;
+    }
+
+    // Replace button to clear any previous listeners from re-renders
+    const button = btn.cloneNode(true);
+    btn.parentNode.replaceChild(button, btn);
+
+    const setOpenState = (open) => {
+        // Sync aria state
+        button.setAttribute('aria-expanded', String(open));
+        // Update label and styles
+        if (open) {
+            button.innerHTML = '<i class="fa fa-minus"></i> Hide Custom Message';
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-outline-primary');
+        } else {
+            button.innerHTML = '<i class="fa fa-plus"></i> Show Custom Message';
+            button.classList.remove('btn-outline-primary');
+            button.classList.add('btn-outline-secondary');
         }
-    ];
+    };
 
-    toggleConfigs.forEach(config => {
-        const button = document.getElementById(config.buttonId);
-        const container = document.getElementById(config.containerId);
+    // Ensure base collapse class exists
+    if (!container.classList.contains('collapse')) {
+        container.classList.add('collapse');
+    }
 
-        if (button && container) {
-            // Set up Bootstrap 4 collapse attributes
-            button.setAttribute('data-toggle', 'collapse');
-            button.setAttribute('data-target', `#${config.containerId}`);
-            button.setAttribute('aria-expanded', 'false');
-            button.setAttribute('aria-controls', config.containerId);
+    // Initialize UI based on current state
+    setOpenState(container.classList.contains('show'));
 
-            // Add Bootstrap collapse class to container
-            container.classList.add('collapse');
+    // Handle click without relying on Bootstrap jQuery events
+    button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const willOpen = !container.classList.contains('show');
+        container.classList.toggle('show', willOpen);
+        setOpenState(willOpen);
+        if (willOpen) {
+            // Focus textarea when opening
+            setTimeout(() => {
+                const ta = container.querySelector('.early-alert-custom-message');
+                if (ta) ta.focus();
+            }, 0);
+        }
+    });
 
-            // Listen for Bootstrap collapse events
-            container.addEventListener('show.bs.collapse', function() {
-                // Update button when showing
-                const icon = button.querySelector('i');
-                icon.className = 'fa fa-minus';
-                button.innerHTML = '<i class="fa fa-minus"></i> Hide Custom Message';
-                button.classList.remove('btn-outline-secondary');
-                button.classList.add('btn-outline-primary');
-
-                console.log(`Show custom message for ${config.alertType}`);
-            });
-
-            container.addEventListener('shown.bs.collapse', function() {
-                // Focus on textarea after collapse animation completes
-                const textarea = container.querySelector('.early-alert-custom-message');
-                if (textarea) {
-                    textarea.focus();
-                }
-            });
-
-            container.addEventListener('hide.bs.collapse', function() {
-                // Update button when hiding
-                const icon = button.querySelector('i');
-                icon.className = 'fa fa-plus';
-                button.innerHTML = '<i class="fa fa-plus"></i> Show Custom Message';
-                button.classList.remove('btn-outline-primary');
-                button.classList.add('btn-outline-secondary');
-
-                console.log(`Hide custom message for ${config.alertType}`);
-            });
-
-            // Add hover effects
-            button.addEventListener('mouseenter', function() {
-                if (container.classList.contains('show')) {
-                    button.classList.add('btn-primary');
-                    button.classList.remove('btn-outline-primary');
-                } else {
-                    button.classList.add('btn-secondary');
-                    button.classList.remove('btn-outline-secondary');
-                }
-            });
-
-            button.addEventListener('mouseleave', function() {
-                if (container.classList.contains('show')) {
-                    button.classList.remove('btn-primary');
-                    button.classList.add('btn-outline-primary');
-                } else {
-                    button.classList.remove('btn-secondary');
-                    button.classList.add('btn-outline-secondary');
-                }
-            });
+    // Hover effects
+    button.addEventListener('mouseenter', () => {
+        if (container.classList.contains('show')) {
+            button.classList.add('btn-primary');
+            button.classList.remove('btn-outline-primary');
+        } else {
+            button.classList.add('btn-secondary');
+            button.classList.remove('btn-outline-secondary');
+        }
+    });
+    button.addEventListener('mouseleave', () => {
+        if (container.classList.contains('show')) {
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-outline-primary');
+        } else {
+            button.classList.remove('btn-secondary');
+            button.classList.add('btn-outline-secondary');
         }
     });
 }
