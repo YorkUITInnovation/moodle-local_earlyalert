@@ -6,39 +6,25 @@
         <h3>{{#str}}selected_alert_based_on, local_earlyalert{{/str}} <span class="text-danger">{{alert_type}}</span> for {{fullname}}</h3>
         {{#grade}}
             <p>{{#str}}grade_instructions, local_earlyalert{{/str}}</p>
-            <p>
-                <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}</b>
-                <select id="id_early_alert_filter_grade_select"
-                        name="early_alert_filter_grade_select"
-                        style="width: 50px;"
-                        data-initial-value="9">
-                    <option value="11">F</option>
-                    <option value="10">D</option>
-                    <option value="9">D+</option>
-                    <option value="8">C-</option>
-                    <option value="7">C</option>
-                    <option value="6">C+</option>
-                    <option value="5">B-</option>
-                    <option value="4">B</option>
-                    <option value="3">B+</option>
-                    <option value="2">A-</option>
-                    <option value="1">A</option>
-                </select>
-            </p>
-
-            <!-- Custom message field - placed directly under the grade selection -->
-            <div class="mt-3">
-                <p>
-                    <b>Add Custom Message:</b>
-                    <span class="custom-message-preview text-muted font-italic"></span>
-                    <button type="button" id="toggle-custom-message-grade" class="btn btn-sm btn-outline-secondary ml-2">
-                        <i class="fa fa-plus"></i> Show Custom Message
-                    </button>
-                </p>
-                <div id="custom-message-container-grade" class="custom-message-container" style="display: none;">
-                    <textarea id="early-alert-custom-message" class="form-control early-alert-custom-message" rows="4"
-                        placeholder="Enter a custom message to be included in all emails. This will replace [custommessage] in the template."></textarea>
-                    <small class="form-text text-muted">This message will be added to all selected student emails.</small>
+            <div class="d-flex align-items-center mb-3">
+                <div class="mr-3">
+                    <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}</b>
+                    <select id="id_early_alert_filter_grade_select"
+                            name="early_alert_filter_grade_select"
+                            style="width: 50px;"
+                            data-initial-value="9">
+                        <option value="11">F</option>
+                        <option value="10">D</option>
+                        <option value="9">D+</option>
+                        <option value="8">C-</option>
+                        <option value="7">C</option>
+                        <option value="6">C+</option>
+                        <option value="5">B-</option>
+                        <option value="4">B</option>
+                        <option value="3">B+</option>
+                        <option value="2">A-</option>
+                        <option value="1">A</option>
+                    </select>
                 </div>
             </div>
         {{/grade}}
@@ -55,7 +41,6 @@
             <!-- Custom message field for assign context -->
             <div class="mt-3">
                 <p>
-                    <b>Add Custom Message:</b>
                     <span class="custom-message-preview text-muted font-italic"></span>
                     <button type="button" id="toggle-custom-message-assign" class="btn btn-sm btn-outline-secondary ml-2">
                         <i class="fa fa-plus"></i> Show Custom Message
@@ -75,7 +60,6 @@
             <!-- Custom message field for exam context -->
             <div class="mt-3">
                 <p>
-                    <b>Add Custom Message:</b>
                     <span class="custom-message-preview text-muted font-italic"></span>
                     <button type="button" id="toggle-custom-message-exam" class="btn btn-sm btn-outline-secondary ml-2">
                         <i class="fa fa-plus"></i> Show Custom Message
@@ -144,6 +128,7 @@
 <div>
     <button id="early-alert-send-button2" class="btn btn-primary float-right early-alert-send-button">Send</button>
 </div>
+
 
 
 
