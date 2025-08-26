@@ -8,8 +8,8 @@
         {{#grade}}
             <p>{{#str}}grade_instructions, local_earlyalert{{/str}}</p>
             <div class="d-flex align-items-center mb-2">
-                <div class="mr-3">
-                    <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}</b>
+                <div class="mr-3 ml-4">
+                    <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}: </b>
                     <select id="id_early_alert_filter_grade_select"
                             name="early_alert_filter_grade_select"
                             style="width: 50px;"
@@ -40,9 +40,9 @@
 
         {{#assign}}
             <p>{{#str}}assignment_instructions, local_earlyalert{{/str}}</p>
-            <div class="mb-2">
+            <div class="mb-5 ml-4">
                 <div class="d-flex align-items-center">
-                    <p class="mb-0 mr-2">{{#str}}assignment_title, local_earlyalert{{/str}}<span id="assignment-title-preview" class="text-muted font-italic"></span></p>
+                    <p class="mb-0 mr-2"><b>{{#str}}assignment_title, local_earlyalert{{/str}}:</b></p>
                     <input type="text" id="early-alert-assignment-title" class="form-control" style="max-width: 320px;"
                            placeholder="Enter the assignment title (required)" required/>
                 </div>
@@ -66,7 +66,7 @@
             </div>
         {{/grade}}
         <!-- Unified collapsible custom message container (shared by all alert types) -->
-        <div id="custom-message-container" class="custom-message-container collapse">
+        <div id="custom-message-container" class="custom-message-container collapse mb-3 ">
             <textarea id="early-alert-custom-message" class="form-control early-alert-custom-message" rows="4"
                       placeholder="Enter a custom message to be included in all emails. This will replace [custommessage] in the template."></textarea>
             <small class="form-text text-muted">This message will be added to all selected student emails.</small>

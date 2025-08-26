@@ -139,11 +139,6 @@ function filter_students_by_assignment() {
     // Add an input event listener for real-time preview of the assignment title
     assignment_input.addEventListener('input', function() {
         const title = assignment_input.value.trim();
-        const assignmentPreview = document.getElementById('assignment-title-preview');
-        if (assignmentPreview) {
-            assignmentPreview.textContent = title ? `: "${title.substring(0, 50)}${title.length > 50 ? '...' : ''}"` : '';
-        }
-
         // Validate the assignment title
         validateAssignmentTitle(title);
     });
