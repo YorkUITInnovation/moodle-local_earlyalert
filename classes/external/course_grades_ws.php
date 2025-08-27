@@ -69,7 +69,8 @@ class local_earlyalert_course_grades_ws extends external_api
                     } else {
                         $grade_value = (float)$student_grade;
                         // Check if student's grade falls within the selected letter grade range
-                        $include_student = ($grade_value >= $grade_range['min'] && $grade_value <= $grade_range['max']);
+                        // $include_student = ($grade_value >= $grade_range['min'] && $grade_value <= $grade_range['max']);
+                        $include_student =  $grade_value <= $grade_range['max']; // include them if its less than or equal to max grade selected
                     }
                 }
 
