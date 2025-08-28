@@ -94,6 +94,7 @@ class local_earlyalert_course_overview_ws extends external_api
                 $data->teacher_firstname = $teacher->firstname;
                 $data->teacher_lastname = $teacher->lastname;
                 $data->teacher_email = $teacher->email;
+                $data->custom_message = $LOG->get_custom_message();
                 // Add data to results
                 $results[$i]->logs[$x] = $data;
                 unset($LOG);
@@ -144,7 +145,8 @@ class local_earlyalert_course_overview_ws extends external_api
                                         'major' => new external_value(PARAM_TEXT, 'Major'),
                                         'teacher_firstname' => new external_value(PARAM_TEXT, 'Teacher first name'),
                                         'teacher_lastname' => new external_value(PARAM_TEXT, 'Teacher last name'),
-                                        'teacher_email' => new external_value(PARAM_TEXT, 'Teacher email')
+                                        'teacher_email' => new external_value(PARAM_TEXT, 'Teacher email'),
+                                        'custom_message' => new external_value(PARAM_TEXT, 'Custom message')
                                     )
                                 )
                             )
@@ -361,3 +363,4 @@ class local_earlyalert_course_overview_ws extends external_api
         );
     }
 }
+

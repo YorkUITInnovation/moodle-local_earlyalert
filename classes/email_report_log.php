@@ -200,6 +200,7 @@ CONST GRADE_A = 1;
         $this->actual_grade = $result->actual_grade ?? 0;
         $this->student_advised_by_advisor = $result->student_advised_by_advisor ?? 0;
         $this->student_advised_by_instructor = $result->student_advised_by_instructor ?? 0;
+        $this->custom_message = $result->custom_message ?? '';
         $this->date_message_sent = $result->date_message_sent ?? 0;
         $this->timecreated = $result->timecreated ?? 0;
         $this->timecreated_hr = '';
@@ -685,6 +686,13 @@ CONST GRADE_A = 1;
     }
 
     /**
+     * @return string
+     */
+    public function get_custom_message() {
+        return $this->custom_message;
+    }
+
+    /**
      * @return mixed
      */
     public function getData()
@@ -700,3 +708,4 @@ CONST GRADE_A = 1;
         $this->data = $data;
     }
 }
+

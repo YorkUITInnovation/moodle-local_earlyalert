@@ -60,6 +60,7 @@ class local_earlyalert_record_log_ws extends external_api
             $data->assignment_name = ($student['assignment_name'] ?? 0);
             $data->trigger_grade = ($student['trigger_grade'] ?? 0);
             $data->actual_grade = ($student['actual_grade'] ?? 0);
+            $data->custom_message = ($student['custom_message'] ?? '');
             //all logs default to unadvised
             $data->student_advised_by_advisor = 0;
             $data->student_advised_by_instructor = 0;
@@ -84,3 +85,4 @@ class local_earlyalert_record_log_ws extends external_api
         return new external_value(PARAM_INT, 'Boolean');
     }
 }
+

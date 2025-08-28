@@ -596,6 +596,7 @@ function setup_preview_buttons(templateCache) {
         record_data.assignment_name = params.assignmenttitle;
         record_data.actual_grade = assigngrade;
         record_data.trigger_grade = selected_grade_value;
+        record_data.custom_message = custom_message;
 
         // case where previews are just added to grade alert type and missed exam etc
         if (alert_type !== 'assign') {
@@ -745,6 +746,7 @@ function setup_preview_emails_with_titles(templateCache) {
         record_data.assignment_name = params.assignmenttitle;
         record_data.actual_grade = assigngrade;
         record_data.trigger_grade = selected_grade_value;
+        record_data.custom_message = customMessage;
 
         button.addEventListener('click', function () {
             setup_preview_buttons_from_template(record_data);

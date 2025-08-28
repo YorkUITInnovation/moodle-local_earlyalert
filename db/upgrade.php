@@ -146,5 +146,21 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         // Earlyalert savepoint reached.
         upgrade_plugin_savepoint(true, 2024112621, 'local', 'earlyalert');
     }
+
+    if ($oldversion < 2025082801) {
+
+        // Define field custom_message to be added to local_earlyalert_report_log.
+        $table = new xmldb_table('local_earlyalert_report_log');
+        $field = new xmldb_field('custom_message', XMLDB_TYPE_TEXT, null, null, null, null, null, 'body');
+
+        // Conditionally launch add field custom_message.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 2025082801, 'local', 'earlyalert');
+    }
+
     return true;
 }
