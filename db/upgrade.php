@@ -151,7 +151,7 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
 
         // Define field custom_message to be added to local_earlyalert_report_log.
         $table = new xmldb_table('local_earlyalert_report_log');
-        $field = new xmldb_field('custom_message', XMLDB_TYPE_TEXT, null, null, null, null, null, 'body');
+        $field = new xmldb_field('custom_message', XMLDB_TYPE_TEXT, null, null, null, null, null, 'student_advised_by_instructor');
 
         // Conditionally launch add field custom_message.
         if (!$dbman->field_exists($table, $field)) {
