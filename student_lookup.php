@@ -71,6 +71,7 @@ if ($user_id) {
                 $data[$i]->trigger_grade = $LOG->get_trigger_grade_letter();
                 $data[$i]->student_advised_by_advisor = $LOG->get_student_advised_by_advisor();
                 $data[$i]->student_advised_by_instructor = $LOG->get_student_advised_by_instructor();
+                $data[$i]->custom_message = $LOG->get_custom_message();
                 $data[$i]->date_sent = $LOG->get_date_sent();
                 $data[$i]->grade = $LOG->get_actual_grade();
                 $data[$i]->major = $student->major;
