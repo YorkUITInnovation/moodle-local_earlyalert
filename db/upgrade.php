@@ -147,7 +147,7 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024112621, 'local', 'earlyalert');
     }
 
-    if ($oldversion < 2025082801) {
+    if ($oldversion < 20250828003) {
 
         // Define field custom_message to be added to local_earlyalert_report_log.
         $table = new xmldb_table('local_earlyalert_report_log');
@@ -159,7 +159,7 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         }
 
         // Earlyalert savepoint reached.
-        upgrade_plugin_savepoint(true, 2025082801, 'local', 'earlyalert');
+        upgrade_plugin_savepoint(true, 20250828003, 'local', 'earlyalert');
     }
 
     return true;
