@@ -44,7 +44,9 @@ $impersonated_user = new stdClass();
 if ($user_id != $USER->id) {
     $is_impersonating = true;
     $impersonated_user = $DB->get_record('user', ['id' => $user_id]);
+    // When impersonating, keep $user_id as the impersonated user's ID
 } else {
+    // When not impersonating, use the logged-in user's ID
     $user_id = $USER->id;
 }
 
@@ -61,6 +63,10 @@ if ($teacher || $is_impersonating) {
 } else {
     $course_data = [];
 }
+
+// Ensure teacher_user_id is always set regardless of the course data structure
+$course_data['teacher_user_id'] = $user_id;
+
 // Add impersonting user name to $course_data if $is_impersonating is true
 if ($is_impersonating) {
     $course_data['impersonated_user'] = $impersonated_user->firstname . ' ' . $impersonated_user->lastname;
@@ -82,7 +88,9 @@ if ($impersonate) {
     $course_data['impersonate'] = true;
 }
 
-$course_data['teacher_user_id'] = $user_id;
+// Debug: Let's see what's actually in course_data when it's passed to the template
+// Uncomment the next line to debug
+// error_log('Course data passed to template: ' . print_r($course_data, true));
 
 // Set is_selected property for the selected course
 if (!empty($course_data['rows']) && $course_id) {

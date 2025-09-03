@@ -784,12 +784,23 @@ function setup_preview_buttons_from_template(student_template_data) {
 function setup_send_emails(student_template_cache_array) {
     const send_button = document.getElementById('early-alert-send-button1');
     const send_button2 = document.getElementById('early-alert-send-button2');
-    send_button.addEventListener('click', function () {
-        maintain_student_template_data_for_submit(student_template_cache_array);
-    });
-    send_button2.addEventListener('click', function () {
-        maintain_student_template_data_for_submit(student_template_cache_array);
-    });
+
+    // Remove any existing event listeners by cloning the buttons
+    if (send_button) {
+        const new_send_button = send_button.cloneNode(true);
+        send_button.parentNode.replaceChild(new_send_button, send_button);
+        new_send_button.addEventListener('click', function () {
+            maintain_student_template_data_for_submit(student_template_cache_array);
+        });
+    }
+
+    if (send_button2) {
+        const new_send_button2 = send_button2.cloneNode(true);
+        send_button2.parentNode.replaceChild(new_send_button2, send_button2);
+        new_send_button2.addEventListener('click', function () {
+            maintain_student_template_data_for_submit(student_template_cache_array);
+        });
+    }
 }
 
 function maintain_student_template_data_for_submit(student_template_cache_array) {
@@ -797,7 +808,7 @@ function maintain_student_template_data_for_submit(student_template_cache_array)
     var student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
     // remove students from template cache if they have been unchecked
     var new_student_temp_array = student_template_cache_array.filter(student => student_ids_array.includes(student.student_id));
-    new_student_temp_array.length > 0 ? create_notification_dialog(new_student_temp_array) : alert('No students selected');
+    new_student_temp_array.length > 0 ? create_notification_dialog(new_student_temp_array) : notification.alert('No students selected', 'Please select at least one student to send emails.');
 }
 
 function create_notification_dialog(student_template_cache_array) {

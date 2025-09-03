@@ -110,3 +110,4 @@ echo $OUTPUT->render_from_template('local_earlyalert/student_lookup', $combined_
 
 echo $OUTPUT->footer();
 
+
