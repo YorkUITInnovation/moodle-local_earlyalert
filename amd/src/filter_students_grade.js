@@ -259,6 +259,19 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
                 display_data.templates = JSON.stringify(templates);
 
+
+                // Find the first template that matches the alert_type and extract hascustommessage
+                let hascustommessage = 0;
+                if (Array.isArray(templates_response) && templates_response.length > 0) {
+                    // Try to find the most specific template for the alert type
+                    let selectedTemplate = templates_response.find(t => t && typeof t === 'object' && typeof t.hascustommessage !== 'undefined');
+                    if (selectedTemplate) {
+                        hascustommessage = Number(selectedTemplate.hascustommessage) || 0;
+                    }
+                }
+                display_data.hascustommessage = hascustommessage;
+
+
                 if (alert_type === 'grade') {
                     // Add alert_type to display_data
                     display_data.alert_type = 'Low Grade';
@@ -790,7 +803,8 @@ function setup_send_emails(student_template_cache_array) {
         const new_send_button = send_button.cloneNode(true);
         send_button.parentNode.replaceChild(new_send_button, send_button);
         new_send_button.addEventListener('click', function () {
-            maintain_student_template_data_for_submit(student_template_cache_array);
+            // Always rebuild the array based on currently checked students
+            maintain_student_template_data_for_submit(student_template_cache_array, true);
         });
     }
 
@@ -798,17 +812,36 @@ function setup_send_emails(student_template_cache_array) {
         const new_send_button2 = send_button2.cloneNode(true);
         send_button2.parentNode.replaceChild(new_send_button2, send_button2);
         new_send_button2.addEventListener('click', function () {
-            maintain_student_template_data_for_submit(student_template_cache_array);
+            // Always rebuild the array based on currently checked students
+            maintain_student_template_data_for_submit(student_template_cache_array, true);
         });
     }
 }
 
-function maintain_student_template_data_for_submit(student_template_cache_array) {
+// Only send for currently checked students, not all in the cache array
+function maintain_student_template_data_for_submit(student_template_cache_array, forceRebuild = false) {
     check_individual_students_checkboxes_for_submit();
     var student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
-    // remove students from template cache if they have been unchecked
-    var new_student_temp_array = student_template_cache_array.filter(student => student_ids_array.includes(student.student_id));
-    new_student_temp_array.length > 0 ? create_notification_dialog(new_student_temp_array) : notification.alert('No students selected', 'Please select at least one student to send emails.');
+
+    // If forceRebuild is true, rebuild the array from DOM state
+    let filtered_array = [];
+    if (forceRebuild) {
+        // Rebuild from DOM: only include checked students
+        const student_checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']");
+        student_checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                const student_id = checkbox.getAttribute('data-student-id');
+                // Find the matching record in the cache array
+                const record = student_template_cache_array.find(stu => stu.student_id == student_id);
+                if (record) filtered_array.push(record);
+            }
+        });
+    } else {
+        // remove students from template cache if they have been unchecked
+        filtered_array = student_template_cache_array.filter(student => student_ids_array.includes(student.student_id));
+    }
+
+    filtered_array.length > 0 ? create_notification_dialog(filtered_array) : notification.alert('No students selected', 'Please select at least one student to send emails.');
 }
 
 function create_notification_dialog(student_template_cache_array) {
