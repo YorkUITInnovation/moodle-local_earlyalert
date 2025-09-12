@@ -258,19 +258,17 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 });
 
                 display_data.templates = JSON.stringify(templates);
+                // console.log( templates_response);
 
-
-                // Find the first template that matches the alert_type and extract hascustommessage
+                // Set hascustommessage to true if any template has it enabled
                 let hascustommessage = 0;
                 if (Array.isArray(templates_response) && templates_response.length > 0) {
-                    // Try to find the most specific template for the alert type
-                    let selectedTemplate = templates_response.find(t => t && typeof t === 'object' && typeof t.hascustommessage !== 'undefined');
-                    if (selectedTemplate) {
-                        hascustommessage = Number(selectedTemplate.hascustommessage) || 0;
-                    }
+                    hascustommessage = templates_response.some(
+                        t => t && t.hascustommessage === 1
+                    ) ? 1 : 0;
                 }
                 display_data.hascustommessage = hascustommessage;
-
+                // console.log( display_data.hascustommessage + ' - has custom message?');
 
                 if (alert_type === 'grade') {
                     // Add alert_type to display_data

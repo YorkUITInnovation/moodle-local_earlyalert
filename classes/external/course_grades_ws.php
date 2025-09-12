@@ -211,6 +211,7 @@ class local_earlyalert_course_grades_ws extends external_api
                         'templateid' => $template_data->templateid,
                         'revision_id' => $template_data->revision_id,
                         'course_id' => $courseid,
+                        'hascustommessage' => isset($course_template->hascustommessage) ? (int)$course_template->hascustommessage : 0,
                         'instructor_id' => $template_data->instructor_id,
                         'triggered_from_user_id' => $template_data->triggered_from_user_id
                     );
@@ -258,6 +259,7 @@ class local_earlyalert_course_grades_ws extends external_api
                             'templateid' => $template_data->templateid,
                             'revision_id' => $template_data->revision_id,
                             'course_id' => $courseid,
+                            'hascustommessage' => isset($template[$i]->hascustommessage) ? (int)$template[$i]->hascustommessage : 0,
                             'instructor_id' => $template_data->instructor_id,
                             'triggered_from_user_id' => $template_data->triggered_from_user_id
                         );
@@ -319,6 +321,7 @@ class local_earlyalert_course_grades_ws extends external_api
             'templateid' => new external_value(PARAM_RAW, 'Template ID', false),
             'revision_id' => new external_value(PARAM_RAW, 'Template Revision', false),
             'course_id' => new external_value(PARAM_RAW, 'Template Course ID', false),
+            'hascustommessage' => new external_value(PARAM_RAW, 'Template has custom message', false),
             'instructor_id' => new external_value(PARAM_RAW, 'Template Instructor ID', false),
             'triggered_from_user_id' => new external_value(PARAM_RAW, 'Template Date', false)
         );
@@ -333,4 +336,3 @@ class local_earlyalert_course_grades_ws extends external_api
         return new external_multiple_structure(self::get_course_student_templates_details());
     }
 }
-
