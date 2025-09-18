@@ -333,12 +333,13 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                             let grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
                             const not_using_gradebook_checkbox = document.getElementById('early-alert-not-using-gradebook-checkbox');
                     
-                            // If showing all students (grade_letter_id === -1) but we have a valid grade selection in the dropdown
-                            if (grade_letter_id === -1 && grade_select.value && grade_select.value !== '-1') {
-                                // Keep the dropdown value as is, just check the checkbox
+                            // If showing all students (grade_letter_id === -1)
+                            if (grade_letter_id === -1) {
+                                // Just check the checkbox, do NOT change the dropdown value
                                 if (not_using_gradebook_checkbox) {
                                     not_using_gradebook_checkbox.checked = true;
                                 }
+                                // Do not set grade_select.value here; preserve user's selection
                             } else if (grade_letter_id > 0) {
                                 // Normal grade filtering - set dropdown value and uncheck checkbox
                                 grade_select.value = grade_letter_id;
