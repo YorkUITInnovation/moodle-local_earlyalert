@@ -63,9 +63,11 @@ function setup_custom_message_listener() {
 // Helper function to rebuild the template cache
 function build_template_cache() {
     const template_cache_input_el = document.getElementById('early-alert-template-cache');
+    console.log('Rebuilding template cache');
     const cached_array = template_cache_input_el ? JSON.parse(template_cache_input_el.value) : [];
     const course_name = document.getElementById('early_alert_course_name').value;
-
+    console.log(' template cache');
+    console.log(cached_array);
     // Single unified textarea
     const textarea_el = document.getElementById('early-alert-custom-message');
     const custom_message = textarea_el ? textarea_el.value.trim() : '';
@@ -99,6 +101,7 @@ function alert_type_button() {
             let teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
             // Choose default grade letter dynamically: 9 for grade alerts, -1 for others (no grade filter)
             const default_grade_letter_id = (alert_type === 'grade') ? 9 : -1;
+            console.log('Alert type selected: ' + alert_type + ' for course: ' + course_name + ' (' + course_id + ')');
             setup_filter_students_by_grade(course_id, default_grade_letter_id, course_name, alert_type, teacher_user_id);
         }
     });
@@ -110,19 +113,40 @@ function alert_type_button() {
  */
 
 function filter_students_by_grade_select() {
-
-    // Get the s delected grade value from the dropdown
+    // Get the selected grade value from the dropdown
     const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
+    const not_using_gradebook_checkbox = document.getElementById('early-alert-not-using-gradebook-checkbox');
     const course_id = document.getElementById('early_alert_filter_course_id').value;
     const course_name = document.getElementById('early_alert_course_name').value;
     const alert_type = document.getElementById('early-alert-alert-type').value;
     const teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
-    // setup listener for drop down selection
+    
+    // Setup listener for drop down selection
     grade_select.addEventListener('change', function (e) {
         let grade_letter_id = e.target.value;
-        setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id);
-
+        // Check if "Not using Gradebook" is checked
+        if (not_using_gradebook_checkbox && not_using_gradebook_checkbox.checked) {
+            // Show all students by passing -1, but preserve the selected grade value
+            setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id);
+        } else {
+            console.log('Grade letter selected: ' + grade_letter_id);
+            setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id);
+        }
     });
+
+    // Setup listener for "Not using Gradebook" checkbox
+    if (not_using_gradebook_checkbox) {
+        not_using_gradebook_checkbox.addEventListener('change', function(e) {
+            if (e.target.checked) {
+                // Show all students regardless of grade selection
+                setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id);
+            } else {
+                // Revert to current grade selection
+                let current_grade = grade_select.value;
+                setup_filter_students_by_grade(course_id, current_grade, course_name, alert_type, teacher_user_id);
+            }
+        });
+    }
 }
 
 function filter_students_by_assignment() {
@@ -178,6 +202,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
     // Only display if course_id is greater than 0
     if (course_id > 0) {
         //Show loader
+        console.log('showing loader')
         Templates.render('local_earlyalert/loader', {})
             .then(function (html, js) {
                 // Insert the rendered template into the target element
@@ -191,14 +216,15 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
         var finalCache = new Map();
 
         // Fetch student list and templates
+        console.log('earlyalert_course_grades_percent_get,   earlyalert_course_student_templates for course_id: ' + course_id + ', grade_letter_id: ' + grade_letter_id + ', alert_type: ' + alert_type);
         var get_grades_and_templates = ajax.call([
             {methodname: 'earlyalert_course_grades_percent_get', args: {"id": course_id, "grade_letter_id": grade_letter_id, "teacher_user_id": teacher_user_id}},
             {methodname: 'earlyalert_course_student_templates', args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type}}
         ]);
         Promise.all(get_grades_and_templates)
             .then(([grades_response, templates_response]) => {
-                // console.log('grade response1: ' , grades_response);
-                // console.log('template response1: ' , templates_response);
+                 console.log('grade response1: ' , grades_response);
+                 console.log('template response1: ' , templates_response);
                 // Reformat the data to display in a grid
                 let num_students = grades_response.length;
                 // console.log('Number of students returned: ' + num_students);
@@ -305,8 +331,23 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         // set default grade letter selected
                         if (alert_type === 'grade') {
                             let grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
-                            grade_select.value = grade_letter_id;
-                            // setup listener for filtering students by grade drop down
+                            const not_using_gradebook_checkbox = document.getElementById('early-alert-not-using-gradebook-checkbox');
+                    
+                            // If showing all students (grade_letter_id === -1) but we have a valid grade selection in the dropdown
+                            if (grade_letter_id === -1 && grade_select.value && grade_select.value !== '-1') {
+                                // Keep the dropdown value as is, just check the checkbox
+                                if (not_using_gradebook_checkbox) {
+                                    not_using_gradebook_checkbox.checked = true;
+                                }
+                            } else if (grade_letter_id > 0) {
+                                // Normal grade filtering - set dropdown value and uncheck checkbox
+                                grade_select.value = grade_letter_id;
+                                if (not_using_gradebook_checkbox) {
+                                    not_using_gradebook_checkbox.checked = false;
+                                }
+                            }
+                    
+                            // Setup listener for filtering students by grade drop down
                             filter_students_by_grade_select();
                         }
                         if (alert_type === 'assign') {
