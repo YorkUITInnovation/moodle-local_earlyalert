@@ -106,7 +106,8 @@ $string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
 $string['view_message'] = 'View Message Details';
 $string['update_campus'] = 'Update Campus profile field';
 $string['no_courses'] = 'No Courses found';
-
+$string['custom_message_button_label'] = 'Show Custom Message';
+$string['not_using_gradebook'] = 'Not using Gradebook';
 
 /* Email template */
 $string['preview_email_greeting'] = 'Hello';
