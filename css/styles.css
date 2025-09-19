@@ -128,13 +128,15 @@
     color: #fff;
 }
 
-.early-alert-grade-column .badge {
+.early-alert-grade-column .badge,
+.early-alert-grade-column .badge-primary,
+table .early-alert-grade-column .badge {
     background-color: #6c757d !important;
-    color:  #ffffff !important;
+    border-color: #6c757d !important;
+    color: #ffffff !important;
 }
 
-/* Alternative neutral options */
-.early-alert-grade-column .badge-primary {
+/* More specific targeting for Bootstrap badges */
+.early-alert-grade-column .badge.badge-primary {
     background-color: #6c757d !important;
-    border-color:  #6c757d !important;
 }
