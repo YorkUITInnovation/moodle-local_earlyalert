@@ -48,8 +48,8 @@ function sendEmails() {
                     // success
                     notification.alert(sent_email);
                 }).fail(function () {
-                    //notification.alert(could_not_send_email);
-                    notification.alert(sent_dialog_text);
+                    notification.alert(could_not_send_email);
+                    //notification.alert(sent_dialog_text);
                 });
             });
         });

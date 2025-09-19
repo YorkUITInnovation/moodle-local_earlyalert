@@ -59,7 +59,7 @@ class local_earlyalert_record_log_ws extends external_api
             $data->instructor_id = ($student['instructor_id'] ?? 0);
             $data->assignment_name = ($student['assignment_name'] ?? 0);
             $data->trigger_grade = ($student['trigger_grade'] ?? 0);
-            $data->actual_grade = ($student['actual_grade'] ?? 0);
+            $data->actual_grade = self::convertGradeToNumeric($student['actual_grade'] ?? '');
             $data->custom_message = ($student['custom_message'] ?? '');
             //all logs default to unadvised
             $data->student_advised_by_advisor = 0;
@@ -74,6 +74,31 @@ class local_earlyalert_record_log_ws extends external_api
         }
 
         return sizeof($ids);
+    }
+
+    /**
+     * Converts grade display text to numeric value for database storage
+     * @param string $gradeText - The grade text from the badge
+     * @return int - Numeric grade value, -1 for no grade
+     */
+    private static function convertGradeToNumeric($gradeText) {
+        // Handle common "no grade" cases
+        if (empty($gradeText) || $gradeText === 'No Grade' || trim($gradeText) === '') {
+            return -1;
+        }
+
+        // Extract numeric value from percentage (e.g., "85%" -> 85)
+        if (preg_match('/(\d+(?:\.\d+)?)%/', $gradeText, $matches)) {
+            return (int)round(floatval($matches[1]));
+        }
+
+        // Try to parse as a direct number
+        if (is_numeric($gradeText)) {
+            return (int)round(floatval($gradeText));
+        }
+
+        // For letter grades or other text, return -1
+        return -1;
     }
 
     /**
