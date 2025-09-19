@@ -524,7 +524,9 @@ function setup_preview_buttons(templateCache) {
     fresh_buttons.forEach(function (button) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
-        const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
+        const gradeColumn = button.closest('tr').querySelector('.early-alert-grade-column');
+        const gradeBadge = gradeColumn ? gradeColumn.querySelector('.badge') : null;
+        const assigngrade = gradeBadge ? gradeBadge.innerHTML : 'No Grade';
         let selected_grade = '';
         let selected_grade_value = 0;
         if (alert_type === 'grade') { // we only use grade/select etc in this alert type
@@ -682,7 +684,9 @@ function setup_preview_emails_with_titles(templateCache) {
     fresh_buttons.forEach(function (button) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
-        const assigngrade = button.closest('tr').querySelector('.early-alert-grade-column').querySelector('.badge').innerHTML;
+        const gradeColumn = button.closest('tr').querySelector('.early-alert-grade-column');
+        const gradeBadge = gradeColumn ? gradeColumn.querySelector('.badge') : null;
+        const assigngrade = gradeBadge ? gradeBadge.innerHTML : 'No Grade';
         let selected_grade = '';
         let selected_grade_value = 0;
         if (alert_type === 'grade') { // we only use grade/select etc in this alert type
