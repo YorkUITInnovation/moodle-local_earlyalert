@@ -126,9 +126,9 @@ function filter_students_by_grade_select() {
         let grade_letter_id = e.target.value;
         // Check if "Not using Gradebook" is checked
         if (not_using_gradebook_checkbox && not_using_gradebook_checkbox.checked) {
-            // Show all students by passing -1, but preserve the selected grade value
-            console.log('On no grade book checked grade letter:  ' + grade_letter_id);
-            setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id);
+            // Rebuild template cache with new grade for template parameters
+            const templateCache = build_template_cache();
+            setup_preview_buttons(templateCache);
         } else {
             console.log('On normal call Grade letter selected: ' + grade_letter_id);
             setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id);
@@ -138,15 +138,13 @@ function filter_students_by_grade_select() {
     // Setup listener for "Not using Gradebook" checkbox
     if (not_using_gradebook_checkbox) {
         not_using_gradebook_checkbox.addEventListener('change', function(e) {
-            // Store the current grade selection before any changes
-            const current_grade = grade_select.value;
-            console.log(current_grade);
             if (e.target.checked) {
                 console.log('Gade letter when using no grade checkbox checked:  ' + current_grade);
                 // Show all students regardless of grade selection, but preserve dropdown value
                 setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id);
             } else {
                 // Revert to current grade selection
+                const current_grade = grade_select.value;
                 console.log('Grade letter when NOT using :  ' + current_grade);
                 setup_filter_students_by_grade(course_id, current_grade, course_name, alert_type, teacher_user_id);
             }
@@ -339,12 +337,13 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     
                             // If showing all students (grade_letter_id === -1)
                             if (grade_letter_id === -1) {
-                                // Just check the checkbox, do NOT change the dropdown value
-                                grade_select.value = 9;
+                                // Store current value before any changes
+                                const currentValue = grade_select.value;
                                 if (not_using_gradebook_checkbox) {
                                     not_using_gradebook_checkbox.checked = true;
                                 }
-                                // Do not set grade_select.value here; preserve user's selection
+                                // Restore the previous selection, or default to 9 if none exists
+                                grade_select.value = currentValue && currentValue !== '-1' ? currentValue : 9;
                             } else if (grade_letter_id > 0) {
                                 // Normal grade filtering - set dropdown value and uncheck checkbox
                                 grade_select.value = grade_letter_id;
