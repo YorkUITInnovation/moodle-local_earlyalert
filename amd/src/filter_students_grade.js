@@ -127,9 +127,10 @@ function filter_students_by_grade_select() {
         // Check if "Not using Gradebook" is checked
         if (not_using_gradebook_checkbox && not_using_gradebook_checkbox.checked) {
             // Show all students by passing -1, but preserve the selected grade value
+            console.log('On no grade book checked grade letter:  ' + grade_letter_id);
             setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id);
         } else {
-            console.log('Grade letter selected: ' + grade_letter_id);
+            console.log('On normal call Grade letter selected: ' + grade_letter_id);
             setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id);
         }
     });
@@ -139,12 +140,14 @@ function filter_students_by_grade_select() {
         not_using_gradebook_checkbox.addEventListener('change', function(e) {
             // Store the current grade selection before any changes
             const current_grade = grade_select.value;
-
+            console.log(current_grade);
             if (e.target.checked) {
+                console.log('Gade letter when using no grade checkbox checked:  ' + current_grade);
                 // Show all students regardless of grade selection, but preserve dropdown value
                 setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id);
             } else {
                 // Revert to current grade selection
+                console.log('Grade letter when NOT using :  ' + current_grade);
                 setup_filter_students_by_grade(course_id, current_grade, course_name, alert_type, teacher_user_id);
             }
         });
@@ -194,6 +197,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
     // convert course_id into an integer
     course_id = parseInt(course_id);
     grade_letter_id = parseInt(grade_letter_id);
+    console.log(grade_letter_id, ' - grade letter id being used to filter students');
     // Add course_id to element with id early_alert_filter_course_id
     document.getElementById('early_alert_filter_course_id').value = course_id;
     // Add alert type to element with id early-alert-alert-type
@@ -203,8 +207,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
     // Only display if course_id is greater than 0
     if (course_id > 0) {
-        //Show loader
-        console.log('showing loader')
         Templates.render('local_earlyalert/loader', {})
             .then(function (html, js) {
                 // Insert the rendered template into the target element
