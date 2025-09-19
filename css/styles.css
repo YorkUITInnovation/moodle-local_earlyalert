@@ -129,12 +129,12 @@
 }
 
 .early-alert-grade-column .badge {
-    background-color: var(--bs-secondary, #6c757d) !important;
-    color: var(--bs-white, #ffffff) !important;
+    background-color: #6c757d !important;
+    color:  #ffffff !important;
 }
 
 /* Alternative neutral options */
 .early-alert-grade-column .badge-primary {
-    background-color: var(--bs-secondary, #6c757d) !important;
-    border-color: var(--bs-secondary, #6c757d) !important;
+    background-color: #6c757d !important;
+    border-color:  #6c757d !important;
 }
