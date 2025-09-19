@@ -340,6 +340,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                             // If showing all students (grade_letter_id === -1)
                             if (grade_letter_id === -1) {
                                 // Just check the checkbox, do NOT change the dropdown value
+                                grade_select.value = 9;
                                 if (not_using_gradebook_checkbox) {
                                     not_using_gradebook_checkbox.checked = true;
                                 }
