@@ -61,13 +61,18 @@ $string['impersonate_user'] = 'Send on behalf of: {$a}';
 $string['impersonating_user'] = 'Impersonating User';
 $string['generate_reports'] = 'Generate Reports';
 $string['grade'] = 'Grade';
-$string['grade_instructions'] = '<ul>
-<li>Grades messages inform students they are averaging below a certain letter grade.
-    <ul><li>The default has been set to a D+.</li></ul>
-</li> 
-<li>Should you wish to adjust this for your course, please use the selector below.
-<ul><li>Note that this is the letter grade that will appear in the email (e.g. you are averaging a D+ or less)</li></ul>
-</li>
+$string['grade_instructions'] = '
+<ul>
+    <li>Grades messages inform students they are averaging below a certain letter grade.
+        <ul><li>The default has been set to a D+.</li></ul>
+    </li> 
+    <li>Should you wish to adjust this for your course, please use the selector below.
+        <ul>
+            <li>Note that this is the letter grade that will appear in the email (e.g. you are averaging a D+ or less)</li>
+            <li>If you are using the gradebook, this is also how you sort your students to show only those averaging a specific grade or less (based on the gradebook course total). If you set the box to D+, for example, you will only see a list of students who are averaging a D+ or less in your list. In order for this feature to work properly, you must have “exclude empty grades” checked under “Grade category” in your eClass settings.</li>
+        </ul>
+    </li>
+    <li>If you are using the gradebook but the calculation is not functioning as intended and/or you would like to select students manually, check the box below:</li>
 </ul>';
 $string['lookup_student'] = 'Lookup Student';
 $string['low_grade'] = 'Low grade';
@@ -107,7 +112,7 @@ $string['view_message'] = 'View Message Details';
 $string['update_campus'] = 'Update Campus profile field';
 $string['no_courses'] = 'No Courses found';
 $string['custom_message_button_label'] = 'Show Custom Message';
-$string['not_using_gradebook'] = 'Not using Gradebook';
+$string['not_using_gradebook'] = 'View all my students, irrespective of grade';
 
 /* Email template */
 $string['preview_email_greeting'] = 'Hello';
