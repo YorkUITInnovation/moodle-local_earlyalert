@@ -342,7 +342,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                                     not_using_gradebook_checkbox.checked = true;
                                 }
                                 // Restore the previous selection, or default to 9 if none exists
-                                grade_select.value = currentValue && currentValue !== '-1' ? currentValue : 9;
+                               // grade_select.value = currentValue && currentValue !== '-1' ? currentValue : 9;
+                                grade_select.value = 9; // default to 9 when showing all students
                             } else if (grade_letter_id > 0) {
                                 // Normal grade filtering - set dropdown value and uncheck checkbox
                                 grade_select.value = grade_letter_id;
