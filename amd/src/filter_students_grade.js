@@ -138,13 +138,12 @@ function filter_students_by_grade_select() {
     // Setup listener for "Not using Gradebook" checkbox
     if (not_using_gradebook_checkbox) {
         not_using_gradebook_checkbox.addEventListener('change', function(e) {
+            const current_grade = grade_select.value; //get current grade selection at time of checkbox change
             if (e.target.checked) {
                 console.log('Gade letter when using no grade checkbox checked:  ' + current_grade);
                 // Show all students regardless of grade selection, but preserve dropdown value
                 setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id);
             } else {
-                // Revert to current grade selection
-                const current_grade = grade_select.value;
                 console.log('Grade letter when NOT using :  ' + current_grade);
                 setup_filter_students_by_grade(course_id, current_grade, course_name, alert_type, teacher_user_id);
             }
