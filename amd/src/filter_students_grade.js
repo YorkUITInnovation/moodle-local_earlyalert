@@ -63,11 +63,8 @@ function setup_custom_message_listener() {
 // Helper function to rebuild the template cache
 function build_template_cache() {
     const template_cache_input_el = document.getElementById('early-alert-template-cache');
-    console.log('Rebuilding template cache');
     const cached_array = template_cache_input_el ? JSON.parse(template_cache_input_el.value) : [];
     const course_name = document.getElementById('early_alert_course_name').value;
-    console.log(' template cache');
-    console.log(cached_array);
     // Single unified textarea
     const textarea_el = document.getElementById('early-alert-custom-message');
     const custom_message = textarea_el ? textarea_el.value.trim() : '';
@@ -101,7 +98,6 @@ function alert_type_button() {
             let teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
             // Choose default grade letter dynamically: 9 for grade alerts, -1 for others (no grade filter)
             const default_grade_letter_id = (alert_type === 'grade') ? 9 : -1;
-            console.log('Alert type selected: ' + alert_type + ' for course: ' + course_name + ' (' + course_id + ')');
             setup_filter_students_by_grade(course_id, default_grade_letter_id, course_name, alert_type, teacher_user_id);
         }
     });
@@ -130,7 +126,6 @@ function filter_students_by_grade_select() {
             const templateCache = build_template_cache();
             setup_preview_buttons(templateCache);
         } else {
-            console.log('On normal call Grade letter selected: ' + grade_letter_id);
             setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id);
         }
     });
@@ -140,11 +135,9 @@ function filter_students_by_grade_select() {
         not_using_gradebook_checkbox.addEventListener('change', function(e) {
             const current_grade = grade_select.value; //get current grade selection at time of checkbox change
             if (e.target.checked) {
-                console.log('Gade letter when using no grade checkbox checked:  ' + current_grade);
                 // Show all students regardless of grade selection, but preserve dropdown value
                 setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id);
             } else {
-                console.log('Grade letter when NOT using :  ' + current_grade);
                 setup_filter_students_by_grade(course_id, current_grade, course_name, alert_type, teacher_user_id);
             }
         });
@@ -194,7 +187,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
     // convert course_id into an integer
     course_id = parseInt(course_id);
     grade_letter_id = parseInt(grade_letter_id);
-    console.log(grade_letter_id, ' - grade letter id being used to filter students');
     // Add course_id to element with id early_alert_filter_course_id
     document.getElementById('early_alert_filter_course_id').value = course_id;
     // Add alert type to element with id early-alert-alert-type
@@ -217,15 +209,14 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
         var finalCache = new Map();
 
         // Fetch student list and templates
-        console.log('earlyalert_course_grades_percent_get,   earlyalert_course_student_templates for course_id: ' + course_id + ', grade_letter_id: ' + grade_letter_id + ', alert_type: ' + alert_type);
         var get_grades_and_templates = ajax.call([
             {methodname: 'earlyalert_course_grades_percent_get', args: {"id": course_id, "grade_letter_id": grade_letter_id, "teacher_user_id": teacher_user_id}},
             {methodname: 'earlyalert_course_student_templates', args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type}}
         ]);
         Promise.all(get_grades_and_templates)
             .then(([grades_response, templates_response]) => {
-                 console.log('grade response1: ' , grades_response);
-                 console.log('template response1: ' , templates_response);
+                 //console.log('grade response1: ' , grades_response);
+                // console.log('template response1: ' , templates_response);
                 // Reformat the data to display in a grid
                 let num_students = grades_response.length;
                 // console.log('Number of students returned: ' + num_students);
@@ -295,7 +286,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     ) ? 1 : 0;
                 }
                 display_data.hascustommessage = hascustommessage;
-                // console.log( display_data.hascustommessage + ' - has custom message?');
 
                 if (alert_type === 'grade') {
                     // Add alert_type to display_data
