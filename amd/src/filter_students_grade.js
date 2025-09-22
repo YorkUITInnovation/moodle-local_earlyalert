@@ -320,6 +320,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         // (Re)attach custom message listeners and toggles now that the DOM was re-rendered
                         setup_custom_message_listener();
                         setup_custom_message_toggles();
+
+                        console.log('display_data: ', display_data);
                         // set default grade letter selected
                         if (alert_type === 'grade') {
                             let grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
