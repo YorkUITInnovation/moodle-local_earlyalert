@@ -38,12 +38,21 @@
                     </button>
                     {{/hascustommessage}}
                 </div>
-                    <span class="form-check">
-                        <input class="early-alert-student-checkbox" type="checkbox" value="" id="early-alert-not-using-gradebook-checkbox">
-                        <label class="form-check-label" for="early-alert-not-using-gradebook-checkbox">
-                            {{#str}}not_using_gradebook, local_earlyalert{{/str}}
-                        </label>
-                    </span>
+            </div>
+            <!-- Unified collapsible custom message container (shared by all alert types) -->
+            {{#hascustommessage}}
+            <div id="custom-message-container" class="custom-message-container collapse mb-3 ">
+                <textarea id="early-alert-custom-message" class="form-control early-alert-custom-message" rows="4"
+                          placeholder="Enter a custom message to be included in all emails. This will replace [custommessage] in the template."></textarea>
+                <small class="form-text text-muted">This message will be added to all selected student emails.</small>
+            </div>
+            {{/hascustommessage}}
+            <div id='early_alert_gradebook_instructions_container' class="mt-1 mb-1">{{#str}}no_gradebook_instructions, local_earlyalert{{/str}}
+                <ul class="list-unstyled mt-2">
+                    <li>
+                        <span> class="mb-1"><input class="early-alert-student-checkbox" type="checkbox" value="" id="early-alert-not-using-gradebook-checkbox"> {{#str}}not_using_gradebook, local_earlyalert{{/str}} </span>
+                    </li>
+                </ul>
             </div>
         {{/grade}}
 
@@ -76,6 +85,7 @@
                 {{/hascustommessage}}
             </div>
         {{/grade}}
+        {{^grade}}
         <!-- Unified collapsible custom message container (shared by all alert types) -->
         {{#hascustommessage}}
         <div id="custom-message-container" class="custom-message-container collapse mb-3 ">
@@ -84,6 +94,7 @@
             <small class="form-text text-muted">This message will be added to all selected student emails.</small>
         </div>
         {{/hascustommessage}}
+        {{/grade}}
     </div>
 </div>
 
