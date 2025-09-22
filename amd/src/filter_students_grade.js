@@ -528,7 +528,7 @@ function setup_preview_buttons(templateCache) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const gradeColumn = button.closest('tr').querySelector('.early-alert-grade-column');
-        const gradeBadge = gradeColumn ? gradeBadge.querySelector('.badge') : null;
+        const gradeBadge = gradeColumn ? gradeColumn.querySelector('.badge') : null;
         const assigngrade = gradeBadge ? gradeBadge.innerHTML : 'No Grade';
         let selected_grade = '';
         let selected_grade_value = 0;
@@ -688,7 +688,7 @@ function setup_preview_emails_with_titles(templateCache) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const gradeColumn = button.closest('tr').querySelector('.early-alert-grade-column');
-        const gradeBadge = gradeColumn ? gradeBadge.querySelector('.badge') : null;
+        const gradeBadge = gradeColumn ? gradeColumn.querySelector('.badge') : null;
         const assigngrade = gradeBadge ? gradeBadge.innerHTML : 'No Grade';
         let selected_grade = '';
         let selected_grade_value = 0;
