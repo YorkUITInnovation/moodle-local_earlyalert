@@ -71,9 +71,10 @@ $string['grade_instructions'] = '
             <li>Note that this is the letter grade that will appear in the email (e.g. you are averaging a D+ or less)</li>
             <li>If you are using the gradebook, this is also how you sort your students to show only those averaging a specific grade or less (based on the gradebook course total). If you set the box to D+, for example, you will only see a list of students who are averaging a D+ or less in your list. In order for this feature to work properly, you must have “exclude empty grades” checked under “Grade category” in your eClass settings.</li>
         </ul>
-    </li>
-    <li>If you are using the gradebook but the calculation is not functioning as intended and/or you would like to select students manually, check the box below:</li>
+    </li>    
 </ul>';
+
+$string['no_gradebook_instructions']  = '<ul><li>If you are using the gradebook but the calculation is not functioning as intended and/or you would like to select students manually, check the box below:</li></ul>'
 $string['lookup_student'] = 'Lookup Student';
 $string['low_grade'] = 'Low grade';
 $string['manage_roles'] = 'Manage Roles';
