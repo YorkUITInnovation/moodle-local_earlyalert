@@ -73,7 +73,7 @@ $string['grade_instructions'] = '
         </ul>
     </li>    
 </ul>';
-$string['no_gradebook_instructions']  = '<ul><li>If you are using the gradebook but the calculation is not functioning as intended and/or you would like to select students manually, check the box below:</li></ul>';
+$string['no_gradebook_instructions']  = 'If you are using the gradebook but the calculation is not functioning as intended and/or you would like to select students manually, check the box below';
 $string['lookup_student'] = 'Lookup Student';
 $string['low_grade'] = 'Low grade';
 $string['manage_roles'] = 'Manage Roles';
