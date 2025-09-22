@@ -302,12 +302,14 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 if (alert_type === 'assign') {
                     // Add alert_type to display_data
                     display_data.alert_type = 'Missed Assignment';
+                    display_data.grade = false; // to render customessage shared containers/fields
                     display_data.assign = true;
                 }
 
                 if (alert_type === 'exam') {
                     // Add alert_type to display_data
                     display_data.alert_type = 'Missed Exam';
+                    display_data.grade = false; // to render customessage shared containers/fields
                     display_data.exam = true;
                 }
 
@@ -531,7 +533,7 @@ function setup_preview_buttons(templateCache) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const gradeColumn = button.closest('tr').querySelector('.early-alert-grade-column');
-        const gradeBadge = gradeColumn ? gradeColumn.querySelector('.badge') : null;
+        const gradeBadge = gradeColumn ? gradeBadge.querySelector('.badge') : null;
         const assigngrade = gradeBadge ? gradeBadge.innerHTML : 'No Grade';
         let selected_grade = '';
         let selected_grade_value = 0;
@@ -691,7 +693,7 @@ function setup_preview_emails_with_titles(templateCache) {
         let record_data = {};
         const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
         const gradeColumn = button.closest('tr').querySelector('.early-alert-grade-column');
-        const gradeBadge = gradeColumn ? gradeColumn.querySelector('.badge') : null;
+        const gradeBadge = gradeColumn ? gradeBadge.querySelector('.badge') : null;
         const assigngrade = gradeBadge ? gradeBadge.innerHTML : 'No Grade';
         let selected_grade = '';
         let selected_grade_value = 0;
@@ -1085,11 +1087,11 @@ function setupTogglePair(buttonId, containerId) {
         // Update label and styles
         if (open) {
             button.innerHTML = '<i class="fa fa-minus"></i> Hide Custom Message';
-            button.classList.remove('btn-outline-secondary', 'btn-secondary');
+            button.classList.remove('btn-outline-secondary');
             button.classList.add('btn-outline-primary');
         } else {
             button.innerHTML = '<i class="fa fa-plus"></i> Show Custom Message';
-            button.classList.remove('btn-outline-primary', 'btn-primary');
+            button.classList.remove('btn-outline-primary');
             button.classList.add('btn-outline-secondary');
         }
     };
