@@ -27,12 +27,6 @@
                         <option value="2">A-</option>
                         <option value="1">A</option>
                     </select>
-                    <ul class="list-unstyled mt-2">
-                        <li>
-                            <p class="mb-1">{{#str}}not_using_gradebook, local_earlyalert{{/str}}</p>
-                            <input class="early-alert-student-checkbox" type="checkbox" value="" id="early-alert-not-using-gradebook-checkbox">
-                        </li>
-                    </ul>
                 </div>
                 <div>
                     <span class="custom-message-preview text-muted font-italic mr-2"></span>
@@ -44,6 +38,13 @@
                     </button>
                     {{/hascustommessage}}
                 </div>
+                <p class="mb-1">{{#str}}no_gradebook_instructions, local_earlyalert{{/str}}</p>
+                <ul class="mt-2">
+                    <li>
+                        <p class="mb-1">{{#str}}not_using_gradebook, local_earlyalert{{/str}}</p>
+                        <input class="early-alert-student-checkbox" type="checkbox" value="" id="early-alert-not-using-gradebook-checkbox">
+                    </li>
+                </ul>
             </div>
         {{/grade}}
 
