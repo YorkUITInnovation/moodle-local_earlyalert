@@ -47,11 +47,15 @@
                 <small class="form-text text-muted">This message will be added to all selected student emails.</small>
             </div>
             {{/hascustommessage}}
-            <div id='early_alert_gradebook_instructions_container' class="mt-1 mb-1">{{#str}}no_gradebook_instructions, local_earlyalert{{/str}}
-                <ul class="list-unstyled mt-2">
-                    <li>
-                        <span class="mb-1"><input class="early-alert-student-checkbox" type="checkbox" value="" id="early-alert-not-using-gradebook-checkbox"> {{#str}}not_using_gradebook, local_earlyalert{{/str}} </span>
-                    </li>
+            <div id='early_alert_gradebook_instructions_container' class="mt-2 mb-1">
+                <ul>
+                    <li>{{#str}}no_gradebook_instructions, local_earlyalert{{/str}}</li>
+                    <ul class="list-unstyled ml-3">
+                        <li>
+                           <input class="early-alert-student-checkbox" type="checkbox" value="" id="early-alert-not-using-gradebook-checkbox">
+                            {{#str}}not_using_gradebook, local_earlyalert{{/str}}
+                        </li>
+                    </ul>
                 </ul>
             </div>
         {{/grade}}
