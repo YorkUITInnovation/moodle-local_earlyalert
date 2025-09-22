@@ -23,11 +23,8 @@ export const init = () => {
  * Updates the preview text and refreshes templates when the custom message changes
  */
 function setup_custom_message_listener() {
-    // Prefer grade textarea if present, else fallback to non-grade
-    let textarea = document.getElementById('early-alert-custom-message-grade');
-    if (!textarea) {
-        textarea = document.getElementById('early-alert-custom-message');
-    }
+    // Single shared textarea for all alert types
+    const textarea = document.getElementById('early-alert-custom-message');
     const preview = document.querySelector('.custom-message-preview');
 
     if (!textarea || !preview) {
@@ -68,11 +65,8 @@ function build_template_cache() {
     const template_cache_input_el = document.getElementById('early-alert-template-cache');
     const cached_array = template_cache_input_el ? JSON.parse(template_cache_input_el.value) : [];
     const course_name = document.getElementById('early_alert_course_name').value;
-    // Prefer grade textarea if present, else fallback to non-grade
-    let textarea_el = document.getElementById('early-alert-custom-message-grade');
-    if (!textarea_el) {
-        textarea_el = document.getElementById('early-alert-custom-message');
-    }
+    // Single unified textarea
+    const textarea_el = document.getElementById('early-alert-custom-message');
     const custom_message = textarea_el ? textarea_el.value.trim() : '';
 
     // Build new cache
@@ -1059,19 +1053,11 @@ function focusOnCheckall() {
 }
 
 /**
- * Sets up toggle functionality for the custom message containers (grade/assign/exam)
+ * Sets up toggle functionality for the single custom message container
  */
 function setup_custom_message_toggles() {
-    const pairs = [
-        {btn: 'toggle-custom-message-grade', container: 'custom-message-container-grade'},
-        {btn: 'toggle-custom-message', container: 'custom-message-container'},
-    ];
-    pairs.forEach(({btn, container}) => setupTogglePair(btn, container));
-}
-
-function setupTogglePair(buttonId, containerId) {
-    const btn = document.getElementById(buttonId);
-    const container = document.getElementById(containerId);
+    const btn = document.getElementById('toggle-custom-message');
+    const container = document.getElementById('custom-message-container');
 
     if (!btn || !container) {
         return;
