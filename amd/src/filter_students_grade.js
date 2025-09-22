@@ -286,7 +286,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     ) ? 1 : 0;
                 }
                 display_data.hascustommessage = hascustommessage;
-
+                // Set alert type flags for template rendering - grade is set explicitly for custommessage field rendering
+                display_data.grade = (alert_type === 'grade');
                 if (alert_type === 'grade') {
                     // Add alert_type to display_data
                     display_data.alert_type = 'Low Grade';
@@ -296,14 +297,12 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 if (alert_type === 'assign') {
                     // Add alert_type to display_data
                     display_data.alert_type = 'Missed Assignment';
-                    display_data.grade = false; // to render customessage shared containers/fields
                     display_data.assign = true;
                 }
 
                 if (alert_type === 'exam') {
                     // Add alert_type to display_data
                     display_data.alert_type = 'Missed Exam';
-                    display_data.grade = false; // to render customessage shared containers/fields
                     display_data.exam = true;
                 }
 
