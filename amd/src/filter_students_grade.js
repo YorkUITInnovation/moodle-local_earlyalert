@@ -23,8 +23,11 @@ export const init = () => {
  * Updates the preview text and refreshes templates when the custom message changes
  */
 function setup_custom_message_listener() {
-    // Single shared textarea for all alert types
-    const textarea = document.getElementById('early-alert-custom-message');
+    // Prefer grade textarea if present, else fallback to non-grade
+    let textarea = document.getElementById('early-alert-custom-message-grade');
+    if (!textarea) {
+        textarea = document.getElementById('early-alert-custom-message');
+    }
     const preview = document.querySelector('.custom-message-preview');
 
     if (!textarea || !preview) {
@@ -65,8 +68,11 @@ function build_template_cache() {
     const template_cache_input_el = document.getElementById('early-alert-template-cache');
     const cached_array = template_cache_input_el ? JSON.parse(template_cache_input_el.value) : [];
     const course_name = document.getElementById('early_alert_course_name').value;
-    // Single unified textarea
-    const textarea_el = document.getElementById('early-alert-custom-message');
+    // Prefer grade textarea if present, else fallback to non-grade
+    let textarea_el = document.getElementById('early-alert-custom-message-grade');
+    if (!textarea_el) {
+        textarea_el = document.getElementById('early-alert-custom-message');
+    }
     const custom_message = textarea_el ? textarea_el.value.trim() : '';
 
     // Build new cache
@@ -1051,11 +1057,19 @@ function focusOnCheckall() {
 }
 
 /**
- * Sets up toggle functionality for the single custom message container
+ * Sets up toggle functionality for the custom message containers (grade/assign/exam)
  */
 function setup_custom_message_toggles() {
-    const btn = document.getElementById('toggle-custom-message');
-    const container = document.getElementById('custom-message-container');
+    const pairs = [
+        {btn: 'toggle-custom-message-grade', container: 'custom-message-container-grade'},
+        {btn: 'toggle-custom-message', container: 'custom-message-container'},
+    ];
+    pairs.forEach(({btn, container}) => setupTogglePair(btn, container));
+}
+
+function setupTogglePair(buttonId, containerId) {
+    const btn = document.getElementById(buttonId);
+    const container = document.getElementById(containerId);
 
     if (!btn || !container) {
         return;
@@ -1071,11 +1085,11 @@ function setup_custom_message_toggles() {
         // Update label and styles
         if (open) {
             button.innerHTML = '<i class="fa fa-minus"></i> Hide Custom Message';
-            button.classList.remove('btn-outline-secondary');
+            button.classList.remove('btn-outline-secondary', 'btn-secondary');
             button.classList.add('btn-outline-primary');
         } else {
             button.innerHTML = '<i class="fa fa-plus"></i> Show Custom Message';
-            button.classList.remove('btn-outline-primary');
+            button.classList.remove('btn-outline-primary', 'btn-primary');
             button.classList.add('btn-outline-secondary');
         }
     };

@@ -31,9 +31,9 @@
                 <div>
                     <span class="custom-message-preview text-muted font-italic mr-2"></span>
                     {{#hascustommessage}}
-                    <button type="button" id="toggle-custom-message" class="btn btn-sm btn-outline-secondary"
-                            data-toggle="collapse" data-target="#custom-message-container"
-                            aria-expanded="false" aria-controls="custom-message-container">
+                    <button type="button" id="toggle-custom-message-grade" class="btn btn-sm btn-outline-secondary"
+                            data-toggle="collapse" data-target="#custom-message-container-grade"
+                            aria-expanded="false" aria-controls="custom-message-container-grade">
                         <i class="fa fa-plus"></i>  {{#str}}custom_message_button_label, local_earlyalert{{/str}}
                     </button>
                     {{/hascustommessage}}
@@ -41,8 +41,8 @@
             </div>
             <!-- Unified collapsible custom message container (shared by all alert types) -->
             {{#hascustommessage}}
-            <div id="custom-message-container" class="custom-message-container collapse mb-3 ">
-                <textarea id="early-alert-custom-message" class="form-control early-alert-custom-message" rows="4"
+            <div id="custom-message-container-grade" class="custom-message-container collapse mb-3 ">
+                <textarea id="early-alert-custom-message-grade" class="form-control early-alert-custom-message" rows="4"
                           placeholder="Enter a custom message to be included in all emails. This will replace [custommessage] in the template."></textarea>
                 <small class="form-text text-muted">This message will be added to all selected student emails.</small>
             </div>
