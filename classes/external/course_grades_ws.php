@@ -190,83 +190,100 @@ class local_earlyalert_course_grades_ws extends external_api
                 $lang = self::process_lang_for_templates($student['lang']);
 
                 $student_idnumber = $student['idnumber'];
-                $course_template_params = array('lang' => $lang,
+
+                // Set up campus, faculty and department
+                $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
+                $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
+                $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
+
+                $template = false;
+                $templateKey = '';
+
+                // 1. Org Unit + Course specific template (most specific)
+                $org_course_params = [
                     'faculty' => $course_faculty,
                     'course' => $course_name,
                     'coursenumber' => $course_number,
                     'message_type' => $alert_type,
                     'active' => 1,
-                    'deleted' => 0);
+                    'deleted' => 0,
+                    'lang' => $lang
+                ];
 
-                // Get course email template
-                $course_template = $DB->get_record('local_et_email', $course_template_params);
+                // Check department, then faculty, then campus for a course-specific template
+                if ($department) {
+                    $org_course_params['unit'] = $department->id;
+                    $org_course_params['context'] = 'DEPT';
+                    if ($org_template = $DB->get_record('local_et_email', $org_course_params)) {
+                        $template = $org_template;
+                        $templateKey = 'org_course_' . $department->id . '_' . $courseid . '_' . $lang . '_' . $student_idnumber;
+                    }
+                }
+                if (!$template && $faculty) {
+                    $org_course_params['unit'] = $faculty->id;
+                    $org_course_params['context'] = 'UNIT';
+                    if ($org_template = $DB->get_record('local_et_email', $org_course_params)) {
+                        $template = $org_template;
+                        $templateKey = 'org_course_' . $faculty->id . '_' . $courseid . '_' . $lang . '_' . $student_idnumber;
+                    }
+                }
+                if (!$template && $campus) {
+                    $org_course_params['unit'] = $campus->id;
+                    $org_course_params['context'] = 'CAMPUS';
+                    if ($org_template = $DB->get_record('local_et_email', $org_course_params)) {
+                        $template = $org_template;
+                        $templateKey = 'org_course_' . $campus->id . '_' . $courseid . '_' . $lang . '_' . $student_idnumber;
+                    }
+                }
 
-                if ($course_template && $course_template->faculty == $student['faculty']) {
-                    $email = new \local_etemplate\email($course_template->id);
+
+                // 2. Course-level template (faculty->course->coursenumber)
+                if (!$template) {
+                    $course_template_params = array('lang' => $lang,
+                        'faculty' => $course_faculty,
+                        'course' => $course_name,
+                        'coursenumber' => $course_number,
+                        'message_type' => $alert_type,
+                        'active' => 1,
+                        'deleted' => 0);
+                    if ($course_template = $DB->get_record('local_et_email', $course_template_params)) {
+                        if ($course_template->faculty == $student['faculty']) {
+                            $template = $course_template;
+                            $templateKey = 'course_' . $courseid . '_' . $lang . '_' . $student_idnumber;
+                        }
+                    }
+                }
+
+                // 3. Org-level templates (DEPT -> UNIT -> CAMPUS)
+                if (!$template) {
+                    if ($department && $depttemplate = $DB->get_record('local_et_email', array('lang' => $lang, 'unit' => $department->id, 'context' => 'DEPT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0))) {
+                        $template = $depttemplate;
+                        $templateKey = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang . '_' . $student_idnumber;
+                    } else if ($faculty && $facultytemplate = $DB->get_record('local_et_email', array('lang' => $lang, 'unit' => $faculty->id, 'context' => 'UNIT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0))) {
+                        $template = $facultytemplate;
+                        $templateKey = $student['campus'] . "_" . $student['faculty'] . '_' . $lang . '_' . $student_idnumber;
+                    } else if ($campus && $campustemplate = $DB->get_record('local_et_email', array('lang' => $lang, 'unit' => $campus->id, 'context' => 'CAMPUS', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0))) {
+                        $template = $campustemplate;
+                        $templateKey = $student['campus'] . '_' . $lang . '_' . $student_idnumber;
+                    }
+                }
+
+                if ($template) {
+                    $email = new \local_etemplate\email($template->id);
                     $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                    $templateCache['course_' . $courseid . '_' . $lang . '_' . $student_idnumber] = array(
-                        'templateKey' => 'course_' . $courseid . '_' . $lang . '_' . $student_idnumber,
+                    $templateCache[$templateKey] = array(
+                        'templateKey' => $templateKey,
                         'subject' => $template_data->subject,
                         'message' => $template_data->message,
                         'templateid' => $template_data->templateid,
                         'revision_id' => $template_data->revision_id,
                         'course_id' => $courseid,
-                        'hascustommessage' => isset($course_template->hascustommessage) ? (int)$course_template->hascustommessage : 0,
+                        'hascustommessage' => isset($template->hascustommessage) ? (int)$template->hascustommessage : 0,
                         'instructor_id' => $template_data->instructor_id,
                         'triggered_from_user_id' => $template_data->triggered_from_user_id
                     );
-
                 } else {
-
-                    //check if template is already defined
-                    // Set up campus, faculty and department
-                    $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
-                    $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
-                    $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
-                    $campustemplate = false;
-                    $facultytemplate = false;
-                    $depttemplate = false;
-
-                    // Get various email templates
-                    $campustemplate = $DB->get_record('local_et_email',
-                        array('lang' => $lang, 'unit' => $campus->id, 'context' => 'CAMPUS', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
-                    $facultytemplate = $DB->get_record('local_et_email',
-                        array('lang' => $lang, 'unit' => $faculty->id, 'context' => 'UNIT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
-                    $depttemplate = $DB->get_record('local_et_email',
-                        array('lang' => $lang, 'unit' => $department->id, 'context' => 'DEPT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0));
-                    // Check which of the aboves are true;
-                    $templateKey = [];
-                    $template = false;
-                    if ($campustemplate) {
-                        $templateKey[$i] = $student['campus'] . '_' . $lang . '_' . $student_idnumber;
-                        $template[$i] = $campustemplate;
-                    }
-                    if ($facultytemplate) {
-                        $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . '_' . $lang . '_' . $student_idnumber;
-                        $template[$i] = $facultytemplate;
-                    }
-                    if ($depttemplate) {
-                        $templateKey[$i] = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang . '_' . $student_idnumber;
-                        $template[$i] = $depttemplate;
-                    }
-                    if (!empty($templateKey[$i])) {
-                        $email = new \local_etemplate\email($template[$i]->id);
-                        $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                        $templateCache[$templateKey[$i]] = array(
-                            'templateKey' => $templateKey[$i],
-                            'subject' => $template_data->subject,
-                            'message' => $template_data->message,
-                            'templateid' => $template_data->templateid,
-                            'revision_id' => $template_data->revision_id,
-                            'course_id' => $courseid,
-                            'hascustommessage' => isset($template[$i]->hascustommessage) ? (int)$template[$i]->hascustommessage : 0,
-                            'instructor_id' => $template_data->instructor_id,
-                            'triggered_from_user_id' => $template_data->triggered_from_user_id
-                        );
-                    }
-                    else{
-                        error_log("No template found for student: " . $student['idnumber'] . "| Campus: " . $student['campus'] . "| Faculty: " . $student['faculty'] . "| Major: " . $student['major']);
-                    }
+                    error_log("No template found for student: " . $student['idnumber'] . "| Course: " . $courseid . "| Campus: " . $student['campus'] . "| Faculty: " . $student['faculty'] . "| Major: " . $student['major']);
                 }
                 $i++;
             }
