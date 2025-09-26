@@ -564,7 +564,7 @@ function setup_preview_buttons(templateCache) {
             const studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
             // uses data found in the checkbox element attributes to create a key to find the template
-            var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var courseTemplateKey = studentFacultyAttr + '_course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
             var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr + '_' + student_idnumber;
             var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr + '_' + student_idnumber;
             var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr + '_' + studentLangAttr + '_' + student_idnumber;
@@ -572,46 +572,28 @@ function setup_preview_buttons(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            // console.log('Course template key:', courseTemplateKey);
-            // console.log('Campus template key:', campusTemplateKey);
-            // console.log('Faculty template key:', facTemplateKey);
-            // console.log('Department template key:', deptTemplateKey);
-            //
-            // console.log('New Template cache:', templateCache);
-
             // templateCache is checked for the template key and if found the email subject and content are set
+            // The order of checks determines the template precedence.
             if (templateCache.has(campusCourseTemplateKey)) {
                 templateEmailSubject = templateCache.get(campusCourseTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusCourseTemplateKey).message;
                 templateObj = templateCache.get(campusCourseTemplateKey);
-            } else if (templateCache.has(campusTemplateKey)) {
-                // console.log("department cache found:", templateCache.get(campusTemplateKey));
-                templateEmailSubject = templateCache.get(campusTemplateKey).subject;
-                templateEmailContent = templateCache.get(campusTemplateKey).message;
-                templateObj = templateCache.get(campusTemplateKey);
-            }
-            else if (templateCache.has(facTemplateKey)) { // if campus template not found, check faculty template
-                if (templateCache.has(deptTemplateKey)) { // if faculty template not found but has department template use it
-                    // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
-                    templateEmailSubject = templateCache.get(deptTemplateKey).subject;
-                    templateEmailContent = templateCache.get(deptTemplateKey).message;
-                    templateObj = templateCache.get(deptTemplateKey);
-                } else { // revert to faculty template
-                    // console.log("faculty cache found:", templateCache.get(facTemplateKey));
-                    templateEmailSubject = templateCache.get(facTemplateKey).subject;
-                    templateEmailContent = templateCache.get(facTemplateKey).message;
-                    templateObj = templateCache.get(facTemplateKey);
-                }
-            } else if (templateCache.has(deptTemplateKey)) { // if faculty template not found, check department template
-                // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
-                templateEmailSubject = templateCache.get(deptTemplateKey).subject;
-                templateEmailContent = templateCache.get(deptTemplateKey).message;
-                templateObj = templateCache.get(deptTemplateKey);
-            } else if (templateCache.has(courseTemplateKey)) { // lastly check for course template
-                //console.log("course cache found:", templateCache.get(courseTemplateKey));
+            } else if (templateCache.has(courseTemplateKey)) {
                 templateEmailSubject = templateCache.get(courseTemplateKey).subject;
                 templateEmailContent = templateCache.get(courseTemplateKey).message;
                 templateObj = templateCache.get(courseTemplateKey);
+            } else if (templateCache.has(deptTemplateKey)) {
+                templateEmailSubject = templateCache.get(deptTemplateKey).subject;
+                templateEmailContent = templateCache.get(deptTemplateKey).message;
+                templateObj = templateCache.get(deptTemplateKey);
+            } else if (templateCache.has(facTemplateKey)) {
+                templateEmailSubject = templateCache.get(facTemplateKey).subject;
+                templateEmailContent = templateCache.get(facTemplateKey).message;
+                templateObj = templateCache.get(facTemplateKey);
+            } else if (templateCache.has(campusTemplateKey)) {
+                templateEmailSubject = templateCache.get(campusTemplateKey).subject;
+                templateEmailContent = templateCache.get(campusTemplateKey).message;
+                templateObj = templateCache.get(campusTemplateKey);
             } else { // if no templates are found, set default values
                 templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';
@@ -728,7 +710,7 @@ function setup_preview_emails_with_titles(templateCache) {
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
             const studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
-            var courseTemplateKey = 'course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var courseTemplateKey = studentFacultyAttr + '_course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
             var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr + '_' + student_idnumber;
             var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr + '_' + student_idnumber;
             var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr+ '_' + studentLangAttr + '_' + student_idnumber;
@@ -736,42 +718,27 @@ function setup_preview_emails_with_titles(templateCache) {
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
-            // console.log('PET Course template key:', courseTemplateKey);
-            // console.log('PET Campus template key:', campusTemplateKey);
-            // console.log('PET Faculty template key:', facTemplateKey);
-            // console.log('PET Department template key:', deptTemplateKey);
-
+            // The order of checks determines the template precedence.
             if (templateCache.has(campusCourseTemplateKey)) {
                 templateEmailSubject = templateCache.get(campusCourseTemplateKey).subject;
                 templateEmailContent = templateCache.get(campusCourseTemplateKey).message;
                 templateObj = templateCache.get(campusCourseTemplateKey);
-            } else if (templateCache.has(campusTemplateKey)) {
-                // console.log("department cache found:", templateCache.get(campusTemplateKey));
-                templateEmailSubject = templateCache.get(campusTemplateKey).subject;
-                templateEmailContent = templateCache.get(campusTemplateKey).message;
-                templateObj = templateCache.get(campusTemplateKey);
-            } else if (templateCache.has(facTemplateKey)) {
-                if (templateCache.has(deptTemplateKey)) {
-                    // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
-                    templateEmailSubject = templateCache.get(deptTemplateKey).subject;
-                    templateEmailContent = templateCache.get(deptTemplateKey).message;
-                    templateObj = templateCache.get(deptTemplateKey);
-                } else {
-                    // console.log("faculty cache found:", templateCache.get(facTemplateKey));
-                    templateEmailSubject = templateCache.get(facTemplateKey).subject;
-                    templateEmailContent = templateCache.get(facTemplateKey).message;
-                    templateObj = templateCache.get(facTemplateKey);
-                }
-            } else if (templateCache.has(deptTemplateKey)) {
-                // console.log("faculty cache found:", templateCache.get(deptTemplateKey));
-                templateEmailSubject = templateCache.get(deptTemplateKey).subject;
-                templateEmailContent = templateCache.get(deptTemplateKey).message;
-                templateObj = templateCache.get(deptTemplateKey);
-            } else if (templateCache.has(courseTemplateKey)) {
-                //console.log("course cache found:", templateCache.get(courseTemplateKey));
+            } else if (templateCache.has(courseTemplateKey)) { // Check for faculty-course template before campus/faculty ones.
                 templateEmailSubject = templateCache.get(courseTemplateKey).subject;
                 templateEmailContent = templateCache.get(courseTemplateKey).message;
                 templateObj = templateCache.get(courseTemplateKey);
+            } else if (templateCache.has(deptTemplateKey)) {
+                templateEmailSubject = templateCache.get(deptTemplateKey).subject;
+                templateEmailContent = templateCache.get(deptTemplateKey).message;
+                templateObj = templateCache.get(deptTemplateKey);
+            } else if (templateCache.has(facTemplateKey)) {
+                templateEmailSubject = templateCache.get(facTemplateKey).subject;
+                templateEmailContent = templateCache.get(facTemplateKey).message;
+                templateObj = templateCache.get(facTemplateKey);
+            } else if (templateCache.has(campusTemplateKey)) {
+                templateEmailSubject = templateCache.get(campusTemplateKey).subject;
+                templateEmailContent = templateCache.get(campusTemplateKey).message;
+                templateObj = templateCache.get(campusTemplateKey);
             } else {
                 templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';
