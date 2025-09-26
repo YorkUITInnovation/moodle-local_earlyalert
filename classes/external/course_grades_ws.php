@@ -223,9 +223,12 @@ class local_earlyalert_course_grades_ws extends external_api
                         'active' => 1,
                         'deleted' => 0
                     ];
-                    $template = $DB->get_record('local_et_email', $faculty_course_params);
-                    if ($template) {
-                        $templateKey = 'course_' . $courseid . '_' . $lang . '_' . $student_idnumber;
+                    $faculty_course_template = $DB->get_record('local_et_email', $faculty_course_params);
+
+                    // Also ensure the student's faculty matches the course's faculty for this template type.
+                    if ($faculty_course_template && trim($student['faculty']) == $course_faculty) {
+                        $template = $faculty_course_template;
+                        $templateKey = $course_faculty . '_course_' . $courseid . '_' . $lang . '_' . $student_idnumber;
                     }
                 }
 
