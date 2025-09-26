@@ -53,7 +53,8 @@ if ($user_id != $USER->id) {
 $show_grades = $CFG->earlyalert_showgrades;
 
 if ($teacher || $is_impersonating) {
-    if (!$courses = enrol_get_users_courses($user_id, ['onlyactive' => true])) {
+    $show_active_only = !empty($CFG->earlyalert_showactivecoursesonly);
+    if (!$courses = enrol_get_users_courses($user_id, ['onlyactive' => $show_active_only])) {
         base::debug_to_console('no course'); //add no course mustache message
     }
 }
@@ -153,4 +154,3 @@ $event->trigger();
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_earlyalert/course_cards', $course_data);
 echo $OUTPUT->footer();
-

@@ -33,5 +33,5 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext('earlyalert_azureopenai_endpoint', get_string('azureopenai_endpoint', 'local_earlyalert'), '', ''));
     $settings->add(new admin_setting_configtext('earlyalert_azureopenai_version', get_string('azureopenai_version', 'local_earlyalert'), '', '2024-02-15-preview'));
     $settings->add(new admin_setting_configtext('earlyalert_azureopenai_deployment', get_string('azureopenai_deployment', 'local_earlyalert'), '', ''));
-
+    $settings->add(new admin_setting_configtext('earlyalert_showactivecourses', get_string('showactivecourses', 'local_earlyalert'), get_string('showactivecourses_desc', 'local_earlyalert'), '1'));
 }
