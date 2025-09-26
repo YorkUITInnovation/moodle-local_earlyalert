@@ -122,6 +122,7 @@ $string['sent_dialog_text'] = 'Thank you. This message has been scheduled to be 
 $string['cancel'] = 'Cancel';
 $string['could_not_send_email'] = 'Sorry an error occured and we could not send the emails';
 
+
 /* Toast messages */
 $string['advised_success_toast'] = 'Advised option updated successfully';
 $string['advised_failed_toast'] = 'Advised option not saved, conatact your administrator';
