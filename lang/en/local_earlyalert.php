@@ -121,7 +121,7 @@ $string['send_dialog_text'] = 'Are you sure you want to send the alert emails to
 $string['sent_dialog_text'] = 'Thank you. This message has been scheduled to be sent to {$a} students.';
 $string['cancel'] = 'Cancel';
 $string['could_not_send_email'] = 'Sorry an error occured and we could not send the emails';
-$string['showactivecourses_desc']= 'Shulich courses are alwasy hidden so added this option';
+$string['showactivecourses_desc']= 'Shulich courses are always hidden so this option would help';
 $string['showactivecourses'] = 'Only active courses for Instructors';
 $string['savessuccess'] = 'Template saved successfully';
 

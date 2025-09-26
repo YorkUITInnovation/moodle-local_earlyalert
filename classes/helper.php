@@ -450,9 +450,10 @@ class helper
      */
     public static function test_get_courses_ws($userid) {
         global $DB;
+        $show_active_only = !empty($CFG->earlyalert_showactivecourses);
         $courses = [];
         if ($userid) {
-            if (!$usercourses = enrol_get_users_courses($userid, ['onlyactive' => true])) {
+            if (!$usercourses = enrol_get_users_courses($userid, ['onlyactive' => $show_active_only])) {
                 \local_earlyalert\base::debug_to_console('no course');
             }
             $course_data = self::get_courses_in_acadyear_by_row($usercourses);

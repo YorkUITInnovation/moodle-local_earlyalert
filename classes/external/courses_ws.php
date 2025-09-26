@@ -27,7 +27,8 @@ class local_earlyalert_courses_ws extends external_api {
         $userid = $params['userid'];
         $courses = [];
         if ($userid) {
-            if (!$usercourses = enrol_get_users_courses($userid, ['onlyactive' => true])) {
+            $show_active_only = !empty($CFG->earlyalert_showactivecourses);
+            if (!$usercourses = enrol_get_users_courses($userid, ['onlyactive' => $show_active_only])) {
                 base::debug_to_console('no course');
             }
             $course_data = helper::get_courses_in_acadyear_by_row($usercourses);

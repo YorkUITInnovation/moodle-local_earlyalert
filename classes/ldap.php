@@ -396,10 +396,10 @@ class ldap
 
         try {
             $student_grade = '';
-
+            $show_active_only = !empty($CFG->earlyalert_showactivecourses);
             if ($course = $DB->get_record('course', ['idnumber' => $cn])) {
                 if ($student = $DB->get_record('user', ['idnumber' => $sisid])) {
-                    if ($enrolments = enrol_get_users_courses($student->id, ['onlyactive' => true])) {
+                    if ($enrolments = enrol_get_users_courses($student->id, ['onlyactive' => $show_active_only])) {
                         foreach ($enrolments as $e) {
                             if ($e->idnumber == $cn) {
                                 $grade = grade_get_course_grade($student->id,
