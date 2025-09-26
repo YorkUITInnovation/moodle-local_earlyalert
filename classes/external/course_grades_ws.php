@@ -198,7 +198,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 $campus_course_params = [
                     'lang' => $lang,
                     'campus' => $student['campus'],
-                    'faculty' => $course_faculty,
+                    'faculty' => $student['ldapfaculty'],
                     'course' => $course_name,
                     'coursenumber' => $course_number,
                     'template_type' => \local_etemplate\email::TEMPLATE_TYPE_CAMPUS_COURSE,
