@@ -150,32 +150,26 @@ class local_earlyalert_course_grades_ws extends external_api
             // Convert alert type to int based on constants in email class
             switch ($alert_type) {
                 case 'grade':
-                    $alert_type = email::MESSAGE_TYPE_GRADE;
+                    $message_type = email::MESSAGE_TYPE_GRADE;
                     break;
                 case 'assign':
-                    $alert_type = email::MESSAGE_TYPE_ASSIGNMENT;
+                    $message_type = email::MESSAGE_TYPE_ASSIGNMENT;
                     break;
                 case 'exam':
-                    $alert_type = email::MESSAGE_TYPE_EXAM;
+                    $message_type = email::MESSAGE_TYPE_EXAM;
                     break;
             }
-            // Get teacher
-            $teacher = $DB->get_record('user', array('id' => $teacher_user_id), 'firstname,lastname,email');
 
             // Get course idnumber to get faculty course name and course number
             $course = $DB->get_record('course', array('id' => $courseid), 'idnumber');
             // Convert course idnumber to array by _
             $course_idnumber = explode('_', $course->idnumber);
             // Capture faculty, course name and course number
-            $course_faculty = $course_idnumber[1];
             $course_name = $course_idnumber[2];
             $course_number = $course_idnumber[4];
-            // Get course email template
+            $section = $course_idnumber[7];
 
-            $facultytemplates = '';
-            $depttemplates = '';
-
-
+            // Get students with grades for this course
             $mdlGrades = helper::get_moodle_grades_by_course($courseid);
             unset($mdlGrades[$teacher_user_id]);
 
@@ -191,83 +185,67 @@ class local_earlyalert_course_grades_ws extends external_api
 
                 $student_idnumber = $student['idnumber'];
 
+                $campus = trim($student['campus']);
+                $faculty = trim($student['faculty']);
+                $department = trim($student['major']);
+
                 $template = null;
-                $templateKey = '';
+                $templateKey = $student_idnumber;
 
-                // 1. Check for the most specific template: campus_course
-                $campus_course_params = [
-                    'lang' => $lang,
-                    'campus' => $student['campus'],
-                    'faculty' => $student['faculty'],
-                    'course' => $course_name,
-                    'coursenumber' => $course_number,
-                    'template_type' => \local_etemplate\email::TEMPLATE_TYPE_CAMPUS_COURSE,
-                    'message_type' => $alert_type,
-                    'active' => 1,
-                    'deleted' => 0
+                $sql = "
+                        SELECT *, 
+                            CASE
+                                WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND section = ? AND message_type = ? AND lang = ? THEN 1
+                                WHEN campus = ? AND faculty = ? AND course = ? AND coursenumber = ? AND section = ? AND message_type = ? AND lang = ? THEN 2
+                                WHEN campus = ? AND course = ? AND coursenumber = ? AND section = ? AND message_type = ? AND lang = ? THEN 3
+                                WHEN faculty = ? AND course = ? AND coursenumber = ? AND section = ? AND message_type = ? AND lang = ? THEN 4
+                                WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 5
+                                WHEN campus = ? AND faculty = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 6
+                                WHEN campus = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 7
+                                WHEN faculty = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 8
+                                WHEN campus = ? AND faculty = ? AND department = ? AND message_type = ? AND lang = ? THEN 9
+                                WHEN campus = ? AND faculty = ? AND message_type = ? AND lang = ? THEN 10
+                                WHEN campus = ? AND message_type = ? AND lang = ? THEN 11
+                                WHEN faculty = ? AND message_type = ? AND lang = ? THEN 12
+                                ELSE 13
+                            END AS priority
+                        FROM {local_et_email}
+                        WHERE active = 1 AND deleted = 0
+                        ORDER BY priority ASC
+                        Limit 1
+                        ";
+
+
+                $search_params = [
+                    // CASE condition 1
+                    $campus, $faculty, $department, $course_name, $course_number, $section, $message_type, $lang,
+                    // CASE condition 2
+                    $campus, $faculty, $course_name, $course_number, $section, $message_type, $lang,
+                    // CASE condition 3
+                    $campus, $course_name, $course_number, $section, $message_type, $lang,
+                    // CASE condition 4
+                    $faculty, $course_name, $course_number, $section, $message_type, $lang,
+                    // CASE condition 5
+                    $campus, $faculty, $department, $course_name, $course_number, $message_type, $lang,
+                    // CASE condition 6
+                    $campus, $faculty, $course_name, $course_number, $message_type, $lang,
+                    // CASE condition 7
+                    $campus, $course_name, $course_number, $message_type, $lang,
+                    // CASE condition 8
+                    $faculty, $course_name, $course_number, $message_type, $lang,
+                    // CASE condition 9
+                    $campus, $faculty, $department, $message_type, $lang,
+                    // CASE condition 10
+                    $campus, $faculty, $message_type, $lang,
+                    // CASE condition 11
+                    $campus,  $message_type, $lang,
+                    // CASE condition 12
+                    $faculty, $message_type, $lang,
+                    // ELSE condition 13
+                    $message_type, $lang
                 ];
-                $template = $DB->get_record('local_et_email', $campus_course_params);
-                if ($template) {
-                    $templateKey = $student['campus'] . '_course_' . $courseid . '_' . $lang . '_' . $student_idnumber;
-                }
 
-                // 2. If not found, check for faculty_course template
-                if (!$template) {
-                    $faculty_course_params = [
-                        'lang' => $lang,
-                        'faculty' => $student['faculty'],
-                        'course' => $course_name,
-                        'coursenumber' => $course_number,
-                        'template_type' => \local_etemplate\email::TEMPLATE_TYPE_FACULTY_COURSE,
-                        'message_type' => $alert_type,
-                        'active' => 1,
-                        'deleted' => 0
-                    ];
-                    $faculty_course_template = $DB->get_record('local_et_email', $faculty_course_params);
-
-                    // Also ensure the student's faculty matches the course's faculty for this template type.
-                    if ($faculty_course_template && trim($student['faculty']) == $course_faculty) {
-                        $template = $faculty_course_template;
-                        $templateKey = $course_faculty . '_course_' . $courseid . '_' . $lang . '_' . $student_idnumber;
-                    }
-                }
-
-                // 3. If still not found, check for department, faculty, and campus level templates
-                if (!$template) {
-                    $campus = $DB->get_record('local_organization_campus', array('shortname' => $student['campus']));
-                    $faculty = $DB->get_record("local_organization_unit", array('shortname' => trim($student['faculty']), 'campus_id' => $campus->id));
-                    $department = $DB->get_record("local_organization_dept", array('shortname' => $student['major'], 'unit_id' => $faculty->id));
-
-                    // Check for department template
-                    if ($department) {
-                        $depttemplate = $DB->get_record('local_et_email',
-                            ['lang' => $lang, 'unit' => $department->id, 'context' => 'DEPT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0, 'template_type' => \local_etemplate\email::TEMPLATE_TYPE_CAMPUS_FACULTY]);
-                        if ($depttemplate) {
-                            $template = $depttemplate;
-                            $templateKey = $student['campus'] . "_" . $student['faculty'] . "_" . $student['major'] . '_' . $lang . '_' . $student_idnumber;
-                        }
-                    }
-
-                    // Check for faculty template if department template not found
-                    if (!$template && $faculty) {
-                        $facultytemplate = $DB->get_record('local_et_email',
-                            ['lang' => $lang, 'unit' => $faculty->id, 'context' => 'UNIT', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0, 'template_type' => \local_etemplate\email::TEMPLATE_TYPE_CAMPUS_FACULTY]);
-                        if ($facultytemplate) {
-                            $template = $facultytemplate;
-                            $templateKey = $student['campus'] . "_" . $student['faculty'] . '_' . $lang . '_' . $student_idnumber;
-                        }
-                    }
-
-                    // Check for campus template if others not found
-                    if (!$template && $campus) {
-                        $campustemplate = $DB->get_record('local_et_email',
-                            ['lang' => $lang, 'unit' => $campus->id, 'context' => 'CAMPUS', 'message_type' => $alert_type, 'active' => 1, 'deleted' => 0, 'template_type' => \local_etemplate\email::TEMPLATE_TYPE_CAMPUS_FACULTY]);
-                        if ($campustemplate) {
-                            $template = $campustemplate;
-                            $templateKey = $student['campus'] . '_' . $lang . '_' . $student_idnumber;
-                        }
-                    }
-                }
+                $template = $DB->get_record_sql($sql, $search_params);
 
                 if ($template) {
                     $email = new \local_etemplate\email($template->id);
@@ -288,7 +266,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 }
             }
             //raise_memory_limit(MEMORY_STANDARD);
-            file_put_contents("/var/www/moodledata/ws_course_template_log.log", print_r($templateCache, true));
+            //file_put_contents("/var/www/moodledata/ws_course_template_log.log", print_r($templateCache, true));
             return $templateCache;
         } catch (Exception $e) {
             error_log('Error in get_course_student_templates: ' . $e->getMessage());
