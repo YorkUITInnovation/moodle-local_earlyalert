@@ -131,7 +131,7 @@ class local_earlyalert_course_grades_ws extends external_api
         return new external_multiple_structure(self::get_course_grades_percent_details());
     }
 
-    public static function get_course_student_templates($id, $alert_type, $teacher_user_id)
+    public static function get_course_student_templates($id, $alert_type, $teacher_user_id, $grade_letter_id)
     {
         global $DB;
 
@@ -140,7 +140,8 @@ class local_earlyalert_course_grades_ws extends external_api
             self::get_course_student_templates_parameters(), array(
                 'id' => $id,
                 'alert_type' => $alert_type,
-                'teacher_user_id' => $teacher_user_id
+                'teacher_user_id' => $teacher_user_id,
+                'grade_letter_id' => $grade_letter_id
             )
         );
 
@@ -173,11 +174,37 @@ class local_earlyalert_course_grades_ws extends external_api
             $mdlGrades = helper::get_moodle_grades_by_course($courseid);
             unset($mdlGrades[$teacher_user_id]);
 
+            // For grade_letter_id <= 0 (e.g., -1) we do not filter by grade at all.
+            $grade_range = null;
+            if ($grade_letter_id > 0) {
+                $grade_range = helper::get_moodle_grade_percent_range($grade_letter_id);
+            }
+
             //lets cache all possible email templates based off of these students...
             $templateCache = array();
             $i = 1;
 
             foreach ($mdlGrades as $student) {
+                // Apply grade filtering only when a valid grade range is present
+                $include_student = true;
+
+                if (!is_null($grade_range) && !empty($grade_range)) {
+                    $student_grade = $student['grade'];
+
+                    // Skip students with non-numeric grades (No Grade, N/A)
+                    if (!is_numeric($student_grade)) {
+                        $include_student = false;
+                    } else {
+                        $grade_value = (float)$student_grade;
+                        // Check if student's grade falls within the selected letter grade range
+                        $include_student =  $grade_value <= $grade_range['max']; // include them if its less than or equal to max grade selected
+                    }
+                }
+
+                if (!$include_student) {
+                    continue;
+                }
+
                 // Get student record
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
                 // Get student Language
@@ -250,7 +277,9 @@ class local_earlyalert_course_grades_ws extends external_api
                 if ($template) {
                     $email = new \local_etemplate\email($template->id);
                     $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
-                    $templateCache[$templateKey] = array(
+
+                    // Merge student data with template data
+                    $student_and_template_data = array_merge($student, [
                         'templateKey' => $templateKey,
                         'subject' => $template_data->subject,
                         'message' => $template_data->message,
@@ -260,13 +289,16 @@ class local_earlyalert_course_grades_ws extends external_api
                         'hascustommessage' => isset($template->hascustommessage) ? (int)$template->hascustommessage : 0,
                         'instructor_id' => $template_data->instructor_id,
                         'triggered_from_user_id' => $template_data->triggered_from_user_id
-                    );
+                    ]);
+
+                    $templateCache[$templateKey] = $student_and_template_data;
+
                 } else {
                     error_log("No template found for student: " . $student['idnumber'] . "| Course: " . $courseid . "| Campus: " . $student['campus'] . "| Faculty: " . $student['faculty'] . "| Major: " . $student['major']);
                 }
             }
             //raise_memory_limit(MEMORY_STANDARD);
-            //file_put_contents("/var/www/moodledata/ws_course_template_log.log", print_r($templateCache, true));
+            file_put_contents("/var/www/moodledata/ws_course_template_log.log", print_r($templateCache, true));
             return $templateCache;
         } catch (Exception $e) {
             error_log('Error in get_course_student_templates: ' . $e->getMessage());
@@ -299,7 +331,8 @@ class local_earlyalert_course_grades_ws extends external_api
         return new external_function_parameters(array(
             'id' => new external_value(PARAM_INT, 'Course id', VALUE_DEFAULT, 0),
             'alert_type' => new external_value(PARAM_TEXT, 'Alert type; grade, assign, exam', VALUE_DEFAULT, 'grade'),
-            'teacher_user_id' => new external_value(PARAM_INT, 'User id of teacher', VALUE_DEFAULT, 0)
+            'teacher_user_id' => new external_value(PARAM_INT, 'User id of teacher', VALUE_DEFAULT, 0),
+            'grade_letter_id' => new external_value(PARAM_INT, 'Grade letter id', VALUE_DEFAULT, -1)
         ));
     }
 
@@ -310,12 +343,21 @@ class local_earlyalert_course_grades_ws extends external_api
     public static function get_course_student_templates_details()
     {
         $fields = array(
+            'id' => new external_value(PARAM_INT, 'Student id', false),
+            'course_id' => new external_value(PARAM_INT, 'Course id', false),
+            'first_name' => new external_value(PARAM_TEXT, 'User first name', false),
+            'last_name' => new external_value(PARAM_TEXT, 'User last name', false),
+            'grade' => new external_value(PARAM_TEXT, 'grade', false),
+            'lang' => new external_value(PARAM_TEXT, 'lang', false),
+            'idnumber' => new external_value(PARAM_TEXT, 'idnumber', false),
+            'campus' => new external_value(PARAM_TEXT, 'User campus', false),
+            'faculty' => new external_value(PARAM_TEXT, 'User faculty', false),
+            'major' => new external_value(PARAM_TEXT, 'User major', false),
             'templateKey' => new external_value(PARAM_RAW, 'Campus_Faculty_Major key for templates', false),
             'subject' => new external_value(PARAM_RAW, 'Subject for template message', false),
             'message' => new external_value(PARAM_RAW, 'Message text for template', false),
             'templateid' => new external_value(PARAM_RAW, 'Template ID', false),
             'revision_id' => new external_value(PARAM_RAW, 'Template Revision', false),
-            'course_id' => new external_value(PARAM_RAW, 'Template Course ID', false),
             'hascustommessage' => new external_value(PARAM_RAW, 'Template has custom message', false),
             'instructor_id' => new external_value(PARAM_RAW, 'Template Instructor ID', false),
             'triggered_from_user_id' => new external_value(PARAM_RAW, 'Template Date', false)

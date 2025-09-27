@@ -208,19 +208,19 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
         var finalCache = new Map();
 
-        // Fetch student list and templates
-        var get_grades_and_templates = ajax.call([
-            {methodname: 'earlyalert_course_grades_percent_get', args: {"id": course_id, "grade_letter_id": grade_letter_id, "teacher_user_id": teacher_user_id}},
-            {methodname: 'earlyalert_course_student_templates', args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type}}
+        // Fetch student list and templates in one call
+        var get_students_and_templates = ajax.call([
+            {
+                methodname: 'earlyalert_course_student_templates',
+                args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type, "grade_letter_id": grade_letter_id}
+            }
         ]);
-        Promise.all(get_grades_and_templates)
-            .then(([grades_response, templates_response]) => {
-                 //console.log('grade response1: ' , grades_response);
-                // console.log('template response1: ' , templates_response);
+
+        get_students_and_templates[0].then(response => {
+                const student_data = Object.values(response);
+
                 // Reformat the data to display in a grid
-                let num_students = grades_response.length;
-                // console.log('Number of students returned: ' + num_students);
-                // Calculate the number of rows and columns for the grid
+                let num_students = student_data.length;
                 let num_rows = Math.min(3, Math.ceil(num_students / 3));
                 let num_cols = Math.ceil(num_students / num_rows);
                 let display_data = {
@@ -228,8 +228,6 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     num_cols: num_cols,
                     student_rows: []
                 };
-
-                let templates = [];
 
                 // Initialize rows array
                 for (let r = 0; r < num_rows; r++) {
@@ -239,35 +237,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                 let row = 0;
                 let col = 0;
 
-                grades_response.forEach(result => {
-                    // Generating keys for templates with course_id, lang, and idnumber - each template is pulled/created for a student based on their campus/lang/facutly/major
+                student_data.forEach(result => {
                     if (typeof result === 'object') {
-                        if (!templates.includes('course_' + course_id + '_' + result.lang + '_' + result.idnumber)) {
-                            var course_lang = 'course_' + course_id + '_' + result.lang + '_' + result.idnumber;
-                            templates.push(course_lang);
-                        }
-
-                        if (!templates.includes(result.campus + '_' + result.lang + '_' + result.idnumber)) {
-                            var campus_lang = result.campus + '_' + result.lang + '_' + result.idnumber;
-                            templates.push(campus_lang);
-                        }
-
-                        if (!templates.includes(result.campus + "_" + result.faculty + '_' + result.lang + '_' + result.idnumber)) {
-                            var campus_fac_lang = result.campus + "_" + result.faculty + '_' + result.lang + '_' + result.idnumber;
-                            templates.push(campus_fac_lang);
-                        }
-
-                        if (!templates.includes(result.campus + "_" + result.faculty + "_" + result.major + '_' + result.lang + '_' + result.idnumber)) {
-                            var campus_fac_maj_lang = result.campus + "_" + result.faculty + "_" + result.major + '_' + result.lang + '_' + result.idnumber;
-                            templates.push(campus_fac_maj_lang);
-                        }
-
-                        // Add new template key for campus_course
-                        if (!templates.includes(result.campus + '_course_' + course_id + '_' + result.lang + '_' + result.idnumber)) {
-                            var campus_course_lang = result.campus + '_course_' + course_id + '_' + result.lang + '_' + result.idnumber;
-                            templates.push(campus_course_lang);
-                        }
-
                         result.faculty = result.faculty ? result.faculty : '';
                         result.major = result.major ? result.major : '';
                         result.campus = result.campus ? result.campus : '';
@@ -281,16 +252,10 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     }
                 });
 
-                display_data.templates = JSON.stringify(templates);
-                // console.log( templates_response);
-
                 // Set hascustommessage to true if any template has it enabled
-                let hascustommessage = 0;
-                if (Array.isArray(templates_response) && templates_response.length > 0) {
-                    hascustommessage = templates_response.some(
-                        t => t && t.hascustommessage === 1
-                    ) ? 1 : 0;
-                }
+                let hascustommessage = student_data.some(
+                    t => t && t.hascustommessage === 1
+                ) ? 1 : 0;
                 display_data.hascustommessage = hascustommessage;
 
                 if (alert_type === 'grade') {
@@ -358,25 +323,23 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         }
 
                         check_allnone_listener(selected_students);
-                        const cachedArrayElement = document.getElementById('early-alert-template-cache');
-                        const cachedArray = JSON.parse(cachedArrayElement.value);
 
-                        templates_response.forEach(result => {
+                        // Populate the template cache from the template data
+                        Object.values(student_data).forEach(result => {
                             if (typeof result === 'object') {
-                                if (cachedArray.includes(result.templateKey)) {
-                                    let finalMessage = {
-                                        subject: result.subject,
-                                        message: result.message,
-                                        templateid: result.templateid,
-                                        revision_id: result.revision_id,
-                                        course_id: result.course_id,
-                                        instructor_id: result.instructor_id,
-                                        triggered_from_user_id: result.triggered_from_user_id,
-                                    };
-                                    finalCache.set(result.templateKey, finalMessage);
-                                }
+                                let finalMessage = {
+                                    subject: result.subject,
+                                    message: result.message,
+                                    templateid: result.templateid,
+                                    revision_id: result.revision_id,
+                                    course_id: result.course_id,
+                                    instructor_id: result.instructor_id,
+                                    triggered_from_user_id: result.triggered_from_user_id,
+                                };
+                                finalCache.set(result.templateKey, finalMessage);
                             }
                         });
+
                         finalCache.set('course_name', course_name);
                         // Ensure custom_message key exists even before user types so downstream lookups never get undefined
                         if (!finalCache.has('custom_message')) {
@@ -402,6 +365,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     .catch(function (error) {
                         console.error('Failed to render template:', error);
                     });
+            }).catch(function (error) {
+                console.error('Failed to fetch student or template data:', error);
             });
     }
 }
@@ -564,61 +529,16 @@ function setup_preview_buttons(templateCache) {
             const studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
             // uses data found in the checkbox element attributes to create a key to find the template
-            var courseTemplateKey = studentFacultyAttr + '_course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
-            var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr + '_' + student_idnumber;
-            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr + '_' + student_idnumber;
-            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr + '_' + studentLangAttr + '_' + student_idnumber;
-            var campusCourseTemplateKey = studentCampusAttr + '_course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var templateKey = student_idnumber;
             var templateEmailContent = '';
             var templateEmailSubject = '';
-            // For debugging - can be removed later
-            console.log('Generated template keys for student ID ' + student_id + ':');
-            console.log('Course template key: '+ courseTemplateKey);
-            console.log('Campus template key: '+ campusTemplateKey);
-            console.log('faculty template key: '+ facTemplateKey);
-            console.log('Dept template key: '+ deptTemplateKey);
-            console.log('course campus template key: '+ campusCourseTemplateKey);
 
             // templateCache is checked for the template key and if found the email subject and content are set
-            // The order of checks determines the template precedence.
-            if (templateCache.has(campusCourseTemplateKey)) { // MK SC 1013
-                console.log("course campus cache found:", templateCache.get(campusCourseTemplateKey));
-                templateEmailSubject = templateCache.get(campusCourseTemplateKey).subject;
-                templateEmailContent = templateCache.get(campusCourseTemplateKey).message;
-                templateObj = templateCache.get(campusCourseTemplateKey);
-            }
-            else if (templateCache.has(courseTemplateKey)) { // faculty course template SC 1013
-                console.log("faculty course cache found:", templateCache.get(courseTemplateKey));
-                templateEmailSubject = templateCache.get(courseTemplateKey).subject;
-                templateEmailContent = templateCache.get(courseTemplateKey).message;
-                templateObj = templateCache.get(courseTemplateKey);
-            }
-            else if (templateCache.has(facTemplateKey)) {
-                if (templateCache.has(deptTemplateKey)) {
-                    console.log("faculty cache found (dept):", templateCache.get(deptTemplateKey));
-                    templateEmailSubject = templateCache.get(deptTemplateKey).subject;
-                    templateEmailContent = templateCache.get(deptTemplateKey).message;
-                    templateObj = templateCache.get(deptTemplateKey);
-                } else {
-                    console.log("faculty cache found: (fac)", templateCache.get(facTemplateKey));
-                    templateEmailSubject = templateCache.get(facTemplateKey).subject;
-                    templateEmailContent = templateCache.get(facTemplateKey).message;
-                    templateObj = templateCache.get(facTemplateKey);
-                }
-            }
-            else if (templateCache.has(deptTemplateKey)) {
-                console.log("faculty dept cache found:", templateCache.get(deptTemplateKey));
-                templateEmailSubject = templateCache.get(deptTemplateKey).subject;
-                templateEmailContent = templateCache.get(deptTemplateKey).message;
-                templateObj = templateCache.get(deptTemplateKey);
-            }
-            else if (templateCache.has(campusTemplateKey)) { // CAMPUS only MK
-                console.log("campus only cache found:", templateCache.get(campusTemplateKey));
-                templateEmailSubject = templateCache.get(campusTemplateKey).subject;
-                templateEmailContent = templateCache.get(campusTemplateKey).message;
-                templateObj = templateCache.get(campusTemplateKey);
-            }
-            else {
+            if (templateCache.has(templateKey)) {
+                templateEmailSubject = templateCache.get(templateKey).subject;
+                templateEmailContent = templateCache.get(templateKey).message;
+                templateObj = templateCache.get(templateKey);
+            } else {
                 templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';
             }
@@ -731,64 +651,22 @@ function setup_preview_emails_with_titles(templateCache) {
             const studentMajorAttr = checkbox.getAttribute('data-student-major');
             const studentLangAttr = checkbox.getAttribute('data-student-lang');
             const courseIdAttr = checkbox.getAttribute('data-courseid');
-            var courseTemplateKey = studentFacultyAttr + '_course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
-            var campusTemplateKey = studentCampusAttr + '_' + studentLangAttr + '_' + student_idnumber;
-            var facTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentLangAttr + '_' + student_idnumber;
-            var deptTemplateKey = studentCampusAttr + '_' + studentFacultyAttr + '_' + studentMajorAttr+ '_' + studentLangAttr + '_' + student_idnumber;
-            var campusCourseTemplateKey = studentCampusAttr + '_course_' + courseIdAttr + '_' + studentLangAttr + '_' + student_idnumber;
+            var templateKey = student_idnumber;
             var templateEmailContent = '';
             var templateEmailSubject = '';
 
             // For debugging - can be removed later
             console.log('Generated template keys for student ID ' + student_id + ':');
-            console.log('Course template key: '+ courseTemplateKey);
-            console.log('Campus template key: '+ campusTemplateKey);
-            console.log('faculty template key: '+ facTemplateKey);
-            console.log('Dept template key: '+ deptTemplateKey);
-            console.log('course campus template key: '+ campusCourseTemplateKey);
+            console.log('Course template key: '+ templateKey);
 
          //  Course template ke/courseTemplateKey: SC_course_13_EN_220403044
             // The order of checks determines the template precedence.
             // templateCache is checked for the template key and if found the email subject and content are set
-            // The order of checks determines the template precedence.
-            if (templateCache.has(campusCourseTemplateKey)) { // MK SC 1013
-                console.log("course campus cache found:", templateCache.get(campusCourseTemplateKey));
-                templateEmailSubject = templateCache.get(campusCourseTemplateKey).subject;
-                templateEmailContent = templateCache.get(campusCourseTemplateKey).message;
-                templateObj = templateCache.get(campusCourseTemplateKey);
-            }
-            else if (templateCache.has(courseTemplateKey)) { // faculty course template SC 1013
-                console.log("faculty course cache found:", templateCache.get(courseTemplateKey));
-                templateEmailSubject = templateCache.get(courseTemplateKey).subject;
-                templateEmailContent = templateCache.get(courseTemplateKey).message;
-                templateObj = templateCache.get(courseTemplateKey);
-            }
-            else if (templateCache.has(facTemplateKey)) {
-                if (templateCache.has(deptTemplateKey)) {
-                    console.log("faculty cache found (dept):", templateCache.get(deptTemplateKey));
-                    templateEmailSubject = templateCache.get(deptTemplateKey).subject;
-                    templateEmailContent = templateCache.get(deptTemplateKey).message;
-                    templateObj = templateCache.get(deptTemplateKey);
-                } else {
-                    console.log("faculty cache found: (fac)", templateCache.get(facTemplateKey));
-                    templateEmailSubject = templateCache.get(facTemplateKey).subject;
-                    templateEmailContent = templateCache.get(facTemplateKey).message;
-                    templateObj = templateCache.get(facTemplateKey);
-                }
-            }
-            else if (templateCache.has(deptTemplateKey)) {
-                 console.log("faculty dept cache found:", templateCache.get(deptTemplateKey));
-                templateEmailSubject = templateCache.get(deptTemplateKey).subject;
-                templateEmailContent = templateCache.get(deptTemplateKey).message;
-                templateObj = templateCache.get(deptTemplateKey);
-            }
-            else if (templateCache.has(campusTemplateKey)) { // CAMPUS only MK
-                 console.log("campus only cache found:", templateCache.get(campusTemplateKey));
-                templateEmailSubject = templateCache.get(campusTemplateKey).subject;
-                templateEmailContent = templateCache.get(campusTemplateKey).message;
-                templateObj = templateCache.get(campusTemplateKey);
-            }
-            else {
+            if (templateCache.has(templateKey)) {
+                templateEmailSubject = templateCache.get(templateKey).subject;
+                templateEmailContent = templateCache.get(templateKey).message;
+                templateObj = templateCache.get(templateKey);
+            } else {
                 templateEmailSubject = 'Template not found';
                 templateEmailContent = 'Template not found';
             }
