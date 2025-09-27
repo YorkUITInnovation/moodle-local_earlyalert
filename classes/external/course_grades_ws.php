@@ -175,8 +175,7 @@ class local_earlyalert_course_grades_ws extends external_api
                     error_log("No template found for student: " . $student['idnumber'] . "| Course: " . $courseid . "| Campus: " . $student['campus'] . "| Faculty: " . $student['faculty'] . "| Major: " . $student['major']);
                 }
             }
-            //raise_memory_limit(MEMORY_STANDARD);
-            file_put_contents("/var/www/moodledata/ws_course_template_log.log", print_r($templateCache, true));
+
             return $templateCache;
         } catch (Exception $e) {
             error_log('Error in get_course_student_templates: ' . $e->getMessage());
