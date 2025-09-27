@@ -62,26 +62,24 @@ function setup_custom_message_listener() {
 
 // Helper function to rebuild the template cache
 function build_template_cache() {
-    const template_cache_input_el = document.getElementById('early-alert-template-cache');
-    const cached_array = template_cache_input_el ? JSON.parse(template_cache_input_el.value) : [];
+    // This function no longer rebuilds the cache from scratch.
+    // It now updates the existing global cache with the latest user inputs.
+    const final_cache = window.currentTemplateCache || new Map();
+
     const course_name = document.getElementById('early_alert_course_name').value;
-    // Single unified textarea
     const textarea_el = document.getElementById('early-alert-custom-message');
     const custom_message = textarea_el ? textarea_el.value.trim() : '';
 
-    // Build new cache
-    const final_cache = new Map();
     final_cache.set('course_name', course_name);
     final_cache.set('custom_message', custom_message);
 
-    // Preserve existing template entries
-    const current_cache = window.currentTemplateCache || {};
-    if (current_cache && typeof current_cache.forEach === 'function') {
-        current_cache.forEach((value, key) => {
-            if (key !== 'course_name' && key !== 'custom_message' && key !== 'assignment_title') {
-                final_cache.set(key, value);
-            }
-        });
+    // Update assignment title if relevant
+    const alert_type_el = document.getElementById('early-alert-alert-type');
+    const alert_type = alert_type_el ? alert_type_el.value : '';
+    if (alert_type === 'assign') {
+        const at = document.getElementById('early-alert-assignment-title');
+        const assignmentTitle = at ? (at.value || '') : '';
+        final_cache.set('assignment_title', assignmentTitle);
     }
 
     window.currentTemplateCache = final_cache;
@@ -659,7 +657,6 @@ function setup_preview_emails_with_titles(templateCache) {
             console.log('Generated template keys for student ID ' + student_id + ':');
             console.log('Course template key: '+ templateKey);
 
-         //  Course template ke/courseTemplateKey: SC_course_13_EN_220403044
             // The order of checks determines the template precedence.
             // templateCache is checked for the template key and if found the email subject and content are set
             if (templateCache.has(templateKey)) {
