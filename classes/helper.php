@@ -472,4 +472,74 @@ class helper
         return $courses;
     }
 
+    /**
+     * @param $campus
+     * @param $faculty
+     * @param $department
+     * @param $course_name
+     * @param $course_number
+     * @param $message_type
+     * @param $lang
+     * @return \stdClass
+     * @throws \dml_exception
+     */
+    public static function get_email_template($campus, $faculty, $department, $course_name, $course_number, $message_type, $lang) {
+        global $DB;
+
+        $sql = "
+        SELECT * FROM (
+                SELECT *, 
+                    CASE
+                        -- specific cases with course and course number
+                        WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 1
+                        WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 2
+                        WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 3
+                        WHEN (campus IS NULL OR campus = '') AND faculty = ? AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 4
+                        
+                        -- more general cases without course and course number
+                        WHEN campus = ? AND faculty = ? AND department = ? AND message_type = ? AND lang = ? THEN 5
+                        WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND message_type = ? AND lang = ? THEN 6
+                        WHEN campus = ? AND faculty = ?  AND message_type = ? AND lang = ? THEN 7
+                        WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '')  AND message_type = ? AND lang = ? THEN 8
+                        WHEN campus = ? AND message_type = ? AND lang = ? THEN 9
+                        WHEN (campus IS NULL OR campus = '') AND faculty = ? AND message_type = ? AND lang = ? THEN 10
+                        WHEN faculty = ? AND message_type = ? AND lang = ? THEN 11                                                        
+                        ELSE NULL
+                    END AS priority
+                FROM {local_et_email}
+                WHERE active = 1 AND deleted = 0
+                 ) AS templates
+        WHERE priority IS NOT NULL
+        ORDER BY priority ASC
+        LIMIT 1
+        ";
+
+        $search_params = [
+            // CASE condition 1
+            $campus, $faculty, $department, $course_name, $course_number, $message_type, $lang,
+            // CASE condition 2
+            $campus, $faculty, $course_name, $course_number, $message_type, $lang,
+            // CASE condition 3
+            $campus, $course_name, $course_number, $message_type, $lang,
+            // CASE condition 4
+            $faculty, $course_name, $course_number, $message_type, $lang,
+            // CASE condition 5
+            $campus, $faculty, $department, $message_type, $lang,
+            // CASE condition 6
+            $campus, $faculty, $message_type, $lang,
+            // CASE condition 7
+            $campus, $faculty, $message_type, $lang,
+            // CASE condition 8
+            $campus, $message_type, $lang,
+            // CASE condition 9
+            $campus, $message_type, $lang,
+            // CASE condition 10
+            $faculty, $message_type, $lang,
+            // CASE condition 11
+            $faculty, $message_type, $lang,
+        ];
+
+        return $DB->get_record_sql($sql, $search_params);
+    }
+
 }

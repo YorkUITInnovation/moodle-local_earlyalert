@@ -4,7 +4,6 @@ require_once($CFG->libdir . "/externallib.php");
 require_once("$CFG->dirroot/config.php");
 
 use local_earlyalert\helper;
-use local_earlyalert\base;
 use local_etemplate\email;
 
 class local_earlyalert_course_grades_ws extends external_api
@@ -98,46 +97,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 $template = null;
                 $templateKey = $student_idnumber;
 
-                $sql = "
-                        SELECT *, 
-                            CASE
-                                WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 1
-                                WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 2
-                                WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 3
-                                WHEN (campus IS NULL OR campus = '') AND faculty = ? AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 4
-                                WHEN campus = ? AND faculty = ? AND department = ? AND (course IS NULL OR course = '') AND (coursenumber IS NULL OR coursenumber = '') AND message_type = ? AND lang = ? THEN 5
-                                WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND (course IS NULL OR course = '') AND (coursenumber IS NULL OR coursenumber = '') AND message_type = ? AND lang = ? THEN 6
-                                WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '') AND (course IS NULL OR course = '') AND (coursenumber IS NULL OR coursenumber = '') AND message_type = ? AND lang = ? THEN 7
-                                WHEN (campus IS NULL OR campus = '') AND faculty = ? AND (department IS NULL OR department = '') AND (course IS NULL OR course = '') AND (coursenumber IS NULL OR coursenumber = '') AND message_type = ? AND lang = ? THEN 8
-                                ELSE 9
-                            END AS priority
-                        FROM {local_et_email}
-                        WHERE active = 1 AND deleted = 0
-                        ORDER BY priority ASC
-                        Limit 1
-                        ";
-
-
-                $search_params = [
-                    // CASE condition 1
-                    $campus, $faculty, $department, $course_name, $course_number, $message_type, $lang,
-                    // CASE condition 2
-                    $campus, $faculty, $course_name, $course_number, $message_type, $lang,
-                    // CASE condition 3
-                    $campus, $course_name, $course_number, $message_type, $lang,
-                    // CASE condition 4
-                    $faculty, $course_name, $course_number, $message_type, $lang,
-                    // CASE condition 5
-                    $campus, $faculty, $department, $message_type, $lang,
-                    // CASE condition 6
-                    $campus, $faculty, $message_type, $lang,
-                    // CASE condition 7
-                    $campus,  $message_type, $lang,
-                    // CASE condition 8
-                    $faculty, $message_type, $lang,
-                ];
-
-                $template = $DB->get_record_sql($sql, $search_params);
+                $template = helper::get_email_template($campus, $faculty, $department, $course_name, $course_number, $message_type, $lang);
 
                 if ($template) {
                     $email = new \local_etemplate\email($template->id);
