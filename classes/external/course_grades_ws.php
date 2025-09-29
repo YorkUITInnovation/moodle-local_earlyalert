@@ -100,10 +100,10 @@ class local_earlyalert_course_grades_ws extends external_api
                 $sql = "
                         SELECT *, 
                             CASE
-                                WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND section = ? AND message_type = ? AND lang = ? THEN 1
-                                WHEN campus = ? AND faculty = ? AND course = ? AND coursenumber = ? AND section = ? AND message_type = ? AND lang = ? THEN 2
-                                WHEN campus = ? AND course = ? AND coursenumber = ? AND section = ? AND message_type = ? AND lang = ? THEN 3
-                                WHEN faculty = ? AND course = ? AND coursenumber = ? AND section = ? AND message_type = ? AND lang = ? THEN 4
+                                WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND (section LIKE CONCAT('%', ?, '%') AND section NOT LIKE '%merged%') AND message_type = ? AND lang = ? THEN 1
+                                WHEN campus = ? AND faculty = ? AND course = ? AND coursenumber = ? AND (section LIKE CONCAT('%', ?, '%') AND section NOT LIKE '%merged%') AND message_type = ? AND lang = ? THEN 2
+                                WHEN campus = ? AND course = ? AND coursenumber = ? AND (section LIKE CONCAT('%', ?, '%') AND section NOT LIKE '%merged%') AND message_type = ? AND lang = ? THEN 3
+                                WHEN faculty = ? AND course = ? AND coursenumber = ? AND (section LIKE CONCAT('%', ?, '%') AND section NOT LIKE '%merged%') AND message_type = ? AND lang = ? THEN 4
                                 WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 5
                                 WHEN campus = ? AND faculty = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 6
                                 WHEN campus = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 7
