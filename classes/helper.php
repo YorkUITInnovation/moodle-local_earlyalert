@@ -490,20 +490,32 @@ class helper
         SELECT * FROM (
                 SELECT *, 
                     CASE
+                        -- you can have campus, faculty, department with course and course number
+                        -- campus, faculty with course and course number
+                        -- campus only with course and course number
+                        -- campus cannot be null or empty when course and course number are provided
                         -- specific cases with course and course number
+                        -- campus canot be null period
                         WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 1
                         WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 2
                         WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 3
                         WHEN (campus IS NULL OR campus = '') AND faculty = ? AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 4
                         
                         -- more general cases without course and course number
+                        -- campus, faculty, department
+                        -- campus, faculty
+                        -- check campus only templates
+                        -- check faculty only templates
+                        -- last case should be faculty specific templates
+                        -- campus cannot be null or empty when faculty is provided
+                        -- campus cannot be null or empty when department is provided
+                        -- campus cannot be null period.
                         WHEN campus = ? AND faculty = ? AND department = ? AND message_type = ? AND lang = ? THEN 5
                         WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND message_type = ? AND lang = ? THEN 6
                         WHEN campus = ? AND faculty = ?  AND message_type = ? AND lang = ? THEN 7
                         WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '')  AND message_type = ? AND lang = ? THEN 8
-                        WHEN campus = ? AND message_type = ? AND lang = ? THEN 9
-                        WHEN (campus IS NULL OR campus = '') AND faculty = ? AND message_type = ? AND lang = ? THEN 10
-                        WHEN faculty = ? AND message_type = ? AND lang = ? THEN 11                                                        
+                        WHEN campus = ? AND message_type = ? AND lang = ? THEN 9                        
+                        WHEN faculty = ? AND message_type = ? AND lang = ? THEN 10                                                       
                         ELSE NULL
                     END AS priority
                 FROM {local_et_email}
@@ -534,8 +546,6 @@ class helper
             // CASE condition 9
             $campus, $message_type, $lang,
             // CASE condition 10
-            $faculty, $message_type, $lang,
-            // CASE condition 11
             $faculty, $message_type, $lang,
         ];
 
