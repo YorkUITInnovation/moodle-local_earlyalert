@@ -9,11 +9,11 @@ use local_earlyalert\helper;
 // Get parameters from URL
 $campus = optional_param('campus', '', PARAM_TEXT);
 $faculty = optional_param('faculty', '', PARAM_TEXT);
-$department = optional_param('department', '', PARAM_TEXT);
-$course_name = optional_param('course', '', PARAM_TEXT);
-$course_number = optional_param('coursenumber', '', PARAM_TEXT);
+$department = strtoupper(optional_param('department', '', PARAM_TEXT));
+$course_name = strtoupper(optional_param('course', '', PARAM_TEXT));
+$course_number = strtoupper(optional_param('coursenumber', '', PARAM_TEXT));
 $message_type = optional_param('message_type', 0, PARAM_INT);
-$lang = optional_param('lang', 'EN', PARAM_TEXT);
+$lang = strtolower(optional_param('lang', 'EN', PARAM_TEXT));
 
 echo "<h1>Template Test Page</h1>";
 echo "<h2>Input Parameters:</h2>";

@@ -317,7 +317,7 @@ class helper
                         'first_name' => $student->firstname,
                         'last_name' => $student->lastname,
                         'grade' => $student_grade,
-                        'lang' => $mdl_user->lang ? strtoupper($mdl_user->lang) : 'EN',
+                        'lang' => $mdl_user->lang ? strtolower($mdl_user->lang) : 'en',
                         'idnumber' => $student->idnumber,
                         'campus' => $studentcampus,
                         'faculty' => $studentfaculty,

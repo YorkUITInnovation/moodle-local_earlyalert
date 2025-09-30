@@ -99,6 +99,11 @@ class local_earlyalert_course_grades_ws extends external_api
 
                 $template = helper::get_email_template($campus, $faculty, $department, $course_name, $course_number, $message_type, $lang);
 
+                // If no template found and the language was FR, try with EN as a fallback.
+                if (!$template && $lang === 'fr') {
+                    $template = helper::get_email_template($campus, $faculty, $department, $course_name, $course_number, $message_type, 'en');
+                }
+
                 if ($template) {
                     $email = new \local_etemplate\email($template->id);
                     $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
@@ -132,17 +137,17 @@ class local_earlyalert_course_grades_ws extends external_api
 
     private static function process_lang_for_templates($lang): string
     {
-        $lang = strtoupper($lang);
+        $lang = strtolower($lang);
         // Business rule in webservice! If student does not have a language in English or French, default to English
         // Array of allowed languages (ISO 639-1 codes and variations)
-        $allowed_en_languages = ['EN', 'EN-CA', 'EN-US'];
-        $allowed_fr_languages = ['FR', 'FR-CA', 'FR-FR'];
+        $allowed_en_languages = ['en', 'en-ca', 'en-us'];
+        $allowed_fr_languages = ['fr', 'fr-ca', 'fr-fr'];
         if (in_array($lang, $allowed_en_languages)) {
-            $lang = 'EN';
+            $lang = 'en';
         } else if (in_array($lang, $allowed_fr_languages)) {
-            $lang = 'FR';
+            $lang = 'fr';
         } else { // any other language
-            $lang = 'EN';
+            $lang = 'en';
         }
         return $lang;
     }
