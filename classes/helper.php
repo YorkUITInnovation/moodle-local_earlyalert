@@ -486,6 +486,11 @@ class helper
     public static function get_email_template($campus, $faculty, $department, $course_name, $course_number, $message_type, $lang) {
         global $DB;
 
+        // campus cannot be null period enforced in all cases
+        if (empty($campus)) {
+            return null;
+        }
+
         $sql = "
         SELECT * FROM (
                 SELECT *, 
@@ -495,27 +500,26 @@ class helper
                         -- campus only with course and course number
                         -- campus cannot be null or empty when course and course number are provided
                         -- specific cases with course and course number
-                        -- campus canot be null period
+                        -- assume message type and lang are always provided
                         WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 1
                         WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 2
                         WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 3
-                        WHEN (campus IS NULL OR campus = '') AND faculty = ? AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 4
                         
                         -- more general cases without course and course number
-                        -- campus, faculty, department
-                        -- campus, faculty
-                        -- check campus only templates
-                        -- check faculty only templates
+                        -- 1. campus, faculty, department
+                        -- 2. campus, faculty
+                        -- 3. check campus only templates
+                        -- 4. check faculty only templates
                         -- last case should be faculty specific templates
                         -- campus cannot be null or empty when faculty is provided
                         -- campus cannot be null or empty when department is provided
                         -- campus cannot be null period.
-                        WHEN campus = ? AND faculty = ? AND department = ? AND message_type = ? AND lang = ? THEN 5
-                        WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND message_type = ? AND lang = ? THEN 6
-                        WHEN campus = ? AND faculty = ?  AND message_type = ? AND lang = ? THEN 7
-                        WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '')  AND message_type = ? AND lang = ? THEN 8
-                        WHEN campus = ? AND message_type = ? AND lang = ? THEN 9                        
-                        WHEN faculty = ? AND message_type = ? AND lang = ? THEN 10                                                       
+                        WHEN campus = ? AND faculty = ? AND department = ? AND message_type = ? AND lang = ? THEN 4
+                        WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND message_type = ? AND lang = ? THEN 5
+                        WHEN campus = ? AND faculty = ?  AND message_type = ? AND lang = ? THEN 6
+                        WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '')  AND message_type = ? AND lang = ? THEN 7
+                        WHEN campus = ? AND message_type = ? AND lang = ? THEN 8
+                        WHEN faculty = ? AND message_type = ? AND lang = ? THEN 9                                                       
                         ELSE NULL
                     END AS priority
                 FROM {local_et_email}
@@ -534,18 +538,16 @@ class helper
             // CASE condition 3
             $campus, $course_name, $course_number, $message_type, $lang,
             // CASE condition 4
-            $faculty, $course_name, $course_number, $message_type, $lang,
-            // CASE condition 5
             $campus, $faculty, $department, $message_type, $lang,
+            // CASE condition 5
+            $campus, $faculty, $message_type, $lang,
             // CASE condition 6
             $campus, $faculty, $message_type, $lang,
             // CASE condition 7
-            $campus, $faculty, $message_type, $lang,
+            $campus, $message_type, $lang,
             // CASE condition 8
             $campus, $message_type, $lang,
             // CASE condition 9
-            $campus, $message_type, $lang,
-            // CASE condition 10
             $faculty, $message_type, $lang,
         ];
 

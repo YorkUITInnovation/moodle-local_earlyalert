@@ -39,4 +39,3 @@ if ($template) {
 } else {
     echo "<p>No template found for the given parameters.</p>";
 }
-?>
