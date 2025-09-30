@@ -517,7 +517,7 @@ class helper
                         WHEN campus = ? AND faculty = ? AND department = ? AND message_type = ? AND lang = ? THEN 4
                         WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND message_type = ? AND lang = ? THEN 5
                         WHEN campus = ? AND faculty = ?  AND message_type = ? AND lang = ? THEN 6
-                        WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IanNULL OR department = '')  AND message_type = ? AND lang = ? THEN 7
+                        WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '')  AND message_type = ? AND lang = ? THEN 7
                         WHEN campus = ? AND message_type = ? AND lang = ? THEN 8
                         WHEN faculty = ? AND message_type = ? AND lang = ? THEN 9                                                       
                         ELSE NULL
