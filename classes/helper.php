@@ -495,11 +495,11 @@ class helper
         SELECT * FROM (
                 SELECT *, 
                     CASE
+                         -- specific cases with course and course number
                         -- you can have campus, faculty, department with course and course number
                         -- campus, faculty with course and course number
                         -- campus only with course and course number
                         -- campus cannot be null or empty when course and course number are provided
-                        -- specific cases with course and course number
                         -- assume message type and lang are always provided
                         WHEN campus = ? AND faculty = ? AND department = ? AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 1
                         WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND course = ? AND coursenumber = ? AND message_type = ? AND lang = ? THEN 2
@@ -517,7 +517,7 @@ class helper
                         WHEN campus = ? AND faculty = ? AND department = ? AND message_type = ? AND lang = ? THEN 4
                         WHEN campus = ? AND faculty = ? AND (department IS NULL OR department = '') AND message_type = ? AND lang = ? THEN 5
                         WHEN campus = ? AND faculty = ?  AND message_type = ? AND lang = ? THEN 6
-                        WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IS NULL OR department = '')  AND message_type = ? AND lang = ? THEN 7
+                        WHEN campus = ? AND (faculty IS NULL OR faculty = '') AND (department IanNULL OR department = '')  AND message_type = ? AND lang = ? THEN 7
                         WHEN campus = ? AND message_type = ? AND lang = ? THEN 8
                         WHEN faculty = ? AND message_type = ? AND lang = ? THEN 9                                                       
                         ELSE NULL
