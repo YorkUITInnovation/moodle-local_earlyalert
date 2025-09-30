@@ -118,13 +118,14 @@ function filter_students_by_grade_select() {
     // Setup listener for drop down selection
     grade_select.addEventListener('change', function (e) {
         let grade_letter_id = e.target.value;
+        const current_course_name = document.getElementById('early_alert_course_name').value;
         // Check if "Not using Gradebook" is checked
         if (not_using_gradebook_checkbox && not_using_gradebook_checkbox.checked) {
             // Rebuild template cache with new grade for template parameters
             const templateCache = build_template_cache();
             setup_preview_buttons(templateCache);
         } else {
-            setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id);
+            setup_filter_students_by_grade(course_id, grade_letter_id, current_course_name, alert_type, teacher_user_id);
         }
     });
 
@@ -132,11 +133,12 @@ function filter_students_by_grade_select() {
     if (not_using_gradebook_checkbox) {
         not_using_gradebook_checkbox.addEventListener('change', function(e) {
             const current_grade = grade_select.value; //get current grade selection at time of checkbox change
+            const current_course_name = document.getElementById('early_alert_course_name').value;
             if (e.target.checked) {
                 // Show all students regardless of grade selection, but preserve dropdown value
-                setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id);
+                setup_filter_students_by_grade(course_id, -1, current_course_name, alert_type, teacher_user_id);
             } else {
-                setup_filter_students_by_grade(course_id, current_grade, course_name, alert_type, teacher_user_id);
+                setup_filter_students_by_grade(course_id, current_grade, current_course_name, alert_type, teacher_user_id);
             }
         });
     }
@@ -477,6 +479,7 @@ function setup_preview_buttons(templateCache) {
 
     // Get the custom message from the template cache
     const custom_message = templateCache.get('custom_message') || '';
+    const course_name = templateCache.get('course_name') || document.getElementById('early_alert_course_name').value;
 
     // Store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
@@ -548,7 +551,7 @@ function setup_preview_buttons(templateCache) {
             studentname: student_name_arr,
             assignmentgrade: assigngrade,
             assignmenttitle: assignment_title,
-            coursename: templateCache.get('course_name'),
+            coursename: course_name,
             customgrade: selected_grade ? selected_grade : 'D+',
             defaultgrade: "D+",
             custommessage: custom_message
@@ -565,7 +568,7 @@ function setup_preview_buttons(templateCache) {
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
         record_data.student_name = student_name;
-        record_data.course_name = templateCache.get('course_name');
+        record_data.course_name = course_name;
         record_data.templateEmailSubject = templateEmailSubject;
         record_data.templateEmailContent = changedTemplateEmailContent;
         record_data.template_id = templateObj.templateid;
@@ -600,6 +603,7 @@ function setup_preview_emails_with_titles(templateCache) {
 
     // Get the custom message from the template cache instead of directly from DOM
     const customMessage = templateCache.get('custom_message') || '';
+    const course_name = templateCache.get('course_name') || document.getElementById('early_alert_course_name').value;
 
     // store ALL the student data and template cache etc when its processed
     let student_template_cache_array = [];
@@ -675,7 +679,7 @@ function setup_preview_emails_with_titles(templateCache) {
             studentname: student_name_arr,
             assignmentgrade: assigngrade,
             assignmenttitle: assignment_title,
-            coursename: templateCache.get('course_name'),
+            coursename: course_name,
             customgrade: selected_grade ? selected_grade : 'D+',
             defaultgrade: "D+",
             custommessage: customMessage
@@ -692,7 +696,7 @@ function setup_preview_emails_with_titles(templateCache) {
         // assemble record data for individual buttons which includes student and template data
         record_data.student_id = student_id;
         record_data.student_name = student_name;
-        record_data.course_name = templateCache.get('course_name');
+        record_data.course_name = course_name;
         record_data.templateEmailSubject = templateEmailSubject;
         record_data.templateEmailContent = changedTemplateEmailContent;
         record_data.template_id = templateObj.templateid;
