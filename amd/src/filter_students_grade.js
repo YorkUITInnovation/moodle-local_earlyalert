@@ -559,6 +559,7 @@ function setup_preview_buttons(templateCache) {
 
         // Apply the replacements
         var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
+        var changedTemplateEmailSubject = addUserInfo(templateEmailSubject, params);
 
         // Double-check that [custommessage] is definitely replaced
         if (changedTemplateEmailContent.includes('[custommessage]')) {
@@ -569,7 +570,7 @@ function setup_preview_buttons(templateCache) {
         record_data.student_id = student_id;
         record_data.student_name = student_name;
         record_data.course_name = course_name;
-        record_data.templateEmailSubject = templateEmailSubject;
+        record_data.templateEmailSubject = changedTemplateEmailSubject;
         record_data.templateEmailContent = changedTemplateEmailContent;
         record_data.template_id = templateObj.templateid;
         record_data.revision_id = templateObj.revision_id;
@@ -687,6 +688,7 @@ function setup_preview_emails_with_titles(templateCache) {
 
         // Apply the replacements
         var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
+        var changedTemplateEmailSubject = addUserInfo(templateEmailSubject, params);
 
         // Double-check that [custommessage] is definitely replaced
         if (changedTemplateEmailContent.includes('[custommessage]')) {
@@ -697,7 +699,7 @@ function setup_preview_emails_with_titles(templateCache) {
         record_data.student_id = student_id;
         record_data.student_name = student_name;
         record_data.course_name = course_name;
-        record_data.templateEmailSubject = templateEmailSubject;
+        record_data.templateEmailSubject = changedTemplateEmailSubject;
         record_data.templateEmailContent = changedTemplateEmailContent;
         record_data.template_id = templateObj.templateid;
         record_data.revision_id = templateObj.revision_id;
@@ -881,7 +883,7 @@ function addUserInfo(emailText, params) {
         '[fullname]',
         '[usergrade]',
         '[grade]',
-        '[coursetitle]',
+        '[coursename]',
         '[assignmenttitle]',
         '[custommessage]'
     ];
@@ -913,7 +915,7 @@ function addUserInfo(emailText, params) {
                     uniqueMatches[i] = defaultGradeText;
                     break;
                 case 4:
-                    // coursetitle action
+                    // coursename action
                     let courseTitleText = params.coursename || '{COURSE TITLE NOT FOUND}';
                     uniqueMatches[i] = courseTitleText;
                     break;
