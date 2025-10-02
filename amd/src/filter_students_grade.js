@@ -401,13 +401,17 @@ function check_individual_students_checkboxes_for_submit() {
 
 function check_allnone_listener(selected_students) {
     // Add an event listener to the select all checkbox
-    const check_all_none_checkbox = document.getElementById('early-alert-checkall-student-checkbox');
+    const check_all_none_checkbox_orig = document.getElementById('early-alert-checkall-student-checkbox');
     const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
+
+    // Clone the button to remove any existing listeners before adding a new one
+    const check_all_none_checkbox = check_all_none_checkbox_orig.cloneNode(true);
+    check_all_none_checkbox_orig.parentNode.replaceChild(check_all_none_checkbox, check_all_none_checkbox_orig);
 
     check_all_none_checkbox.addEventListener('click', function () {
         student_ids_selected.value = [];
-        // Get all checkboxes within the list
-        let checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']");
+        // Get all checkboxes within the list, but exclude the 'not using gradebook' checkbox
+        let checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']:not(#early-alert-not-using-gradebook-checkbox)");
         // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
         checkboxes.forEach(function (checkbox) {
             if (check_all_none_checkbox.checked) {
