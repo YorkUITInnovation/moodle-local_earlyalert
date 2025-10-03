@@ -46,28 +46,40 @@ class grade_letters
      */
     public function get_grade_percentage_range()
     {
-        global $CFG, $DB;
+        global $DB;
 
-        // Select all rows from the grade_letters table
-        $grades = $DB->get_records('grade_letters',null, 'id ASC');
-        $grade_count = count($grades);
-        $percentage_ranges = [];
+        // Fetch all grade letters for contextid = 1, ordered by lower boundary ascending.
+        $grade_letters = $DB->get_records('grade_letters', ['contextid' => 1], 'lowerboundary ASC');
 
-        for ($i=1; $i <= $grade_count; $i++) {
-            if ($i==1){
-                $current_max_grade = 100;
-                $current_min_grade = $grades[$i]->lowerboundary;
-                $percentage_ranges[$grades[$i]->id] = ['min' => $current_min_grade, 'max' => $current_max_grade];
-            }
-            else {
-                $current_max_grade = $percentage_ranges[$i-1]['min']-.1;
-                $current_min_grade = $grades[$i]->lowerboundary;
-                $percentage_ranges[$grades[$i]->id] = ['min' => $current_min_grade, 'max' => $current_max_grade];
-            }
+        if (empty($grade_letters)) {
+            return [];
         }
-        return $percentage_ranges;
 
+        $grade_ranges = [];
+        $letters_array = array_values($grade_letters); // Re-index numerically
+
+        for ($i = 0; $i < count($letters_array); $i++) {
+            $current_letter = $letters_array[$i];
+            $min = (float)$current_letter->lowerboundary;
+
+            if ($i < count($letters_array) - 1) {
+                // The max is the min of the next grade, minus a small amount.
+                $next_letter = $letters_array[$i + 1];
+                $max = (float)$next_letter->lowerboundary - 0.01;
+            } else {
+                // This is the highest grade, so the max is 100.
+                $max = 100.0;
+            }
+
+            $grade_ranges[$current_letter->id] = [
+                'min' => $min,
+                'max' => $max,
+                'letter' => $current_letter->letter
+            ];
+        }
+        return $grade_ranges;
     }
+
 
     public function get_letter_value($grade_val){
         return grade_format_gradevalue_letter($grade_val, new \stdClass());

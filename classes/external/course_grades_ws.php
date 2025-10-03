@@ -128,7 +128,7 @@ class local_earlyalert_course_grades_ws extends external_api
                 }
             }
 
-            return $templateCache;
+            return array_values($templateCache);
         } catch (Exception $e) {
             error_log('Error in get_course_student_templates: ' . $e->getMessage());
             throw new moodle_exception('errorprocessingrequest', 'local_earlyalert', '', null, $e->getMessage());

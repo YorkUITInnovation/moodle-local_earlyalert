@@ -13,17 +13,17 @@ use local_earlyalert\base;
 
 class email_report_log extends crud
 {
-CONST GRADE_F = 11;
-CONST GRADE_D = 10;
-CONST GRADE_D_PLUS = 9;
-CONST GRADE_C_MINUS = 8;
-CONST GRADE_C = 7;
-CONST GRADE_C_PLUS = 6;
-CONST GRADE_B_MINUS = 5;
+CONST GRADE_F = 10;
+CONST GRADE_E = 9;
+CONST GRADE_D = 8;
+CONST GRADE_D_PLUS = 7;
+CONST GRADE_C = 6;
+CONST GRADE_C_PLUS = 5;
 CONST GRADE_B = 4;
 CONST GRADE_B_PLUS = 3;
-CONST GRADE_A_MINUS = 2;
-CONST GRADE_A = 1;
+CONST GRADE_A = 2;
+CONST GRADE_A_PLUS = 1;
+
 
     /**
      *
@@ -298,24 +298,18 @@ CONST GRADE_A = 1;
         switch ($this->trigger_grade) {
             case self::GRADE_F:
                 return 'F';
-            case self::GRADE_D:
-                return 'D';
-            case self::GRADE_D_PLUS:
-                return 'D+';
-            case self::GRADE_C_MINUS:
-                return 'C-';
+            case self::GRADE_E:
+                return 'E';
             case self::GRADE_C:
                 return 'C';
             case self::GRADE_C_PLUS:
                 return 'C+';
-            case self::GRADE_B_MINUS:
-                return 'B-';
             case self::GRADE_B:
                 return 'B';
             case self::GRADE_B_PLUS:
                 return 'B+';
-            case self::GRADE_A_MINUS:
-                return 'A-';
+            case self::GRADE_A_PLUS:
+                return 'A+';
             case self::GRADE_A:
                 return 'A';
             default:

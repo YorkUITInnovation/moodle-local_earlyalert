@@ -14,6 +14,7 @@ $course_name = strtoupper(optional_param('course', '', PARAM_TEXT));
 $course_number = strtoupper(optional_param('coursenumber', '', PARAM_TEXT));
 $message_type = optional_param('message_type', 0, PARAM_INT);
 $lang = strtolower(optional_param('lang', 'EN', PARAM_TEXT));
+$grade_letter_id = optional_param('grade_letter_id', 0, PARAM_INT);
 
 echo "<h1>Template Test Page</h1>";
 echo "<h2>Input Parameters:</h2>";
@@ -39,3 +40,9 @@ if ($template) {
 } else {
     echo "<p>No template found for the given parameters.</p>";
 }
+
+echo "<h2>All Grade Ranges:</h2>";
+echo "<pre>";
+$grade_ranges = helper::get_moodle_grade_percent_range($grade_letter_id);
+print_r($grade_ranges);
+echo "</pre>";

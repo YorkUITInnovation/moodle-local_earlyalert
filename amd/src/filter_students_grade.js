@@ -9,6 +9,10 @@ import selectBox from 'local_earlyalert/select_box';
 import config from 'core/config';
 import selectCourseBox from 'local_earlyalert/select_course_box';
 
+const DEFAULT_GRADE_ID = 7; // D+
+const DEFAULT_GRADE_LETTER = 'D+';
+const SHOW_ALL_STUDENTS_ID = -1;
+
 export const init = () => {
     alert_type_button();
     get_users();
@@ -94,8 +98,8 @@ function alert_type_button() {
             let course_name = event.target.getAttribute('data-name');
             let course_id = event.target.getAttribute('data-course_id');
             let teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
-            // Choose default grade letter dynamically: 9 for grade alerts, -1 for others (no grade filter)
-            const default_grade_letter_id = (alert_type === 'grade') ? 9 : -1;
+            // Choose default grade letter dynamically: 7 for grade alerts, -1 for others (no grade filter)
+            const default_grade_letter_id = (alert_type === 'grade') ? DEFAULT_GRADE_ID : SHOW_ALL_STUDENTS_ID;
             setup_filter_students_by_grade(course_id, default_grade_letter_id, course_name, alert_type, teacher_user_id);
         }
     });
@@ -136,7 +140,7 @@ function filter_students_by_grade_select() {
             const current_course_name = document.getElementById('early_alert_course_name').value;
             if (e.target.checked) {
                 // Show all students regardless of grade selection, but preserve dropdown value
-                setup_filter_students_by_grade(course_id, -1, current_course_name, alert_type, teacher_user_id);
+                setup_filter_students_by_grade(course_id, SHOW_ALL_STUDENTS_ID, current_course_name, alert_type, teacher_user_id);
             } else {
                 setup_filter_students_by_grade(course_id, current_grade, current_course_name, alert_type, teacher_user_id);
             }
@@ -169,7 +173,7 @@ function filter_students_by_assignment() {
         // Validate the assignment title
         if (validateAssignmentTitle(assignment_title)) {
             // For assignment alerts, do not filter by grade; pass -1 to include all students
-            setup_filter_students_by_grade(course_id, -1, course_name, alert_type, teacher_user_id, assignment_title);
+            setup_filter_students_by_grade(course_id, SHOW_ALL_STUDENTS_ID, course_name, alert_type, teacher_user_id, assignment_title);
         }
     });
     validateAssignmentTitle(assignment_input.value.trim());
@@ -217,7 +221,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
         ]);
 
         get_students_and_templates[0].then(response => {
-                const student_data = Object.values(response);
+                const student_data = response; // Response is already an array
 
                 // Reformat the data to display in a grid
                 let num_students = student_data.length;
@@ -296,15 +300,13 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                             const not_using_gradebook_checkbox = document.getElementById('early-alert-not-using-gradebook-checkbox');
 
                             // If showing all students (grade_letter_id === -1)
-                            if (grade_letter_id === -1) {
+                            if (grade_letter_id === SHOW_ALL_STUDENTS_ID) {
                                 // Store current value before any changes
-                                const currentValue = grade_select.value;
                                 if (not_using_gradebook_checkbox) {
                                     not_using_gradebook_checkbox.checked = true;
                                 }
-                                // Restore the previous selection, or default to 9 if none exists
-                               // grade_select.value = currentValue && currentValue !== '-1' ? currentValue : 9;
-                                grade_select.value = 9; // default to 9 when showing all students
+
+                                grade_select.value = DEFAULT_GRADE_ID; // default to 7 when showing all students
                             } else if (grade_letter_id > 0) {
                                 // Normal grade filtering - set dropdown value and uncheck checkbox
                                 grade_select.value = grade_letter_id;
@@ -325,7 +327,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                         check_allnone_listener(selected_students);
 
                         // Populate the template cache from the template data
-                        Object.values(student_data).forEach(result => {
+                        student_data.forEach(result => {
                             if (typeof result === 'object') {
                                 let finalMessage = {
                                     subject: result.subject,
@@ -556,8 +558,8 @@ function setup_preview_buttons(templateCache) {
             assignmentgrade: assigngrade,
             assignmenttitle: assignment_title,
             coursename: course_name,
-            customgrade: selected_grade ? selected_grade : 'D+',
-            defaultgrade: "D+",
+            customgrade: selected_grade ? selected_grade : DEFAULT_GRADE_LETTER,
+            defaultgrade: DEFAULT_GRADE_LETTER,
             custommessage: custom_message
         };
 
@@ -663,8 +665,8 @@ function setup_preview_emails_with_titles(templateCache) {
             var templateEmailSubject = '';
 
             // For debugging - can be removed later
-            console.log('Generated template keys for student ID ' + student_id + ':');
-            console.log('Course template key: '+ templateKey);
+           // console.log('Generated template keys for student ID ' + student_id + ':');
+           // console.log('Course template key: '+ templateKey);
 
             // The order of checks determines the template precedence.
             // templateCache is checked for the template key and if found the email subject and content are set
@@ -685,8 +687,8 @@ function setup_preview_emails_with_titles(templateCache) {
             assignmentgrade: assigngrade,
             assignmenttitle: assignment_title,
             coursename: course_name,
-            customgrade: selected_grade ? selected_grade : 'D+',
-            defaultgrade: "D+",
+            customgrade: selected_grade ? selected_grade : DEFAULT_GRADE_LETTER,
+            defaultgrade: DEFAULT_GRADE_LETTER,
             custommessage: customMessage
         };
 
