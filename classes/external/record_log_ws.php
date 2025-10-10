@@ -46,7 +46,18 @@ class local_earlyalert_record_log_ws extends external_api
         $ids=[];
         $students = json_decode($template_data, true);
         forEach($students as $student) {
+            // Get idnumber from user student_id
+            $user = $DB->get_record('user', array('id' => $student['student_id']), '*', MUST_EXIST);
+            // Oracle SQL
+            $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID=" . trim($user->idnumber) . ";";
+            $OCI = new \local_earlyalert\oracle_client();
+            $OCI->connect();
+            $stid = $OCI->execute_query($sql);
 
+            $student_profile = '';
+            if (count($stid) > 0) {
+                $student_profile = json_encode($stid[0]);
+            }
             // add to data structure
             $data= new stdClass();
             $data->template_id = ($student['template_id'] ?? 0);
@@ -64,6 +75,7 @@ class local_earlyalert_record_log_ws extends external_api
             //all logs default to unadvised
             $data->student_advised_by_advisor = 0;
             $data->student_advised_by_instructor = 0;
+            $data->student_profile = $student_profile;
             //all logs default to unsent
             $data->date_message_sent = 0;
             $data->timecreated = time();

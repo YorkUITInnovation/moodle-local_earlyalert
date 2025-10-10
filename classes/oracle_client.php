@@ -16,7 +16,7 @@
 
 namespace local_earlyalert;
 
-defined('MOODLE_INTERNAL') || die();
+//defined('MOODLE_INTERNAL') || die();
 
 /**
  * Simple Oracle DB client for connecting and executing queries using OCI8.
