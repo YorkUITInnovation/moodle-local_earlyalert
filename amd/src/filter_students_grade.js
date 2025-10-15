@@ -225,8 +225,8 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
                 // Reformat the data to display in a grid
                 let num_students = student_data.length;
-                let num_cols = 3;
-                let num_rows = Math.ceil(num_students / num_cols);
+                let num_rows = Math.min(3, Math.ceil(num_students / 3));
+                let num_cols = Math.ceil(num_students / num_rows);
                 let display_data = {
                     num_rows: num_rows,
                     num_cols: num_cols,
@@ -238,16 +238,21 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
                     display_data.student_rows[r] = {students: []};
                 }
 
-                student_data.forEach((result, index) => {
-                    if (typeof result === 'object') {
-                        const row = index % num_rows;
-                        const col = Math.floor(index / num_rows);
+                let row = 0;
+                let col = 0;
 
+                student_data.forEach(result => {
+                    if (typeof result === 'object') {
                         result.faculty = result.faculty ? result.faculty : '';
                         result.major = result.major ? result.major : '';
                         result.campus = result.campus ? result.campus : '';
                         result.courseid = course_id;
                         display_data.student_rows[row].students[col] = result;
+                        col++;
+                        if (col === num_cols) {
+                            col = 0;
+                            row++;
+                        }
                     }
                 });
 
