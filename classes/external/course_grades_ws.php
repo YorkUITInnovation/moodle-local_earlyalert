@@ -128,7 +128,13 @@ class local_earlyalert_course_grades_ws extends external_api
                 }
             }
 
-            return array_values($templateCache);
+            $templateCache = array_values($templateCache);
+            // Sort the final list of students by last name before returning.
+            usort($templateCache, function ($a, $b) {
+                return strcasecmp($a['last_name'], $b['last_name']);
+            });
+
+            return $templateCache;
         } catch (Exception $e) {
             error_log('Error in get_course_student_templates: ' . $e->getMessage());
             throw new moodle_exception('errorprocessingrequest', 'local_earlyalert', '', null, $e->getMessage());
