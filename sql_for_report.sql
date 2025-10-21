@@ -1,0 +1,85 @@
+Select l.id,
+       et.name,
+       et.subject,
+       et.message,
+       et.context,
+       et.unit,
+       et.active,
+       et.message_type,
+       et.campus,
+       et.faculty,
+       et.course,
+       et.coursenumber,
+       et.hascustommessage,
+       et.template_type,
+       iu.idnumber                                             As instructor_idnumber,
+       iu.firstname                                            As instructor_firstname,
+       iu.lastname                                             As instructor_lastname,
+       iu.email                                                As `instructor_email;`,
+       c.fullname                                              As course_fullname,
+       c.shortname                                             As course_shortname,
+       c.idnumber                                              As course_idnumber,
+       l.assignment_name,
+       l.trigger_grade,
+       l.actual_grade,
+       l.student_advised_by_advisor,
+       l.student_advised_by_instructor,
+       l.custom_message,
+       FROM_UNIXTIME(l.timecreated, '%Y-%m-%d %H:%i:%s')       As timecreated,
+       FROM_UNIXTIME(l.date_message_sent, '%Y-%m-%d %H:%i:%s') As date_message_sent,
+       jt.*
+From moodle.mdl_local_earlyalert_report_log l
+         Inner Join
+     moodle.mdl_local_et_email et On et.id = l.template_id
+         Inner Join
+     moodle.mdl_user iu On iu.id = l.instructor_id
+         Inner Join
+     moodle.mdl_course c On c.id = l.course_id
+         LEFT JOIN JSON_TABLE(
+        CAST(COALESCE(NULLIF(l.student_profile, ''), '{}') AS JSON), -- cast in case the column is TEXT/LONGTEXT
+        '$'
+            COLUMNS (
+    SISID                   VARCHAR(32)   PATH '$.SISID',
+    FIRSTNAME               VARCHAR(100)  PATH '$.FIRSTNAME',
+    SURNAME                 VARCHAR(100)  PATH '$.SURNAME',
+    ACADEMICYEAR            VARCHAR(10)   PATH '$.ACADEMICYEAR',
+    STUDYSESSION            VARCHAR(10)   PATH '$.STUDYSESSION',
+    SESSIONNAME             VARCHAR(10)   PATH '$.SESSIONNAME',
+    TRANSCRIPTTITLE         VARCHAR(500)  PATH '$.TRANSCRIPTTITLE',
+    PROGFACULTY             VARCHAR(10)   PATH '$.PROGFACULTY',
+    CAMPUS                  VARCHAR(10)   PATH '$.CAMPUS',
+    COLLEGEAFFILIATION      VARCHAR(100)  PATH '$.COLLEGEAFFILIATION',
+    COLLEGE                 VARCHAR(10)   PATH '$.COLLEGE',
+    PROGRAM                 VARCHAR(100)  PATH '$.PROGRAM',
+    ACADQUALIFICATION       VARCHAR(10)   PATH '$.ACADQUALIFICATION',
+    CURRICULUMDETAIL        VARCHAR(10)   PATH '$.CURRICULUMDETAIL',
+    SUBJECT1                VARCHAR(50)   PATH '$.SUBJECT1',
+    SUBJECT1FACULTY         VARCHAR(50)   PATH '$.SUBJECT1FACULTY',
+    SUBJECT1FACULTYDESC     VARCHAR(200)  PATH '$.SUBJECT1FACULTYDESC',
+    UNIT1                   VARCHAR(50)   PATH '$.UNIT1',
+    TITLE1                  VARCHAR(100)  PATH '$.TITLE1',
+    SUBJECT2                VARCHAR(50)   PATH '$.SUBJECT2',
+    SUBJECT2FACULTY         VARCHAR(50)   PATH '$.SUBJECT2FACULTY',
+    SUBJECT2FACULTYDESC     VARCHAR(200)  PATH '$.SUBJECT2FACULTYDESC',
+    UNIT2                   VARCHAR(50)   PATH '$.UNIT2',
+    TITLE2                  VARCHAR(100)  PATH '$.TITLE2',
+    BASIS                   VARCHAR(50)   PATH '$.BASIS',
+    EMAIL                   VARCHAR(254)  PATH '$.EMAIL',
+    STUDYLEVEL              VARCHAR(10)   PATH '$.STUDYLEVEL',
+    IMMIGRATIONSTATUS       VARCHAR(10)   PATH '$.IMMIGRATIONSTATUS',
+    VISAFLAG                VARCHAR(5)    PATH '$.VISAFLAG',
+    VISAEXPIRYDATE          VARCHAR(50)   PATH '$.VISAEXPIRYDATE',
+    LANGUAGECORRESPONDENCE  VARCHAR(10)   PATH '$.LANGUAGECORRESPONDENCE',
+    MATUREFLAG              VARCHAR(5)    PATH '$.MATUREFLAG',
+    OSAPFLAG                VARCHAR(5)    PATH '$.OSAPFLAG',
+    VARSITYFLAG             VARCHAR(5)    PATH '$.VARSITYFLAG',
+    ESLFLAG                 VARCHAR(5)    PATH '$.ESLFLAG',
+    SCHOLARSHIPFLAG         VARCHAR(5)    PATH '$.SCHOLARSHIPFLAG',
+    OGPA                    VARCHAR(20)   PATH '$.OGPA',
+    LATESTACADEMICDECISION  VARCHAR(100)  PATH '$.LATESTACADEMICDECISION',
+    ACADEMICDECISIONTERM    VARCHAR(50)   PATH '$.ACADEMICDECISIONTERM',
+    ACADEMICSTATUS          VARCHAR(50)   PATH '$.ACADEMICSTATUS',
+    REGISTRATIONSTATUS      VARCHAR(10)   PATH '$.REGISTRATIONSTATUS'
+  )
+                   ) AS jt
+                   ON TRUE;
