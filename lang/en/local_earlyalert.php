@@ -60,7 +60,7 @@ $string['idashboard'] = 'Instructor Dashboard';
 $string['impersonate_user'] = 'Send on behalf of: {$a}';
 $string['impersonating_user'] = 'Impersonating User';
 $string['generate_reports'] = 'Generate Reports';
-$string['grade'] = 'Grade';
+$string['grade'] = 'Course Total';
 $string['grade_instructions'] = '
 <ul>
     <li>Grades messages inform students they are averaging below a certain letter grade.
@@ -80,7 +80,7 @@ $string['manage_roles'] = 'Manage Roles';
 $string['manage_templates'] = 'Manage Templates';
 $string['markham_streams'] = 'Markham Streams';
 $string['message_to_advisors'] = 'You are receiving this email because you are the advisor for the following student(s) who has/have been identified as at risk in one or more of their courses. Please follow up with the student(s) as soon as possible.' . "\n\n";
-$string['missed_assignment'] = 'Missed Assignment';
+$string['missed_assignment'] = 'Missed Test/Quiz';
 $string['missed_exam'] = 'Missed Exam';
 $string['my_courses'] = 'My Courses';
 $string['my_list_of_students'] = 'My List of Students';
