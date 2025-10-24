@@ -264,15 +264,6 @@ const AdministratorView = ({
     <div className="space-y-6">
       {/* Executive Summary */}
       <div className="bg-white rounded-lg shadow-lg border-2 border-[#E31837] p-8">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 bg-[#E31837] rounded-full">
-            <BarChart3 className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold text-[#E31837]">Executive Dashboard</h2>
-            <p className="text-[#B91C1C] text-lg">Strategic overview of student success initiatives</p>
-          </div>
-        </div>
         <div className="grid gap-6 mt-6" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
           <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between mb-4">
