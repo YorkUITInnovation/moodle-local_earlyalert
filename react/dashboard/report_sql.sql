@@ -28,13 +28,13 @@ Select l.id,
        FROM_UNIXTIME(l.timecreated, '%Y-%m-%d %H:%i:%s')       As timecreated,
        FROM_UNIXTIME(l.date_message_sent, '%Y-%m-%d %H:%i:%s') As date_message_sent,
        jt.*
-From moodle.mdl_local_earlyalert_report_log l
+From {local_earlyalert_report_log} l
          Inner Join
-     moodle.mdl_local_et_email et On et.id = l.template_id
+     {local_et_email} et On et.id = l.template_id
          Inner Join
-     moodle.mdl_user iu On iu.id = l.instructor_id
+    {user} iu On iu.id = l.instructor_id
          Inner Join
-     moodle.mdl_course c On c.id = l.course_id
+    {course} c On c.id = l.course_id
          LEFT JOIN JSON_TABLE(
         CAST(COALESCE(NULLIF(l.student_profile, ''), '{}') AS JSON), -- cast in case the column is TEXT/LONGTEXT
         '$'
@@ -82,4 +82,4 @@ From moodle.mdl_local_earlyalert_report_log l
     REGISTRATIONSTATUS      VARCHAR(10)   PATH '$.REGISTRATIONSTATUS'
   )
                    ) AS jt
-                   ON TRUE;
+                   ON TRUE
