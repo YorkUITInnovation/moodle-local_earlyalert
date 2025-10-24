@@ -53,14 +53,15 @@ $string['course_overview_render_instructions'] = '<ul>
 $string['early_alert'] = 'Early Alert';
 $string['earlyalert_viewed'] = 'Early Alert Viewed';
 $string['exam_instructions'] = '<ul>
-<li>These messages inform students of a missed exam that threatens their success in the course  
+<li>These messages inform students of a missed test/quiz that threatens their success in the course  
 </li>
 </ul>';
 $string['idashboard'] = 'Instructor Dashboard';
 $string['impersonate_user'] = 'Send on behalf of: {$a}';
 $string['impersonating_user'] = 'Impersonating User';
 $string['generate_reports'] = 'Generate Reports';
-$string['grade'] = 'Course Total';
+//$string['grade'] = 'Course Total';
+$string['grade'] = 'Gradebook Course Total (if applicable)';
 $string['grade_instructions'] = '
 <ul>
     <li>Grades messages inform students they are averaging below a certain letter grade.

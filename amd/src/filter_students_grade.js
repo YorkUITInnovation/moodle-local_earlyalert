@@ -13,7 +13,20 @@ const DEFAULT_GRADE_ID = 7; // D+
 const DEFAULT_GRADE_LETTER = 'D+';
 const SHOW_ALL_STUDENTS_ID = -1;
 
-export const init = () => {
+const strings = {};
+
+export const init = async() => {
+    // Pre-load all required strings needed due to the promise nature of getString and not making the request for student data complex with getString calls
+    [
+        strings.low_grade,
+        strings.missed_assignment,
+        strings.missed_exam,
+    ] = await Promise.all([
+        getString('low_grade', 'local_earlyalert'),
+        getString('missed_assignment', 'local_earlyalert'),
+        getString('missed_exam', 'local_earlyalert'),
+    ]);
+
     alert_type_button();
     get_users();
     // Set up the custom message listener globally - not tied to any specific alert type
@@ -264,19 +277,19 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
 
                 if (alert_type === 'grade') {
                     // Add alert_type to display_data
-                    display_data.alert_type = 'Low Grade';
+                    display_data.alert_type = strings.low_grade;
                     display_data.grade = true;
                 }
 
                 if (alert_type === 'assign') {
                     // Add alert_type to display_data
-                    display_data.alert_type = 'Missed Assignment';
+                    display_data.alert_type = strings.missed_assignment;
                     display_data.assign = true;
                 }
 
                 if (alert_type === 'exam') {
                     // Add alert_type to display_data
-                    display_data.alert_type = 'Missed Exam';
+                    display_data.alert_type = strings.missed_exam;
                     display_data.exam = true;
                 }
 
