@@ -1,0 +1,79 @@
+{
+  "name": "early-alerts-dashboard",
+  "version": "1.0.0",
+  "description": "York University Student Success Analytics Platform - Real-time dashboard for tracking and managing student alerts",
+  "private": true,
+  "homepage": "/local/earlyalert/react/dashboard/build",
+  "author": {
+    "name": "York University",
+    "email": "vidurk@yorku.ca"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/early-alerts-dashboard.git"
+  },
+  "keywords": [
+    "education",
+    "analytics",
+    "dashboard",
+    "student-success",
+    "university",
+    "react",
+    "fastapi"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "dotenv": "^17.0.0",
+    "html2canvas": "^1.4.1",
+    "lucide-react": "^0.525.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^5.10.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-scripts": "5.0.1",
+    "recharts": "^3.0.2",
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "dev": "npm start",
+    "dev:backend": "cd backend && uvicorn main:app --reload",
+    "dev:full": "concurrently \"npm run dev\" \"npm run dev:backend\"",
+    "setup": "./scripts/setup-dev.sh",
+    "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src/ --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write src/",
+    "test:coverage": "npm test -- --coverage --watchAll=false",
+    "build:analyze": "npm run build && npx bundle-analyzer build/static/js/*.js"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

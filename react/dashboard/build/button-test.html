@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-button {
+            background-color: #FF4444;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin: 10px;
+        }
+        .test-button:hover {
+            background-color: #DD3333;
+        }
+        .dashboard-preview {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ask AI Button Test</h1>
+    
+    <div class="dashboard-preview">
+        <div class="header">
+            <div>
+                <h2>York University Early Alert Analytics Dashboard</h2>
+                <p>Powered by Llamalytics</p>
+            </div>
+            <div class="button-group">
+                <button class="test-button" style="background-color: #E31837;">
+                    🔄 Refresh Data
+                </button>
+                <button class="test-button">
+                    🤖 Ask AI - TEST
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <h2>Instructions:</h2>
+    <ol>
+        <li>The red "🤖 Ask AI - TEST" button above simulates what should appear in your dashboard</li>
+        <li>Open your dashboard at <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
+        <li>Look for this button in the header section, next to the "Refresh Data" button</li>
+        <li>If you don't see it, try:</li>
+        <ul>
+            <li>Hard refresh (Ctrl+F5 or Cmd+Shift+R)</li>
+            <li>Clear browser cache</li>
+            <li>Check browser console for errors (F12)</li>
+        </ul>
+    </ol>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.test-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    alert('Button clicked: ' + this.textContent);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

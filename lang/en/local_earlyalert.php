@@ -151,3 +151,7 @@ $string['azureopenai_endpoint'] = 'Azure OpenAI Endpoint';
 $string['azureopenai_version'] = 'Azure OpenAI API Version';
 $string['azureopenai_deployment'] = 'Azure OpenAI Deployment Name';
 
+// React dashboards
+$string['administrative_reports'] = 'Administrative Reports';
+$string['advisor_reports'] = 'Advisor Reports';
+
