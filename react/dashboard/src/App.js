@@ -948,19 +948,6 @@ const EarlyAlertDashboard = () => {
               onToggle={() => setShowVisualizationPanel(false)}
             />
           )}
-          
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-sm text-green-800">
-              <span className="font-semibold">
-                {usingMockData ? '� Demo Mode:' : '�🚀 Live Data:'}
-              </span> 
-              {usingMockData 
-                ? ' This dashboard is showing sample data for demonstration purposes. Start the backend server to connect to the live MySQL database.'
-                : ' This dashboard is now connected to live MySQL database via FastAPI! Data updates automatically reflect current student information and alerts from the database.'
-              }
-              {students.length > 0 && ` Currently showing ${students.length} students and ${alerts.length} alerts.`}
-            </p>
-          </div>
         </div>
 
         {/* View Toggle - Only show if not locked by query parameter */}
