@@ -1,0 +1,56 @@
+<!-- Desktop Screenshot Placeholder -->
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#f8fafc"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="1280" height="80" fill="#E31837"/>
+  <text x="640" y="45" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="bold">York University Early Alert Analytics Dashboard</text>
+  
+  <!-- Dashboard Cards -->
+  <rect x="40" y="120" width="280" height="140" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="180" y="150" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Total Alerts</text>
+  <text x="180" y="200" text-anchor="middle" fill="#E31837" font-family="Arial, sans-serif" font-size="36" font-weight="bold">1,247</text>
+  
+  <rect x="360" y="120" width="280" height="140" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="500" y="150" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Active Students</text>
+  <text x="500" y="200" text-anchor="middle" fill="#E31837" font-family="Arial, sans-serif" font-size="36" font-weight="bold">892</text>
+  
+  <rect x="680" y="120" width="280" height="140" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="820" y="150" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Success Rate</text>
+  <text x="820" y="200" text-anchor="middle" fill="#10b981" font-family="Arial, sans-serif" font-size="36" font-weight="bold">87%</text>
+  
+  <!-- Chart Area -->
+  <rect x="40" y="300" width="600" height="350" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="340" y="330" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Alert Trends</text>
+  
+  <!-- Sample Chart Bars -->
+  <rect x="80" y="400" width="40" height="200" fill="#E31837"/>
+  <rect x="140" y="450" width="40" height="150" fill="#E31837"/>
+  <rect x="200" y="380" width="40" height="220" fill="#E31837"/>
+  <rect x="260" y="420" width="40" height="180" fill="#E31837"/>
+  <rect x="320" y="390" width="40" height="210" fill="#E31837"/>
+  <rect x="380" y="460" width="40" height="140" fill="#E31837"/>
+  <rect x="440" y="410" width="40" height="190" fill="#E31837"/>
+  <rect x="500" y="430" width="40" height="170" fill="#E31837"/>
+  <rect x="560" y="400" width="40" height="200" fill="#E31837"/>
+  
+  <!-- Side Panel -->
+  <rect x="680" y="300" width="280" height="350" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="820" y="330" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Recent Alerts</text>
+  
+  <!-- Recent Alert Items -->
+  <rect x="700" y="350" width="240" height="50" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+  <circle cx="720" cy="375" r="8" fill="#ef4444"/>
+  <text x="740" y="370" fill="#374151" font-family="Arial, sans-serif" font-size="12">John Smith - Academic Risk</text>
+  <text x="740" y="385" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">LAPS - 2 hours ago</text>
+  
+  <rect x="700" y="420" width="240" height="50" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+  <circle cx="720" cy="445" r="8" fill="#f59e0b"/>
+  <text x="740" y="440" fill="#374151" font-family="Arial, sans-serif" font-size="12">Sarah Johnson - Attendance</text>
+  <text x="740" y="455" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Schulich - 4 hours ago</text>
+  
+  <rect x="700" y="490" width="240" height="50" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+  <circle cx="720" cy="515" r="8" fill="#ef4444"/>
+  <text x="740" y="510" fill="#374151" font-family="Arial, sans-serif" font-size="12">Mike Chen - Grade Drop</text>
+  <text x="740" y="525" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Lassonde - 6 hours ago</text>
+</svg>
