@@ -9,15 +9,15 @@ class ApiService {
     // DO NOT cache real student data - always fetch fresh
   }
 
-  // Load real student data from JSON file
+  // Load real student data from data.php
   async loadRealStudentData() {
     // Always fetch fresh data, never use cache
 
     try {
-      console.log('🔄 Fetching real student data from /real_student_data.json...');
+      console.log('🔄 Fetching real student data from data.php...');
       // Add cache-busting timestamp to force fresh load
       const timestamp = new Date().getTime();
-      const response = await fetch(`/real_student_data.json?t=${timestamp}`, {
+      const response = await fetch(`/local/earlyalert/react/dashboard/data.php?t=${timestamp}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -29,14 +29,27 @@ class ApiService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data = await response.json();
-      console.log('✅ Real student data loaded successfully!');
-      console.log('📊 Metadata:', data.metadata);
-      console.log('📋 Total alert logs:', data.alert_logs?.length || 0);
-      console.log('🔍 First alert log:', data.alert_logs?.[0]);
+      const jsonResponse = await response.json();
+      console.log('✅ Real student data loaded successfully from data.php!');
+      console.log('📊 Success:', jsonResponse.success);
+      console.log('📋 Total records:', jsonResponse.count || 0);
+      console.log('📅 Date range:', jsonResponse.date_range);
+      console.log('🔍 First record:', jsonResponse.data?.[0]);
+
+      // Transform the response to match expected format
+      const data = {
+        metadata: {
+          source: 'data.php',
+          count: jsonResponse.count || 0,
+          date_range: jsonResponse.date_range,
+          timestamp: new Date().toISOString()
+        },
+        alert_logs: jsonResponse.data || []
+      };
+
       return data;
     } catch (error) {
-      console.error('❌ Error loading real student data:', error);
+      console.error('❌ Error loading real student data from data.php:', error);
       console.error('❌ Error details:', {
         message: error.message,
         stack: error.stack,
@@ -82,28 +95,28 @@ class ApiService {
         const studentMap = new Map();
         
         realData.alert_logs.forEach(log => {
-          if (log.SISID && log.FIRSTNAME && log.SURNAME) {
-            const key = log.SISID.toString();
+          if (log.sisid && log.firstname && log.surname) {
+            const key = log.sisid.toString();
             if (!studentMap.has(key)) {
               studentMap.set(key, {
-                id: log.SISID,
-                sisid: log.SISID,
-                firstname: log.FIRSTNAME,
-                lastname: log.SURNAME,
-                email: log.EMAIL || `${log.FIRSTNAME?.toLowerCase()}.${log.SURNAME?.toLowerCase()}@my.yorku.ca`,
-                home_faculty: log.PROGFACULTY || 'Unknown',
-                campus: log.CAMPUS === 'G' ? 'Glendon' : log.CAMPUS === 'K' ? 'Keele' : log.CAMPUS === 'M' ? 'Markham' : log.CAMPUS || 'Unknown',
-                program: log.TRANSCRIPTTITLE || log.PROGRAM || 'Unknown Program',
-                study_level: this.mapStudyLevel(log.STUDYLEVEL),
-                ogpa: log.OGPA || 0,
-                academic_decision: log.LATESTACADEMICDECISION || 'Unknown',
-                academic_status: log.ACADEMICSTATUS || 'Unknown',
-                immigration_status: this.mapImmigrationStatus(log.IMMIGRATIONSTATUS),
-                language_of_correspondence: log.LANGUAGECORRESPONDENCE || 'EN',
-                osap_flag: log.OSAPFLAG === 'Y',
-                esl_flag: log.ESLFLAG === 'Y',
-                varsity_flag: log.VARSITYFLAG === 'Y',
-                scholarship_flag: log.SCHOLARSHIPFLAG === 'Y',
+                id: log.sisid,
+                sisid: log.sisid,
+                firstname: log.firstname,
+                lastname: log.surname,
+                email: log.email || `${log.firstname?.toLowerCase()}.${log.surname?.toLowerCase()}@my.yorku.ca`,
+                home_faculty: log.progfaculty || 'Unknown',
+                campus: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus || 'Unknown',
+                program: log.transcripttitle || log.program || 'Unknown Program',
+                study_level: this.mapStudyLevel(log.studylevel),
+                ogpa: log.ogpa || 0,
+                academic_decision: log.latestacademicdecision || 'Unknown',
+                academic_status: log.academicstatus || 'Unknown',
+                immigration_status: this.mapImmigrationStatus(log.immigrationstatus),
+                language_of_correspondence: log.languagecorrespondence || 'EN',
+                osap_flag: log.osapflag === 'Y',
+                esl_flag: log.eslflag === 'Y',
+                varsity_flag: log.varsityflag === 'Y',
+                scholarship_flag: log.scholarshipflag === 'Y',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               });
@@ -220,7 +233,7 @@ class ApiService {
           
           return {
             id: log.id || index + 1,
-            student_id: log.SISID,
+            student_id: log.sisid,
             alert_type: this.extractMessageType(log.name),
             template_type: log.template_type || 'Unknown',
             course_code: log.course || 'N/A',
@@ -240,23 +253,23 @@ class ApiService {
             issue_resolved: false,
             // Student data embedded
             student: {
-              sisid: log.SISID,
-              firstname: log.FIRSTNAME,
-              lastname: log.SURNAME,
-              email: log.EMAIL || `${log.FIRSTNAME?.toLowerCase()}.${log.SURNAME?.toLowerCase()}@my.yorku.ca`,
-              home_faculty: log.PROGFACULTY || log.faculty || 'Unknown',
-              campus: log.CAMPUS === 'G' ? 'Glendon' : log.CAMPUS === 'K' ? 'Keele' : log.CAMPUS === 'M' ? 'Markham' : log.CAMPUS || log.campus || 'Unknown',
-              program: log.TRANSCRIPTTITLE || log.PROGRAM || 'Unknown Program',
-              study_level: this.mapStudyLevel(log.STUDYLEVEL),
-              ogpa: log.OGPA || 0,
-              academic_decision: log.LATESTACADEMICDECISION || 'Unknown',
-              academic_status: log.ACADEMICSTATUS || 'No status',
-              immigration_status: this.mapImmigrationStatus(log.IMMIGRATIONSTATUS),
-              language_of_correspondence: log.LANGUAGECORRESPONDENCE || 'EN',
-              osap_flag: log.OSAPFLAG === 'Y',
-              esl_flag: log.ESLFLAG === 'Y',
-              varsity_flag: log.VARSITYFLAG === 'Y',
-              scholarship_flag: log.SCHOLARSHIPFLAG === 'Y'
+              sisid: log.sisid,
+              firstname: log.firstname,
+              lastname: log.surname,
+              email: log.email || `${log.firstname?.toLowerCase()}.${log.surname?.toLowerCase()}@my.yorku.ca`,
+              home_faculty: log.progfaculty || log.faculty || 'Unknown',
+              campus: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus || 'Unknown',
+              program: log.transcripttitle || log.program || 'Unknown Program',
+              study_level: this.mapStudyLevel(log.studylevel),
+              ogpa: log.ogpa || 0,
+              academic_decision: log.latestacademicdecision || 'Unknown',
+              academic_status: log.academicstatus || 'No status',
+              immigration_status: this.mapImmigrationStatus(log.immigrationstatus),
+              language_of_correspondence: log.languagecorrespondence || 'EN',
+              osap_flag: log.osapflag === 'Y',
+              esl_flag: log.eslflag === 'Y',
+              varsity_flag: log.varsityflag === 'Y',
+              scholarship_flag: log.scholarshipflag === 'Y'
             }
           };
         });
@@ -358,8 +371,8 @@ class ApiService {
         
         alerts.forEach(alert => {
           // Count unique students
-          if (alert.SISID) uniqueStudents.add(alert.SISID.toString());
-          
+          if (alert.sisid) uniqueStudents.add(alert.sisid.toString());
+
           // Count priority levels
           const priority = this.mapPriority(alert.trigger_grade, alert.actual_grade);
           if (priority === 'High') highPriorityCount++;

@@ -24,7 +24,7 @@ echo base::page(
 
 
 $data = [
-    'report_type' => 'admin'
+    'report_type' => 'advisor'
 ];
 
 
