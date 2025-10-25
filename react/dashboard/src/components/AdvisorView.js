@@ -167,7 +167,8 @@ const AdvisorView = ({
 
   // Student details lookup
   const getStudentDetails = (studentId) => {
-    return students.find(s => s.id === studentId) || {};
+    // Try to find student by id or sisId
+    return students.find(s => s.id === studentId || s.sisId === studentId) || {};
   };
 
   // Export filtered data
@@ -732,7 +733,7 @@ const AdvisorView = ({
                   <div className="space-y-3">
                     <div>
                       <label className="text-sm font-medium text-gray-500">{getString('name')}</label>
-                      <div className="text-gray-900">{selectedStudent.firstname} {selectedStudent.lastname}</div>
+                      <div className="text-gray-900">{selectedStudent.firstName} {selectedStudent.lastName}</div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-500">{getString('email')}</label>
@@ -740,7 +741,7 @@ const AdvisorView = ({
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-500">{getString('student_id')}</label>
-                      <div className="text-gray-900">{selectedStudent.sisid}</div>
+                      <div className="text-gray-900">{selectedStudent.sisId}</div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-500">{getString('immigration_status')}</label>
@@ -755,7 +756,7 @@ const AdvisorView = ({
                   <div className="space-y-3">
                     <div>
                       <label className="text-sm font-medium text-gray-500">{getString('faculty')}</label>
-                      <div className="text-gray-900">{selectedStudent.home_faculty}</div>
+                      <div className="text-gray-900">{selectedStudent.homeFaculty}</div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-500">{getString('program')}</label>
@@ -778,16 +779,26 @@ const AdvisorView = ({
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{getString('recent_alerts')}</h3>
                 <div className="space-y-3">
                   {alerts
-                    .filter(alert => alert.studentId === selectedStudent.id)
+                    .filter(alert => alert.studentId === selectedStudent.id || alert.studentId === selectedStudent.sisId)
                     .slice(0, 5)
                     .map((alert, index) => (
                       <div key={index} className="p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center justify-between">
-                          <div>
+                          <div className="flex-1">
                             <div className="font-medium text-gray-900">{alert.alertType}</div>
                             <div className="text-sm text-gray-600">
-                              {alert.course} • {new Date(alert.dateRaised).toLocaleDateString()}
+                              {alert.courseName && alert.courseName !== 'N/A' ? alert.courseName : alert.course}
+                              {alert.course && alert.course !== 'N/A' && alert.courseName && alert.courseName !== 'N/A' && alert.course !== alert.courseName && (
+                                <span className="text-gray-500"> ({alert.course})</span>
+                              )}
+                              {' • '}
+                              {new Date(alert.dateRaised).toLocaleDateString()}
                             </div>
+                            {alert.professor && alert.professor !== 'N/A' && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Professor: {alert.professor}
+                              </div>
+                            )}
                           </div>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             alert.priority === 'High' ? 'bg-red-100 text-red-800' :
@@ -797,9 +808,6 @@ const AdvisorView = ({
                             {alert.priority}
                           </span>
                         </div>
-                        {alert.description && (
-                          <div className="mt-2 text-sm text-gray-600">{alert.description}</div>
-                        )}
                       </div>
                     ))}
                 </div>
