@@ -777,6 +777,43 @@ const EarlyAlertDashboard = () => {
       {/* PWA Manager for install prompt, offline status, and updates */}
       <PWAManager />
       
+      {/* Data Loading Overlay - Shows when fetching data from data.php */}
+      {loading && !stringsLoading && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              padding: '2rem',
+              borderRadius: '0.5rem',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+              textAlign: 'center',
+              minWidth: '300px'
+            }}
+          >
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#E31837] mx-auto mb-4"></div>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1F2937', marginBottom: '0.5rem' }}>
+              Loading Data
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+              Fetching student alert records from database...
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Show loading state while language strings are loading */}
       {stringsLoading ? (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
