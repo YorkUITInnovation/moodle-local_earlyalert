@@ -66,22 +66,45 @@ class LanguageService {
 
         const response = await fetch(url, fetchOptions);
 
+        console.log('📡 Response status:', response.status, response.statusText);
+        console.log('📡 Response headers:', response.headers);
+
         if (!response.ok) {
           throw new Error(`Failed to load language strings: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json();
+        // Get the raw response text first to see what we're actually getting
+        const responseText = await response.text();
+        console.log('📄 Raw response text (first 500 chars):', responseText.substring(0, 500));
+
+        // Try to parse as JSON
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('❌ Failed to parse response as JSON:', parseError);
+          console.error('📄 Full response text:', responseText);
+          throw new Error('Response is not valid JSON. Check console for full response text.');
+        }
+
+        console.log('📥 Raw response from get_strings.php:', data);
+        console.log('📊 Response success:', data.success);
+        console.log('📋 Response strings:', data.strings);
+        console.log('🔢 Response count:', data.count);
 
         if (!data.success) {
           throw new Error(data.error || 'Failed to load language strings');
         }
 
         console.log(`✅ Loaded ${data.count} language strings from Moodle`);
+        console.log('📋 Loaded strings:', data.strings);
 
         // Merge new strings with existing ones
         this.strings = { ...this.strings, ...data.strings };
         this.loaded = true;
         this.loading = false;
+
+        console.log('💾 Stored strings in service:', this.strings);
 
         return this.strings;
       } catch (error) {
@@ -99,25 +122,16 @@ class LanguageService {
    * @param {string} key - The string identifier. Can be:
    *   - Simple key: 'pluginname' (looks in local_earlyalert)
    *   - Component:key format: 'core:add', 'mod_assignment:assignment'
-   * @param {string} defaultValue - Optional default value if string not found
-   * @returns {string} - The translated string
+   * @returns {string} - The translated string from Moodle
    */
-  getString(key, defaultValue = null) {
-    // First, try direct lookup
-    if (this.strings[key]) {
-      return this.strings[key];
-    }
+  getString(key) {
+    // Debug logging
+    console.log(`🔍 getString called with key: "${key}"`);
+    console.log(`📦 Available strings:`, Object.keys(this.strings));
+    console.log(`✅ Found value:`, this.strings[key]);
 
-    // If key doesn't contain ':', try with local_earlyalert as default component
-    // This maintains backward compatibility
-    if (!key.includes(':')) {
-      // Key without component, already checked above
-      return defaultValue !== null ? defaultValue : key;
-    }
-
-    // For component:key format, we already have it stored with that format
-    // So if it's not found, return default
-    return defaultValue !== null ? defaultValue : key;
+    // Return the string from Moodle (no fallback, Moodle handles that)
+    return this.strings[key] || key;
   }
 
   /**

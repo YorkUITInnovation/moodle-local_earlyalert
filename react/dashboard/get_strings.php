@@ -23,23 +23,49 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Set error handler to catch any errors and return JSON
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false,
+        'error' => "PHP Error: $errstr in $errfile on line $errline",
+        'strings' => []
+    ]);
+    exit;
+});
+
 // Prevent any output before JSON
 ob_start();
 
-// Include Moodle config
-require_once(__DIR__ . '/../../../../config.php');
+try {
+    // Include Moodle config
+    // Path from: /local/earlyalert/react/dashboard/get_strings.php to /config.php
+    require_once('../../../../config.php');
 
-// Require login - ensures only authenticated users can access
-require_login();
+    // Require login - ensures only authenticated users can access
+    require_login();
 
-global $CFG;
+    global $CFG;
 
-// Clear any buffered output and set JSON headers
-ob_end_clean();
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
-header('Access-Control-Allow-Headers: Content-Type');
+    // Clear any buffered output and set JSON headers
+    ob_end_clean();
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST');
+    header('Access-Control-Allow-Headers: Content-Type');
+
+} catch (Exception $e) {
+    ob_end_clean();
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false,
+        'error' => 'Failed to initialize: ' . $e->getMessage(),
+        'strings' => []
+    ]);
+    exit;
+}
 
 try {
     // Get the requested string keys (comma-separated or JSON array)
@@ -49,7 +75,13 @@ try {
     if (empty($keys) && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $input = file_get_contents('php://input');
         $data = json_decode($input, true);
+
+        // Debug logging
+        error_log('POST input raw: ' . $input);
+        error_log('POST data decoded: ' . print_r($data, true));
+
         $keys = $data['keys'] ?? '';
+        error_log('Keys extracted: ' . print_r($keys, true));
     }
 
     $strings = [];
@@ -58,14 +90,8 @@ try {
         // Parse keys - support both comma-separated and JSON array format
         $keyArray = [];
         if (is_string($keys)) {
-            // Try to decode as JSON first
-            $decoded = json_decode($keys, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                $keyArray = $decoded;
-            } else {
-                // Fall back to comma-separated
-                $keyArray = array_map('trim', explode(',', $keys));
-            }
+            // The keys come as a comma-separated string from JS
+            $keyArray = array_map('trim', explode(',', $keys));
         } else if (is_array($keys)) {
             $keyArray = $keys;
         }
@@ -75,7 +101,6 @@ try {
             // Support two formats:
             // 1. Simple string: "key" (defaults to local_earlyalert)
             // 2. Component:key format: "core:add" or "mod_assignment:assignment"
-            // 3. Object format: {"key": "add", "component": "core"}
 
             $key = '';
             $component = 'local_earlyalert'; // Default component

@@ -10,6 +10,7 @@ import ViewToggle from './components/ViewToggle';
 import AdministratorView from './components/AdministratorView';
 import AdvisorView from './components/AdvisorView';
 import { useApiData } from './hooks/useApiData';
+import { useLanguageStrings } from './hooks/useLanguageStrings';
 import azureOpenAIService from './services/azureOpenAIService';
 
 // Simple markdown renderer for AI responses
@@ -147,6 +148,21 @@ const MarkdownRenderer = ({ content }) => {
 };
 
 const EarlyAlertDashboard = () => {
+  // Language strings hook
+  const { getString, loading: stringsLoading } = useLanguageStrings([
+    'refresh_data',
+    'ask_ai',
+    'hide_ai',
+    'generate_charts',
+    'hide_charts',
+    'ai_analytics_assistant',
+    'ask_questions_about_data',
+    'ai_assistant',
+    'analyzing_data',
+    'suggested_questions',
+    'type_message'
+  ]);
+
   // API data hook
   const { 
     loading, 
@@ -751,6 +767,17 @@ const EarlyAlertDashboard = () => {
       {/* PWA Manager for install prompt, offline status, and updates */}
       <PWAManager />
       
+      {/* Show loading state while language strings are loading */}
+      {stringsLoading ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E31837] mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading dashboard...</p>
+            </div>
+          </div>
+        </div>
+      ) : (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -770,7 +797,7 @@ const EarlyAlertDashboard = () => {
               }`}
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span>Refresh Data</span>
+              <span>{getString('refresh_data')}</span>
             </button>
             
             <button
@@ -788,7 +815,7 @@ const EarlyAlertDashboard = () => {
               }}
             >
               <Brain className="w-4 h-4" />
-              {showConversationalAnalytics ? 'Hide AI' : 'Ask AI'}
+              {showConversationalAnalytics ? getString('hide_ai') : getString('ask_ai')}
             </button>
             
             <button
@@ -805,7 +832,7 @@ const EarlyAlertDashboard = () => {
               }}
             >
               <BarChart3 className="w-4 h-4" />
-              {showVisualizationPanel ? 'Hide Charts' : 'Generate Charts'}
+              {showVisualizationPanel ? getString('hide_charts') : getString('generate_charts')}
             </button>
           </div>
           
@@ -818,8 +845,8 @@ const EarlyAlertDashboard = () => {
                     <Brain className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">AI Analytics Assistant</h3>
-                    <p className="text-sm text-red-100">Ask questions about your dashboard data</p>
+                    <h3 className="text-lg font-semibold">{getString('ai_analytics_assistant')}</h3>
+                    <p className="text-sm text-red-100">{getString('ask_questions_about_data')}</p>
                   </div>
                 </div>
               </div>
@@ -836,7 +863,7 @@ const EarlyAlertDashboard = () => {
                         {message.role === 'assistant' && (
                           <div className="flex items-center gap-2 mb-1">
                             <Bot className="w-4 h-4" />
-                            <span className="text-sm font-medium">AI Assistant</span>
+                            <span className="text-sm font-medium">{getString('ai_assistant')}</span>
                           </div>
                         )}
                         <div className="text-sm">
@@ -857,11 +884,11 @@ const EarlyAlertDashboard = () => {
                       <div className="inline-block max-w-xs lg:max-w-md px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-800">
                         <div className="flex items-center gap-2 mb-2">
                           <Bot className="w-4 h-4" />
-                          <span className="text-sm font-medium">AI Assistant</span>
+                          <span className="text-sm font-medium">{getString('ai_assistant')}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#E31837]"></div>
-                          <span className="text-sm">Analyzing your data...</span>
+                          <span className="text-sm">{getString('analyzing_data')}</span>
                         </div>
                       </div>
                     </div>
@@ -871,7 +898,7 @@ const EarlyAlertDashboard = () => {
                 {/* Suggested Questions - only show if no custom messages */}
                 {chatMessages.length === 1 && (
                   <div className="mt-2 mb-2">
-                    <p className="text-sm text-gray-600 mb-2">Suggested questions:</p>
+                    <p className="text-sm text-gray-600 mb-2">{getString('suggested_questions')}</p>
                     <div className="space-y-1">
                       <button 
                         onClick={() => handleSuggestedQuestion("What are the key insights from the current data?")}
@@ -903,7 +930,7 @@ const EarlyAlertDashboard = () => {
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(chatInput)}
-                      placeholder="Ask me anything about your dashboard data..."
+                      placeholder={getString('type_message')}
                       className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31837] focus:border-[#E31837] text-sm bg-white"
                       style={{ width: '100%' }}
                       disabled={isChatLoading}
@@ -1025,6 +1052,7 @@ const EarlyAlertDashboard = () => {
         )}
 
       </div>
+      )}
     </div>
   );
 };

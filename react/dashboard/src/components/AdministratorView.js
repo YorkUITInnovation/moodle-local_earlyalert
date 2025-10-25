@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Users, AlertTriangle, CheckCircle, Target, Award, Clock, BarChart3 } from 'lucide-react';
+import { useLanguageStrings } from '../hooks/useLanguageStrings';
 
 // Normalizes various student identifier shapes into a comparable string key.
 const normalizeAlertStudentId = (alert) => {
@@ -32,6 +33,46 @@ const AdministratorView = ({
   currentInterventionData,
   currentCampusAnalysisData 
 }) => {
+  // Language strings hook
+  const { getString } = useLanguageStrings([
+    'unique_students',
+    'active_alerts',
+    'faculties_engaged',
+    'resolution_rate',
+    'currently_tracked',
+    'requiring_attention',
+    'active_monitoring',
+    'students_contacted',
+    'alert_trends_3months',
+    'monthly_alert_activity',
+    'alert_distribution_by_student_home_faculty',
+    'top_faculties',
+    'top',
+    'alert_distribution_by_course_faculty',
+    'faculty_performance_analysis',
+    'comprehensive_faculty_metrics',
+    'faculties_monitored',
+    'faculty',
+    'total_alerts',
+    'students',
+    'contacted',
+    'low_grade',
+    'missed_assignment',
+    'missed_test_quiz',
+    'strategic_insights_recommendations',
+    'intervention_efficiency',
+    'resource_allocation',
+    'system_coverage',
+    'resolved',
+    'first_half_alerts',
+    'second_half_alerts',
+    'total_alerts_for',
+    'intervention_efficiency_text',
+    'resource_allocation_text',
+    'system_coverage_text',
+    'alerts'
+  ]);
+
   // Calculate strategic metrics
   const strategicMetrics = useMemo(() => {
     const totalAlerts = alerts?.length || 0;
@@ -271,9 +312,9 @@ const AdministratorView = ({
                 <Users className="w-8 h-8" />
               </div>
             </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Unique Students</h3>
+            <h3 className="text-sm font-medium text-gray-600 mb-2">{getString('unique_students')}</h3>
             <div className="text-3xl font-bold text-gray-900 mb-2">{strategicMetrics.studentsWithAlerts}</div>
-            <p className="text-sm text-gray-500">Currently tracked</p>
+            <p className="text-sm text-gray-500">{getString('currently_tracked')}</p>
           </div>
           
           <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
@@ -282,9 +323,9 @@ const AdministratorView = ({
                 <AlertTriangle className="w-8 h-8" />
               </div>
             </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Active Alerts</h3>
+            <h3 className="text-sm font-medium text-gray-600 mb-2">{getString('active_alerts')}</h3>
             <div className="text-3xl font-bold text-gray-900 mb-2">{strategicMetrics.totalAlerts}</div>
-            <p className="text-sm text-gray-500">Requiring attention</p>
+            <p className="text-sm text-gray-500">{getString('requiring_attention')}</p>
           </div>
           
           <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
@@ -293,9 +334,9 @@ const AdministratorView = ({
                 <Users className="w-8 h-8" />
               </div>
             </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Faculties Engaged</h3>
+            <h3 className="text-sm font-medium text-gray-600 mb-2">{getString('faculties_engaged')}</h3>
             <div className="text-3xl font-bold text-gray-900 mb-2">{facultyPerformance.length}</div>
-            <p className="text-sm text-gray-500">Active monitoring</p>
+            <p className="text-sm text-gray-500">{getString('active_monitoring')}</p>
           </div>
           
           <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
@@ -304,9 +345,9 @@ const AdministratorView = ({
                 <CheckCircle className="w-8 h-8" />
               </div>
             </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Resolution Rate</h3>
+            <h3 className="text-sm font-medium text-gray-600 mb-2">{getString('resolution_rate')}</h3>
             <div className="text-3xl font-bold text-gray-900 mb-2">{strategicMetrics.resolutionRate}%</div>
-            <p className="text-sm text-gray-500">Students contacted</p>
+            <p className="text-sm text-gray-500">{getString('students_contacted')}</p>
           </div>
         </div>
       </div>
@@ -318,10 +359,10 @@ const AdministratorView = ({
           <div className="flex items-center justify-between mb-6" style={{ height: '48px' }}>
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-[#E31837]" />
-              Alert Trends (Last 3 Months)
+              {getString('alert_trends_3months')}
             </h3>
             <div className="text-sm text-gray-500">
-              Monthly alert activity
+              {getString('monthly_alert_activity')}
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
@@ -341,9 +382,9 @@ const AdministratorView = ({
                 }}
                 formatter={(value, name, props) => {
                   const labels = {
-                    'alerts': 'Total Alerts',
-                    'resolved': 'Resolved Alerts', 
-                    'highPriority': 'High Priority Alerts'
+                    'alerts': getString('total_alerts'),
+                    'resolved': getString('resolved'),
+                    'highPriority': getString('high_priority')
                   };
                   return [value, labels[name] || name];
                 }}
@@ -353,11 +394,11 @@ const AdministratorView = ({
                     return (
                       <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
                         <p className="font-semibold mb-2">{data.month}</p>
-                        <p className="text-sm"><span className="font-medium">Total Alerts:</span> {data.alerts}</p>
-                        <p className="text-sm"><span className="font-medium">Resolved:</span> {data.resolved}</p>
+                        <p className="text-sm"><span className="font-medium">{getString('total_alerts')}:</span> {data.alerts}</p>
+                        <p className="text-sm"><span className="font-medium">{getString('resolved')}:</span> {data.resolved}</p>
                         <div className="border-t border-gray-200 mt-2 pt-2">
-                          <p className="text-xs text-gray-600">1st-15th: {data.firstHalf} alerts</p>
-                          <p className="text-xs text-gray-600">16th-End: {data.secondHalf} alerts</p>
+                          <p className="text-xs text-gray-600">{getString('first_half_alerts', '1st-15th')}: {data.firstHalf} alerts</p>
+                          <p className="text-xs text-gray-600">{getString('second_half_alerts', '16th-End')}: {data.secondHalf} alerts</p>
                         </div>
                       </div>
                     );
@@ -376,10 +417,10 @@ const AdministratorView = ({
           <div className="flex items-center justify-between mb-6" style={{ height: '48px' }}>
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Target className="w-5 h-5 text-[#E31837]" />
-              Alert Distribution by Student Home Faculty
+              {getString('alert_distribution_by_student_home_faculty')}
             </h3>
             <div className="text-sm text-gray-500">
-              Top {Math.min(6, facultyPerformance.length)} faculties
+              {getString('top')} {Math.min(6, facultyPerformance.length)} {getString('faculties_monitored').toLowerCase()}
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
@@ -405,7 +446,7 @@ const AdministratorView = ({
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} height={60} />
               <YAxis />
-              <Tooltip formatter={(value, name, props) => [value, `Total Alerts for ${props.payload.fullName}`]} />
+              <Tooltip formatter={(value, name, props) => [value, `${getString('total_alerts_for')} ${props.payload.fullName}`]} />
               <Bar dataKey="value" fill="#E31837" />
             </BarChart>
           </ResponsiveContainer>
@@ -418,9 +459,9 @@ const AdministratorView = ({
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-[#E31837]" />
-              Alert Distribution by Course Faculty
+              {getString('alert_distribution_by_course_faculty')}
             </h3>
-            <span className="text-sm text-gray-500">Top {courseFacultyDistribution.length} faculties</span>
+            <span className="text-sm text-gray-500">{getString('top')} {courseFacultyDistribution.length} {getString('faculties_monitored').toLowerCase()}</span>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={courseFacultyDistribution.map(f => ({
@@ -431,7 +472,7 @@ const AdministratorView = ({
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
               <YAxis />
-              <Tooltip formatter={(value, name, props) => [value, `Total Alerts for ${props.payload.fullName}`]} />
+              <Tooltip formatter={(value, name, props) => [value, `${getString('total_alerts_for')} ${props.payload.fullName}`]} />
               <Bar dataKey="value" fill="#6366F1" />
             </BarChart>
           </ResponsiveContainer>
@@ -445,12 +486,12 @@ const AdministratorView = ({
             <div>
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <Award className="w-5 h-5 text-[#E31837]" />
-                Faculty Performance Analysis
+                {getString('faculty_performance_analysis')}
               </h3>
-              <p className="text-sm text-gray-600 mt-1">Comprehensive faculty-level metrics and outcomes</p>
+              <p className="text-sm text-gray-600 mt-1">{getString('comprehensive_faculty_metrics')}</p>
             </div>
             <div className="text-sm text-gray-500">
-              {facultyPerformance.length} faculties monitored
+              {facultyPerformance.length} {getString('faculties_monitored')}
             </div>
           </div>
         </div>
@@ -458,13 +499,13 @@ const AdministratorView = ({
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faculty</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Alerts</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Students</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacted</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Low Grade</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Missed Assignment</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Missed Test/Quiz</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('faculty')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('total_alerts')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('students')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('contacted')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('low_grade')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_assignment')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_test_quiz')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -505,27 +546,27 @@ const AdministratorView = ({
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <Clock className="w-5 h-5 text-[#E31837]" />
-          Strategic Insights & Recommendations
+          {getString('strategic_insights_recommendations')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-semibold text-blue-900 mb-2">Intervention Efficiency</h4>
+            <h4 className="font-semibold text-blue-900 mb-2">{getString('intervention_efficiency')}</h4>
             <p className="text-sm text-blue-800">
-              {strategicMetrics.resolutionRate}% of alerts are being successfully addressed. 
+              {strategicMetrics.resolutionRate}% of {getString('alerts')} are being successfully addressed.
               Consider expanding successful intervention strategies to underperforming areas.
             </p>
           </div>
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h4 className="font-semibold text-yellow-900 mb-2">Resource Allocation</h4>
+            <h4 className="font-semibold text-yellow-900 mb-2">{getString('resource_allocation')}</h4>
             <p className="text-sm text-yellow-800">
-              {strategicMetrics.criticalRate}% of alerts are high priority. 
+              {strategicMetrics.criticalRate}% of {getString('alerts')} are {getString('high_priority').toLowerCase()}.
               Review resource distribution to ensure adequate support for critical cases.
             </p>
           </div>
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <h4 className="font-semibold text-green-900 mb-2">System Coverage</h4>
+            <h4 className="font-semibold text-green-900 mb-2">{getString('system_coverage')}</h4>
             <p className="text-sm text-green-800">
-              Monitoring {strategicMetrics.alertRate}% of student population. 
+              Monitoring {strategicMetrics.alertRate}% of student population.
               Strong coverage indicates effective early warning system implementation.
             </p>
           </div>
