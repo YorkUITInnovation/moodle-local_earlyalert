@@ -7,6 +7,7 @@ import {
   CheckCircle, X
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useLanguageStrings } from '../hooks/useLanguageStrings';
 
 const AdvisorView = ({ 
   alerts,
@@ -59,6 +60,65 @@ const AdvisorView = ({
   chartFilterType,
   setChartFilterType
 }) => {
+  // Language strings hook
+  const { getString } = useLanguageStrings([
+    'advisor_staff_dashboard',
+    'detailed_student_info_insights',
+    'alert_types_click_filter',
+    'intervention_status',
+    'filter_options',
+    'clear_all_filters',
+    'all_campuses',
+    'all_faculties',
+    'all_alert_types',
+    'all_statuses',
+    'all_template_types',
+    'all_student_types',
+    'domestic',
+    'international',
+    'all_academic_statuses',
+    'all_study_levels',
+    'active_filters',
+    'filter_faculty',
+    'filter_status',
+    'filter_template',
+    'filter_type',
+    'chart_filter',
+    'student_alerts_total',
+    'search_placeholder',
+    'hide_filters',
+    'show_filters',
+    'export',
+    'export_count',
+    'student',
+    'date',
+    'course',
+    'send_email',
+    'view_details',
+    'showing_first_of_results',
+    'student_details',
+    'personal_information',
+    'name',
+    'email',
+    'student_id',
+    'immigration_status',
+    'academic_information',
+    'program',
+    'campus',
+    'gpa',
+    'recent_alerts',
+    'n_a',
+    'alert_type',
+    'status',
+    'faculty',
+    'actions',
+    'pending',
+    'in_progress',
+    'high',
+    'medium',
+    'low'
+  ]);
+
   const COLORS = ['#E31837', '#DC2626', '#B91C1C', '#991B1B', '#7F1D1D', '#EF4444', '#F87171'];
   
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -149,8 +209,8 @@ const AdvisorView = ({
     <div className="space-y-6">
       {/* Advisor Header */}
       <div className="bg-white rounded-lg shadow-lg border-2 border-[#E31837] p-6">
-        <h2 className="text-2xl font-bold mb-2 text-[#E31837]">Advisor & Staff Dashboard</h2>
-        <p className="text-[#B91C1C]">Detailed student information and actionable insights</p>
+        <h2 className="text-2xl font-bold mb-2 text-[#E31837]">{getString('advisor_staff_dashboard')}</h2>
+        <p className="text-[#B91C1C]">{getString('detailed_student_info_insights')}</p>
       </div>
 
       {/* Quick Action Cards */}
@@ -182,7 +242,7 @@ const AdvisorView = ({
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
-            Alert Types (Click to Filter)
+            {getString('alert_types_click_filter')}
           </h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
@@ -226,7 +286,7 @@ const AdvisorView = ({
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-600" />
-            Intervention Status
+            {getString('intervention_status')}
           </h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={currentInterventionData}>
@@ -246,14 +306,14 @@ const AdvisorView = ({
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-md font-semibold text-gray-900 flex items-center gap-2">
               <Filter className="w-4 h-4 text-gray-600" />
-              Filter Options
+              {getString('filter_options')}
             </h4>
             <button
               onClick={clearAllFilters}
               className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <X className="w-4 h-4" />
-              Clear All Filters
+              {getString('clear_all_filters')}
             </button>
           </div>
           <div className="space-y-4">
@@ -265,7 +325,7 @@ const AdvisorView = ({
             onChange={(e) => setFilterCampus(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Campuses</option>
+            <option value="">{getString('all_campuses')}</option>
             {availableCampuses && availableCampuses.map(campus => (
               <option key={campus} value={campus}>{campus}</option>
             ))}
@@ -276,7 +336,7 @@ const AdvisorView = ({
             onChange={(e) => setFilterFaculty(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Faculties</option>
+            <option value="">{getString('all_faculties')}</option>
             {availableFaculties.map(faculty => (
               <option key={faculty} value={faculty}>{faculty}</option>
             ))}
@@ -287,7 +347,7 @@ const AdvisorView = ({
             onChange={(e) => setFilterAlertType(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Alert Types</option>
+            <option value="">{getString('all_alert_types')}</option>
             {availableAlertTypes && availableAlertTypes.map(type => (
               <option key={type} value={type}>{type}</option>
             ))}
@@ -298,7 +358,7 @@ const AdvisorView = ({
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Statuses</option>
+            <option value="">{getString('all_statuses')}</option>
             {availableStatuses.map(status => (
               <option key={status} value={status}>{status}</option>
             ))}
@@ -312,7 +372,7 @@ const AdvisorView = ({
             onChange={(e) => setFilterTemplateType(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Template Types</option>
+            <option value="">{getString('all_template_types')}</option>
             {availableTemplateTypes.map(templateType => (
               <option key={templateType} value={templateType}>{templateType}</option>
             ))}
@@ -323,9 +383,9 @@ const AdvisorView = ({
             onChange={(e) => setFilterStudentType(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Student Types</option>
-            <option value="Domestic">Domestic</option>
-            <option value="International">International</option>
+            <option value="">{getString('all_student_types')}</option>
+            <option value="Domestic">{getString('domestic')}</option>
+            <option value="International">{getString('international')}</option>
           </select>
 
           <select
@@ -333,7 +393,7 @@ const AdvisorView = ({
             onChange={(e) => setFilterAcademicStatus(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Academic Statuses</option>
+            <option value="">{getString('all_academic_statuses')}</option>
             {availableAcademicStatuses && availableAcademicStatuses.map(status => (
               <option key={status} value={status}>{status}</option>
             ))}
@@ -344,7 +404,7 @@ const AdvisorView = ({
             onChange={(e) => setFilterStudyLevel(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Study Levels</option>
+            <option value="">{getString('all_study_levels')}</option>
             {availableStudyLevels && availableStudyLevels.map(level => (
               <option key={level} value={level}>{level}</option>
             ))}
@@ -355,16 +415,16 @@ const AdvisorView = ({
             {(filterFaculty || filterStatus || filterTemplateType || filterStudentType || selectedChartData) && (
               <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-medium text-blue-900">Active Filters:</span>
+              <span className="text-sm font-medium text-blue-900">{getString('active_filters')}</span>
               {filterFaculty && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                  Faculty: {filterFaculty}
+                  {getString('faculty')}: {filterFaculty}
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setFilterFaculty('')} />
                 </span>
               )}
               {filterStatus && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                  Status: {filterStatus}
+                  {getString('status')}: {filterStatus}
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setFilterStatus('')} />
                 </span>
               )}
@@ -399,7 +459,7 @@ const AdvisorView = ({
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 whitespace-nowrap">
               <Users className="w-5 h-5 text-blue-600" />
-              Student Alerts ({advisorMetrics.totalFiltered} total)
+              {getString('student_alerts_total').replace('{$a}', advisorMetrics.totalFiltered)}
             </h3>
             
             <div className="flex items-center justify-end whitespace-nowrap" style={{ gap: '8px' }}>
@@ -409,7 +469,7 @@ const AdvisorView = ({
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="Search by student name, email, alert type, or course..."
+                    placeholder={getString('search_placeholder')}
                     value={tableSearchTerm}
                     onChange={(e) => setTableSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -437,7 +497,7 @@ const AdvisorView = ({
                 className="flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-800 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
               >
                 <Filter className="w-4 h-4" />
-                {showFilters ? 'Hide Filters' : 'Show Filters'}
+                {showFilters ? getString('hide_filters') : getString('show_filters')}
                 {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
               <button
@@ -445,7 +505,7 @@ const AdvisorView = ({
                 className="flex items-center gap-2 px-4 py-2 bg-[#E31837] text-white rounded-lg hover:bg-[#B91C1C] transition-colors"
               >
                 <Download className="w-4 h-4 text-white" />
-                Export ({advisorMetrics.totalFiltered})
+                {getString('export')} ({advisorMetrics.totalFiltered})
               </button>
             </div>
           </div>
@@ -460,7 +520,7 @@ const AdvisorView = ({
                   onClick={() => handleSort('studentName')}
                 >
                   <div className="flex items-center gap-1">
-                    Student
+                    {getString('student')}
                     {sortField === 'studentName' && (
                       sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
                     )}
@@ -471,7 +531,7 @@ const AdvisorView = ({
                   onClick={() => handleSort('alertType')}
                 >
                   <div className="flex items-center gap-1">
-                    Alert Type
+                    {getString('alert_type')}
                     {sortField === 'alertType' && (
                       sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
                     )}
@@ -482,16 +542,16 @@ const AdvisorView = ({
                   onClick={() => handleSort('dateRaised')}
                 >
                   <div className="flex items-center gap-1">
-                    Date
+                    {getString('date')}
                     {sortField === 'dateRaised' && (
                       sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
                     )}
                   </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faculty</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('faculty')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('course')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -531,7 +591,7 @@ const AdvisorView = ({
                     {alert.faculty}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {alert.courseName || alert.course || 'N/A'}
+                    {alert.courseName || alert.course || getString('n_a')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center gap-2">
@@ -541,7 +601,7 @@ const AdvisorView = ({
                           window.open(`mailto:${alert.email}`, '_blank');
                         }}
                         className="text-blue-600 hover:text-blue-900"
-                        title="Send Email"
+                        title={getString('send_email')}
                       >
                         <Mail className="w-4 h-4" />
                       </button>
@@ -552,7 +612,7 @@ const AdvisorView = ({
                           setShowStudentDetails(true);
                         }}
                         className="text-gray-600 hover:text-gray-900"
-                        title="View Details"
+                        title={getString('view_details')}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -566,7 +626,7 @@ const AdvisorView = ({
 
         {tableFilteredAlerts.length > 50 && (
           <div className="p-4 bg-gray-50 border-t border-gray-200 text-center text-sm text-gray-600">
-            Showing first 50 of {tableFilteredAlerts.length} results. Use filters to narrow down the list.
+            {getString('showing_first_of_results').replace('{$a}', tableFilteredAlerts.length)}
           </div>
         )}
       </div>
@@ -577,7 +637,7 @@ const AdvisorView = ({
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Student Details</h2>
+                <h2 className="text-xl font-bold text-gray-900">{getString('student_details')}</h2>
                 <button
                   onClick={() => setShowStudentDetails(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -591,22 +651,22 @@ const AdvisorView = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Personal Information */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{getString('personal_information')}</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Name</label>
+                      <label className="text-sm font-medium text-gray-500">{getString('name')}</label>
                       <div className="text-gray-900">{selectedStudent.firstname} {selectedStudent.lastname}</div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Email</label>
+                      <label className="text-sm font-medium text-gray-500">{getString('email')}</label>
                       <div className="text-gray-900">{selectedStudent.email}</div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Student ID</label>
+                      <label className="text-sm font-medium text-gray-500">{getString('student_id')}</label>
                       <div className="text-gray-900">{selectedStudent.sisid}</div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Immigration Status</label>
+                      <label className="text-sm font-medium text-gray-500">{getString('immigration_status')}</label>
                       <div className="text-gray-900">{selectedStudent.immigrationStatus}</div>
                     </div>
                   </div>
@@ -614,23 +674,23 @@ const AdvisorView = ({
 
                 {/* Academic Information */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Academic Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{getString('academic_information')}</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Faculty</label>
+                      <label className="text-sm font-medium text-gray-500">{getString('faculty')}</label>
                       <div className="text-gray-900">{selectedStudent.home_faculty}</div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Program</label>
+                      <label className="text-sm font-medium text-gray-500">{getString('program')}</label>
                       <div className="text-gray-900">{selectedStudent.program}</div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">Campus</label>
+                      <label className="text-sm font-medium text-gray-500">{getString('campus')}</label>
                       <div className="text-gray-900">{selectedStudent.campus}</div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-500">GPA</label>
-                      <div className="text-gray-900">{selectedStudent.ogpa || 'N/A'}</div>
+                      <label className="text-sm font-medium text-gray-500">{getString('gpa')}</label>
+                      <div className="text-gray-900">{selectedStudent.ogpa || getString('n_a')}</div>
                     </div>
                   </div>
                 </div>
@@ -638,7 +698,7 @@ const AdvisorView = ({
 
               {/* Student's Alerts */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Alerts</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{getString('recent_alerts')}</h3>
                 <div className="space-y-3">
                   {alerts
                     .filter(alert => alert.studentId === selectedStudent.id)
