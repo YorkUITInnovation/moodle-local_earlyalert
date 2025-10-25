@@ -814,6 +814,10 @@ const EarlyAlertDashboard = () => {
               onClick={() => {
                 console.log('Ask AI button clicked!');
                 setShowConversationalAnalytics(!showConversationalAnalytics);
+                // Close the Visualization Panel if it's open
+                if (!showConversationalAnalytics) {
+                  setShowVisualizationPanel(false);
+                }
               }}
               className="flex items-center gap-2 px-4 py-2 btn-ask-ai rounded-lg transition-all duration-200 font-medium"
               style={{ 
@@ -832,6 +836,10 @@ const EarlyAlertDashboard = () => {
               onClick={() => {
                 console.log('Generate Charts button clicked!');
                 setShowVisualizationPanel(!showVisualizationPanel);
+                // Close the AI Panel if it's open
+                if (!showVisualizationPanel) {
+                  setShowConversationalAnalytics(false);
+                }
               }}
               className="flex items-center gap-2 px-4 py-2 btn-visualize rounded-lg transition-all duration-200 font-medium"
               style={{ 
