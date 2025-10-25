@@ -174,9 +174,13 @@ const ConversationalAnalytics = ({
   ];
 
   useEffect(() => {
-    // Check if Azure OpenAI is configured
-    const configured = azureOpenAIService.isConfigured();
-    setIsConfigured(configured);
+    // Check if Azure OpenAI is configured (async)
+    const checkConfiguration = async () => {
+      const configured = await azureOpenAIService.isConfigured();
+      setIsConfigured(configured);
+    };
+
+    checkConfiguration();
   }, []);
 
   useEffect(() => {

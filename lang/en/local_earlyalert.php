@@ -147,10 +147,15 @@ $string['messageprovider:earlyalert_notification'] = 'Early Alert Notification';
 
 // Azure OpenAI Settings
 $string['azureopenai_settings'] = 'Azure OpenAI Settings';
+$string['azureopenai_settings_desc'] = 'Configure Azure OpenAI integration for the AI Analytics Assistant feature in the React dashboard. This enables conversational analytics and data insights.';
 $string['azureopenai_apikey'] = 'Azure OpenAI API Key';
+$string['azureopenai_apikey_desc'] = 'Enter your Azure OpenAI API key. You can find this in the Azure Portal under your OpenAI resource > Keys and Endpoint.';
 $string['azureopenai_endpoint'] = 'Azure OpenAI Endpoint';
-$string['azureopenai_version'] = 'Azure OpenAI API Version';
+$string['azureopenai_endpoint_desc'] = 'Enter your Azure OpenAI endpoint URL (e.g., https://your-resource-name.openai.azure.com/). Find this in the Azure Portal under your OpenAI resource > Keys and Endpoint.';
 $string['azureopenai_deployment'] = 'Azure OpenAI Deployment Name';
+$string['azureopenai_deployment_desc'] = 'Enter the deployment name for your GPT model (e.g., gpt-4, gpt-35-turbo). This is the name you assigned when deploying the model in Azure OpenAI Studio.';
+$string['azureopenai_version'] = 'Azure OpenAI API Version';
+$string['azureopenai_version_desc'] = 'The Azure OpenAI API version to use. Default is 2024-08-01-preview. Only change if you need a specific API version.';
 
 // React dashboards
 $string['administrative_reports'] = 'Administrative Reports';

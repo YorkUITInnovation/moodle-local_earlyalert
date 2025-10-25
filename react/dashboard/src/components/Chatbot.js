@@ -20,19 +20,14 @@ const Chatbot = ({ studentData, dashboardContext }) => {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    // Check if Azure OpenAI is configured
-    const configured = azureOpenAIService.isConfigured();
-    setIsConfigured(configured);
-    
-    // Debug environment variables (only for development)
-    console.log('Environment variables check:', {
-      endpoint: !!process.env.REACT_APP_AZURE_OPENAI_ENDPOINT,
-      apiKey: !!process.env.REACT_APP_AZURE_OPENAI_API_KEY,
-      deploymentName: !!process.env.REACT_APP_AZURE_OPENAI_DEPLOYMENT_NAME,
-      apiVersion: !!process.env.REACT_APP_AZURE_OPENAI_API_VERSION,
-      endpointValue: process.env.REACT_APP_AZURE_OPENAI_ENDPOINT?.substring(0, 50) + '...',
-      deploymentNameValue: process.env.REACT_APP_AZURE_OPENAI_DEPLOYMENT_NAME
-    });
+    // Check if Azure OpenAI is configured (async)
+    const checkConfiguration = async () => {
+      const configured = await azureOpenAIService.isConfigured();
+      setIsConfigured(configured);
+      console.log('Azure OpenAI configuration status:', configured);
+    };
+
+    checkConfiguration();
   }, []);
 
   useEffect(() => {
@@ -65,7 +60,7 @@ const Chatbot = ({ studentData, dashboardContext }) => {
       let responseContent;
       
       if (!isConfigured) {
-        responseContent = "I'm not fully configured yet. To enable AI responses, please set up your Azure OpenAI credentials in the .env file:\n\n• REACT_APP_AZURE_OPENAI_ENDPOINT\n• REACT_APP_AZURE_OPENAI_API_KEY\n• REACT_APP_AZURE_OPENAI_DEPLOYMENT_NAME\n\nFor now, I can suggest some common queries:\n• 'What are the top alert types?'\n• 'Which faculty has the most alerts?'\n• 'How is our resolution rate trending?'";
+        responseContent = "I'm not fully configured yet. To enable AI responses, please configure Azure OpenAI settings in Moodle:\n\nGo to: Site administration > Plugins > Local plugins > Early Alert > Plugin Settings\n\nSet the following:\n• Azure OpenAI API Key\n• Azure OpenAI Endpoint\n• Azure OpenAI Deployment Name\n\nFor now, I can suggest some common queries:\n• 'What are the top alert types?'\n• 'Which faculty has the most alerts?'\n• 'How is our resolution rate trending?'";
       } else {
         responseContent = await azureOpenAIService.sendMessage(
           userMessage.content,

@@ -1,57 +1,114 @@
-import OpenAI from 'openai';
+import { AzureOpenAI } from 'openai';
 
 class AzureOpenAIService {
   constructor() {
     this.client = null;
-    this.deploymentName = process.env.REACT_APP_AZURE_OPENAI_DEPLOYMENT_NAME;
-    this.initializeClient();
+    this.deploymentName = null;
+    this.modelName = null;
+    this.config = null;
+    this.configLoaded = false;
+    this.configPromise = null;
   }
 
-  initializeClient() {
-    const endpoint = process.env.REACT_APP_AZURE_OPENAI_ENDPOINT;
-    const apiKey = process.env.REACT_APP_AZURE_OPENAI_API_KEY;
-    const deploymentName = process.env.REACT_APP_AZURE_OPENAI_DEPLOYMENT_NAME;
-    const apiVersion = process.env.REACT_APP_AZURE_OPENAI_API_VERSION || '2024-06-01';
+  async loadConfiguration() {
+    if (this.configLoaded) {
+      return this.config;
+    }
 
-    console.log('Initializing Azure OpenAI client with:', {
+    if (this.configPromise) {
+      return this.configPromise;
+    }
+
+    this.configPromise = (async () => {
+      try {
+        console.log('🔄 Loading Azure OpenAI configuration from app_env.php...');
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/local/earlyalert/react/dashboard/app_env.php?t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to load configuration: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Configuration loaded from app_env.php:', {
+          success: data.success,
+          configured: data.configured,
+          hasApiKey: !!data.azure_openai?.api_key,
+          hasEndpoint: !!data.azure_openai?.endpoint,
+          hasDeployment: !!data.azure_openai?.deployment_name
+        });
+
+        if (!data.success || !data.configured) {
+          console.warn('⚠️ Azure OpenAI is not fully configured in Moodle settings.');
+          this.config = null;
+          this.configLoaded = true;
+          return null;
+        }
+
+        this.config = data.azure_openai;
+        this.deploymentName = data.azure_openai.deployment_name;
+        this.modelName = data.azure_openai.deployment_name; // Use deployment name as model name for GPT-5
+        this.configLoaded = true;
+
+        // Initialize client with loaded configuration
+        await this.initializeClient();
+
+        return this.config;
+      } catch (error) {
+        console.error('❌ Failed to load Azure OpenAI configuration:', error);
+        this.config = null;
+        this.configLoaded = true;
+        return null;
+      }
+    })();
+
+    return this.configPromise;
+  }
+
+  async initializeClient() {
+    if (!this.config) {
+      console.warn('Cannot initialize client: Configuration not loaded or incomplete.');
+      return;
+    }
+
+    const { endpoint, api_key, deployment_name, api_version } = this.config;
+
+    console.log('Initializing Azure OpenAI client with configuration from Moodle:', {
       endpoint: endpoint ? 'Set' : 'Missing',
-      apiKey: apiKey ? 'Set' : 'Missing',
-      deploymentName: deploymentName ? 'Set' : 'Missing',
-      apiVersion
+      apiKey: api_key ? 'Set' : 'Missing',
+      deploymentName: deployment_name ? 'Set' : 'Missing',
+      apiVersion: api_version
     });
 
-    if (!endpoint || !apiKey || !deploymentName) {
-      console.warn('Azure OpenAI configuration is incomplete. Please check your environment variables.');
+    if (!endpoint || !api_key || !deployment_name) {
+      console.warn('Azure OpenAI configuration is incomplete. Please check your Moodle plugin settings.');
       return;
     }
 
     try {
-      // Your endpoint format: https://aura-openai-administration.openai.azure.com/openai/deployments/gpt-4o-mini-administration/chat/completions?api-version=2025-01-01-preview
-      // We need to extract the base URL properly
-      
-      let baseURL;
-      if (endpoint.includes('/chat/completions')) {
-        // Extract base URL from your full endpoint
-        baseURL = endpoint.split('/chat/completions')[0];
-      } else if (endpoint.includes('/openai/deployments/')) {
-        // If it's a partial endpoint, use as-is
-        baseURL = endpoint;
-      } else {
-        // Standard format
-        baseURL = `${endpoint}/openai/deployments/${deploymentName}`;
-      }
-
-      console.log('Setting up OpenAI client with baseURL:', baseURL);
-
-      this.client = new OpenAI({
-        apiKey: apiKey,
-        baseURL: baseURL,
-        defaultQuery: { 'api-version': apiVersion },
-        defaultHeaders: {
-          'api-key': apiKey,
-        },
+      // GPT-5 style initialization with options object
+      const options = {
+        endpoint: endpoint,
+        apiKey: api_key,
+        deployment: deployment_name,
+        apiVersion: api_version,
         dangerouslyAllowBrowser: true
+      };
+
+      console.log('Setting up AzureOpenAI client with options:', {
+        endpoint: options.endpoint,
+        deployment: options.deployment,
+        apiVersion: options.apiVersion
       });
+
+      this.client = new AzureOpenAI(options);
 
       console.log('Azure OpenAI client initialized successfully');
     } catch (error) {
@@ -59,16 +116,16 @@ class AzureOpenAIService {
     }
   }
 
-  isConfigured() {
-    const endpoint = process.env.REACT_APP_AZURE_OPENAI_ENDPOINT;
-    const apiKey = process.env.REACT_APP_AZURE_OPENAI_API_KEY;
-    const deploymentName = process.env.REACT_APP_AZURE_OPENAI_DEPLOYMENT_NAME;
-    
-    const configured = !!(endpoint && apiKey && deploymentName && this.client);
+  async isConfigured() {
+    // Ensure configuration is loaded
+    await this.loadConfiguration();
+
+    const configured = !!(this.config && this.config.api_key && this.config.endpoint && this.config.deployment_name && this.client);
     console.log('Configuration check:', {
-      endpoint: !!endpoint,
-      apiKey: !!apiKey,
-      deploymentName: !!deploymentName,
+      hasConfig: !!this.config,
+      endpoint: !!this.config?.endpoint,
+      apiKey: !!this.config?.api_key,
+      deploymentName: !!this.config?.deployment_name,
       client: !!this.client,
       overall: configured
     });
@@ -79,8 +136,13 @@ class AzureOpenAIService {
   async sendMessage(message, studentData, dashboardContext) {
     console.log('sendMessage called with:', { message, hasClient: !!this.client });
     
+    // Ensure configuration is loaded and client is initialized
+    if (!this.configLoaded) {
+      await this.loadConfiguration();
+    }
+
     if (!this.client) {
-      throw new Error('Azure OpenAI client is not configured. Please check your environment variables.');
+      throw new Error('Azure OpenAI is not configured. Please configure Azure OpenAI settings in Moodle plugin settings (Site administration > Plugins > Local plugins > Early Alert > Plugin Settings).');
     }
 
     try {
@@ -138,12 +200,16 @@ Answer the user's question based on the current dashboard data context.`;
 
       const response = await this.client.chat.completions.create({
         messages: messages,
-        max_tokens: 800,
-        temperature: 0.7,
-        top_p: 0.9,
+        max_completion_tokens: 16384,
+        model: this.modelName
       });
 
       console.log('Received response from Azure OpenAI:', response);
+
+      // Check for errors in response (GPT-5 pattern)
+      if (response?.error !== undefined && response.status !== "200") {
+        throw response.error;
+      }
 
       return response.choices[0]?.message?.content || 'I apologize, but I was unable to generate a response.';
     } catch (error) {

@@ -28,11 +28,11 @@ if ($hassiteconfig) {
     // Send emails to advisors
     $settings->add(new admin_setting_configcheckbox('earlyalert_sendemailtoadvisors', get_string('send_email_to_advisors', 'local_earlyalert'), '', 0));
     $settings->add(new admin_setting_configcheckbox('earlyalert_showactivecourses', get_string('showactivecourses', 'local_earlyalert'), get_string('showactivecourses_desc', 'local_earlyalert'), '1'));
-    // Azure OpenAI settings
-    $settings->add(new admin_setting_heading('earlyalert_azureopenai_heading', get_string('azureopenai_settings', 'local_earlyalert'), ''));
-    $settings->add(new admin_setting_configtext('earlyalert_azureopenai_apikey', get_string('azureopenai_apikey', 'local_earlyalert'), '', ''));
-    $settings->add(new admin_setting_configtext('earlyalert_azureopenai_endpoint', get_string('azureopenai_endpoint', 'local_earlyalert'), '', ''));
-    $settings->add(new admin_setting_configtext('earlyalert_azureopenai_version', get_string('azureopenai_version', 'local_earlyalert'), '', '2024-02-15-preview'));
-    $settings->add(new admin_setting_configtext('earlyalert_azureopenai_deployment', get_string('azureopenai_deployment', 'local_earlyalert'), '', ''));
+    // Azure OpenAI settings for AI Analytics Assistant
+    $settings->add(new admin_setting_heading('earlyalert_azureopenai_heading', get_string('azureopenai_settings', 'local_earlyalert'), get_string('azureopenai_settings_desc', 'local_earlyalert')));
+    $settings->add(new admin_setting_configtext('earlyalert_azureopenai_apikey', get_string('azureopenai_apikey', 'local_earlyalert'), get_string('azureopenai_apikey_desc', 'local_earlyalert'), ''));
+    $settings->add(new admin_setting_configtext('earlyalert_azureopenai_endpoint', get_string('azureopenai_endpoint', 'local_earlyalert'), get_string('azureopenai_endpoint_desc', 'local_earlyalert'), ''));
+    $settings->add(new admin_setting_configtext('earlyalert_azureopenai_deployment', get_string('azureopenai_deployment', 'local_earlyalert'), get_string('azureopenai_deployment_desc', 'local_earlyalert'), ''));
+    $settings->add(new admin_setting_configtext('earlyalert_azureopenai_version', get_string('azureopenai_version', 'local_earlyalert'), get_string('azureopenai_version_desc', 'local_earlyalert'), '2024-08-01-preview'));
 
 }
