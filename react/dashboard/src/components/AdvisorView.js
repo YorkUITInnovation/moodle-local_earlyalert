@@ -126,6 +126,10 @@ const AdvisorView = ({
   const [showFilters, setShowFilters] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+
   // Detailed metrics for advisors
   const advisorMetrics = useMemo(() => {
     const pendingAlerts = filteredAlerts.filter(alert => alert.status === 'Pending').length;
@@ -149,6 +153,17 @@ const AdvisorView = ({
       totalFiltered: filteredAlerts.length
     };
   }, [filteredAlerts]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(tableFilteredAlerts.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedAlerts = tableFilteredAlerts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [tableFilteredAlerts.length]);
 
   // Student details lookup
   const getStudentDetails = (studentId) => {
@@ -555,8 +570,8 @@ const AdvisorView = ({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {tableFilteredAlerts.slice(0, 50).map((alert, index) => (
-                <tr key={index} className="hover:bg-gray-50 cursor-pointer" 
+              {paginatedAlerts.map((alert, index) => (
+                <tr key={index} className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => {
                       setSelectedStudent(getStudentDetails(alert.studentId));
                       setShowStudentDetails(true);
@@ -624,9 +639,71 @@ const AdvisorView = ({
           </table>
         </div>
 
-        {tableFilteredAlerts.length > 50 && (
-          <div className="p-4 bg-gray-50 border-t border-gray-200 text-center text-sm text-gray-600">
-            {getString('showing_first_of_results').replace('{$a}', tableFilteredAlerts.length)}
+        {/* Pagination Controls */}
+        {tableFilteredAlerts.length > 0 && (
+          <div className="p-4 bg-gray-50 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-700">
+                  Showing {startIndex + 1} to {Math.min(endIndex, tableFilteredAlerts.length)} of {tableFilteredAlerts.length} results
+                </span>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="rowsPerPage" className="text-sm text-gray-700">
+                    Rows per page:
+                  </label>
+                  <select
+                    id="rowsPerPage"
+                    value={rowsPerPage}
+                    onChange={(e) => {
+                      setRowsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={500}>500</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  First
+                </button>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+
+                <span className="text-sm text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </span>
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Last
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
