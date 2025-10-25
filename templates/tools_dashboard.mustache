@@ -63,20 +63,36 @@
             </div>
         </div>
     {{/roles}}
-    {{#reports}}
+    {{#admin_report}}
         <div class="col-md-2">
             <div class="card">
                 <div class="card-body d-flex justify-content-center align-items-center">
-                    <i class="fa fa-file-text-o fa-4x text-danger"></i>
+                    <i class="fa fa-area-chart fa-4x text-danger"></i>
                 </div>
                 <a href="{{config.wwwroot}}/local/earlyalert/report_admin_dashboard.php"
                    class="text-white text-uppercase"
                    title="{{#str}}student_lookup, local_earlyalert{{/str}}">
                     <div class="footer d-flex justify-content-center align-items-center bg-danger text-white text-uppercase pt-3 pb-3">
-                        {{#str}}generate_reports, local_earlyalert{{/str}}
+                        {{#str}}administrative_report, local_earlyalert{{/str}}
                     </div>
                 </a>
             </div>
         </div>
-    {{/reports}}
+    {{/admin_report}}
+    {{#advisor_report}}
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <i class="fa fa-pie-chart fa-4x text-danger"></i>
+                </div>
+                <a href="{{config.wwwroot}}/local/earlyalert/report_advisor_dashboard.php"
+                   class="text-white text-uppercase"
+                   title="{{#str}}student_lookup, local_earlyalert{{/str}}">
+                    <div class="footer d-flex justify-content-center align-items-center bg-danger text-white text-uppercase pt-3 pb-3">
+                        {{#str}}advisor_report, local_earlyalert{{/str}}
+                    </div>
+                </a>
+            </div>
+        </div>
+    {{/advisor_report}}
 </div>

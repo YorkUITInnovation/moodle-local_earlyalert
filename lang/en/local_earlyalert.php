@@ -25,6 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['administrative_report'] = 'Admin Report';
+$string['advisor_report'] = 'Advisor Report';
+
 $string['pluginname'] = 'Early Alert';
 $string['adashboard'] = 'Admin Dashboard';
 $string['adjust_default_grade'] = 'Adjust Default Grade';

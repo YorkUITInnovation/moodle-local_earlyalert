@@ -41,7 +41,10 @@ if (has_capability('local/organization:unit_view', $context, $USER->id)) {
     $data->roles = true;
 }
 if (has_capability('local/earlyalert:view_reports', $context, $USER->id)) {
-    $data->reports = true;
+    $data->admin_report = true;
+}
+if (has_capability('local/earlyalert:view_advisor_reports', $context, $USER->id)) {
+    $data->advisor_report = true;
 }
 
 $event = \local_earlyalert\event\earlyalert_viewed::create(array(
