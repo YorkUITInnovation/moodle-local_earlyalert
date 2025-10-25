@@ -623,19 +623,29 @@ const EarlyAlertDashboard = () => {
       // Use the integrated service that handles both local and AI analytics
       console.log('🤖 Processing query with integrated analytics...');
       
-      // Send to integrated service - it will automatically choose local or AI
+      // Send to integrated service with complete dashboard context including all calculated data
       const response = await azureOpenAIService.sendMessage(message, students, {
         alerts: alerts,
-        filteredAlerts: alerts,
+        filteredAlerts: filteredAlerts,
         allAlerts: alerts,
         metrics: metrics,
         studentData: students,
-        facultyData: [],
-        alertTypeData: [],
-        campusAnalysisData: [],
-        timelineData: [],
-        interventionData: [],
-        currentFilters: {}
+        facultyData: currentFacultyData,
+        alertTypeData: currentAlertTypeData,
+        campusAnalysisData: currentCampusAnalysisData,
+        timelineData: currentTimelineData,
+        interventionData: currentInterventionData,
+        currentFilters: {
+          faculty: filterFaculty,
+          status: filterStatus,
+          templateType: filterTemplateType,
+          studentType: filterStudentType,
+          campus: filterCampus,
+          alertType: filterAlertType,
+          academicStatus: filterAcademicStatus,
+          studyLevel: filterStudyLevel,
+          searchTerm: searchTerm
+        }
       });
       
       const aiResponse = {

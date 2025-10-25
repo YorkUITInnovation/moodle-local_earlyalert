@@ -228,9 +228,24 @@ class ApiService {
         console.log('🔍 API Service - Using real alert data from Excel conversion');
         
         // Transform alert logs into dashboard format
+        let missingFacultyCount = 0;
         const alerts = realData.alert_logs.map((log, index) => {
           const alertDate = log.date_message_sent ? new Date(log.date_message_sent) : new Date();
           
+          // Track missing faculty data
+          if (!log.progfaculty && !log.faculty) {
+            missingFacultyCount++;
+            if (missingFacultyCount <= 3) {
+              console.warn('⚠️ Alert with missing faculty data:', {
+                id: log.id,
+                studentId: log.sisid,
+                studentName: `${log.firstname} ${log.surname}`,
+                progfaculty: log.progfaculty,
+                faculty: log.faculty
+              });
+            }
+          }
+
           return {
             id: log.id || index + 1,
             student_id: log.sisid,
@@ -277,6 +292,14 @@ class ApiService {
         console.log('📊 API Service - Alerts extracted from real data:', alerts.length, 'alerts');
         console.log('🔍 Sample alert types:', alerts.slice(0, 3).map(a => a.alert_type));
         console.log('🔍 Sample template types:', alerts.slice(0, 3).map(a => a.template_type));
+
+        if (missingFacultyCount > 0) {
+          console.warn(`⚠️ Found ${missingFacultyCount} alerts with missing faculty data (both progfaculty and faculty fields are empty)`);
+          console.warn('⚠️ These alerts will show as "Unknown" faculty in the dashboard');
+        } else {
+          console.log('✅ All alerts have faculty information');
+        }
+
         return alerts;
       }
     } catch (error) {

@@ -236,9 +236,12 @@ Answer the user's question based on the current dashboard data context.`;
     const totalStudents = studentData?.length || 0;
     const uniqueStudentsWithAlerts = filteredAlerts ? new Set(filteredAlerts.map(a => a.studentId)).size : 0;
     
-    // Top faculties by alerts
-    const topFaculties = facultyData ? [...facultyData].sort((a, b) => b.alerts - a.alerts).slice(0, 5) : [];
-    
+    // Top faculties by alerts - filter out "Unknown" faculty and show all identified faculties
+    const knownFaculties = facultyData ? facultyData.filter(f => f.name && f.name !== 'Unknown' && f.name.trim() !== '') : [];
+    const unknownFacultyCount = facultyData ? facultyData.filter(f => !f.name || f.name === 'Unknown' || f.name.trim() === '').reduce((sum, f) => sum + (f.alerts || 0), 0) : 0;
+    const allFaculties = knownFaculties.sort((a, b) => b.alerts - a.alerts);
+    const topFaculties = allFaculties.slice(0, 10); // Show top 10 faculties
+
     // Top alert types
     const topAlertTypes = alertTypeData ? [...alertTypeData].sort((a, b) => b.value - a.value).slice(0, 5) : [];
     
@@ -276,8 +279,10 @@ ${activeFilters.length > 0 ? activeFilters.map(f => `• ${f}`).join('\n') : '�
 TOP ALERT TYPES:
 ${topAlertTypes.map((item, i) => `${i + 1}. ${item.name}: ${item.value} alerts`).join('\n')}
 
-FACULTY BREAKDOWN:
-${topFaculties.map((item, i) => `${i + 1}. ${item.name}: ${item.alerts} alerts`).join('\n')}
+FACULTY BREAKDOWN (All Identified Faculties):
+${topFaculties.length > 0 ? topFaculties.map((item, i) => `${i + 1}. ${item.name}: ${item.alerts} alerts (${totalAlerts > 0 ? ((item.alerts / totalAlerts) * 100).toFixed(1) : 0}% of total)`).join('\n') : '• No faculty data available'}
+${unknownFacultyCount > 0 ? `\nNote: ${unknownFacultyCount} alerts have unidentified faculty (missing data in student records)` : ''}
+${allFaculties.length > 10 ? `\n(Showing top 10 of ${allFaculties.length} faculties)` : ''}
 
 STATUS DISTRIBUTION:
 ${statusBreakdown.map(status => `• ${status.name}: ${status.value} (${((status.value / totalAlerts) * 100).toFixed(1)}%)`).join('\n')}
