@@ -122,39 +122,79 @@ class AzureOpenAIService {
 Your role is to provide conversational analytics and insights based on the current dashboard data. You can analyze trends, identify patterns, make recommendations, and answer questions about student alert data.
 
 CAPABILITIES:
-- Analyze student alert patterns and trends
-- Identify at-risk student populations
+- Analyze student alert patterns and trends across all 8 filter dimensions
+- Identify at-risk student populations based on multiple factors
 - Provide faculty and campus-specific insights
-- Suggest intervention strategies
-- Compare performance metrics
+- Suggest targeted intervention strategies
+- Compare performance metrics across different student populations
 - Highlight concerning patterns or positive trends
+- Cross-reference data between different filter types (e.g., international students in specific faculties)
 
 CURRENT DASHBOARD DATA:
 ${dataContext}
 
+IMPORTANT TERMINOLOGY - 8 FILTER TYPES AVAILABLE:
+
+1. STUDENT TYPE (Immigration Status):
+   - Based on official immigration status codes
+   - "Domestic" = Canadian citizens (C) or Landed Immigrants/Permanent Residents (L)
+   - "International" = All other visa/permit holders (R, V, P, U, G, etc.)
+   - Key consideration: International students may face unique challenges (language, cultural adjustment, visa requirements)
+
+2. FACULTY:
+   - Student's home faculty/school (e.g., LAPS, Schulich, Lassonde, Science, etc.)
+   - Represents academic division and program area
+   - Different faculties may have different support resources and academic standards
+
+3. STATUS:
+   - Current state of the alert intervention
+   - Common values: Open, In Progress, Resolved, Follow-up Required, etc.
+   - Tracks the lifecycle of each alert and intervention effectiveness
+
+4. TEMPLATE TYPE:
+   - The type of alert/notification sent to the student
+   - Examples: Low Grade Alert, Missed Assignment, Attendance Warning, Academic Performance, etc.
+   - Indicates the specific academic concern triggering the alert
+
+5. CAMPUS:
+   - Physical campus location (Keele, Glendon, Markham, etc.)
+   - Different campuses may have different resources, demographics, and support services
+
+6. ALERT TYPE:
+   - Category of the academic concern
+   - Examples: Academic Performance, Attendance, Assignment, Exam, Behavioral, etc.
+   - Helps classify the nature of the student's difficulty
+
+7. ACADEMIC STATUS:
+   - Student's current academic standing
+   - Examples: Good Standing, Academic Warning, Academic Probation, etc.
+   - Critical indicator of academic risk level
+
+8. STUDY LEVEL:
+   - Student's year/level in program
+   - Examples: Undergraduate - Year 1, Undergraduate - Year 2, Graduate, etc.
+   - Different years may face different challenges (Year 1 = transition issues, upper years = advanced coursework)
+
 INSTRUCTIONS:
 - Always ground your responses in the actual data provided above
-- Be specific with numbers, percentages, and trends
+- Be specific with numbers, percentages, and trends from the filter breakdowns
+- When users ask about any of the 8 filter types, refer to the corresponding breakdown section
+- Identify cross-filter patterns (e.g., "International students in Year 1 with low grade alerts")
 - Provide actionable insights that can help improve student outcomes
+- Consider how multiple filters interact (e.g., campus + faculty + student type)
 - When asked about specific students, provide general insights while respecting privacy
 - Focus on data-driven recommendations for administrators and faculty
 - Highlight both problems and successes in the data
 - Use clear, professional language suitable for university administrators
 
-IMPORTANT TERMINOLOGY:
-- Immigration Status / Student Type: In the raw data, immigration status is coded as:
-  • "C" (Canadian) or "L" (Landed Immigrant/Permanent Resident) = Domestic students
-  • All other values (R, V, P, U, G, etc.) = International students
-- The data you receive has already been transformed to show "Domestic" or "International"
-- When users ask about "student type", they are referring to immigration status (Domestic vs International)
-- Domestic students and international students may have different support needs and risk profiles
-
 RESPONSE STYLE:
 - Start with key insights or direct answers
-- Support with specific data points
+- Support with specific data points from filter breakdowns
+- Reference specific filter types when relevant (e.g., "Looking at Filter 3 (Status)...")
 - End with actionable recommendations when appropriate
 - Keep responses concise but comprehensive
 - Use bullet points for clarity when listing multiple insights
+- When comparing groups, always provide context and percentages
 
 Answer the user's question based on the current dashboard data context.`;
 
@@ -210,7 +250,7 @@ Answer the user's question based on the current dashboard data context.`;
     const studentsWithAlertIds = filteredAlerts ? new Set(filteredAlerts.map(a => a.studentId)) : new Set();
     const studentsWithAlerts = studentData ? studentData.filter(s => studentsWithAlertIds.has(s.id)) : [];
     
-    // Immigration status breakdown (Domestic vs International)
+    // FILTER TYPE 1: Immigration Status / Student Type (Domestic vs International)
     const domesticStudents = studentsWithAlerts.filter(s => s.immigrationStatus === 'Domestic').length;
     const internationalStudents = studentsWithAlerts.filter(s => s.immigrationStatus === 'International').length;
     const unknownImmigrationStatus = studentsWithAlerts.filter(s => !s.immigrationStatus || s.immigrationStatus === 'Unknown').length;
@@ -221,7 +261,56 @@ Answer the user's question based on the current dashboard data context.`;
     const varsityStudents = studentsWithAlerts.filter(s => s.varsityFlag).length;
     const scholarshipStudents = studentsWithAlerts.filter(s => s.scholarshipFlag).length;
     
-    // Academic standing breakdown
+    // FILTER TYPE 2: Faculty breakdown from alerts
+    const facultyBreakdownMap = new Map();
+    filteredAlerts?.forEach(alert => {
+      const faculty = alert.faculty || 'Unknown';
+      facultyBreakdownMap.set(faculty, (facultyBreakdownMap.get(faculty) || 0) + 1);
+    });
+
+    // FILTER TYPE 3: Status breakdown from alerts
+    const statusBreakdownMap = new Map();
+    filteredAlerts?.forEach(alert => {
+      const status = alert.status || 'Unknown';
+      statusBreakdownMap.set(status, (statusBreakdownMap.get(status) || 0) + 1);
+    });
+
+    // FILTER TYPE 4: Template Type breakdown
+    const templateTypeMap = new Map();
+    filteredAlerts?.forEach(alert => {
+      const templateType = alert.template_type || 'Unknown';
+      templateTypeMap.set(templateType, (templateTypeMap.get(templateType) || 0) + 1);
+    });
+
+    // FILTER TYPE 5: Campus breakdown from alerts
+    const campusBreakdownMap = new Map();
+    filteredAlerts?.forEach(alert => {
+      const campus = alert.campus || 'Unknown';
+      campusBreakdownMap.set(campus, (campusBreakdownMap.get(campus) || 0) + 1);
+    });
+
+    // FILTER TYPE 6: Alert Type breakdown
+    const alertTypeBreakdownMap = new Map();
+    filteredAlerts?.forEach(alert => {
+      const alertType = alert.alertType || 'Unknown';
+      alertTypeBreakdownMap.set(alertType, (alertTypeBreakdownMap.get(alertType) || 0) + 1);
+    });
+
+    // FILTER TYPE 7: Academic Status breakdown
+    const academicStatusMap = new Map();
+    filteredAlerts?.forEach(alert => {
+      const academicStatus = alert.academicStatus || 'Unknown';
+      academicStatusMap.set(academicStatus, (academicStatusMap.get(academicStatus) || 0) + 1);
+    });
+
+    // FILTER TYPE 8: Study Level breakdown
+    const studyLevelMap = new Map();
+    filteredAlerts?.forEach(alert => {
+      const studyLevel = alert.studyLevel || 'Unknown';
+      studyLevelMap.set(studyLevel, (studyLevelMap.get(studyLevel) || 0) + 1);
+    });
+
+    // Academic standing breakdown (for students with alerts)
     const academicStandingMap = new Map();
     studentsWithAlerts.forEach(s => {
       if (s.academicDecision) {
@@ -270,62 +359,105 @@ CURRENT DASHBOARD OVERVIEW:
 ACTIVE FILTERS:
 ${activeFilters.length > 0 ? activeFilters.map(f => `• ${f}`).join('\n') : '• None (showing all data)'}
 
-STUDENT DEMOGRAPHICS (Students with Alerts):
-${uniqueStudentsWithAlerts > 0 ? `
-Immigration Status:
-• Domestic Students: ${domesticStudents} (${((domesticStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
-• International Students: ${internationalStudents} (${((internationalStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
-${unknownImmigrationStatus > 0 ? `• Unknown Status: ${unknownImmigrationStatus} (${((unknownImmigrationStatus / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)` : ''}
+═══════════════════════════════════════════════════════════
+COMPREHENSIVE FILTER BREAKDOWNS (All 8 Filter Types):
+═══════════════════════════════════════════════════════════
 
-Student Support Flags:
-• OSAP Recipients: ${osapStudents} (${((osapStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
+FILTER 1: STUDENT TYPE (Immigration Status):
+${uniqueStudentsWithAlerts > 0 ? `• Domestic Students: ${domesticStudents} students (${((domesticStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
+• International Students: ${internationalStudents} students (${((internationalStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)${unknownImmigrationStatus > 0 ? `\n• Unknown Status: ${unknownImmigrationStatus} students (${((unknownImmigrationStatus / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)` : ''}` : '• No data available'}
+
+FILTER 2: FACULTY:
+${facultyBreakdownMap.size > 0 ? Array.from(facultyBreakdownMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([faculty, count]) => `• ${faculty}: ${count} alerts (${((count / totalAlerts) * 100).toFixed(1)}%)`)
+  .join('\n') : '• No faculty data available'}
+
+FILTER 3: STATUS:
+${statusBreakdownMap.size > 0 ? Array.from(statusBreakdownMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([status, count]) => `• ${status}: ${count} alerts (${((count / totalAlerts) * 100).toFixed(1)}%)`)
+  .join('\n') : '• No status data available'}
+
+FILTER 4: TEMPLATE TYPE:
+${templateTypeMap.size > 0 ? Array.from(templateTypeMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([templateType, count]) => `• ${templateType}: ${count} alerts (${((count / totalAlerts) * 100).toFixed(1)}%)`)
+  .join('\n') : '• No template type data available'}
+
+FILTER 5: CAMPUS:
+${campusBreakdownMap.size > 0 ? Array.from(campusBreakdownMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([campus, count]) => `• ${campus}: ${count} alerts (${((count / totalAlerts) * 100).toFixed(1)}%)`)
+  .join('\n') : '• No campus data available'}
+
+FILTER 6: ALERT TYPE:
+${alertTypeBreakdownMap.size > 0 ? Array.from(alertTypeBreakdownMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([alertType, count]) => `• ${alertType}: ${count} alerts (${((count / totalAlerts) * 100).toFixed(1)}%)`)
+  .join('\n') : '• No alert type data available'}
+
+FILTER 7: ACADEMIC STATUS:
+${academicStatusMap.size > 0 ? Array.from(academicStatusMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([academicStatus, count]) => `• ${academicStatus}: ${count} alerts (${((count / totalAlerts) * 100).toFixed(1)}%)`)
+  .join('\n') : '• No academic status data available'}
+
+FILTER 8: STUDY LEVEL:
+${studyLevelMap.size > 0 ? Array.from(studyLevelMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([studyLevel, count]) => `• ${studyLevel}: ${count} alerts (${((count / totalAlerts) * 100).toFixed(1)}%)`)
+  .join('\n') : '• No study level data available'}
+
+═══════════════════════════════════════════════════════════
+ADDITIONAL STUDENT INSIGHTS:
+═══════════════════════════════════════════════════════════
+
+Student Support Flags (for students with alerts):
+${uniqueStudentsWithAlerts > 0 ? `• OSAP Recipients: ${osapStudents} (${((osapStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
 • ESL Students: ${eslStudents} (${((eslStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
 • Varsity Athletes: ${varsityStudents} (${((varsityStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
-• Scholarship Holders: ${scholarshipStudents} (${((scholarshipStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
+• Scholarship Holders: ${scholarshipStudents} (${((scholarshipStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)` : '• No data available'}
 
-Academic Standing Distribution:
-${Array.from(academicStandingMap.entries())
+Academic Standing Distribution (for students with alerts):
+${academicStandingMap.size > 0 ? Array.from(academicStandingMap.entries())
   .sort((a, b) => b[1] - a[1])
-  .map(([standing, count]) => `• ${standing}: ${count} (${((count / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)`)
-  .join('\n')}
-` : '• No student demographic data available'}
+  .map(([standing, count]) => `• ${standing}: ${count} students (${((count / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)`)
+  .join('\n') : '• No academic standing data available'}
 
-TOP ALERT TYPES:
-${topAlertTypes.map((item, i) => `${i + 1}. ${item.name}: ${item.value} alerts`).join('\n')}
-
-FACULTY BREAKDOWN (All Identified Faculties):
-${topFaculties.length > 0 ? topFaculties.map((item, i) => `${i + 1}. ${item.name}: ${item.alerts} alerts (${totalAlerts > 0 ? ((item.alerts / totalAlerts) * 100).toFixed(1) : 0}% of total)`).join('\n') : '• No faculty data available'}
-${unknownFacultyCount > 0 ? `\nNote: ${unknownFacultyCount} alerts have unidentified faculty (missing data in student records)` : ''}
-${allFaculties.length > 10 ? `\n(Showing top 10 of ${allFaculties.length} faculties)` : ''}
-
-STATUS DISTRIBUTION:
-${statusBreakdown.map(status => `• ${status.name}: ${status.value} (${((status.value / totalAlerts) * 100).toFixed(1)}%)`).join('\n')}
-
-CAMPUS ANALYSIS:
+CAMPUS ANALYSIS (Detailed):
 ${campusAnalysisData ? campusAnalysisData.map(campus => 
   `• ${campus.name}: ${campus.totalAlerts} alerts, ${campus.uniqueStudents} students`
-).join('\n') : 'No campus data available'}
+).join('\n') : '• No campus data available'}
 
-RECENT TREND ANALYSIS:
+
+═══════════════════════════════════════════════════════════
+TRENDS & PERFORMANCE METRICS:
+═══════════════════════════════════════════════════════════
+
+Recent Trend Analysis:
 ${recentTimelineData.length > 0 ? 
   `• Last 7 days: ${recentTrend >= 0 ? 'Increasing' : 'Decreasing'} trend (${recentTrend > 0 ? '+' : ''}${recentTrend} alerts)` : 
   '• No recent timeline data available'
 }
 
-KEY PERFORMANCE INDICATORS:
+Key Performance Indicators:
 • Email Open Rate: ${metrics?.emailOpenRate || 0}%
 • Follow-up Rate: ${metrics?.followUpRate || 0}%
 • Students with Multiple Alerts: ${metrics?.multipleAlertsStudents || 0}
 
-RISK INDICATORS:
+Risk Indicators:
 • High Priority Percentage: ${totalAlerts > 0 ? ((highPriorityAlerts / totalAlerts) * 100).toFixed(1) : 0}%
 • Unresolved Percentage: ${totalAlerts > 0 ? ((unresolvedAlerts / totalAlerts) * 100).toFixed(1) : 0}%
 • Alert-to-Student Ratio: ${uniqueStudentsWithAlerts > 0 ? (totalAlerts / uniqueStudentsWithAlerts).toFixed(1) : 0}
 
-RECOMMENDATIONS CONTEXT:
-• Total system capacity: ${allAlerts?.length || 0} total alerts
-• Current filtered view: ${totalAlerts} alerts
+═══════════════════════════════════════════════════════════
+CONTEXT & METADATA:
+═══════════════════════════════════════════════════════════
+• Total system capacity: ${allAlerts?.length || 0} total alerts across all time
+• Current filtered view: ${totalAlerts} alerts (based on active filters)
 • Data freshness: ${new Date().toLocaleString()}
+• Filter coverage: ${activeFilters.length > 0 ? `${activeFilters.length} filter(s) applied` : 'No filters - showing all data'}
 `;
 
     return summary;

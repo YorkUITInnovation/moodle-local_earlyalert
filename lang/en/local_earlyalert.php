@@ -166,7 +166,7 @@ $string['advisor_reports'] = 'Advisor Reports';
 
 // React dashboard UI strings
 $string['refresh_data'] = 'Refresh Data';
-$string['ask_ai'] = 'Ask AI';
+$string['ask_ai'] = 'Ask AI (Beta)';
 $string['hide_ai'] = 'Hide AI';
 $string['generate_charts'] = 'Generate Charts';
 $string['hide_charts'] = 'Hide Charts';
