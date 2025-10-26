@@ -141,6 +141,14 @@ INSTRUCTIONS:
 - Highlight both problems and successes in the data
 - Use clear, professional language suitable for university administrators
 
+IMPORTANT TERMINOLOGY:
+- Immigration Status / Student Type: In the raw data, immigration status is coded as:
+  • "C" (Canadian) or "L" (Landed Immigrant/Permanent Resident) = Domestic students
+  • All other values (R, V, P, U, G, etc.) = International students
+- The data you receive has already been transformed to show "Domestic" or "International"
+- When users ask about "student type", they are referring to immigration status (Domestic vs International)
+- Domestic students and international students may have different support needs and risk profiles
+
 RESPONSE STYLE:
 - Start with key insights or direct answers
 - Support with specific data points
@@ -198,6 +206,30 @@ Answer the user's question based on the current dashboard data context.`;
     const totalStudents = studentData?.length || 0;
     const uniqueStudentsWithAlerts = filteredAlerts ? new Set(filteredAlerts.map(a => a.studentId)).size : 0;
     
+    // Student demographics analysis
+    const studentsWithAlertIds = filteredAlerts ? new Set(filteredAlerts.map(a => a.studentId)) : new Set();
+    const studentsWithAlerts = studentData ? studentData.filter(s => studentsWithAlertIds.has(s.id)) : [];
+    
+    // Immigration status breakdown (Domestic vs International)
+    const domesticStudents = studentsWithAlerts.filter(s => s.immigrationStatus === 'Domestic').length;
+    const internationalStudents = studentsWithAlerts.filter(s => s.immigrationStatus === 'International').length;
+    const unknownImmigrationStatus = studentsWithAlerts.filter(s => !s.immigrationStatus || s.immigrationStatus === 'Unknown').length;
+    
+    // Additional student flags
+    const osapStudents = studentsWithAlerts.filter(s => s.osapFlag).length;
+    const eslStudents = studentsWithAlerts.filter(s => s.eslFlag).length;
+    const varsityStudents = studentsWithAlerts.filter(s => s.varsityFlag).length;
+    const scholarshipStudents = studentsWithAlerts.filter(s => s.scholarshipFlag).length;
+    
+    // Academic standing breakdown
+    const academicStandingMap = new Map();
+    studentsWithAlerts.forEach(s => {
+      if (s.academicDecision) {
+        const standing = s.academicDecision;
+        academicStandingMap.set(standing, (academicStandingMap.get(standing) || 0) + 1);
+      }
+    });
+    
     // Top faculties by alerts - filter out "Unknown" faculty and show all identified faculties
     const knownFaculties = facultyData ? facultyData.filter(f => f.name && f.name !== 'Unknown' && f.name.trim() !== '') : [];
     const unknownFacultyCount = facultyData ? facultyData.filter(f => !f.name || f.name === 'Unknown' || f.name.trim() === '').reduce((sum, f) => sum + (f.alerts || 0), 0) : 0;
@@ -237,6 +269,26 @@ CURRENT DASHBOARD OVERVIEW:
 
 ACTIVE FILTERS:
 ${activeFilters.length > 0 ? activeFilters.map(f => `• ${f}`).join('\n') : '• None (showing all data)'}
+
+STUDENT DEMOGRAPHICS (Students with Alerts):
+${uniqueStudentsWithAlerts > 0 ? `
+Immigration Status:
+• Domestic Students: ${domesticStudents} (${((domesticStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
+• International Students: ${internationalStudents} (${((internationalStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
+${unknownImmigrationStatus > 0 ? `• Unknown Status: ${unknownImmigrationStatus} (${((unknownImmigrationStatus / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)` : ''}
+
+Student Support Flags:
+• OSAP Recipients: ${osapStudents} (${((osapStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
+• ESL Students: ${eslStudents} (${((eslStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
+• Varsity Athletes: ${varsityStudents} (${((varsityStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
+• Scholarship Holders: ${scholarshipStudents} (${((scholarshipStudents / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)
+
+Academic Standing Distribution:
+${Array.from(academicStandingMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([standing, count]) => `• ${standing}: ${count} (${((count / uniqueStudentsWithAlerts) * 100).toFixed(1)}%)`)
+  .join('\n')}
+` : '• No student demographic data available'}
 
 TOP ALERT TYPES:
 ${topAlertTypes.map((item, i) => `${i + 1}. ${item.name}: ${item.value} alerts`).join('\n')}
