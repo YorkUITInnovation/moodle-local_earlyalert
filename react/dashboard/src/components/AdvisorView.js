@@ -423,7 +423,7 @@ const AdvisorView = ({
           >
             <option value="">{getString('all_study_levels')}</option>
             {availableStudyLevels && availableStudyLevels.map(level => (
-              <option key={level} value={level}>{level}</option>
+              <option key={level.value} value={level.value}>{level.label}</option>
             ))}
           </select>
         </div>

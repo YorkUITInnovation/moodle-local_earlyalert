@@ -54,9 +54,6 @@ export const useLanguageStrings = (keys = []) => {
    * @returns {string}
    */
   const getString = (key) => {
-    console.log(`🔍 Hook getString called with key: "${key}"`);
-    console.log(`📦 Hook strings state:`, strings);
-    console.log(`✅ Hook found value:`, strings[key]);
 
     // Use the strings from hook state, not from languageService directly
     return strings[key] || key;

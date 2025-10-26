@@ -10,16 +10,13 @@ const ChartDataTest = () => {
       setLoading(true);
       setError(null);
       try {
-        console.log('Fetching chart data...');
         const response = await fetch('http://localhost:8000/api/dashboard/charts');
-        console.log('Response status:', response.status);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('Chart data received:', data);
         setChartData(data);
       } catch (err) {
         console.error('Error fetching chart data:', err);

@@ -176,8 +176,6 @@ export const useApiData = () => {
     setError(null);
     
     try {
-      console.log('🔄 useApiData - Starting data load...');
-      
       // Try to load alerts and students (the critical data)
       let alertsData, studentsData, metricsData, chartsData;
       
@@ -186,8 +184,6 @@ export const useApiData = () => {
           apiService.getAlerts(filters.alerts || {}),
           apiService.getStudents(filters.students || {})
         ]);
-        console.log('✅ useApiData - Core data loaded successfully');
-        console.log('📊 Students:', studentsData?.length, 'Alerts:', alertsData?.length);
       } catch (coreErr) {
         console.error('❌ useApiData - Failed to load core data:', coreErr.message);
         throw coreErr; // Re-throw to fall back to mock data
@@ -199,7 +195,6 @@ export const useApiData = () => {
           apiService.getDashboardMetrics(),
           apiService.getChartData()
         ]);
-        console.log('✅ useApiData - Metrics and charts loaded');
       } catch (metricsErr) {
         console.warn('⚠️ useApiData - Metrics/charts failed, using defaults:', metricsErr.message);
         metricsData = mockMetrics;

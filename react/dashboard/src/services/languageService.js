@@ -27,8 +27,6 @@ class LanguageService {
       this.loading = true;
 
       try {
-        console.log('🔄 Loading language strings from Moodle...');
-
         // Build the request
         const timestamp = new Date().getTime();
         const url = `/local/earlyalert/react/dashboard/get_strings.php?t=${timestamp}`;
@@ -66,16 +64,12 @@ class LanguageService {
 
         const response = await fetch(url, fetchOptions);
 
-        console.log('📡 Response status:', response.status, response.statusText);
-        console.log('📡 Response headers:', response.headers);
-
         if (!response.ok) {
           throw new Error(`Failed to load language strings: ${response.status} ${response.statusText}`);
         }
 
         // Get the raw response text first to see what we're actually getting
         const responseText = await response.text();
-        console.log('📄 Raw response text (first 500 chars):', responseText.substring(0, 500));
 
         // Try to parse as JSON
         let data;
@@ -87,24 +81,14 @@ class LanguageService {
           throw new Error('Response is not valid JSON. Check console for full response text.');
         }
 
-        console.log('📥 Raw response from get_strings.php:', data);
-        console.log('📊 Response success:', data.success);
-        console.log('📋 Response strings:', data.strings);
-        console.log('🔢 Response count:', data.count);
-
         if (!data.success) {
           throw new Error(data.error || 'Failed to load language strings');
         }
-
-        console.log(`✅ Loaded ${data.count} language strings from Moodle`);
-        console.log('📋 Loaded strings:', data.strings);
 
         // Merge new strings with existing ones
         this.strings = { ...this.strings, ...data.strings };
         this.loaded = true;
         this.loading = false;
-
-        console.log('💾 Stored strings in service:', this.strings);
 
         return this.strings;
       } catch (error) {
@@ -125,10 +109,6 @@ class LanguageService {
    * @returns {string} - The translated string from Moodle
    */
   getString(key) {
-    // Debug logging
-    console.log(`🔍 getString called with key: "${key}"`);
-    console.log(`📦 Available strings:`, Object.keys(this.strings));
-    console.log(`✅ Found value:`, this.strings[key]);
 
     // Return the string from Moodle (no fallback, Moodle handles that)
     return this.strings[key] || key;

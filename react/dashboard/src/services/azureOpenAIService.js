@@ -21,7 +21,6 @@ class AzureOpenAIService {
 
     this.configPromise = (async () => {
       try {
-        console.log('🔄 Loading Azure OpenAI configuration from app_env.php...');
         const timestamp = new Date().getTime();
         const response = await fetch(`/local/earlyalert/react/dashboard/app_env.php?t=${timestamp}`, {
           cache: 'no-store',
@@ -37,13 +36,6 @@ class AzureOpenAIService {
         }
 
         const data = await response.json();
-        console.log('✅ Configuration loaded from app_env.php:', {
-          success: data.success,
-          configured: data.configured,
-          hasApiKey: !!data.azure_openai?.api_key,
-          hasEndpoint: !!data.azure_openai?.endpoint,
-          hasDeployment: !!data.azure_openai?.deployment_name
-        });
 
         if (!data.success || !data.configured) {
           console.warn('⚠️ Azure OpenAI is not fully configured in Moodle settings.');
@@ -80,13 +72,6 @@ class AzureOpenAIService {
 
     const { endpoint, api_key, deployment_name, api_version } = this.config;
 
-    console.log('Initializing Azure OpenAI client with configuration from Moodle:', {
-      endpoint: endpoint ? 'Set' : 'Missing',
-      apiKey: api_key ? 'Set' : 'Missing',
-      deploymentName: deployment_name ? 'Set' : 'Missing',
-      apiVersion: api_version
-    });
-
     if (!endpoint || !api_key || !deployment_name) {
       console.warn('Azure OpenAI configuration is incomplete. Please check your Moodle plugin settings.');
       return;
@@ -102,15 +87,7 @@ class AzureOpenAIService {
         dangerouslyAllowBrowser: true
       };
 
-      console.log('Setting up AzureOpenAI client with options:', {
-        endpoint: options.endpoint,
-        deployment: options.deployment,
-        apiVersion: options.apiVersion
-      });
-
       this.client = new AzureOpenAI(options);
-
-      console.log('Azure OpenAI client initialized successfully');
     } catch (error) {
       console.error('Failed to initialize Azure OpenAI client:', error);
     }
@@ -121,21 +98,11 @@ class AzureOpenAIService {
     await this.loadConfiguration();
 
     const configured = !!(this.config && this.config.api_key && this.config.endpoint && this.config.deployment_name && this.client);
-    console.log('Configuration check:', {
-      hasConfig: !!this.config,
-      endpoint: !!this.config?.endpoint,
-      apiKey: !!this.config?.api_key,
-      deploymentName: !!this.config?.deployment_name,
-      client: !!this.client,
-      overall: configured
-    });
-    
+
     return configured;
   }
 
   async sendMessage(message, studentData, dashboardContext) {
-    console.log('sendMessage called with:', { message, hasClient: !!this.client });
-    
     // Ensure configuration is loaded and client is initialized
     if (!this.configLoaded) {
       await this.loadConfiguration();
@@ -148,8 +115,6 @@ class AzureOpenAIService {
     try {
       // Prepare context from student data
       const dataContext = this.prepareDataContext(studentData, dashboardContext);
-      
-      console.log('Prepared data context length:', dataContext.length);
       
       // Create system prompt with data context
       const systemPrompt = `You are an AI Analytics Assistant for the York University Early Alert Analytics Dashboard. 
@@ -196,15 +161,12 @@ Answer the user's question based on the current dashboard data context.`;
         }
       ];
 
-      console.log('Sending request to Azure OpenAI...');
-
       const response = await this.client.chat.completions.create({
         messages: messages,
         max_completion_tokens: 16384,
         model: this.modelName
       });
 
-      console.log('Received response from Azure OpenAI:', response);
 
       // Check for errors in response (GPT-5 pattern)
       if (response?.error !== undefined && response.status !== "200") {

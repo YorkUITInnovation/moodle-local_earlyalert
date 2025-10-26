@@ -283,37 +283,9 @@ const EarlyAlertDashboard = () => {
   }, [loadData]);
 
   // Debug: Log when alerts data changes
-  useEffect(() => {
-    console.log('🔄 ALERTS DATA UPDATED - Count:', alerts.length);
-    if (alerts.length > 0) {
-      console.log('📋 First alert sample:', {
-        alertType: alerts[0].alertType,
-        templateType: alerts[0].template_type,
-        student: {
-          immigrationStatus: alerts[0].student?.immigrationStatus,
-          academicStatus: alerts[0].student?.academicStatus
-        }
-      });
-    }
-  }, [alerts]);
-
   // Filter alerts based on current filter selections
   const filteredAlerts = useMemo(() => {
-    console.log('🔍 FILTERING ALERTS - Total alerts:', alerts.length);
-    
-    // Debug: Log immigration status distribution
-    const immigrationStatusCounts = {};
-    alerts.forEach(alert => {
-      const status = alert.student?.immigrationStatus || 'Missing';
-      immigrationStatusCounts[status] = (immigrationStatusCounts[status] || 0) + 1;
-    });
-    console.log('📊 Immigration Status Distribution:', immigrationStatusCounts);
-    console.log('📊 Sample student data:', alerts.slice(0, 3).map(a => ({
-      sisId: a.student?.sisId,
-      immigrationStatus: a.student?.immigrationStatus
-    })));
-    
-    return alerts.filter(alert => {
+    const filtered = alerts.filter(alert => {
       const matchesFaculty = !filterFaculty || alert.faculty === filterFaculty;
       const matchesStatus = !filterStatus || alert.status === filterStatus;
       const matchesTemplateType = !filterTemplateType || alert.template_type === filterTemplateType;
@@ -321,8 +293,9 @@ const EarlyAlertDashboard = () => {
       const matchesCampus = !filterCampus || alert.campus === filterCampus;
       const matchesAlertType = !filterAlertType || alert.alertType === filterAlertType;
       const matchesAcademicStatus = !filterAcademicStatus || alert.student?.academicStatus === filterAcademicStatus;
-      const matchesStudyLevel = !filterStudyLevel || alert.student?.studyLevel === filterStudyLevel;
-      
+      const matchesStudyLevel = !filterStudyLevel || alert.student?.studylevel === filterStudyLevel;
+
+
       const matchesChart = !selectedChartData || (
         (chartFilterType === 'alertType' && alert.alertType === selectedChartData) ||
         (chartFilterType === 'faculty' && (facultyMapping[alert.faculty] || alert.faculty) === selectedChartData)
@@ -332,7 +305,9 @@ const EarlyAlertDashboard = () => {
              matchesCampus && matchesAlertType && matchesAcademicStatus && matchesStudyLevel && 
              matchesChart;
     });
-  }, [alerts, filterFaculty, filterStatus, filterTemplateType, filterStudentType, filterCampus, 
+
+    return filtered;
+  }, [alerts, filterFaculty, filterStatus, filterTemplateType, filterStudentType, filterCampus,
       filterAlertType, filterAcademicStatus, filterStudyLevel, selectedChartData, chartFilterType, facultyMapping]);
 
   // Sort filtered alerts
@@ -533,20 +508,13 @@ const EarlyAlertDashboard = () => {
 
   // Get unique template types from the actual data
   const availableTemplateTypes = useMemo(() => {
-    console.log('🔍 Total alerts loaded:', alerts.length);
-    console.log('🔍 First 3 alerts:', alerts.slice(0, 3));
-    
     const templateTypes = new Set();
     alerts.forEach(alert => {
       if (alert.template_type) {
         templateTypes.add(alert.template_type);
       }
     });
-    const result = Array.from(templateTypes).sort();
-    console.log('🔍 Available Template Types:', result);
-    console.log('📊 Sample alert with template_type:', alerts.find(a => a.template_type));
-    console.log('📊 All alerts with template_type:', alerts.filter(a => a.template_type).length, 'out of', alerts.length);
-    return result;
+    return Array.from(templateTypes).sort();
   }, [alerts]);
 
   // Get unique campuses from the actual data
@@ -568,36 +536,30 @@ const EarlyAlertDashboard = () => {
         alertTypes.add(alert.alertType);
       }
     });
-    const types = Array.from(alertTypes).sort();
-    console.log('🎯 Available Alert Types for dropdown:', types);
-    return types;
+    return Array.from(alertTypes).sort();
   }, [alerts]);
 
   // Get unique academic statuses from the actual data
   const availableAcademicStatuses = useMemo(() => {
     const statuses = new Set();
-    console.log('🔍 Extracting academic statuses from', alerts.length, 'alerts');
     alerts.forEach(alert => {
       const status = alert.student?.academicStatus;
       if (status) {
         statuses.add(status);
       }
     });
-    const statusArray = Array.from(statuses).sort();
-    console.log('📊 Available Academic Statuses:', statusArray);
-    return statusArray;
+    return Array.from(statuses).sort();
   }, [alerts]);
 
-  // Get unique study levels from the actual data
+  // Fixed study levels options with value and display label
   const availableStudyLevels = useMemo(() => {
-    const levels = new Set();
-    alerts.forEach(alert => {
-      if (alert.student?.studyLevel) {
-        levels.add(alert.student.studyLevel);
-      }
-    });
-    return Array.from(levels).sort();
-  }, [alerts]);
+    return [
+      { value: '01', label: '01' },
+      { value: '02', label: '02' },
+      { value: '03', label: '03' },
+      { value: '04', label: '04' }
+    ];
+  }, []);
 
   // Handle chart click for filtering
   const handleChartClick = (value, type) => {
@@ -621,8 +583,7 @@ const EarlyAlertDashboard = () => {
     
     try {
       // Use the integrated service that handles both local and AI analytics
-      console.log('🤖 Processing query with integrated analytics...');
-      
+
       // Send to integrated service with complete dashboard context including all calculated data
       const response = await azureOpenAIService.sendMessage(message, students, {
         alerts: alerts,
@@ -871,7 +832,6 @@ const EarlyAlertDashboard = () => {
             
             <button
               onClick={() => {
-                console.log('Generate Charts button clicked!');
                 setShowVisualizationPanel(!showVisualizationPanel);
                 // Close the AI Panel if it's open
                 if (!showVisualizationPanel) {

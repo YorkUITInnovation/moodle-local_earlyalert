@@ -1,8 +1,6 @@
 // API service to connect React dashboard to real student data and FastAPI backend
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-console.log('🚀🚀🚀 API SERVICE LOADED - VERSION 2.0 - NO CACHE 🚀🚀🚀');
-
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
@@ -14,7 +12,6 @@ class ApiService {
     // Always fetch fresh data, never use cache
 
     try {
-      console.log('🔄 Fetching real student data from data.php...');
       // Add cache-busting timestamp to force fresh load
       const timestamp = new Date().getTime();
       const response = await fetch(`/local/earlyalert/react/dashboard/data.php?t=${timestamp}`, {
@@ -25,16 +22,10 @@ class ApiService {
           'Expires': '0'
         }
       });
-      console.log('📡 Fetch response status:', response.status, response.statusText);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const jsonResponse = await response.json();
-      console.log('✅ Real student data loaded successfully from data.php!');
-      console.log('📊 Success:', jsonResponse.success);
-      console.log('📋 Total records:', jsonResponse.count || 0);
-      console.log('📅 Date range:', jsonResponse.date_range);
-      console.log('🔍 First record:', jsonResponse.data?.[0]);
 
       // Transform the response to match expected format
       const data = {
@@ -88,9 +79,9 @@ class ApiService {
     try {
       // First, try to use real student data
       const realData = await this.loadRealStudentData();
+
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
-        console.log('🔍 API Service - Using real student data from Excel conversion');
-        
+
         // Extract unique students from alert logs
         const studentMap = new Map();
         
@@ -107,6 +98,7 @@ class ApiService {
                 home_faculty: log.progfaculty || 'Unknown',
                 campus: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus || 'Unknown',
                 program: log.transcripttitle || log.program || 'Unknown Program',
+                studylevel: log.studylevel ? log.studylevel.toString() : null,
                 study_level: this.mapStudyLevel(log.studylevel),
                 ogpa: log.ogpa || 0,
                 academic_decision: log.latestacademicdecision || 'Unknown',
@@ -125,7 +117,6 @@ class ApiService {
         });
         
         const students = Array.from(studentMap.values());
-        console.log('📊 API Service - Students extracted from real data:', students.length, 'unique students');
         return students;
       }
     } catch (error) {
@@ -182,8 +173,6 @@ class ApiService {
 
   // Comprehensive data for AI context
   async getComprehensiveData() {
-    console.log('🔍 API Service - Fetching comprehensive database data for AI context');
-    
     try {
       // Fetch all students with no filters and high limit
       const students = await this.getStudents({ limit: 2000 });
@@ -196,13 +185,6 @@ class ApiService {
       
       // Fetch chart data for trends
       const chartData = await this.getChartData();
-      
-      console.log('📊 Comprehensive data retrieved:', {
-        students: students.length,
-        alerts: alerts.length,
-        metrics: metrics ? 'included' : 'missing',
-        chartData: chartData ? 'included' : 'missing'
-      });
       
       return {
         students,
@@ -225,8 +207,6 @@ class ApiService {
       // First, try to use real student data
       const realData = await this.loadRealStudentData();
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
-        console.log('🔍 API Service - Using real alert data from Excel conversion');
-        
         // Transform alert logs into dashboard format
         let missingFacultyCount = 0;
         const alerts = realData.alert_logs.map((log, index) => {
@@ -235,15 +215,6 @@ class ApiService {
           // Track missing faculty data
           if (!log.progfaculty && !log.faculty) {
             missingFacultyCount++;
-            if (missingFacultyCount <= 3) {
-              console.warn('⚠️ Alert with missing faculty data:', {
-                id: log.id,
-                studentId: log.sisid,
-                studentName: `${log.firstname} ${log.surname}`,
-                progfaculty: log.progfaculty,
-                faculty: log.faculty
-              });
-            }
           }
 
           return {
@@ -275,6 +246,7 @@ class ApiService {
               home_faculty: log.progfaculty || log.faculty || 'Unknown',
               campus: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus || 'Unknown',
               program: log.transcripttitle || log.program || 'Unknown Program',
+              studylevel: log.studylevel ? log.studylevel.toString() : null,
               study_level: this.mapStudyLevel(log.studylevel),
               ogpa: log.ogpa || 0,
               academic_decision: log.latestacademicdecision || 'Unknown',
@@ -289,15 +261,8 @@ class ApiService {
           };
         });
         
-        console.log('📊 API Service - Alerts extracted from real data:', alerts.length, 'alerts');
-        console.log('🔍 Sample alert types:', alerts.slice(0, 3).map(a => a.alert_type));
-        console.log('🔍 Sample template types:', alerts.slice(0, 3).map(a => a.template_type));
-
         if (missingFacultyCount > 0) {
-          console.warn(`⚠️ Found ${missingFacultyCount} alerts with missing faculty data (both progfaculty and faculty fields are empty)`);
-          console.warn('⚠️ These alerts will show as "Unknown" faculty in the dashboard');
-        } else {
-          console.log('✅ All alerts have faculty information');
+          console.warn(`⚠️ Found ${missingFacultyCount} alerts with missing faculty data`);
         }
 
         return alerts;
@@ -380,9 +345,9 @@ class ApiService {
     try {
       // First, try to calculate metrics from real student data
       const realData = await this.loadRealStudentData();
+
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
-        console.log('🔍 API Service - Calculating metrics from real data');
-        
+
         const alerts = realData.alert_logs;
         const uniqueStudents = new Set();
         let highPriorityCount = 0;
@@ -437,9 +402,9 @@ class ApiService {
     try {
       // First, try to generate chart data from real student data
       const realData = await this.loadRealStudentData();
+
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
-        console.log('🔍 API Service - Generating chart data from real data');
-        
+
         const alerts = realData.alert_logs;
         
         // Alert types distribution
@@ -539,14 +504,6 @@ class ApiService {
 
   // Helper method to transform data from API format to dashboard format
   transformAlertsForDashboard(alerts) {
-    console.log('🔧 Transforming', alerts.length, 'alerts for dashboard');
-    if (alerts.length > 0) {
-      console.log('🔧 Sample alert.student before transform:', {
-        academic_status: alerts[0].student?.academic_status,
-        immigration_status: alerts[0].student?.immigration_status
-      });
-    }
-    
     const transformed = alerts.map(alert => ({
       id: alert.id,
       studentId: alert.student_id,
@@ -581,6 +538,7 @@ class ApiService {
         homeFaculty: alert.student.home_faculty,
         campus: alert.student.campus,
         program: alert.student.program,
+        studylevel: alert.student.studylevel,
         studyLevel: alert.student.study_level,
         ogpa: alert.student.ogpa,
         academicDecision: alert.student.academic_decision,
@@ -604,15 +562,11 @@ class ApiService {
       scholarshipFlag: alert.student.scholarship_flag
     }));
     
-    console.log('🔄 Transformed alerts - Sample alertTypes:', transformed.slice(0, 3).map(a => a.alertType));
-    console.log('🔄 Transformed alerts - Sample template_types:', transformed.slice(0, 3).map(a => a.template_type));
-    console.log('🔄 Transformed alerts - Sample academicStatus:', transformed.slice(0, 3).map(a => a.student?.academicStatus));
     return transformed;
   }
 
   transformStudentsForDashboard(students) {
-    console.log('🔄 transformStudentsForDashboard - Input:', typeof students, Array.isArray(students), students?.length);
-    
+
     // Safety check: ensure students is an array
     if (!Array.isArray(students)) {
       console.warn('⚠️ transformStudentsForDashboard - students is not an array:', students);
@@ -628,6 +582,7 @@ class ApiService {
       homeFaculty: student.home_faculty,
       campus: student.campus,
       program: student.program,
+      studylevel: student.studylevel,
       studyLevel: student.study_level,
       ogpa: student.ogpa,
       languageOfCorrespondence: student.language_of_correspondence,

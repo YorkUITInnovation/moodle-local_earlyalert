@@ -23,7 +23,6 @@ const PWAManager = () => {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');
         setSwRegistration(registration);
-        console.log('✅ Service Worker registered successfully');
 
         // Check for updates
         registration.addEventListener('updatefound', () => {
