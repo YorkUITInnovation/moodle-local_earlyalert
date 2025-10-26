@@ -4,7 +4,6 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Toolti
 import { AlertTriangle, Users, TrendingUp, CheckCircle, Filter, Download, Eye, UserCheck, ChevronUp, ChevronDown, Search, RefreshCw, X, FileSpreadsheet, Brain, Send, Bot, BarChart3 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import Chatbot from './components/Chatbot';
-import PWAManager from './components/PWAManager';
 import VisualizationPanel from './components/VisualizationPanel';
 import ViewToggle from './components/ViewToggle';
 import AdministratorView from './components/AdministratorView';
@@ -735,9 +734,6 @@ const EarlyAlertDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* PWA Manager for install prompt, offline status, and updates */}
-      <PWAManager />
-      
       {/* Data Loading Overlay - Shows when fetching data from data.php */}
       {loading && !stringsLoading && (
         <div

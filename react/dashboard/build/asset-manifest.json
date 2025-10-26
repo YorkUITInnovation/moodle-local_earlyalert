@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/local/earlyalert/react/dashboard/build/static/css/main.ceb11e17.css",
-    "main.js": "/local/earlyalert/react/dashboard/build/static/js/main.f460b3a4.js",
+    "main.js": "/local/earlyalert/react/dashboard/build/static/js/main.ed8e8f02.js",
     "static/js/239.bc7d0e7f.chunk.js": "/local/earlyalert/react/dashboard/build/static/js/239.bc7d0e7f.chunk.js",
     "static/js/453.0c57c708.chunk.js": "/local/earlyalert/react/dashboard/build/static/js/453.0c57c708.chunk.js",
     "index.html": "/local/earlyalert/react/dashboard/build/index.html",
     "main.ceb11e17.css.map": "/local/earlyalert/react/dashboard/build/static/css/main.ceb11e17.css.map",
-    "main.f460b3a4.js.map": "/local/earlyalert/react/dashboard/build/static/js/main.f460b3a4.js.map",
+    "main.ed8e8f02.js.map": "/local/earlyalert/react/dashboard/build/static/js/main.ed8e8f02.js.map",
     "239.bc7d0e7f.chunk.js.map": "/local/earlyalert/react/dashboard/build/static/js/239.bc7d0e7f.chunk.js.map",
     "453.0c57c708.chunk.js.map": "/local/earlyalert/react/dashboard/build/static/js/453.0c57c708.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ceb11e17.css",
-    "static/js/main.f460b3a4.js"
+    "static/js/main.ed8e8f02.js"
   ]
 }
