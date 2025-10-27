@@ -175,15 +175,13 @@ class LocalAnalyticsService {
   }
 
   handleStatusCount(query, alerts) {
-    const statusMatch = query.match(/['"]?(pending|resolved|in progress|closed)['"]?/i);
+    const statusMatch = query.match(/['"]?(advised|unadvised)['"]?/i);
     if (!statusMatch) return null;
     
     const targetStatus = statusMatch[1].toLowerCase();
     const statusMap = {
-      'pending': 'Pending',
-      'resolved': 'Resolved',
-      'in progress': 'In Progress',
-      'closed': 'Closed'
+      'advised': 'Advised',
+      'unadvised': 'Unadvised'
     };
     
     const correctStatus = statusMap[targetStatus];
@@ -411,7 +409,7 @@ class LocalAnalyticsService {
 
   getStatusBreakdown(alerts) {
     return alerts.reduce((acc, alert) => {
-      const status = alert.status || 'Pending';
+      const status = alert.status || 'Unadvised';
       acc[status] = (acc[status] || 0) + 1;
       return acc;
     }, {});

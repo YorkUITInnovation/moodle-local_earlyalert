@@ -118,7 +118,7 @@ const mockAlerts = [
     dateRaised: new Date('2024-01-20'),
     lastUpdated: new Date('2024-01-22'),
     priority: "High",
-    status: "Not Contacted",
+    status: "Unadvised",
     description: "Failing multiple assignments",
     student: mockStudents[2],
     program: "Engineering",
@@ -151,9 +151,8 @@ const mockChartData = {
     { name: "Lassonde", value: 1, color: "#991B1B" }
   ],
   status_distribution: [
-    { name: "Not Contacted", value: 1, color: "#E31837" },
-    { name: "In Progress", value: 1, color: "#B91C1C" },
-    { name: "Resolved", value: 1, color: "#22C55E" }
+    { name: "Unadvised", value: 1, color: "#E31837" },
+    { name: "Advised", value: 2, color: "#22C55E" }
   ],
   priority_distribution: [
     { name: "High", value: 2, color: "#E31837" },

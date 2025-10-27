@@ -133,8 +133,8 @@ const AdvisorView = ({
 
   // Detailed metrics for advisors
   const advisorMetrics = useMemo(() => {
-    const pendingAlerts = filteredAlerts.filter(alert => alert.status === 'Pending').length;
-    const inProgressAlerts = filteredAlerts.filter(alert => alert.status === 'In Progress').length;
+    const advisedAlerts = filteredAlerts.filter(alert => alert.status === 'Advised').length;
+    const unadvisedAlerts = filteredAlerts.filter(alert => alert.status === 'Unadvised').length;
     const highPriorityAlerts = filteredAlerts.filter(alert => alert.priority === 'High').length;
     const todayAlerts = filteredAlerts.filter(alert => {
       const today = new Date().toISOString().split('T')[0];
@@ -147,8 +147,8 @@ const AdvisorView = ({
     }).length;
 
     return {
-      pendingAlerts,
-      inProgressAlerts,
+      advisedAlerts,
+      unadvisedAlerts,
       highPriorityAlerts,
       todayAlerts,
       totalFiltered: filteredAlerts.length
@@ -177,6 +177,7 @@ const AdvisorView = ({
     const exportData = tableFilteredAlerts.map(alert => {
       const student = getStudentDetails(alert.studentId);
       return {
+        'SISID': alert.student?.sisId || alert.studentId,
         'Student ID': alert.studentId,
         'Student Name': alert.studentName,
         'Email': alert.email,
@@ -534,6 +535,17 @@ const AdvisorView = ({
               <tr>
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleSort('sisId')}
+                >
+                  <div className="flex items-center gap-1">
+                    SISID
+                    {sortField === 'sisId' && (
+                      sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('studentId')}
                 >
                   <div className="flex items-center gap-1">
@@ -579,7 +591,6 @@ const AdvisorView = ({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('status')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('faculty')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('course')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -589,6 +600,9 @@ const AdvisorView = ({
                       setSelectedStudent(getStudentDetails(alert.studentId));
                       setShowStudentDetails(true);
                     }}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{alert.student?.sisId || alert.studentId}</div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{alert.studentId}</div>
                   </td>
@@ -610,9 +624,8 @@ const AdvisorView = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      alert.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                      alert.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
-                      alert.status === 'Contacted' ? 'bg-green-100 text-green-800' :
+                      alert.status === 'Advised' ? 'bg-green-100 text-green-800' :
+                      alert.status === 'Unadvised' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
                       {alert.status}
@@ -623,31 +636,6 @@ const AdvisorView = ({
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
                     {alert.courseName || alert.course || getString('n_a')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(`mailto:${alert.email}`, '_blank');
-                        }}
-                        className="text-blue-600 hover:text-blue-900"
-                        title={getString('send_email')}
-                      >
-                        <Mail className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedStudent(getStudentDetails(alert.studentId));
-                          setShowStudentDetails(true);
-                        }}
-                        className="text-gray-600 hover:text-gray-900"
-                        title={getString('view_details')}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
                   </td>
                 </tr>
               ))}

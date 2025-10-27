@@ -93,7 +93,7 @@ const AdministratorView = ({
 
     const resolutionCandidates = alerts || [];
     const resolvedAlerts = resolutionCandidates.filter(alert => 
-      alert.status === 'Contacted' || alert.status === 'Resolved'
+      alert.status === 'Advised'
     ).length;
     const resolutionRate = totalAlerts > 0 ? ((resolvedAlerts / totalAlerts) * 100).toFixed(1) : 0;
     
@@ -136,7 +136,7 @@ const AdministratorView = ({
         facultyStats[faculty].students.add(normalizedId);
       }
       
-      if (alert.status === 'Contacted' || alert.status === 'Resolved') {
+      if (alert.status === 'Advised') {
         facultyStats[faculty].resolved++;
       }
       
@@ -248,7 +248,7 @@ const AdministratorView = ({
         month: monthInfo.name,
         shortMonth: monthInfo.shortName,
         alerts: monthAlerts.length,
-        resolved: monthAlerts.filter(a => a.status === 'Contacted' || a.status === 'Resolved').length,
+        resolved: monthAlerts.filter(a => a.status === 'Advised').length,
         highPriority: monthAlerts.filter(a => a.priority === 'High').length,
         firstHalf: firstHalf,
         secondHalf: secondHalf

@@ -233,9 +233,9 @@ class ApiService {
             description: log.subject || 'N/A',
             follow_up_notes: log.custom_message || '',
             assigned_to: 'Academic Advisor',
-            follow_up_initiated: log.student_advised_by_advisor ? true : false,
+            follow_up_initiated: log.student_advised_by_advisor && log.student_advised_by_advisor !== 0 && log.student_advised_by_advisor !== '0' ? true : false,
             email_opened: false,
-            student_contacted: log.student_advised_by_instructor ? true : false,
+            student_contacted: log.student_advised_by_instructor && log.student_advised_by_instructor !== 0 && log.student_advised_by_instructor !== '0' ? true : false,
             issue_resolved: false,
             // Student data embedded
             student: {
@@ -317,12 +317,15 @@ class ApiService {
 
   // Helper method to map alert status
   mapAlertStatus(log) {
-    if (log.student_advised_by_advisor && log.student_advised_by_instructor) {
-      return 'In Progress';
-    } else if (log.student_advised_by_advisor || log.student_advised_by_instructor) {
-      return 'Contacted';
+    // A student is advised if student_advised_by_advisor OR student_advised_by_instructor has a timestamp (not 0)
+    // These fields contain timestamps when advised, or 0 when unadvised
+    const advisedByAdvisor = log.student_advised_by_advisor && log.student_advised_by_advisor !== 0 && log.student_advised_by_advisor !== '0';
+    const advisedByInstructor = log.student_advised_by_instructor && log.student_advised_by_instructor !== 0 && log.student_advised_by_instructor !== '0';
+
+    if (advisedByAdvisor || advisedByInstructor) {
+      return 'Advised';
     } else {
-      return 'Not Contacted';
+      return 'Unadvised';
     }
   }
 
@@ -353,10 +356,9 @@ class ApiService {
         let highPriorityCount = 0;
         let mediumPriorityCount = 0;
         let lowPriorityCount = 0;
-        let resolvedCount = 0;
-        let inProgressCount = 0;
-        let newCount = 0;
-        
+        let advisedCount = 0;
+        let unadvisedCount = 0;
+
         alerts.forEach(alert => {
           // Count unique students
           if (alert.sisid) uniqueStudents.add(alert.sisid.toString());
@@ -369,25 +371,24 @@ class ApiService {
           
           // Count status
           const status = this.mapAlertStatus(alert);
-          if (status === 'In Progress') inProgressCount++;
-          else if (status === 'Contacted') resolvedCount++;
-          else newCount++;
+          if (status === 'Advised') advisedCount++;
+          else unadvisedCount++;
         });
         
         const totalAlerts = alerts.length;
-        const activeAlerts = totalAlerts - resolvedCount;
-        
+        const activeAlerts = unadvisedCount; // Active alerts are unadvised alerts
+
         return {
           totalAlerts,
           activeAlerts,
-          resolvedAlerts: resolvedCount,
+          resolvedAlerts: advisedCount,
           highPriority: highPriorityCount,
           mediumPriority: mediumPriorityCount,
           lowPriority: lowPriorityCount,
           uniqueStudents: uniqueStudents.size,
-          resolutionRate: totalAlerts > 0 ? ((resolvedCount / totalAlerts) * 100).toFixed(2) : 0,
-          newAlerts: newCount,
-          inProgressAlerts: inProgressCount
+          resolutionRate: totalAlerts > 0 ? ((advisedCount / totalAlerts) * 100).toFixed(2) : 0,
+          advisedAlerts: advisedCount,
+          unadvisedAlerts: unadvisedCount
         };
       }
     } catch (error) {

@@ -446,7 +446,7 @@ const EarlyAlertDashboard = () => {
     // Calculate from filtered alerts
     const statusCounts = {};
     filteredAlerts.forEach(alert => {
-      const status = alert.status || 'Pending';
+      const status = alert.status || 'Unadvised';
       statusCounts[status] = (statusCounts[status] || 0) + 1;
     });
     
