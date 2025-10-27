@@ -177,6 +177,7 @@ const AdvisorView = ({
     const exportData = tableFilteredAlerts.map(alert => {
       const student = getStudentDetails(alert.studentId);
       return {
+        'Student ID': alert.studentId,
         'Student Name': alert.studentName,
         'Email': alert.email,
         'Alert Type': alert.alertType,
@@ -189,7 +190,6 @@ const AdvisorView = ({
         'Professor': alert.professor,
         'Description': alert.description,
         'Academic Decision': alert.academicDecision,
-        'Student ID': alert.studentId,
         'Program': student.program,
         'Study Level': student.studyLevel,
         'Immigration Status': student.immigrationStatus,
@@ -534,6 +534,17 @@ const AdvisorView = ({
               <tr>
                 <th 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => handleSort('studentId')}
+                >
+                  <div className="flex items-center gap-1">
+                    {getString('student_id')}
+                    {sortField === 'studentId' && (
+                      sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('studentName')}
                 >
                   <div className="flex items-center gap-1">
@@ -578,6 +589,9 @@ const AdvisorView = ({
                       setSelectedStudent(getStudentDetails(alert.studentId));
                       setShowStudentDetails(true);
                     }}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{alert.studentId}</div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div>
