@@ -296,4 +296,6 @@ $string['in_progress'] = 'In Progress';
 $string['high'] = 'High';
 $string['medium'] = 'Medium';
 $string['low'] = 'Low';
+$string['advised'] = 'Advised';
+$string['unadvised'] = 'Unadvised';
 

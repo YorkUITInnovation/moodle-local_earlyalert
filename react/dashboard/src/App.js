@@ -656,7 +656,7 @@ const EarlyAlertDashboard = () => {
         'Varsity': alert.student?.varsityFlag ? 'Yes' : 'No',
         'Scholarship': alert.student?.scholarshipFlag ? 'Yes' : 'No',
         'Alert Type': alert.alertType || 'N/A',
-        'Course Code': alert.courseCode || alert.course || 'N/A',
+        'Course': alert.course || 'N/A',
         'Course Name': alert.courseName || 'N/A',
         'Professor': alert.professorName || alert.professor || 'N/A',
         'Priority': alert.priority || 'N/A',

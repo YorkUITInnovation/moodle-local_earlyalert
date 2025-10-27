@@ -117,11 +117,22 @@ const AdvisorView = ({
     'in_progress',
     'high',
     'medium',
-    'low'
+    'low',
+    'advised',
+    'unadvised'
   ]);
 
   const COLORS = ['#E31837', '#DC2626', '#B91C1C', '#991B1B', '#7F1D1D', '#EF4444', '#F87171'];
   
+  // Helper function to translate status values
+  const translateStatus = (status) => {
+    if (!status) return getString('n_a');
+    const statusLower = status.toLowerCase();
+    if (statusLower === 'advised') return getString('advised');
+    if (statusLower === 'unadvised') return getString('unadvised');
+    return status; // Return original if no translation found
+  };
+
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showStudentDetails, setShowStudentDetails] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -183,11 +194,12 @@ const AdvisorView = ({
         'Email': alert.email,
         'Alert Type': alert.alertType,
         'Date Raised': new Date(alert.dateRaised).toLocaleDateString(),
-        'Status': alert.status,
+        'Status': translateStatus(alert.status),
         'Priority': alert.priority,
         'Faculty': alert.faculty,
         'Campus': alert.campus,
         'Course': alert.course,
+        'Course Name': alert.courseName || 'N/A',
         'Professor': alert.professor,
         'Description': alert.description,
         'Academic Decision': alert.academicDecision,
@@ -378,7 +390,7 @@ const AdvisorView = ({
           >
             <option value="">{getString('all_statuses')}</option>
             {availableStatuses.map(status => (
-              <option key={status} value={status}>{status}</option>
+              <option key={status} value={status}>{translateStatus(status)}</option>
             ))}
           </select>
         </div>
@@ -628,7 +640,7 @@ const AdvisorView = ({
                       alert.status === 'Unadvised' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
-                      {alert.status}
+                      {translateStatus(alert.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
