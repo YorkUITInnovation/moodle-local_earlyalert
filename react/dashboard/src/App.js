@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
-import { AlertTriangle, Users, TrendingUp, CheckCircle, Filter, Download, Eye, UserCheck, ChevronUp, ChevronDown, Search, RefreshCw, X, FileSpreadsheet, Brain, Send, Bot, BarChart3 } from 'lucide-react';
+import { AlertTriangle, Users, TrendingUp, CheckCircle, Filter, Download, Eye, UserCheck, ChevronUp, ChevronDown, Search, RefreshCw, FileSpreadsheet, Brain, Send, Bot, BarChart3 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import Chatbot from './components/Chatbot';
 import VisualizationPanel from './components/VisualizationPanel';
@@ -154,6 +154,10 @@ const EarlyAlertDashboard = () => {
     'hide_ai',
     'generate_charts',
     'hide_charts',
+    'filter_by_date_range',
+    'start_date',
+    'end_date',
+    'apply_date_range',
     'ai_analytics_assistant',
     'ask_questions_about_data',
     'ai_assistant',
@@ -195,6 +199,29 @@ const EarlyAlertDashboard = () => {
   const [currentView, setCurrentView] = useState('administrator'); // New view state
   const [viewLockedByQuery, setViewLockedByQuery] = useState(false); // Track if view is set by query param
   const [selectedDate, setSelectedDate] = useState('');
+
+  // Calculate default date range (first and last day of current month)
+  const getDefaultDateRange = () => {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    return {
+      start: formatDate(firstDay),
+      end: formatDate(lastDay)
+    };
+  };
+
+  const defaultRange = getDefaultDateRange();
+  const [dateRangeStart, setDateRangeStart] = useState(defaultRange.start);
+  const [dateRangeEnd, setDateRangeEnd] = useState(defaultRange.end);
   const [showChatbot, setShowChatbot] = useState(false);
   const [showColumnSelector, setShowColumnSelector] = useState(false);
   const [showConversationalAnalytics, setShowConversationalAnalytics] = useState(false);
@@ -278,8 +305,25 @@ const EarlyAlertDashboard = () => {
 
   // Initialize data from API
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    // Load data with default date range on initial mount
+    if (defaultRange.start && defaultRange.end) {
+      // Convert from YYYY-MM-DD to MM-DD-YYYY format
+      const convertDate = (dateStr) => {
+        const [year, month, day] = dateStr.split('-');
+        return `${month}-${day}-${year}`;
+      };
+
+      const formattedStart = convertDate(defaultRange.start);
+      const formattedEnd = convertDate(defaultRange.end);
+      const dateRange = `${formattedStart} - ${formattedEnd}`;
+
+      console.log('Initial load with date range:', dateRange);
+      loadData({ date_range: dateRange });
+    } else {
+      loadData({ date_range: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Debug: Log when alerts data changes
   // Filter alerts based on current filter selections
@@ -787,7 +831,24 @@ const EarlyAlertDashboard = () => {
         <div className="mb-8">
           <div className="flex items-center gap-4 mt-4" style={{ marginBottom: '0px' }}>
             <button 
-              onClick={() => loadData()} 
+              onClick={() => {
+                if (dateRangeStart && dateRangeEnd) {
+                  // Convert from YYYY-MM-DD to MM-DD-YYYY format
+                  const convertDate = (dateStr) => {
+                    const [year, month, day] = dateStr.split('-');
+                    return `${month}-${day}-${year}`;
+                  };
+
+                  const formattedStart = convertDate(dateRangeStart);
+                  const formattedEnd = convertDate(dateRangeEnd);
+                  const dateRange = `${formattedStart} - ${formattedEnd}`;
+
+                  console.log('Refresh button clicked with date range:', dateRange);
+                  loadData({ date_range: dateRange });
+                } else {
+                  loadData({ date_range: null });
+                }
+              }}
               disabled={loading}
               style={{
                 backgroundColor: '#E31837',
@@ -846,7 +907,55 @@ const EarlyAlertDashboard = () => {
               {showVisualizationPanel ? getString('hide_charts') : getString('generate_charts')}
             </button>
           </div>
-          
+
+          {/* Date Range Selector */}
+          <div className="mt-4 flex items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <label className="text-sm font-medium text-gray-700">{getString('filter_by_date_range')}</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dateRangeStart}
+                onChange={(e) => setDateRangeStart(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31837] focus:border-[#E31837] text-sm"
+                placeholder={getString('start_date')}
+                title={getString('start_date')}
+              />
+              <span className="text-gray-500">to</span>
+              <input
+                type="date"
+                value={dateRangeEnd}
+                onChange={(e) => setDateRangeEnd(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31837] focus:border-[#E31837] text-sm"
+                placeholder={getString('end_date')}
+                title={getString('end_date')}
+              />
+              <button
+                onClick={() => {
+                  if (dateRangeStart && dateRangeEnd) {
+                    // Convert from YYYY-MM-DD to MM-DD-YYYY format
+                    const convertDate = (dateStr) => {
+                      const [year, month, day] = dateStr.split('-');
+                      return `${month}-${day}-${year}`;
+                    };
+
+                    const formattedStart = convertDate(dateRangeStart);
+                    const formattedEnd = convertDate(dateRangeEnd);
+                    const dateRange = `${formattedStart} - ${formattedEnd}`;
+
+                    console.log('Apply button clicked with date range:', dateRange);
+                    loadData({ date_range: dateRange });
+                  }
+                }}
+                disabled={!dateRangeStart || !dateRangeEnd}
+                className="px-4 py-2 bg-[#E31837] hover:bg-[#B91C1C] text-white rounded-lg transition-colors text-sm flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                title={getString('apply_date_range')}
+              >
+                <CheckCircle className="w-4 h-4" />
+                {getString('apply_date_range')}
+              </button>
+            </div>
+          </div>
+
           {/* Inline Conversational Analytics */}
           {showConversationalAnalytics && (
             <div className="bg-white rounded-lg shadow-lg border border-gray-200" style={{ marginTop: '0px' }}>

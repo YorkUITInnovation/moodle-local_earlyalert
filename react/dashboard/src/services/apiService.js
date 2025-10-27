@@ -8,13 +8,27 @@ class ApiService {
   }
 
   // Load real student data from data.php
-  async loadRealStudentData() {
+  async loadRealStudentData(filters = {}) {
     // Always fetch fresh data, never use cache
 
     try {
       // Add cache-busting timestamp to force fresh load
       const timestamp = new Date().getTime();
-      const response = await fetch(`/local/earlyalert/react/dashboard/data.php?t=${timestamp}`, {
+
+      // Build query parameters
+      const params = new URLSearchParams();
+      params.append('t', timestamp);
+
+      // Add date_range if provided
+      if (filters.date_range) {
+        params.append('date_range', filters.date_range);
+        console.log('📅 Sending date_range to data.php:', filters.date_range);
+      }
+
+      const url = `/local/earlyalert/react/dashboard/data.php?${params.toString()}`;
+      console.log('🔗 Fetching from:', url);
+
+      const response = await fetch(url, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -26,6 +40,12 @@ class ApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const jsonResponse = await response.json();
+
+      console.log('✅ Received data from data.php:', {
+        count: jsonResponse.count,
+        date_range: jsonResponse.date_range,
+        records: jsonResponse.data?.length || 0
+      });
 
       // Transform the response to match expected format
       const data = {
@@ -78,7 +98,7 @@ class ApiService {
   async getStudents(filters = {}) {
     try {
       // First, try to use real student data
-      const realData = await this.loadRealStudentData();
+      const realData = await this.loadRealStudentData(filters);
 
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
 
@@ -205,7 +225,7 @@ class ApiService {
   async getAlerts(filters = {}) {
     try {
       // First, try to use real student data
-      const realData = await this.loadRealStudentData();
+      const realData = await this.loadRealStudentData(filters);
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
         // Transform alert logs into dashboard format
         let missingFacultyCount = 0;

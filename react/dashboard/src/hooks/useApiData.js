@@ -181,8 +181,8 @@ export const useApiData = () => {
       
       try {
         [alertsData, studentsData] = await Promise.all([
-          apiService.getAlerts(filters.alerts || {}),
-          apiService.getStudents(filters.students || {})
+          apiService.getAlerts(filters),
+          apiService.getStudents(filters)
         ]);
       } catch (coreErr) {
         console.error('❌ useApiData - Failed to load core data:', coreErr.message);

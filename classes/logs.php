@@ -20,19 +20,19 @@ class logs
             // If current month is September (9) through December (12)
             if ($current_month >= 9) {
                 // September 1 current year to August 31 following year
-                $start_date = "09/01/{$current_year}";
-                $end_date = "08/31/" . ($current_year + 1);
+                $start_date = "09-01-{$current_year}";
+                $end_date = "08-31-" . ($current_year + 1);
             } else {
                 // January through August: September 1 previous year to August 31 current year
-                $start_date = "09/01/" . ($current_year - 1);
-                $end_date = "08/31/{$current_year}";
+                $start_date = "09-01-" . ($current_year - 1);
+                $end_date = "08-31-{$current_year}";
             }
 
             $date_range = "{$start_date} - {$end_date}";
         }
 
         if ($date_range) {
-            // Expecting date_range in format "MM/DD/YYYY - MM/DD/YYYY"
+            // Expecting date_range in format "MM-DD-YYYY - MM-DD-YYYY"
             list($start_date, $end_date) = explode(' - ', $date_range);
             $start_timestamp = strtotime($start_date . ' 00:00:00');
             $end_timestamp = strtotime($end_date . ' 23:59:59');
