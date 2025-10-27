@@ -545,17 +545,6 @@ const AdvisorView = ({
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('sisId')}
-                >
-                  <div className="flex items-center gap-1">
-                    SISID
-                    {sortField === 'sisId' && (
-                      sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                    )}
-                  </div>
-                </th>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('studentId')}
@@ -612,9 +601,6 @@ const AdvisorView = ({
                       setSelectedStudent(getStudentDetails(alert.studentId));
                       setShowStudentDetails(true);
                     }}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{alert.student?.sisId || alert.studentId}</div>
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{alert.studentId}</div>
                   </td>
