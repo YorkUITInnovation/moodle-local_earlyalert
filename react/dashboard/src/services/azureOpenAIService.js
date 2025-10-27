@@ -343,8 +343,8 @@ Answer the user's question based on the current dashboard data context.`;
     
     // Risk assessment
     const highPriorityAlerts = filteredAlerts ? filteredAlerts.filter(a => a.priority === 'High').length : 0;
-    const unresolvedAlerts = filteredAlerts ? filteredAlerts.filter(a => a.status !== 'Resolved').length : 0;
-    
+    const unresolvedAlerts = filteredAlerts ? filteredAlerts.filter(a => a.status !== 'Advised').length : 0;
+
     // Comprehensive data summary
     const summary = `
 CURRENT DASHBOARD OVERVIEW:

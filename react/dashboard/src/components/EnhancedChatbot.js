@@ -34,7 +34,7 @@ const EnhancedChatbot = ({ studentData, dashboardContext, alertData }) => {
       total: alertData.length,
       high_priority: alertData.filter(a => a.priority === 'High').length,
       in_progress: alertData.filter(a => a.status === 'In Progress').length,
-      resolved: alertData.filter(a => a.status === 'Resolved').length,
+      advised: alertData.filter(a => a.status === 'Advised').length,
       faculties: [...new Set(alertData.map(a => a.faculty))],
       alert_types: [...new Set(alertData.map(a => a.alertType))]
     } : {};
@@ -45,7 +45,7 @@ CURRENT DASHBOARD CONTEXT:
 - Total Active Alerts: ${alertSummary.total || 0}
 - High Priority Cases: ${alertSummary.high_priority || 0}
 - In Progress: ${alertSummary.in_progress || 0}
-- Resolved: ${alertSummary.resolved || 0}
+- Advised: ${alertSummary.advised || 0}
 - Active Faculties: ${alertSummary.faculties?.join(', ') || 'None'}
 - Alert Types: ${alertSummary.alert_types?.join(', ') || 'None'}
 

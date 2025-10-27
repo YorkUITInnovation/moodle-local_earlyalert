@@ -78,7 +78,7 @@ Generated on: ${new Date().toLocaleDateString()}
 
 ## Key Metrics
 - **Total Alerts**: ${alertData?.length || 0}
-- **Resolution Rate**: ${Math.round((alertData?.filter(a => a.status === 'Resolved').length / alertData?.length) * 100) || 0}%
+- **Resolution Rate**: ${Math.round((alertData?.filter(a => a.status === 'Advised').length / alertData?.length) * 100) || 0}%
 - **Average Response Time**: 2.3 days
 - **Student Retention Impact**: +12.5%
 
@@ -187,7 +187,7 @@ ${predictiveData?.riskScores?.map(f =>
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-2xl font-bold">
-                  {Math.round((alertData?.filter(a => a.status === 'Resolved').length / alertData?.length) * 100) || 0}%
+                  {Math.round((alertData?.filter(a => a.status === 'Advised').length / alertData?.length) * 100) || 0}%
                 </div>
                 <div className="text-sm opacity-90">Resolution Rate</div>
               </div>

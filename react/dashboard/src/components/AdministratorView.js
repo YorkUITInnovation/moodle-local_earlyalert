@@ -383,7 +383,7 @@ const AdministratorView = ({
                 formatter={(value, name, props) => {
                   const labels = {
                     'alerts': getString('total_alerts'),
-                    'resolved': getString('resolved'),
+                    'resolved': getString('advised'),
                     'highPriority': getString('high_priority')
                   };
                   return [value, labels[name] || name];
@@ -395,7 +395,7 @@ const AdministratorView = ({
                       <div className="bg-white p-3 border border-gray-300 rounded shadow-lg">
                         <p className="font-semibold mb-2">{data.month}</p>
                         <p className="text-sm"><span className="font-medium">{getString('total_alerts')}:</span> {data.alerts}</p>
-                        <p className="text-sm"><span className="font-medium">{getString('resolved')}:</span> {data.resolved}</p>
+                        <p className="text-sm"><span className="font-medium">{getString('advised')}:</span> {data.resolved}</p>
                         <div className="border-t border-gray-200 mt-2 pt-2">
                           <p className="text-xs text-gray-600">{getString('first_half_alerts', '1st-15th')}: {data.firstHalf} alerts</p>
                           <p className="text-xs text-gray-600">{getString('second_half_alerts', '16th-End')}: {data.secondHalf} alerts</p>

@@ -96,7 +96,7 @@ const mockAlerts = [
     dateRaised: new Date('2024-01-10'),
     lastUpdated: new Date('2024-01-25'),
     priority: "Medium",
-    status: "Resolved",
+    status: "Advised",
     description: "Poor attendance record",
     student: mockStudents[1],
     program: "Business Administration",
