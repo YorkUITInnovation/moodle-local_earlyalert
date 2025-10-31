@@ -49,7 +49,7 @@ class local_earlyalert_record_log_ws extends external_api
             // Get idnumber from user student_id
             $user = $DB->get_record('user', array('id' => $student['student_id']), '*', MUST_EXIST);
             // Oracle SQL
-            $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID=" . trim($user->idnumber) . ";";
+            $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID=" . trim($user->idnumber);
             $OCI = new \local_earlyalert\oracle_client();
             $OCI->connect();
             $stid = $OCI->execute_query($sql);
