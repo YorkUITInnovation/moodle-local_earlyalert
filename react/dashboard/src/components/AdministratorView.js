@@ -25,7 +25,7 @@ const AdministratorView = ({
   alerts, 
   students, 
   chartData, 
-  facultyMapping, 
+  facultyMapping,
   filteredAlerts,
   currentFacultyData,
   currentAlertTypeData,
@@ -114,22 +114,11 @@ const AdministratorView = ({
   const facultyPerformance = useMemo(() => {
     const facultyStats = {};
     
-    // Debug: Check first alert structure
-    if (alerts && alerts.length > 0) {
-      console.log('🔍 First alert structure:', alerts[0]);
-      console.log('🔍 progfaculty:', alerts[0].progfaculty);
-      console.log('🔍 student.home_faculty:', alerts[0].student?.home_faculty);
-      console.log('🔍 All alert keys:', Object.keys(alerts[0]));
-    }
-
     alerts?.forEach(alert => {
       const faculty = alert.progfaculty || alert.student?.home_faculty || 'Unknown';
       const normalizedId = normalizeAlertStudentId(alert);
       const alertType = alert.alert_type || alert.alertType || 'Unknown';
       
-      if (!faculty || faculty === 'Unknown') {
-        console.warn('⚠️ Alert with missing faculty:', { id: alert.id, progfaculty: alert.progfaculty, home_faculty: alert.student?.home_faculty });
-      }
 
       if (!facultyStats[faculty]) {
         facultyStats[faculty] = {
@@ -166,8 +155,6 @@ const AdministratorView = ({
       }
     });
     
-    console.log('🔍 Faculty Stats:', facultyStats);
-
     return Object.entries(facultyStats).map(([faculty, stats]) => ({
       faculty: facultyMapping[faculty] || faculty,
       totalAlerts: stats.total,
@@ -291,16 +278,17 @@ const AdministratorView = ({
         
         // Map code to full faculty name
         let facultyName = code;
-        if (code === 'LE') facultyName = 'Lassonde';
-        else if (code === 'GL') facultyName = 'Glendon';
-        else if (code === 'SC') facultyName = 'Science';
-        else if (code === 'HH') facultyName = 'Health';
-        else if (code === 'LA') facultyName = 'Liberal Arts';
-        else if (code === 'ED') facultyName = 'Education';
-        else if (code === 'ES') facultyName = 'Environmental';
-        else if (code === 'OS') facultyName = 'Osgoode';
-        else if (code === 'SB') facultyName = 'Schulich';
-        
+        if (code === 'AP') facultyName = 'Faculty of Liberal Arts & Professional Studies';
+        else if (code === 'ED') facultyName = 'Faculty of Education';
+        else if (code === 'EU') facultyName = 'Faculty of Environmental & Urban Change';
+        else if (code === 'FA') facultyName = 'School of the Arts, Media, Performance & Design';
+        else if (code === 'GL') facultyName = 'Glendon College / Collège universitaire Glendon';
+        else if (code === 'GS') facultyName = 'Faculty of Graduate Studies';
+        else if (code === 'HH') facultyName = 'Faculty of Health';
+        else if (code === 'LE') facultyName = 'Lassonde School of Engineering';
+        else if (code === 'LW') facultyName = 'Osgoode Hall Law School';
+        else if (code === 'SB') facultyName = 'Schulich School of Business';
+        else if (code === 'SC') facultyName = 'Faculty of Science';
         facultyCounts[code] = {
           code: code,
           name: facultyName,
