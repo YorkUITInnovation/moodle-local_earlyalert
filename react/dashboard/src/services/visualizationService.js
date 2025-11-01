@@ -404,7 +404,7 @@ class VisualizationService {
 
     const groups = {};
     alerts.forEach(alert => {
-      const faculty = alert.faculty || 'Unknown';
+      const faculty = alert.faculty_template || 'Unknown';
       const displayName = facultyMap[faculty] || faculty;
       groups[displayName] = (groups[displayName] || 0) + 1;
     });
@@ -490,7 +490,7 @@ class VisualizationService {
     const campuses = {};
     
     alerts.forEach(alert => {
-      const campus = alert.campus || 'Keele';
+      const campus = alert.campus_template || 'Keele';
       campuses[campus] = (campuses[campus] || 0) + 1;
     });
 

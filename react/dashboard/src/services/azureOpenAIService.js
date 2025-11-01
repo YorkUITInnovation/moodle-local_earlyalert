@@ -264,7 +264,7 @@ Answer the user's question based on the current dashboard data context.`;
     // FILTER TYPE 2: Faculty breakdown from alerts
     const facultyBreakdownMap = new Map();
     filteredAlerts?.forEach(alert => {
-      const faculty = alert.faculty || 'Unknown';
+      const faculty = alert.faculty_template || 'Unknown';
       facultyBreakdownMap.set(faculty, (facultyBreakdownMap.get(faculty) || 0) + 1);
     });
 
@@ -285,7 +285,7 @@ Answer the user's question based on the current dashboard data context.`;
     // FILTER TYPE 5: Campus breakdown from alerts
     const campusBreakdownMap = new Map();
     filteredAlerts?.forEach(alert => {
-      const campus = alert.campus || 'Unknown';
+      const campus = alert.campus_template || 'Unknown';
       campusBreakdownMap.set(campus, (campusBreakdownMap.get(campus) || 0) + 1);
     });
 

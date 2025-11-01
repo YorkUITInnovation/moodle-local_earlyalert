@@ -114,11 +114,23 @@ const AdministratorView = ({
   const facultyPerformance = useMemo(() => {
     const facultyStats = {};
     
+    // Debug: Check first alert structure
+    if (alerts && alerts.length > 0) {
+      console.log('🔍 First alert structure:', alerts[0]);
+      console.log('🔍 progfaculty:', alerts[0].progfaculty);
+      console.log('🔍 student.home_faculty:', alerts[0].student?.home_faculty);
+      console.log('🔍 All alert keys:', Object.keys(alerts[0]));
+    }
+
     alerts?.forEach(alert => {
-      const faculty = alert.faculty;
+      const faculty = alert.progfaculty || alert.student?.home_faculty || 'Unknown';
       const normalizedId = normalizeAlertStudentId(alert);
       const alertType = alert.alert_type || alert.alertType || 'Unknown';
       
+      if (!faculty || faculty === 'Unknown') {
+        console.warn('⚠️ Alert with missing faculty:', { id: alert.id, progfaculty: alert.progfaculty, home_faculty: alert.student?.home_faculty });
+      }
+
       if (!facultyStats[faculty]) {
         facultyStats[faculty] = {
           total: 0,
@@ -154,6 +166,8 @@ const AdministratorView = ({
       }
     });
     
+    console.log('🔍 Faculty Stats:', facultyStats);
+
     return Object.entries(facultyStats).map(([faculty, stats]) => ({
       faculty: facultyMapping[faculty] || faculty,
       totalAlerts: stats.total,

@@ -285,11 +285,11 @@ const EarlyAlertDashboard = () => {
   // Filter alerts based on current filter selections
   const filteredAlerts = useMemo(() => {
     const filtered = alerts.filter(alert => {
-      const matchesFaculty = !filterFaculty || alert.faculty === filterFaculty;
+      const matchesFaculty = !filterFaculty || alert.faculty_template === filterFaculty;
       const matchesStatus = !filterStatus || alert.status === filterStatus;
       const matchesTemplateType = !filterTemplateType || alert.template_type === filterTemplateType;
       const matchesStudentType = !filterStudentType || alert.student?.immigrationStatus === filterStudentType;
-      const matchesCampus = !filterCampus || alert.campus === filterCampus;
+      const matchesCampus = !filterCampus || alert.campus_template === filterCampus;
       const matchesAlertType = !filterAlertType || alert.alertType === filterAlertType;
       const matchesAcademicStatus = !filterAcademicStatus || alert.student?.academicStatus === filterAcademicStatus;
       const matchesStudyLevel = !filterStudyLevel || alert.student?.studylevel === filterStudyLevel;
@@ -297,7 +297,7 @@ const EarlyAlertDashboard = () => {
 
       const matchesChart = !selectedChartData || (
         (chartFilterType === 'alertType' && alert.alertType === selectedChartData) ||
-        (chartFilterType === 'faculty' && (facultyMapping[alert.faculty] || alert.faculty) === selectedChartData)
+        (chartFilterType === 'faculty' && (facultyMapping[alert.faculty_template] || alert.faculty_template) === selectedChartData)
       );
 
       return matchesFaculty && matchesStatus && matchesTemplateType && matchesStudentType && 
@@ -347,8 +347,8 @@ const EarlyAlertDashboard = () => {
         alert.studentName?.toLowerCase().includes(tableSearchTerm.toLowerCase()) ||
         alert.email?.toLowerCase().includes(tableSearchTerm.toLowerCase()) ||
         alert.alertType?.toLowerCase().includes(tableSearchTerm.toLowerCase()) ||
-        alert.course?.toLowerCase().includes(tableSearchTerm.toLowerCase());
-      
+        alert.course_template?.toLowerCase().includes(tableSearchTerm.toLowerCase());
+
       return matchesTableSearch;
     });
   }, [sortedAlerts, tableSearchTerm]);
@@ -406,7 +406,7 @@ const EarlyAlertDashboard = () => {
     // Calculate from filtered alerts
     const facultyCounts = {};
     filteredAlerts.forEach(alert => {
-      const properFacultyName = facultyMapping[alert.faculty] || alert.faculty;
+      const properFacultyName = facultyMapping[alert.faculty_template] || alert.faculty_template;
       facultyCounts[properFacultyName] = (facultyCounts[properFacultyName] || 0) + 1;
     });
     
@@ -471,9 +471,9 @@ const EarlyAlertDashboard = () => {
     const campusCounts = {};
     const campusStudents = {};
     filteredAlerts.forEach(alert => {
-      campusCounts[alert.campus] = (campusCounts[alert.campus] || 0) + 1;
-      if (!campusStudents[alert.campus]) campusStudents[alert.campus] = new Set();
-      campusStudents[alert.campus].add(alert.studentId);
+      campusCounts[alert.campus_template] = (campusCounts[alert.campus_template] || 0) + 1;
+      if (!campusStudents[alert.campus_template]) campusStudents[alert.campus_template] = new Set();
+      campusStudents[alert.campus_template].add(alert.studentId);
     });
     
     return Object.entries(campusCounts).map(([name, totalAlerts]) => ({
@@ -487,8 +487,8 @@ const EarlyAlertDashboard = () => {
   const availableFaculties = useMemo(() => {
     const faculties = new Set();
     alerts.forEach(alert => {
-      if (alert.faculty) {
-        faculties.add(alert.faculty);
+      if (alert.faculty_template) {
+        faculties.add(alert.faculty_template);
       }
     });
     return Array.from(faculties).sort();
@@ -520,8 +520,8 @@ const EarlyAlertDashboard = () => {
   const availableCampuses = useMemo(() => {
     const campuses = new Set();
     alerts.forEach(alert => {
-      if (alert.campus) {
-        campuses.add(alert.campus);
+      if (alert.campus_template) {
+        campuses.add(alert.campus_template);
       }
     });
     return Array.from(campuses).sort();
@@ -643,8 +643,8 @@ const EarlyAlertDashboard = () => {
         'Student Name': `${alert.student?.firstName || alert.student?.firstname || ''} ${alert.student?.lastName || alert.student?.lastname || ''}`.trim(),
         'Student ID': alert.student?.sisId || alert.student?.sisid || 'N/A',
         'Email': alert.student?.email || alert.email || 'N/A',
-        'Faculty': facultyMapping[alert.faculty] || alert.faculty || 'N/A',
-        'Campus': alert.campus || 'N/A',
+        'Faculty': facultyMapping[alert.faculty_template] || alert.faculty_template || 'N/A',
+        'Campus': alert.campus_template || 'N/A',
         'Program': alert.student?.program || alert.program || 'N/A',
         'Student Type': alert.student?.immigrationStatus || alert.immigrationStatus || 'N/A',
         'Study Level': alert.student?.studyLevel || alert.studyLevel || 'N/A',
@@ -656,7 +656,7 @@ const EarlyAlertDashboard = () => {
         'Varsity': alert.student?.varsityFlag ? 'Yes' : 'No',
         'Scholarship': alert.student?.scholarshipFlag ? 'Yes' : 'No',
         'Alert Type': alert.alertType || 'N/A',
-        'Course': alert.course || 'N/A',
+        'Course': alert.course_template || 'N/A',
         'Course Name': alert.courseName || 'N/A',
         'Professor': alert.professorName || alert.professor || 'N/A',
         'Priority': alert.priority || 'N/A',

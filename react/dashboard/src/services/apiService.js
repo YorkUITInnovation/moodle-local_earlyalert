@@ -213,7 +213,7 @@ class ApiService {
           const alertDate = log.date_message_sent ? new Date(log.date_message_sent) : new Date();
           
           // Track missing faculty data
-          if (!log.progfaculty && !log.faculty) {
+          if (!log.progfaculty && !log.faculty_template) {
             missingFacultyCount++;
           }
 
@@ -237,13 +237,18 @@ class ApiService {
             email_opened: false,
             student_contacted: log.student_advised_by_instructor && log.student_advised_by_instructor !== 0 && log.student_advised_by_instructor !== '0' ? true : false,
             issue_resolved: false,
+            // Top-level fields for easy access
+            progfaculty: log.progfaculty || 'Unknown',
+            faculty_template: log.faculty_template || 'N/A',
+            campus_template: log.campus_template || 'N/A',
+            course_template: log.course_template || 'N/A',
             // Student data embedded
             student: {
               sisid: log.sisid,
               firstname: log.firstname,
               lastname: log.surname,
               email: log.email || `${log.firstname?.toLowerCase()}.${log.surname?.toLowerCase()}@my.yorku.ca`,
-              home_faculty: log.progfaculty || log.faculty || 'Unknown',
+              home_faculty: log.progfaculty || log.faculty_template || 'Unknown',
               campus: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus || 'Unknown',
               program: log.transcripttitle || log.program || 'Unknown Program',
               studylevel: log.studylevel ? log.studylevel.toString() : null,
@@ -422,7 +427,7 @@ class ApiService {
           alertTypeMap.set(alertType, (alertTypeMap.get(alertType) || 0) + 1);
           
           // Faculty distribution
-          const faculty = alert.PROGFACULTY || alert.faculty || 'Unknown';
+          const faculty = alert.PROGFACULTY || alert.faculty_template || 'Unknown';
           facultyMap.set(faculty, (facultyMap.get(faculty) || 0) + 1);
           
           // Status distribution
@@ -434,7 +439,7 @@ class ApiService {
           priorityMap.set(priority, (priorityMap.get(priority) || 0) + 1);
           
           // Campus analysis
-          const campus = alert.CAMPUS === 'G' ? 'Glendon' : alert.CAMPUS === 'K' ? 'Keele' : alert.CAMPUS === 'M' ? 'Markham' : alert.CAMPUS || alert.campus || 'Unknown';
+          const campus = alert.CAMPUS === 'G' ? 'Glendon' : alert.CAMPUS === 'K' ? 'Keele' : alert.CAMPUS === 'M' ? 'Markham' : alert.CAMPUS || alert.campus_template || 'Unknown';
           campusMap.set(campus, (campusMap.get(campus) || 0) + 1);
           
           // Timeline data
@@ -464,7 +469,7 @@ class ApiService {
             // Count unique students per campus
             const campusStudents = new Set();
             realData.alert_logs.forEach(alert => {
-              const alertCampus = alert.CAMPUS === 'G' ? 'Glendon' : alert.CAMPUS === 'K' ? 'Keele' : alert.CAMPUS === 'M' ? 'Markham' : alert.CAMPUS || alert.campus || 'Unknown';
+              const alertCampus = alert.CAMPUS === 'G' ? 'Glendon' : alert.CAMPUS === 'K' ? 'Keele' : alert.CAMPUS === 'M' ? 'Markham' : alert.CAMPUS || alert.campus_template || 'Unknown';
               if (alertCampus === campus && alert.SISID) {
                 campusStudents.add(alert.SISID.toString());
               }
@@ -511,6 +516,10 @@ class ApiService {
       studentName: `${alert.student.firstname} ${alert.student.lastname}`,
       email: alert.student.email,
       faculty: alert.student.home_faculty,
+      progfaculty: alert.progfaculty || alert.student.home_faculty, // Add progfaculty for AdministratorView
+      faculty_template: alert.faculty_template || 'N/A',
+      campus_template: alert.campus_template || 'N/A',
+      course_template: alert.course_template || 'N/A',
       campus: alert.student.campus,
       alertType: alert.alert_type,
       template_type: alert.template_type,

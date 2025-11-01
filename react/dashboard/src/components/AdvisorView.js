@@ -188,7 +188,6 @@ const AdvisorView = ({
     const exportData = tableFilteredAlerts.map(alert => {
       const student = getStudentDetails(alert.studentId);
       return {
-        'SISID': alert.student?.sisId || alert.studentId,
         'Student ID': alert.studentId,
         'Student Name': alert.studentName,
         'Email': alert.email,
@@ -196,9 +195,9 @@ const AdvisorView = ({
         'Date Raised': new Date(alert.dateRaised).toLocaleDateString(),
         'Status': translateStatus(alert.status),
         'Priority': alert.priority,
-        'Faculty': alert.faculty,
-        'Campus': alert.campus,
-        'Course': alert.course,
+        'Faculty': alert.faculty_template,
+        'Campus': alert.campus_template,
+        'Course': alert.course_template,
         'Course Name': alert.courseName || 'N/A',
         'Professor': alert.professor,
         'Description': alert.description,
@@ -630,10 +629,10 @@ const AdvisorView = ({
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {alert.faculty}
+                    {alert.faculty_template}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {alert.courseName || alert.course || getString('n_a')}
+                    {alert.courseName || alert.course_template || getString('n_a')}
                   </td>
                 </tr>
               ))}
@@ -814,9 +813,9 @@ const AdvisorView = ({
                           <div className="flex-1">
                             <div className="font-medium text-gray-900">{alert.alertType}</div>
                             <div className="text-sm text-gray-600">
-                              {alert.courseName && alert.courseName !== 'N/A' ? alert.courseName : alert.course}
-                              {alert.course && alert.course !== 'N/A' && alert.courseName && alert.courseName !== 'N/A' && alert.course !== alert.courseName && (
-                                <span className="text-gray-500"> ({alert.course})</span>
+                              {alert.courseName && alert.courseName !== 'N/A' ? alert.courseName : alert.course_template}
+                              {alert.course_template && alert.course_template !== 'N/A' && alert.courseName && alert.courseName !== 'N/A' && alert.course_template !== alert.courseName && (
+                                <span className="text-gray-500"> ({alert.course_template})</span>
                               )}
                               {' • '}
                               {new Date(alert.dateRaised).toLocaleDateString()}

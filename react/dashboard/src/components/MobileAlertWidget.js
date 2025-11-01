@@ -16,7 +16,7 @@ const MobileAlertWidget = ({ alerts, userLocation }) => {
     // Filter alerts by proximity if location available
     if (userLocation && alerts) {
       const nearby = alerts.filter(alert => 
-        alert.campus && calculateDistance(userLocation, alert.campusLocation) < 1000 // 1km radius
+        alert.campus_template && calculateDistance(userLocation, alert.campusLocation) < 1000 // 1km radius
       );
       setNearbyAlerts(nearby);
     }
