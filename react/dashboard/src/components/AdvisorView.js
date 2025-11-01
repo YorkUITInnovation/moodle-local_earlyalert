@@ -194,6 +194,8 @@ const AdvisorView = ({
         'Alert Type': alert.alertType,
         'Date Raised': new Date(alert.dateRaised).toLocaleDateString(),
         'Status': translateStatus(alert.status),
+        'Advised by Advisor': (alert.student_advised_by_advisor && alert.student_advised_by_advisor !== 0 && alert.student_advised_by_advisor !== '0') ? 'Yes' : 'No',
+        'Advised by Instructor': (alert.student_advised_by_instructor && alert.student_advised_by_instructor !== 0 && alert.student_advised_by_instructor !== '0') ? 'Yes' : 'No',
         'Priority': alert.priority,
         'Faculty Template': alert.faculty_template,
         'Campus Template': alert.campus_template,

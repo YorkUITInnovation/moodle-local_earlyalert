@@ -237,6 +237,9 @@ class ApiService {
             email_opened: false,
             student_contacted: log.student_advised_by_instructor && log.student_advised_by_instructor !== 0 && log.student_advised_by_instructor !== '0' ? true : false,
             issue_resolved: false,
+            // Raw advised fields for export
+            student_advised_by_advisor: log.student_advised_by_advisor,
+            student_advised_by_instructor: log.student_advised_by_instructor,
             // Top-level fields for easy access
             progfaculty: log.progfaculty || 'Unknown',
             faculty_template: log.faculty_template || 'N/A',
@@ -601,6 +604,9 @@ class ApiService {
       studentContacted: alert.student_contacted,
       issueResolved: alert.issue_resolved,
       resolved: alert.issue_resolved, // Add resolved field for getFollowUpStatus function
+      // Raw advised fields for export
+      student_advised_by_advisor: alert.student_advised_by_advisor,
+      student_advised_by_instructor: alert.student_advised_by_instructor,
       // All student data fields from data.php at top level for export
       academicyear: alert.academicyear,
       studysession: alert.studysession,
