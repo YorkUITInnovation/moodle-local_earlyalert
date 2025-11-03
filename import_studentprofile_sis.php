@@ -75,9 +75,12 @@ foreach ($logs as $log) {
 
     if (!empty($sis_profile_data[0])) {
         // Profile found, update the log record.
-        $log->student_profile = json_encode($sis_profile_data[0]);
-        $log->timemodified = time();
-        $DB->update_record('local_earlyalert_report_log', $log);
+        // Create an object with only the fields to update for a more targeted query.
+        $record_to_update = new stdClass();
+        $record_to_update->id = $log->id;
+        $record_to_update->student_profile = json_encode($sis_profile_data[0]);
+        $record_to_update->timemodified = time();
+        $DB->update_record('local_earlyalert_report_log', $record_to_update);
         $updated_count++;
     } else {
         // Profile not found in SIS.
