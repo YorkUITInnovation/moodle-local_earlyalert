@@ -84,7 +84,7 @@ foreach ($logs as $log) {
         $DB->update_record('local_earlyalert_report_log', $record_to_update);
         $updated_count++;
     } else {
-        // Profile not found in SIS.
+        // Profile not found in SIS - edge case.
         $not_found_count++;
         $not_found_users[] = $user;
     }
@@ -102,15 +102,13 @@ $summary .= html_writer::tag('p', "Profiles not found in SIS: {$not_found_count}
 $summary .= html_writer::tag('p', "Moodle users without an ID number: {$no_idnumber_count}");
 $summary .= html_writer::end_tag('div');
 $summary .= html_writer::end_tag('div');
-
 echo $summary;
 
 if (!empty($not_found_users)) {
-    echo html_writer::tag('h3', 'Profiles Not Found in SIS', ['style' => 'margin-top: 20px;']);
-    $table = new html_table();
-    $table->head = ['User', 'Email', 'SIS ID (idnumber)'];
-    $table->attributes['class'] = 'table table-striped';
-    echo html_writer::table($table);
+    echo html_writer::tag('h3', 'SIS IDs for Profiles Not Found in SIS', ['style' => 'margin-top: 20px;']);
+    foreach ($not_found_users as $user) {
+        echo html_writer::tag('p', $user);
+    }
 }
 
 echo $OUTPUT->footer();
