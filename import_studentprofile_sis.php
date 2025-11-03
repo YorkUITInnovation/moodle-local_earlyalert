@@ -70,8 +70,9 @@ foreach ($logs as $log) {
     $sisid = trim($user->idnumber);
 
     // Query Oracle for the student's profile.
-    $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID='" . $OCI->escape_string($sisid) . "'";
-    $sis_profile_data = $OCI->execute_query($sql);
+    $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID=:sisid";
+    $params = [':sisid' => $sisid];
+    $sis_profile_data = $OCI->execute_query($sql, $params);
 
     if (!empty($sis_profile_data[0])) {
         // Profile found, update the log record.
