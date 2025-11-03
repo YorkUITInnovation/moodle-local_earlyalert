@@ -105,7 +105,7 @@ $summary .= html_writer::end_tag('div');
 echo $summary;
 
 if (!empty($not_found_users)) {
-    echo html_writer::tag('h3', 'SIS IDs for Profiles Not Found in SIS', ['style' => 'margin-top: 20px;']);
+    echo html_writer::tag('h3', 'Moodle IDs for Profiles Not Found in SIS', ['style' => 'margin-top: 20px;']);
     foreach ($not_found_users as $user->idnumber) {
         echo html_writer::tag('p', $user->id);
     }
