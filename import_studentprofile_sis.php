@@ -106,8 +106,8 @@ echo $summary;
 
 if (!empty($not_found_users)) {
     echo html_writer::tag('h3', 'SIS IDs for Profiles Not Found in SIS', ['style' => 'margin-top: 20px;']);
-    foreach ($not_found_users as $user) {
-        echo html_writer::tag('p', $user);
+    foreach ($not_found_users as $user->idnumber) {
+        echo html_writer::tag('p', $user->id);
     }
 }
 
