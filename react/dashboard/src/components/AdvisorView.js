@@ -200,7 +200,7 @@ const AdvisorView = ({
         'Faculty Template': alert.faculty_template,
         'Campus Template': alert.campus_template,
         'Course Template': alert.course_template,
-        'Course Name': alert.courseName || 'N/A',
+        'Course': alert.course_name || alert.courseName || alert.course || 'N/A',
         'Professor': alert.professor,
         'Description': alert.description,
         // Student data fields from data.php
@@ -665,7 +665,7 @@ const AdvisorView = ({
                     {alert.faculty_template}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {alert.courseName || alert.course_template || getString('n_a')}
+                    {alert.course_name || alert.courseName || alert.course_template || getString('n_a')}
                   </td>
                 </tr>
               ))}

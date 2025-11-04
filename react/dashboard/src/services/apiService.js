@@ -589,7 +589,7 @@ class ApiService {
       alertType: alert.alert_type,
       template_type: alert.template_type,
       course: alert.course_code || 'N/A',
-      courseName: alert.course_name || 'N/A',
+      course_name: alert.course_name || 'N/A',
       professor: alert.professor_name || 'N/A',
       dateRaised: new Date(alert.date_raised),
       timecreated: alert.timecreated, // Add timecreated field
