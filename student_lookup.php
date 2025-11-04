@@ -67,7 +67,12 @@ if ($user_id) {
                 // Build data object
                 $data[$i] = new \stdClass();
                 $data[$i]->id = $LOG->get_id();
-                $data[$i]->message_type = $LOG->get_message_type();
+                $message_type_key = $LOG->get_message_type();
+                if (!empty($message_type_key)) {
+                    $data[$i]->message_type = get_string($message_type_key, 'local_earlyalert');
+                } else {
+                    $data[$i]->message_type = '';
+                }
                 $data[$i]->user_read = $LOG->get_user_read();
                 $data[$i]->trigger_grade = $LOG->get_trigger_grade_letter();
                 $data[$i]->student_advised_by_advisor = $LOG->get_student_advised_by_advisor();
