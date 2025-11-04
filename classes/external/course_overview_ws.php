@@ -76,7 +76,7 @@ class local_earlyalert_course_overview_ws extends external_api
                 // Build data object
                 $data = new \stdClass();
                 $data->id = $log->id;
-                $data->message_type = $LOG->get_message_type();
+                $data->message_type = $LOG->get_message_type(); // returns nice name for message type
                 $data->user_read = $LOG->get_user_read();
                 $data->course_id = $LOG->get_course_id();
                 $data->course_name = $LOG->get_course_name();
