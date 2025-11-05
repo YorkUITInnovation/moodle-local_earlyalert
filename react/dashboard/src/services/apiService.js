@@ -96,7 +96,7 @@ class ApiService {
                 lastname: log.surname,
                 email: log.email || `${log.firstname?.toLowerCase()}.${log.surname?.toLowerCase()}@my.yorku.ca`,
                 home_faculty: log.progfaculty || 'Unknown',
-                campus: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus || 'Unknown',
+                campus: log.campus === 'GL' ? 'Glendon' : log.campus === 'YK' ? 'Keele' : log.campus === 'MK' ? 'Markham' : log.campus || 'Unknown',
                 program: log.transcripttitle || log.program || 'Unknown Program',
                 studylevel: log.studylevel ? log.studylevel.toString() : null,
                 study_level: this.mapStudyLevel(log.studylevel),
@@ -504,7 +504,7 @@ class ApiService {
           priorityMap.set(priority, (priorityMap.get(priority) || 0) + 1);
           
           // Campus analysis
-          const campus = alert.CAMPUS === 'G' ? 'Glendon' : alert.CAMPUS === 'K' ? 'Keele' : alert.CAMPUS === 'M' ? 'Markham' : alert.CAMPUS || alert.campus_template || 'Unknown';
+          const campus = alert.CAMPUS === 'GL' ? 'Glendon' : alert.CAMPUS === 'YK' ? 'Keele' : alert.CAMPUS === 'MK' ? 'Markham' : alert.CAMPUS || alert.campus_template || 'Unknown';
           campusMap.set(campus, (campusMap.get(campus) || 0) + 1);
           
           // Timeline data
@@ -534,7 +534,7 @@ class ApiService {
             // Count unique students per campus
             const campusStudents = new Set();
             realData.alert_logs.forEach(alert => {
-              const alertCampus = alert.CAMPUS === 'G' ? 'Glendon' : alert.CAMPUS === 'K' ? 'Keele' : alert.CAMPUS === 'M' ? 'Markham' : alert.CAMPUS || alert.campus_template || 'Unknown';
+              const alertCampus = alert.CAMPUS === 'GL' ? 'Glendon' : alert.CAMPUS === 'YK' ? 'Keele' : alert.CAMPUS === 'MK' ? 'Markham' : alert.CAMPUS || alert.campus_template || 'Unknown';
               if (alertCampus === campus && alert.SISID) {
                 campusStudents.add(alert.SISID.toString());
               }
