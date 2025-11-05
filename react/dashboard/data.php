@@ -110,7 +110,8 @@ try {
                 'latestacademicdecision' => $log->latestacademicdecision,
                 'academicdecisionterm' => $log->academicdecisionterm,
                 'academicstatus' => $log->academicstatus,
-                'registrationstatus' => $log->registrationstatus
+                'registrationstatus' => $log->registrationstatus,
+                'campus' => $log->campus
             ];
         }
     }
