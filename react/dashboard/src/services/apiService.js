@@ -50,13 +50,13 @@ class ApiService {
     }
   }
 
-  // Helper method to map campus codes to full names
-  mapCampus(campusCode) {
+  // Helper method to map campus codes to the sis equivalent from early alert
+  mapCampusTemplate(campusCode) {
     if (!campusCode) return 'N/A';
     const code = campusCode.toUpperCase();
-    if (code === 'YK' || code === 'K') return 'Keele';
-    if (code === 'MK' || code === 'M') return 'Markham';
-    if (code === 'GL' || code === 'G') return 'Glendon';
+    if (code === 'YK') return 'K';
+    if (code === 'MK') return 'M';
+    if (code === 'GL') return 'G';
     return campusCode; // Return original if no match
   }
 
@@ -106,7 +106,7 @@ class ApiService {
                 lastname: log.surname,
                 email: log.email || `${log.firstname?.toLowerCase()}.${log.surname?.toLowerCase()}@my.yorku.ca`,
                 home_faculty: log.progfaculty || 'Unknown',
-                campus: this.mapCampus(log.campus),
+                campus: log.campus || 'Unkown',
                 program: log.transcripttitle || log.program || 'Unknown Program',
                 studylevel: log.studylevel ? log.studylevel.toString() : null,
                 study_level: this.mapStudyLevel(log.studylevel),
@@ -253,7 +253,7 @@ class ApiService {
             // Top-level fields for easy access
             progfaculty: log.progfaculty || 'Unknown',
             faculty_template: log.faculty_template || 'N/A',
-            campus_template: this.mapCampus(log.campus),
+            campus_template: this.mapCampusTemplate(log.campus_template),
             course_template: log.course_template || 'N/A',
             // All student data fields from data.php at top level for export
             academicyear: log.academicyear,
@@ -299,7 +299,7 @@ class ApiService {
               lastname: log.surname,
               email: log.email || `${log.firstname?.toLowerCase()}.${log.surname?.toLowerCase()}@my.yorku.ca`,
               home_faculty: log.progfaculty || log.faculty_template || 'Unknown',
-              campus: this.mapCampus(log.campus),
+              campus: log.campus || 'Unkown',
               program: log.transcripttitle || log.program || 'Unknown Program',
               studylevel: log.studylevel ? log.studylevel.toString() : null,
               study_level: this.mapStudyLevel(log.studylevel),
@@ -513,7 +513,7 @@ class ApiService {
           priorityMap.set(priority, (priorityMap.get(priority) || 0) + 1);
           
           // Campus analysis
-          const campus = alert.CAMPUS ? this.mapCampus(alert.CAMPUS) : this.mapCampus(alert.campus_template);
+          const campus = alert.CAMPUS ? alert.CAMPUS : this.mapCampusTemplate(alert.campus_template);
           campusMap.set(campus, (campusMap.get(campus) || 0) + 1);
           
           // Timeline data
@@ -543,7 +543,7 @@ class ApiService {
             // Count unique students per campus
             const campusStudents = new Set();
             realData.alert_logs.forEach(alert => {
-              const alertCampus = alert.CAMPUS ? this.mapCampus(alert.CAMPUS) : this.mapCampus(alert.campus_template);
+              const alertCampus = alert.CAMPUS ? alert.CAMPUS : this.mapCampusTemplate(alert.campus_template);
               if (alertCampus === campus && alert.SISID) {
                 campusStudents.add(alert.SISID.toString());
               }
@@ -592,9 +592,9 @@ class ApiService {
       faculty: alert.student.home_faculty,
       progfaculty: alert.progfaculty || alert.student.home_faculty, // Add progfaculty for AdministratorView
       faculty_template: alert.faculty_template || 'N/A',
-      campus_template: this.mapCampus(alert.campus_template),
+      campus_template: this.mapCampusTemplate(alert.campus_template),
       course_template: alert.course_template || 'N/A',
-      campus: alert.campus ? this.mapCampus(alert.campus) : this.mapCampus(alert.student.campus),
+      campus: alert.student.campus,
       alertType: alert.alert_type,
       template_type: alert.template_type,
       course: alert.course_code || 'N/A',
@@ -659,7 +659,7 @@ class ApiService {
         lastName: alert.student.lastname,
         email: alert.student.email,
         homeFaculty: alert.student.home_faculty,
-        campus: this.mapCampus(alert.student.campus),
+        campus: alert.student.campus,
         program: alert.student.program,
         studylevel: alert.student.studylevel,
         studyLevel: alert.student.study_level,
@@ -722,7 +722,7 @@ class ApiService {
       lastName: student.lastname,
       email: student.email,
       homeFaculty: student.home_faculty,
-      campus: this.mapCampus(student.campus),
+      campus: student.campus,
       program: student.program,
       studylevel: student.studylevel,
       studyLevel: student.study_level,
