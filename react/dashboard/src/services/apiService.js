@@ -243,7 +243,7 @@ class ApiService {
             // Top-level fields for easy access
             progfaculty: log.progfaculty || 'Unknown',
             faculty_template: log.faculty_template || 'N/A',
-            campus_template: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus_template || 'N/A',
+            campus_template: log.campus === 'GL' ? 'Glendon' : log.campus === 'YK' ? 'Keele' : log.campus === 'MK' ? 'Markham' : log.campus_template || 'N/A',
             course_template: log.course_template || 'N/A',
             // All student data fields from data.php at top level for export
             academicyear: log.academicyear,
@@ -290,7 +290,7 @@ class ApiService {
               lastname: log.surname,
               email: log.email || `${log.firstname?.toLowerCase()}.${log.surname?.toLowerCase()}@my.yorku.ca`,
               home_faculty: log.progfaculty || log.faculty_template || 'Unknown',
-              campus: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus || 'Unknown',
+              campus: log.campus === 'GL' ? 'Glendon' : log.campus === 'YK' ? 'Keele' : log.campus === 'MK' ? 'Markham' : log.campus || 'Unknown',
               program: log.transcripttitle || log.program || 'Unknown Program',
               studylevel: log.studylevel ? log.studylevel.toString() : null,
               study_level: this.mapStudyLevel(log.studylevel),
