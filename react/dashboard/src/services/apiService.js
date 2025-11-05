@@ -50,6 +50,16 @@ class ApiService {
     }
   }
 
+  // Helper method to map campus codes to full names
+  mapCampus(campusCode) {
+    if (!campusCode) return 'N/A';
+    const code = campusCode.toUpperCase();
+    if (code === 'YK' || code === 'K') return 'Keele';
+    if (code === 'MK' || code === 'M') return 'Markham';
+    if (code === 'GL' || code === 'G') return 'Glendon';
+    return campusCode; // Return original if no match
+  }
+
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
     const config = {
@@ -96,7 +106,7 @@ class ApiService {
                 lastname: log.surname,
                 email: log.email || `${log.firstname?.toLowerCase()}.${log.surname?.toLowerCase()}@my.yorku.ca`,
                 home_faculty: log.progfaculty || 'Unknown',
-                campus: log.campus === 'GL' ? 'Glendon' : log.campus === 'YK' ? 'Keele' : log.campus === 'MK' ? 'Markham' : log.campus || 'Unknown',
+                campus: this.mapCampus(log.campus),
                 program: log.transcripttitle || log.program || 'Unknown Program',
                 studylevel: log.studylevel ? log.studylevel.toString() : null,
                 study_level: this.mapStudyLevel(log.studylevel),
@@ -243,14 +253,13 @@ class ApiService {
             // Top-level fields for easy access
             progfaculty: log.progfaculty || 'Unknown',
             faculty_template: log.faculty_template || 'N/A',
-            campus_template: log.campus === 'GL' ? 'Glendon' : log.campus === 'YK' ? 'Keele' : log.campus === 'MK' ? 'Markham' : log.campus_template || 'N/A',
+            campus_template: this.mapCampus(log.campus),
             course_template: log.course_template || 'N/A',
             // All student data fields from data.php at top level for export
             academicyear: log.academicyear,
             studysession: log.studysession,
             sessionname: log.sessionname,
             transcripttitle: log.transcripttitle,
-            campus: log.campus,
             collegeaffiliation: log.collegeaffiliation,
             college: log.college,
             program: log.program || log.transcripttitle,
@@ -290,7 +299,7 @@ class ApiService {
               lastname: log.surname,
               email: log.email || `${log.firstname?.toLowerCase()}.${log.surname?.toLowerCase()}@my.yorku.ca`,
               home_faculty: log.progfaculty || log.faculty_template || 'Unknown',
-              campus: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus || 'Unknown',
+              campus: this.mapCampus(log.campus),
               program: log.transcripttitle || log.program || 'Unknown Program',
               studylevel: log.studylevel ? log.studylevel.toString() : null,
               study_level: this.mapStudyLevel(log.studylevel),
@@ -504,7 +513,7 @@ class ApiService {
           priorityMap.set(priority, (priorityMap.get(priority) || 0) + 1);
           
           // Campus analysis
-          const campus = alert.CAMPUS === 'GL' ? 'Glendon' : alert.CAMPUS === 'YK' ? 'Keele' : alert.CAMPUS === 'MK' ? 'Markham' : alert.CAMPUS || alert.campus_template || 'Unknown';
+          const campus = alert.CAMPUS ? this.mapCampus(alert.CAMPUS) : this.mapCampus(alert.campus_template);
           campusMap.set(campus, (campusMap.get(campus) || 0) + 1);
           
           // Timeline data
@@ -534,7 +543,7 @@ class ApiService {
             // Count unique students per campus
             const campusStudents = new Set();
             realData.alert_logs.forEach(alert => {
-              const alertCampus = alert.CAMPUS === 'GL' ? 'Glendon' : alert.CAMPUS === 'YK' ? 'Keele' : alert.CAMPUS === 'MK' ? 'Markham' : alert.CAMPUS || alert.campus_template || 'Unknown';
+              const alertCampus = alert.CAMPUS ? this.mapCampus(alert.CAMPUS) : this.mapCampus(alert.campus_template);
               if (alertCampus === campus && alert.SISID) {
                 campusStudents.add(alert.SISID.toString());
               }
@@ -583,9 +592,9 @@ class ApiService {
       faculty: alert.student.home_faculty,
       progfaculty: alert.progfaculty || alert.student.home_faculty, // Add progfaculty for AdministratorView
       faculty_template: alert.faculty_template || 'N/A',
-      campus_template: alert.campus_template || 'N/A',
+      campus_template: this.mapCampus(alert.campus_template),
       course_template: alert.course_template || 'N/A',
-      campus: alert.campus || alert.student.campus,
+      campus: alert.campus ? this.mapCampus(alert.campus) : this.mapCampus(alert.student.campus),
       alertType: alert.alert_type,
       template_type: alert.template_type,
       course: alert.course_code || 'N/A',
@@ -650,7 +659,7 @@ class ApiService {
         lastName: alert.student.lastname,
         email: alert.student.email,
         homeFaculty: alert.student.home_faculty,
-        campus: alert.student.campus,
+        campus: this.mapCampus(alert.student.campus),
         program: alert.student.program,
         studylevel: alert.student.studylevel,
         studyLevel: alert.student.study_level,
@@ -713,7 +722,7 @@ class ApiService {
       lastName: student.lastname,
       email: student.email,
       homeFaculty: student.home_faculty,
-      campus: student.campus,
+      campus: this.mapCampus(student.campus),
       program: student.program,
       studylevel: student.studylevel,
       studyLevel: student.study_level,
