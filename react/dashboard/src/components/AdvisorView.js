@@ -202,8 +202,6 @@ const AdvisorView = ({
         'Course': alert.course_name || alert.courseName || alert.course || 'N/A',
         'Professor': alert.professor,
         // Student data fields from data.php
-        'Academic Year': alert.academicyear || alert.student?.academicyear || 'N/A',
-        'Study Session': alert.studysession || alert.student?.studysession || 'N/A',
         'Session Name': alert.sessionname || alert.student?.sessionname || 'N/A',
         'Program Faculty': alert.progfaculty || alert.student?.home_faculty || 'N/A',
         'Campus': alert.campus || alert.student?.campus || 'N/A',
