@@ -243,7 +243,7 @@ class ApiService {
             // Top-level fields for easy access
             progfaculty: log.progfaculty || 'Unknown',
             faculty_template: log.faculty_template || 'N/A',
-            campus_template: log.campus_template || 'N/A',
+            campus_template: log.campus === 'G' ? 'Glendon' : log.campus === 'K' ? 'Keele' : log.campus === 'M' ? 'Markham' : log.campus_template || 'N/A',
             course_template: log.course_template || 'N/A',
             // All student data fields from data.php at top level for export
             academicyear: log.academicyear,
