@@ -11,6 +11,7 @@ import AdvisorView from './components/AdvisorView';
 import { useApiData } from './hooks/useApiData';
 import { useLanguageStrings } from './hooks/useLanguageStrings';
 import azureOpenAIService from './services/azureOpenAIService';
+import { facultyMapping } from './constants/facultyMapping';
 
 // Simple markdown renderer for AI responses
 const MarkdownRenderer = ({ content }) => {
@@ -229,31 +230,6 @@ const EarlyAlertDashboard = () => {
   // Color scheme for charts - Updated with brand color #E31837
   const COLORS = ['#E31837', '#DC2626', '#B91C1C', '#991B1B', '#7F1D1D', '#EF4444', '#F87171'];
 
-  // Faculty name mapping for consistent display - York University faculties
-  const facultyMapping = {
-    'LAPS': 'Liberal Arts & Professional Studies',
-    'AP': 'Liberal Arts & Professional Studies', 
-    'SC': 'Faculty of Science',
-    'LE': 'Lassonde School of Engineering',
-    'GL': 'Glendon College',
-    'HH': 'Faculty of Health',
-    'FA': 'Faculty of Fine Arts',
-    'ED': 'Faculty of Education',
-    'GS': 'Faculty of Graduate Studies',
-    'SB': 'Schulich School of Business',
-    'ES': 'Faculty of Environmental & Urban Change',
-    'OS': 'Osgoode Hall Law School',
-    'Schulich': 'Schulich School of Business',
-    'Lassonde': 'Lassonde School of Engineering',
-    'Science': 'Faculty of Science',
-    'AMPD': 'Faculty of Fine Arts',
-    'Health': 'Faculty of Health',
-    'Graduate Studies': 'Faculty of Graduate Studies',
-    'Glendon': 'Glendon College',
-    'Education': 'Faculty of Education',
-    'Environment and Urban Change': 'Faculty of Environmental & Urban Change',
-    'Osgoode': 'Osgoode Hall Law School'
-  };
 
   // Column configuration for table - updated for real student data
   const availableColumns = [
@@ -307,7 +283,7 @@ const EarlyAlertDashboard = () => {
 
     return filtered;
   }, [alerts, filterFaculty, filterStatus, filterTemplateType, filterStudentType, filterCampus,
-      filterAlertType, filterAcademicStatus, filterStudyLevel, selectedChartData, chartFilterType, facultyMapping]);
+      filterAlertType, filterAcademicStatus, filterStudyLevel, selectedChartData, chartFilterType]);
 
   // Sort filtered alerts
   const sortedAlerts = useMemo(() => {
@@ -411,7 +387,7 @@ const EarlyAlertDashboard = () => {
     });
     
     return Object.entries(facultyCounts).map(([name, alerts]) => ({ name, alerts }));
-  }, [chartData, filteredAlerts, selectedChartData, filterFaculty, filterStatus, filterTemplateType, filterStudentType, searchTerm, facultyMapping]);
+  }, [chartData, filteredAlerts, selectedChartData, filterFaculty, filterStatus, filterTemplateType, filterStudentType, searchTerm]);
 
   const currentTimelineData = useMemo(() => {
     if (!chartData?.timeline_data) return [];
@@ -1000,7 +976,6 @@ const EarlyAlertDashboard = () => {
             alerts={alerts}
             students={students}
             chartData={chartData}
-            facultyMapping={facultyMapping}
             filteredAlerts={filteredAlerts}
             currentFacultyData={currentFacultyData}
             currentAlertTypeData={currentAlertTypeData}

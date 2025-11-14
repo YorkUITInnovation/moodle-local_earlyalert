@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Users, AlertTriangle, CheckCircle, Target, Award, Clock, BarChart3 } from 'lucide-react';
 import { useLanguageStrings } from '../hooks/useLanguageStrings';
+import { FACULTY_NAMES, getFacultyCode, facultyMapping } from '../constants/facultyMapping';
 
 // Normalizes various student identifier shapes into a comparable string key.
 const normalizeAlertStudentId = (alert) => {
@@ -25,7 +26,6 @@ const AdministratorView = ({
   alerts, 
   students, 
   chartData, 
-  facultyMapping,
   filteredAlerts,
   currentFacultyData,
   currentAlertTypeData,
@@ -166,7 +166,7 @@ const AdministratorView = ({
       missedAssignment: stats.missedAssignment,
       missedTest: stats.missedTest
     })).sort((a, b) => b.totalAlerts - a.totalAlerts);
-  }, [alerts, facultyMapping]);
+  }, [alerts]);
 
   // Trend analysis (last 90 days to capture more data)
   const trendData = useMemo(() => {
@@ -276,19 +276,9 @@ const AdministratorView = ({
       if (match) {
         const code = match[1];
         
-        // Map code to full faculty name
-        let facultyName = code;
-        if (code === 'AP') facultyName = 'Faculty of Liberal Arts & Professional Studies';
-        else if (code === 'ED') facultyName = 'Faculty of Education';
-        else if (code === 'EU') facultyName = 'Faculty of Environmental & Urban Change';
-        else if (code === 'FA') facultyName = 'School of the Arts, Media, Performance & Design';
-        else if (code === 'GL') facultyName = 'Glendon College / Collège universitaire Glendon';
-        else if (code === 'GS') facultyName = 'Faculty of Graduate Studies';
-        else if (code === 'HH') facultyName = 'Faculty of Health';
-        else if (code === 'LE') facultyName = 'Lassonde School of Engineering';
-        else if (code === 'LW') facultyName = 'Osgoode Hall Law School';
-        else if (code === 'SB') facultyName = 'Schulich School of Business';
-        else if (code === 'SC') facultyName = 'Faculty of Science';
+        // Use the centralized faculty name mapping
+        const facultyName = FACULTY_NAMES[code] || code;
+
         facultyCounts[code] = {
           code: code,
           name: facultyName,
@@ -426,25 +416,11 @@ const AdministratorView = ({
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={facultyPerformance.slice(0, 6).map(f => {
-              // Map full faculty names to short codes
-              let shortName = f.faculty;
-              if (f.faculty.includes('Lassonde')) shortName = 'LE';
-              else if (f.faculty.includes('Glendon')) shortName = 'GL';
-              else if (f.faculty.includes('Science')) shortName = 'SC';
-              else if (f.faculty.includes('Health')) shortName = 'HH';
-              else if (f.faculty.includes('Liberal Arts')) shortName = 'AP';
-              else if (f.faculty.includes('Education')) shortName = 'ED';
-              else if (f.faculty.includes('Environmental')) shortName = 'ES';
-              else if (f.faculty.includes('Osgoode')) shortName = 'OS';
-              else if (f.faculty.includes('Schulich')) shortName = 'SB';
-              
-              return {
-                name: shortName,
-                value: f.totalAlerts,
-                fullName: f.faculty
-              };
-            })}>
+            <BarChart data={facultyPerformance.slice(0, 6).map(f => ({
+              name: getFacultyCode(f.faculty),
+              value: f.totalAlerts,
+              fullName: f.faculty
+            }))}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} height={60} />
               <YAxis />
