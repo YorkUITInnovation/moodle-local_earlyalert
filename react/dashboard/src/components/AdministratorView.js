@@ -70,7 +70,11 @@ const AdministratorView = ({
     'intervention_efficiency_text',
     'resource_allocation_text',
     'system_coverage_text',
-    'alerts'
+    'alerts',
+    'based_total_alerts',
+    'students_advised',
+    'unique_students_advised',
+    'based_unique_students'
   ]);
 
   // Calculate strategic metrics
@@ -97,6 +101,20 @@ const AdministratorView = ({
     ).length;
     const resolutionRate = totalAlerts > 0 ? ((resolvedAlerts / totalAlerts) * 100).toFixed(1) : 0;
     
+    // Calculate unique students advised
+    const uniqueAdvisedStudentIds = alerts?.reduce((set, alert) => {
+      if (alert.status === 'Advised') {
+        const normalizedId = normalizeAlertStudentId(alert);
+        if (normalizedId) {
+          set.add(normalizedId);
+        }
+      }
+      return set;
+    }, new Set()) || new Set();
+
+    const studentsAdvised = uniqueAdvisedStudentIds.size;
+    const studentsAdvisedRate = studentsWithAlerts > 0 ? ((studentsAdvised / studentsWithAlerts) * 100).toFixed(1) : 0;
+
     const highPriorityAlerts = alerts?.filter(alert => alert.priority === 'High').length || 0;
     const criticalRate = totalAlerts > 0 ? ((highPriorityAlerts / totalAlerts) * 100).toFixed(1) : 0;
     
@@ -106,6 +124,8 @@ const AdministratorView = ({
       studentsWithAlerts,
       alertRate: alertRate.toFixed(1),
       resolutionRate,
+      studentsAdvised,
+      studentsAdvisedRate,
       criticalRate
     };
   }, [alerts, students]);
@@ -126,6 +146,7 @@ const AdministratorView = ({
           resolved: 0,
           highPriority: 0,
           students: new Set(),
+          advisedStudents: new Set(),
           lowGrade: 0,
           missedAssignment: 0,
           missedTest: 0
@@ -139,6 +160,9 @@ const AdministratorView = ({
       
       if (alert.status === 'Advised') {
         facultyStats[faculty].resolved++;
+        if (normalizedId) {
+          facultyStats[faculty].advisedStudents.add(normalizedId);
+        }
       }
       
       if (alert.priority === 'High') {
@@ -159,6 +183,7 @@ const AdministratorView = ({
       faculty: facultyMapping[faculty] || faculty,
       totalAlerts: stats.total,
       uniqueStudents: stats.students.size,
+      uniqueStudentsAdvised: stats.advisedStudents.size,
       resolutionRate: stats.total > 0 ? ((stats.resolved / stats.total) * 100).toFixed(1) : 0,
       criticalRate: stats.total > 0 ? ((stats.highPriority / stats.total) * 100).toFixed(1) : 0,
       alertsPerStudent: stats.students.size > 0 ? (stats.total / stats.students.size).toFixed(1) : 0,
@@ -297,7 +322,7 @@ const AdministratorView = ({
     <div className="space-y-6">
       {/* Executive Summary */}
       <div className="bg-white rounded-lg shadow-lg border-2 border-[#E31837] p-8">
-        <div className="grid gap-6 mt-6" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        <div className="grid gap-6 mt-6" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
           <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between mb-4">
               <div className="p-4 rounded-lg bg-[#E31837] text-white shadow-md">
@@ -339,7 +364,18 @@ const AdministratorView = ({
             </div>
             <h3 className="text-sm font-medium text-gray-600 mb-2">{getString('resolution_rate')}</h3>
             <div className="text-3xl font-bold text-gray-900 mb-2">{strategicMetrics.resolutionRate}%</div>
-            <p className="text-sm text-gray-500">{getString('students_contacted')}</p>
+            <p className="text-sm text-gray-500">{getString('based_total_alerts')}</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 rounded-lg bg-[#E31837] text-white shadow-md">
+                <CheckCircle className="w-8 h-8" />
+              </div>
+            </div>
+            <h3 className="text-sm font-medium text-gray-600 mb-2">{getString('students_advised')}</h3>
+            <div className="text-3xl font-bold text-gray-900 mb-2">{strategicMetrics.studentsAdvisedRate}%</div>
+            <p className="text-sm text-gray-500">{getString('based_unique_students')}</p>
           </div>
         </div>
       </div>
@@ -480,7 +516,7 @@ const AdministratorView = ({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('faculty')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('total_alerts')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('students')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('contacted')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('students_advised')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('low_grade')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_assignment')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_test_quiz')}</th>
@@ -501,7 +537,7 @@ const AdministratorView = ({
                       <div className="text-sm text-gray-900">{faculty.uniqueStudents}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{faculty.resolutionRate}%</div>
+                      <div className="text-sm text-gray-900">{faculty.uniqueStudentsAdvised}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{faculty.lowGrade}</div>
