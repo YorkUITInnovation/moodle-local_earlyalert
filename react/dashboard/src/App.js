@@ -12,6 +12,7 @@ import { useApiData } from './hooks/useApiData';
 import { useLanguageStrings } from './hooks/useLanguageStrings';
 import azureOpenAIService from './services/azureOpenAIService';
 import { facultyMapping } from './constants/facultyMapping';
+import { campusMapping } from './constants/campusMapping';
 
 // Simple markdown renderer for AI responses
 const MarkdownRenderer = ({ content }) => {
@@ -437,7 +438,7 @@ const EarlyAlertDashboard = () => {
     if (!selectedChartData && !filterFaculty && !filterStatus && !filterTemplateType && !filterStudentType && 
         !filterCampus && !filterAlertType && !filterAcademicStatus && !filterStudyLevel && !searchTerm) {
       return chartData.campus_analysis.map(item => ({
-        name: item.campus,
+        name: campusMapping[item.campus] || item.campus,
         totalAlerts: item.alerts,
         uniqueStudents: item.students
       }));
@@ -447,9 +448,10 @@ const EarlyAlertDashboard = () => {
     const campusCounts = {};
     const campusStudents = {};
     filteredAlerts.forEach(alert => {
-      campusCounts[alert.campus_template] = (campusCounts[alert.campus_template] || 0) + 1;
-      if (!campusStudents[alert.campus_template]) campusStudents[alert.campus_template] = new Set();
-      campusStudents[alert.campus_template].add(alert.studentId);
+      const campusName = campusMapping[alert.campus_template] || alert.campus_template;
+      campusCounts[campusName] = (campusCounts[campusName] || 0) + 1;
+      if (!campusStudents[campusName]) campusStudents[campusName] = new Set();
+      campusStudents[campusName].add(alert.studentId);
     });
     
     return Object.entries(campusCounts).map(([name, totalAlerts]) => ({
@@ -620,7 +622,7 @@ const EarlyAlertDashboard = () => {
         'Student ID': alert.student?.sisId || alert.student?.sisid || 'N/A',
         'Email': alert.student?.email || alert.email || 'N/A',
         'Faculty': facultyMapping[alert.faculty_template] || alert.faculty_template || 'N/A',
-        'Campus': alert.campus_template || 'N/A',
+        'Campus': campusMapping[alert.campus_template] || alert.campus_template || 'N/A',
         'Program': alert.student?.program || alert.program || 'N/A',
         'Student Type': alert.student?.immigrationStatus || alert.immigrationStatus || 'N/A',
         'Study Level': alert.student?.studyLevel || alert.studyLevel || 'N/A',
@@ -686,7 +688,7 @@ const EarlyAlertDashboard = () => {
       if (filterStatus) filterInfo.push(`Status-${filterStatus}`);
       if (filterTemplateType) filterInfo.push(`Template-${filterTemplateType}`);
       if (filterStudentType) filterInfo.push(`Type-${filterStudentType}`);
-      if (filterCampus) filterInfo.push(`Campus-${filterCampus}`);
+      if (filterCampus) filterInfo.push(`Campus-${campusMapping[filterCampus] || filterCampus}`);
       if (filterAlertType) filterInfo.push(`Alert-${filterAlertType.replace(/[^a-zA-Z0-9]/g, '')}`);
       if (filterAcademicStatus) filterInfo.push(`AcadStatus-${filterAcademicStatus.replace(/[^a-zA-Z0-9]/g, '')}`);
       if (filterStudyLevel) filterInfo.push(`StudyLevel-${filterStudyLevel.replace(/[^a-zA-Z0-9]/g, '')}`);

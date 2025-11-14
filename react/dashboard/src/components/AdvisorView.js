@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useLanguageStrings } from '../hooks/useLanguageStrings';
+import { campusMapping } from '../constants/campusMapping';
 
 const AdvisorView = ({ 
   alerts,
@@ -197,14 +198,14 @@ const AdvisorView = ({
         'Advised by Advisor': (alert.student_advised_by_advisor && alert.student_advised_by_advisor !== 0 && alert.student_advised_by_advisor !== '0') ? 'Yes' : 'No',
         'Advised by Instructor': (alert.student_advised_by_instructor && alert.student_advised_by_instructor !== 0 && alert.student_advised_by_instructor !== '0') ? 'Yes' : 'No',
         'Faculty Template': alert.faculty_template,
-        'Campus Template': alert.campus_template,
+        'Campus Template': campusMapping[alert.campus_template] || alert.campus_template,
         'Course Template': alert.course_template,
         'Course': alert.course_name || alert.courseName || alert.course || 'N/A',
         'Professor': alert.professor,
         // Student data fields from data.php
         'Session Name': alert.sessionname || alert.student?.sessionname || 'N/A',
         'Program Faculty': alert.progfaculty || alert.student?.home_faculty || 'N/A',
-        'Campus': alert.campus || alert.student?.campus || 'N/A',
+        'Campus': campusMapping[alert.campus] || campusMapping[alert.student?.campus] || alert.campus || alert.student?.campus || 'N/A',
         'Program': alert.program || student.program || 'N/A',
         'Academic Qualification': alert.acadqualification || alert.student?.acadqualification || 'N/A',
         'Basis': alert.basis || alert.student?.basis || 'N/A',
@@ -369,7 +370,7 @@ const AdvisorView = ({
           >
             <option value="">{getString('all_campuses')}</option>
             {availableCampuses && availableCampuses.map(campus => (
-              <option key={campus} value={campus}>{campus}</option>
+              <option key={campus} value={campus}>{campusMapping[campus] || campus}</option>
             ))}
           </select>
 
