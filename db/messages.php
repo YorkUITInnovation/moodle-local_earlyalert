@@ -26,9 +26,9 @@ defined('MOODLE_INTERNAL') || die();
 
 $messageproviders = [
     'earlyalert_notification' => [
-        'capability' => 'local/earlyalert:access_early_alert',
         'defaults' => [
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
         ],
     ],
 ];
+
