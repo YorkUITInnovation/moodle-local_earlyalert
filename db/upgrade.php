@@ -176,5 +176,11 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 20251000001, 'local', 'earlyalert');
     }
 
+    if ($oldversion < 2026012900) {
+        // Moodle 5.1 compatibility upgrade.
+        // No database changes required, but marking upgrade point for compatibility updates.
+        upgrade_plugin_savepoint(true, 2026012900, 'local', 'earlyalert');
+    }
+
     return true;
 }

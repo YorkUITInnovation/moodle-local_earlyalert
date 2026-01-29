@@ -9,7 +9,7 @@
         {{#grade}}
             <p>{{#str}}grade_instructions, local_earlyalert{{/str}}</p>
             <div class="d-flex align-items-center mb-2">
-                <div class="mr-3 ml-4">
+                <div class="me-3 ms-4">
                     <b>{{#str}}adjust_default_grade, local_earlyalert{{/str}}: </b>
                     <select id="id_early_alert_filter_grade_select"
                             name="early_alert_filter_grade_select"
@@ -28,10 +28,10 @@
                     </select>
                 </div>
                 <div>
-                    <span class="custom-message-preview text-muted font-italic mr-2"></span>
+                    <span class="custom-message-preview text-muted font-italic me-2"></span>
                     {{#hascustommessage}}
                     <button type="button" id="toggle-custom-message" class="btn btn-sm btn-outline-secondary"
-                            data-toggle="collapse" data-target="#custom-message-container"
+                            data-bs-toggle="collapse" data-bs-target="#custom-message-container"
                             aria-expanded="false" aria-controls="custom-message-container">
                         <i class="fa fa-plus"></i>  {{#str}}custom_message_button_label, local_earlyalert{{/str}}
                     </button>
@@ -49,7 +49,7 @@
             <div id='early_alert_gradebook_instructions_container' class="mt-3 mb-1">
                 <ul>
                     <li>{{#str}}no_gradebook_instructions, local_earlyalert{{/str}}</li>
-                    <ul class="list-unstyled ml-3">
+                    <ul class="list-unstyled ms-3">
                         <li>
                            <input class="early-alert-student-checkbox" type="checkbox" value="" id="early-alert-not-using-gradebook-checkbox">
                             {{#str}}not_using_gradebook, local_earlyalert{{/str}}
@@ -61,9 +61,9 @@
 
         {{#assign}}
             <p>{{#str}}assignment_instructions, local_earlyalert{{/str}}</p>
-            <div class="mb-5 ml-4">
+            <div class="mb-5 ms-4">
                 <div class="d-flex align-items-center">
-                    <p class="mb-0 mr-2"><b>{{#str}}assignment_title, local_earlyalert{{/str}}:</b></p>
+                    <p class="mb-0 me-2"><b>{{#str}}assignment_title, local_earlyalert{{/str}}:</b></p>
                     <input type="text" id="early-alert-assignment-title" class="form-control" style="max-width: 320px;"
                            placeholder="Enter the assignment title (required)" required/>
                 </div>
@@ -78,10 +78,10 @@
         {{/exam}}
         {{^grade}}
             <div class="mb-3">
-                <span class="custom-message-preview text-muted font-italic mr-2"></span>
+                <span class="custom-message-preview text-muted font-italic me-2"></span>
                 {{#hascustommessage}}
                 <button type="button" id="toggle-custom-message" class="btn btn-sm btn-outline-secondary"
-                        data-toggle="collapse" data-target="#custom-message-container"
+                        data-bs-toggle="collapse" data-bs-target="#custom-message-container"
                         aria-expanded="false" aria-controls="custom-message-container">
                     <i class="fa fa-plus"></i> Show Custom Message
                 </button>
@@ -107,7 +107,7 @@
         <p>{{#str}}select_students, local_earlyalert, {{alert_type}} {{/str}}</p>
         <p>
             <input type="checkbox" id="early-alert-checkall-student-checkbox" class="early-alert-checkall-student-checkbox"> All/None
-            <button id="early-alert-send-button1" class="btn btn-primary btn-sm ml-2 early-alert-send-button">Send</button>
+            <button id="early-alert-send-button1" class="btn btn-primary btn-sm ms-2 early-alert-send-button">Send</button>
         </p>
     </div>
 </div>
@@ -140,7 +140,7 @@
                                    data-student-major="{{major}}"
                                    data-courseid="{{courseid}}"></td>
                         <td>{{last_name}}, {{first_name}}<br>{{idnumber}}</td>
-                        <td class="early-alert-grade-column"><span class="badge badge-primary">{{grade}}</span></td>
+                        <td class="early-alert-grade-column"><span class="badge bg-primary">{{grade}}</span></td>
                         <td>
                             <button class="btn btn-outline-primary btn-sm early-alert-preview-button">{{#str}}preview, local_earlyalert{{/str}}</button>
                         </td>
@@ -152,5 +152,5 @@
     {{/student_rows}}
 </div>
 <div>
-    <button id="early-alert-send-button2" class="btn btn-primary btn-sm float-right early-alert-send-button">Send</button>
+    <button id="early-alert-send-button2" class="btn btn-primary btn-sm float-end early-alert-send-button">Send</button>
 </div>

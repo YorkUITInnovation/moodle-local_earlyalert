@@ -1,12 +1,31 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * A scheduled task for early alerts
+ * Scheduled task for processing mail queue.
  *
- * @package    local_earlyalert
+ * @package     local_earlyalert
+ * @category    task
+ * @copyright   2024 York University <itinnovation@yorku.ca>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace local_earlyalert\task;
 
+defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
@@ -16,12 +35,8 @@ use local_earlyalert\email_report_log;
 use local_etemplate\email;
 use local_etemplate\emails;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
- * The main scheduled task for the Early Alerts plugin
- *
- * @package    local_earlyalert
+ * The main scheduled task for processing the email queue.
  */
 class process_mail_queue extends \core\task\scheduled_task {
 
