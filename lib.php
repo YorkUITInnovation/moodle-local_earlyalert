@@ -35,8 +35,8 @@ defined('MOODLE_INTERNAL') || die();
 function local_earlyalert_extend_navigation(global_navigation $navigation) {
     global $PAGE;
 
-    // Only add the link if the user has the capability to access Early Alert.
-    if (!has_capability('local/earlyalert:access_early_alert', context_system::instance())) {
+    // Only add the link if the user has the capability to access Early Alert or is a site admin.
+    if (!is_siteadmin() && !has_capability('local/earlyalert:access_early_alert', context_system::instance())) {
         return;
     }
 
