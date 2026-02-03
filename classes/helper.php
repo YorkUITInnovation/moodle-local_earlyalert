@@ -392,10 +392,32 @@ class helper
         $editing_teacher = $DB->get_record('role', array('shortname' => 'editingteacher'), 'id');
         // Get Role ID for teacher.
         $teacher = $DB->get_record('role', array('shortname' => 'teacher'), 'id');
+
+        // Check if roles exist before querying
+        if (!$editing_teacher && !$teacher) {
+            return false;
+        }
+
+        // Build role ID list
+        $roleids = array();
+        if ($editing_teacher) {
+            $roleids[] = $editing_teacher->id;
+        }
+        if ($teacher) {
+            $roleids[] = $teacher->id;
+        }
+
+        if (empty($roleids)) {
+            return false;
+        }
+
         // SQL to get user roles based on the editing_teacher and teacher role IDs.
-        $sql = "SELECT * FROM {role_assignments} WHERE userid = ? AND roleid IN ($editing_teacher->id, $teacher->id)";
+        list($insql, $inparams) = $DB->get_in_or_equal($roleids, SQL_PARAMS_NAMED);
+        $sql = "SELECT * FROM {role_assignments} WHERE userid = :userid AND roleid $insql";
+        $params = array_merge(array('userid' => $USER->id), $inparams);
+
         // Get user roles.
-        if ($userroles = $DB->get_records_sql($sql, array($USER->id))) {
+        if ($userroles = $DB->get_records_sql($sql, $params)) {
             return true;
         } else {
             return false;
@@ -412,10 +434,16 @@ class helper
         global $USER, $DB;
         // Get role ID for advisor.
         $advisor = $DB->get_record('role', array('shortname' => 'ea_advisor'), 'id');
-        // SQL to get user roles based on the editing_teacher and teacher role IDs.
-        $sql = "SELECT * FROM {role_assignments} WHERE userid = ? AND roleid IN ($advisor->id)";
+
+        // Check if role exists before querying
+        if (!$advisor) {
+            return false;
+        }
+
+        // SQL to get user roles based on the advisor role ID.
+        $sql = "SELECT * FROM {role_assignments} WHERE userid = ? AND roleid = ?";
         // Get user roles.
-        if ($userroles = $DB->get_records_sql($sql, array($USER->id))) {
+        if ($userroles = $DB->get_records_sql($sql, array($USER->id, $advisor->id))) {
             return true;
         } else {
             return false;

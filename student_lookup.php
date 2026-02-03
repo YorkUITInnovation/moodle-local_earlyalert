@@ -42,7 +42,8 @@ if (!has_capability('local/earlyalert:access_early_alert', $context)) {
 $PAGE->requires->js_call_amd('local_earlyalert/student_lookup', 'init');
 
 $user_id = optional_param('user_id', 0, PARAM_INT);
-
+// Initialize an empty array to hold the combined courses
+$combined_courses = [];
 $course_data = [];
 if ($user_id) {
     $show_active_only = !empty($CFG->earlyalert_showactivecourses);
@@ -51,26 +52,25 @@ if ($user_id) {
     }
 
     $course_data = helper::get_courses_in_acadyear_by_row($courses);
-// Initialize an empty array to hold the combined courses
-    $combined_courses = [];
     // flag to show checkbox enabled or disabled for teacher/advisor
     $combined_courses['disabled_advisor'] = true;
     $combined_courses['disabled_instructor'] = true;
 
     base::debug_to_console('Advisor: '. helper::is_advisor());
     base::debug_to_console('Instructor: '. helper::is_teacher());
-// Check user roles and set flags accordingly
-    if (helper::is_advisor()) { // takes precedence over teacher and only show advisor checkbox
-        $combined_courses['disabled_advisor'] = false; // advisors see the advisor checkbox
-        $combined_courses['disabled_instructor'] = true; // advisors do not see the instructor checkbox
-    }
-    if (helper::is_teacher() && !helper::is_advisor()) { // teacher/instructor can see instructor checkbox
-        $combined_courses['disabled_advisor'] = true; // may have been set before in the is_advisor if block
-        $combined_courses['disabled_instructor'] = false; // only teachers see the instructor checkbox
-    }
-    if (is_siteadmin()) { // site admin can see both
-        $combined_courses['disabled_advisor'] = false; // site admins see the advisor checkbox
-        $combined_courses['disabled_instructor'] = false; // site admins see the instructor checkbox
+// Check user roles and set flags accordingly - site admin takes precedence
+    if (is_siteadmin()) {
+        // Site admin can see both
+        $combined_courses['disabled_advisor'] = false;
+        $combined_courses['disabled_instructor'] = false;
+    } else if (helper::is_advisor()) {
+        // Advisors see the advisor checkbox only
+        $combined_courses['disabled_advisor'] = false;
+        $combined_courses['disabled_instructor'] = true;
+    } else if (helper::is_teacher()) {
+        // Teachers see the instructor checkbox only
+        $combined_courses['disabled_advisor'] = true;
+        $combined_courses['disabled_instructor'] = false;
     }
 
 // Loop through the original array and extract the courses
