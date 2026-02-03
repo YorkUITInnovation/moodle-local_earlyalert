@@ -74,8 +74,9 @@ if ($user_id) {
     }
 
 // Loop through the original array and extract the courses
-    foreach ($course_data['rows'] as $row) {
-        foreach ($row['courses'] as $course) {
+    if (!empty($course_data['rows'])) {
+        foreach ($course_data['rows'] as $row) {
+            foreach ($row['courses'] as $course) {
             $combined_courses['courses'][] = $course;
             // Get alerts for the course and user_id
             $alerts = $DB->get_records('local_earlyalert_report_log', ['course_id' => $course->id, 'target_user_id' => $user_id],'timecreated DESC', 'id');
@@ -108,8 +109,10 @@ if ($user_id) {
             }
             $course->alerts = $data;
             $course->has_alerts = count($alerts) > 0;
+            }
         }
     }
+
     $student = $DB->get_record('user', ['id' => $user_id], 'id,firstname,lastname,email,idnumber', MUST_EXIST);
     $combined_courses['userid']= $student->id;
     $combined_courses['firstname']= $student->firstname;
