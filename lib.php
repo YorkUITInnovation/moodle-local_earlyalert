@@ -25,57 +25,24 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Extends the global navigation with the Early Alert link.
+ * Callback to add custom items to the primary navigation.
  *
- * This function is called when Moodle builds the navigation tree.
- * It adds a link to the Early Alert tool dashboard in the primary navigation.
- *
- * @param global_navigation $navigation The global navigation object
+ * @param \core\navigation\views\primary $primary The primary navigation view
  */
-function local_earlyalert_extend_navigation(global_navigation $navigation) {
-    global $PAGE;
-
+function local_earlyalert_extend_navigation_primary(\core\navigation\views\primary $primary) {
     // Only add the link if the user has the capability to access Early Alert or is a site admin.
     if (!is_siteadmin() && !has_capability('local/earlyalert:access_early_alert', context_system::instance())) {
         return;
     }
 
-    // Create the Early Alert navigation node.
-    $earlyalertnode = $navigation->add(
+    // Add Early Alert to the primary navigation.
+    $primary->add(
         get_string('early_alert', 'local_earlyalert'),
         new moodle_url('/local/earlyalert/tool_dashboard.php'),
-        navigation_node::TYPE_CUSTOM,
         null,
-        'earlyalert',
-        new pix_icon('i/navigationitem', '')
-    );
-
-    // Set the node to show in the primary navigation (top menu bar).
-    $earlyalertnode->showinflatnavigation = true;
-}
-
-/**
- * Add Early Alert link to the primary navigation (navbar).
- *
- * This is the Moodle 5.x method for adding items to the primary navigation bar.
- *
- * @param navigation_node $parentnode The parent navigation node
- * @param stdClass $course The course object
- * @param context $context The current context
- */
-function local_earlyalert_extend_navigation_frontpage(navigation_node $parentnode, stdClass $course, context $context) {
-    // Only add the link if the user has the capability to access Early Alert or is a site admin.
-    if (!is_siteadmin() && !has_capability('local/earlyalert:access_early_alert', context_system::instance())) {
-        return;
-    }
-
-    // Add Early Alert to the navigation.
-    $earlyalertnode = $parentnode->add(
-        get_string('early_alert', 'local_earlyalert'),
-        new moodle_url('/local/earlyalert/tool_dashboard.php'),
-        navigation_node::TYPE_CUSTOM,
         null,
-        'earlyalert',
-        new pix_icon('i/navigationitem', '')
+        'earlyalert'
     );
 }
+
+
