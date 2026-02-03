@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Library functions for the Early Alert plugin.
+ * Hook callbacks for the Early Alert plugin.
  *
  * @package     local_earlyalert
  * @copyright   2024 York University <itinnovation@yorku.ca>
@@ -24,25 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Callback to add custom items to the primary navigation.
- *
- * @param \core\navigation\views\primary $primary The primary navigation view
- */
-function local_earlyalert_extend_navigation_primary(\core\navigation\views\primary $primary) {
-    // Only add the link if the user has the capability to access Early Alert or is a site admin.
-    if (!is_siteadmin() && !has_capability('local/earlyalert:access_early_alert', context_system::instance())) {
-        return;
-    }
-
-    // Add Early Alert to the primary navigation.
-    $primary->add(
-        get_string('early_alert', 'local_earlyalert'),
-        new moodle_url('/local/earlyalert/tool_dashboard.php'),
-        null,
-        null,
-        'earlyalert'
-    );
-}
-
-
+$callbacks = [
+    [
+        'hook' => \core\hook\navigation\primary_extend::class,
+        'callback' => \local_earlyalert\hook_callbacks::class . '::extend_primary_navigation',
+        'priority' => 500,
+    ],
+];
