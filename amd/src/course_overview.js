@@ -9,6 +9,12 @@ export const init = () => {
 // add mutation observer that lets us know when the course overview buttons are added to the page
 function observeCourseOverviewButtons() {
     const targetNode = document.getElementById('early-alert-student-results');
+
+    // Guard: element may not exist on all pages - bail out early to avoid TypeError
+    if (!targetNode) {
+        return;
+    }
+
     const config = { childList: true, subtree: true };
 
     const callback = function(mutationsList, observer) {

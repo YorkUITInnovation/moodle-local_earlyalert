@@ -860,6 +860,9 @@ function get_users() {
     selectCourseBox.init('#course-search', 'earlyalert_get_courses', user_id, "Select a course");
     let search = document.getElementById('search');
     let courseSearch = document.getElementById('course-search');
+
+    if (!courseSearch) return;
+
     let userId = search ? search.value : user_id; // fallback to logged-in user
 
     // On course change, reload page with user_id and course_id

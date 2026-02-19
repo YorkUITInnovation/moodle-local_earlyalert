@@ -3,8 +3,7 @@ import ajax from 'core/ajax';
 const selectCourseBox = {
     init: function(selector, method, userid, placeholder) {
         const select = document.querySelector(selector);
-        console.log(userid);
-        //if (!select) return;
+        if (!select) return;
         select.innerHTML = `<option value="">${placeholder}</option>`;
         if (!userid) return;
         ajax.call([{
