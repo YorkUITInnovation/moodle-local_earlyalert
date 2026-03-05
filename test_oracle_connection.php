@@ -85,12 +85,13 @@ try {
     echo "<h2>Test 4: Query Test</h2>";
     echo "<p>Testing query against V222.VIEW_MOODLE_EARLY_ALERTS...</p>";
 
-    // Get a sample user with idnumber
+    // Get specific test user with idnumber 221100482
     global $DB;
-    $sample_user = $DB->get_record_sql("SELECT id, username, idnumber FROM {user} WHERE idnumber IS NOT NULL AND idnumber != '' LIMIT 1");
+    $sample_user = $DB->get_record('user', ['idnumber' => '221100482'], 'id, username, idnumber');
 
     if (!$sample_user) {
-        echo "<p class='error'>✗ No users found with idnumber set. Cannot test query.</p>";
+        echo "<p class='error'>✗ Test user with idnumber 221100482 not found in Moodle database.</p>";
+        echo "<p>Please ensure this user exists or change the test idnumber in the script.</p>";
     } else {
         echo "<p class='info'>Testing with user: " . htmlspecialchars($sample_user->username) . " (ID: " . $sample_user->id . ", IDNumber: " . htmlspecialchars($sample_user->idnumber) . ")</p>";
 
