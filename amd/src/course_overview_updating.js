@@ -22,11 +22,11 @@ function update_student_status_for_instructor() {
             const status = this.checked ? 1 : 0;
 
             ajax.call([{
-                methodname: 'earlyalert_update_student_status_instructor',
+                methodname: 'local_earlyalert_update_student_status_instructor',
                 args: {
                     logid: logId,
                     status: status
-                }
+                },
             }])[0].then(function (response) {
                 // Show Toast notification
                 addToast(getString('advised_success_toast', 'local_earlyalert'), {
@@ -48,7 +48,7 @@ function update_student_status_for_advisor() {
     // Select all checkboxes with the class .checkbox-advisor-followup
     const checkboxes = document.querySelectorAll('.checkbox-advisor-followup');
 
-// Loop through each checkbox and add an event listener
+    // Loop through each checkbox and add an event listener
     checkboxes.forEach(function (checkbox) {
         checkbox.addEventListener('change', function () {
             const logId = this.getAttribute('data-logid');
@@ -56,7 +56,7 @@ function update_student_status_for_advisor() {
             const status = this.checked ? 1 : 0;
             // Perform the AJAX call for the checkbox that was changed
             ajax.call([{
-                methodname: 'earlyalert_update_student_status_advisor',
+                methodname: 'local_earlyalert_update_student_status_advisor',
                 args: {
                     logid: logId,
                     status: status
@@ -85,7 +85,7 @@ function preview_message() {
         previewButton.addEventListener('click', function () {
             const logId = this.getAttribute('data-logid');
             ajax.call([{
-                methodname: 'earlyalert_get_message',
+                methodname: 'local_earlyalert_get_message',
                 args: {
                     logid: logId
                 }

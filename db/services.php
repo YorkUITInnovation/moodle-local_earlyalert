@@ -25,16 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $functions = [
-    'earlyalert_course_grades_percent_get' => [
-        'classname' => 'local_earlyalert_course_grades_ws',
-        'methodname' => 'get_course_grades_percent',
-        'classpath' => 'local/earlyalert/classes/external/course_grades_ws.php',
-        'description' => 'Return course grades in percentages for a course',
-        'type' => 'read',
-        'capabilities' => '',
-        'ajax' => true,
-    ],
-    'earlyalert_course_student_templates' => [
+    'local_earlyalert_course_student_templates' => [
         'classname' => 'local_earlyalert_course_grades_ws',
         'methodname' => 'get_course_student_templates',
         'classpath' => 'local/earlyalert/classes/external/course_grades_ws.php',
@@ -43,7 +34,7 @@ $functions = [
         'capabilities' => '',
         'ajax' => true,
     ],
-    'earlyalert_report_log_insert' => [
+    'local_earlyalert_report_log_insert' => [
         'classname' => 'local_earlyalert_record_log_ws',
         'methodname' => 'insert_email_log',
         'classpath' => 'local/earlyalert/classes/external/record_log_ws.php',
@@ -52,7 +43,7 @@ $functions = [
         'capabilities' => '',
         'ajax' => true,
     ],
-    'earlyalert_course_overview' => [
+    'local_earlyalert_course_overview' => [
         'classname' => 'local_earlyalert_course_overview_ws',
         'methodname' => 'get_course_overview',
         'classpath' => 'local/earlyalert/classes/external/course_overview_ws.php',
@@ -61,7 +52,7 @@ $functions = [
         'capabilities' => '',
         'ajax' => true,
     ],
-    'earlyalert_update_student_status_instructor' => [
+    'local_earlyalert_update_student_status_instructor' => [
         'classname' => 'local_earlyalert_course_overview_ws',
         'methodname' => 'update_student_status_instructor',
         'classpath' => 'local/earlyalert/classes/external/course_overview_ws.php',
@@ -70,7 +61,7 @@ $functions = [
         'capabilities' => '',
         'ajax' => true,
     ],
-    'earlyalert_update_student_status_advisor' => [
+    'local_earlyalert_update_student_status_advisor' => [
         'classname' => 'local_earlyalert_course_overview_ws',
         'methodname' => 'update_student_status_advisor',
         'classpath' => 'local/earlyalert/classes/external/course_overview_ws.php',
@@ -79,7 +70,7 @@ $functions = [
         'capabilities' => '',
         'ajax' => true,
     ],
-    'earlyalert_get_users' => [
+    'local_earlyalert_get_users' => [
         'classname' => 'local_earlyalert_users_ws',
         'methodname' => 'get_users',
         'classpath' => 'local/earlyalert/classes/external/users_ws.php',
@@ -88,7 +79,7 @@ $functions = [
         'capabilities' => '',
         'ajax' => true,
     ],
-    'earlyalert_get_courses' => [
+    'local_earlyalert_get_courses' => [
         'classname' => 'local_earlyalert_courses_ws',
         'methodname' => 'get_courses',
         'classpath' => 'local/earlyalert/classes/external/courses_ws.php',
@@ -97,7 +88,7 @@ $functions = [
         'capabilities' => '',
         'ajax' => true,
     ],
-    'earlyalert_get_message' => [
+    'local_earlyalert_get_message' => [
         'classname' => 'local_earlyalert_course_overview_ws',
         'methodname' => 'get_message',
         'classpath' => 'local/earlyalert/classes/external/course_overview_ws.php',

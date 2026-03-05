@@ -228,7 +228,7 @@ function setup_filter_students_by_grade(course_id, grade_letter_id, course_name,
         // Fetch student list and templates in one call
         var get_students_and_templates = ajax.call([
             {
-                methodname: 'earlyalert_course_student_templates',
+                methodname: 'local_earlyalert_course_student_templates',
                 args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type, "grade_letter_id": grade_letter_id}
             }
         ]);
@@ -829,7 +829,7 @@ function create_notification_dialog(student_template_cache_array) {
 
         // send emails and save records
         var sendEmail = ajax.call([{
-            methodname: 'earlyalert_report_log_insert',
+            methodname: 'local_earlyalert_report_log_insert',
             args: {
                 template_data: JSON.stringify(student_template_cache_array),
             }
@@ -856,8 +856,8 @@ function get_users() {
             user_id = teacherUserIdInput.value;
         }
     }
-    selectBox.init('#search', 'earlyalert_get_users', "Select a user");
-    selectCourseBox.init('#course-search', 'earlyalert_get_courses', user_id, "Select a course");
+    selectBox.init('#search', 'local_earlyalert_get_users', "Select a user");
+    selectCourseBox.init('#course-search', 'local_earlyalert_get_courses', user_id, "Select a course");
     let search = document.getElementById('search');
     let courseSearch = document.getElementById('course-search');
 
@@ -877,7 +877,7 @@ function get_users() {
         // On user change, update courses and clear selection
         search.addEventListener('change', function (event) {
             const newUserId = search.value;
-            selectCourseBox.init('#course-search', 'earlyalert_get_courses', newUserId, "Select a course");
+            selectCourseBox.init('#course-search', 'local_earlyalert_get_courses', newUserId, "Select a course");
             // Clear the course selection
             courseSearch.value = '';
         });

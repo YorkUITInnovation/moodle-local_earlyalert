@@ -13,7 +13,7 @@ export const init = () => {
 };
 
 function get_users() {
-    selectBox.init('#earlyalert-student-search', 'earlyalert_get_users', "Select a user");
+    selectBox.init('#earlyalert-student-search', 'local_earlyalert_get_users', "Select a user");
     // On search change, navigate to a url with the user_id as a parameter
     let search = document.getElementById('earlyalert-student-search');
     if (search) {

@@ -54,7 +54,7 @@ function addCourseOverviewButtonListener() {
 
             // Make ajax call to get the students in the course
             ajax.call([{
-                methodname: 'earlyalert_course_overview',
+                methodname: 'local_earlyalert_course_overview',
                 args: {
                     id: courseId
                 }
