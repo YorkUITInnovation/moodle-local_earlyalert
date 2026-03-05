@@ -41,10 +41,18 @@ class local_earlyalert_record_log_ws extends external_api
         //OPTIONAL but in most web service it should present
         $context = \context_system::instance();
         self::validate_context($context);
+
         // check student template object map
         $id=0;
         $ids=[];
         $students = json_decode($template_data, true);
+
+        // Validate that we have students to process
+        if (empty($students) || !is_array($students)) {
+            error_log('Early Alert - No students provided or invalid template_data format');
+            return 0;
+        }
+
         forEach($students as $student) {
             // Get idnumber from user student_id
             $user = $DB->get_record('user', array('id' => $student['student_id']), '*', MUST_EXIST);
@@ -52,23 +60,34 @@ class local_earlyalert_record_log_ws extends external_api
             // Attempt to fetch student profile from Oracle SIS
             // This is optional - if it fails, we still save the email log without profile data
             $student_profile = '';
+            $OCI = null;
             try {
                 // Oracle SQL
                 $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID=:sisid";
-                $params = [':sisid' => trim($user->idnumber)];
+                $oracle_params = [':sisid' => trim($user->idnumber)];
                 $OCI = new \local_earlyalert\oracle_client();
                 $OCI->connect();
-                $stid = $OCI->execute_query($sql, $params);
+                $stid = $OCI->execute_query($sql, $oracle_params);
 
                 if (count($stid) > 0) {
                     $student_profile = json_encode($stid[0]);
                 }
+                // Close the connection after use
+                $OCI->close();
             } catch (\Exception $e) {
                 // Log the error but don't fail the entire process
                 error_log('Early Alert - Failed to fetch student profile from SIS for student ID ' .
                          $student['student_id'] . ' (idnumber: ' . $user->idnumber . '): ' . $e->getMessage());
                 // Continue without student profile data
                 $student_profile = '';
+                // Ensure connection is closed even on error
+                if ($OCI !== null) {
+                    try {
+                        $OCI->close();
+                    } catch (\Exception $close_error) {
+                        // Ignore close errors
+                    }
+                }
             }
 
             // add to data structure
@@ -108,6 +127,17 @@ class local_earlyalert_record_log_ws extends external_api
                 error_log('Early Alert - Exception while saving email log for student ID ' .
                          $student['student_id'] . ': ' . $e->getMessage());
             }
+        }
+
+        // Log summary for monitoring
+        $total_students = count($students);
+        $successful_saves = sizeof($ids);
+        $failed_saves = $total_students - $successful_saves;
+
+        if ($failed_saves > 0) {
+            error_log("Early Alert - Email processing complete: {$successful_saves}/{$total_students} successful, {$failed_saves} failed");
+        } else {
+            error_log("Early Alert - Email processing complete: {$successful_saves}/{$total_students} emails logged successfully");
         }
 
         return sizeof($ids);
