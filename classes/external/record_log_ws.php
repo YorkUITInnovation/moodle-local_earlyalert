@@ -48,17 +48,29 @@ class local_earlyalert_record_log_ws extends external_api
         forEach($students as $student) {
             // Get idnumber from user student_id
             $user = $DB->get_record('user', array('id' => $student['student_id']), '*', MUST_EXIST);
-            // Oracle SQL
-            $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID=:sisid";
-            $params = [':sisid' => trim($user->idnumber)];
-            $OCI = new \local_earlyalert\oracle_client();
-            $OCI->connect();
-            $stid = $OCI->execute_query($sql, $params);
 
+            // Attempt to fetch student profile from Oracle SIS
+            // This is optional - if it fails, we still save the email log without profile data
             $student_profile = '';
-            if (count($stid) > 0) {
-                $student_profile = json_encode($stid[0]);
+            try {
+                // Oracle SQL
+                $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID=:sisid";
+                $params = [':sisid' => trim($user->idnumber)];
+                $OCI = new \local_earlyalert\oracle_client();
+                $OCI->connect();
+                $stid = $OCI->execute_query($sql, $params);
+
+                if (count($stid) > 0) {
+                    $student_profile = json_encode($stid[0]);
+                }
+            } catch (\Exception $e) {
+                // Log the error but don't fail the entire process
+                error_log('Early Alert - Failed to fetch student profile from SIS for student ID ' .
+                         $student['student_id'] . ' (idnumber: ' . $user->idnumber . '): ' . $e->getMessage());
+                // Continue without student profile data
+                $student_profile = '';
             }
+
             // add to data structure
             $data= new stdClass();
             $data->template_id = ($student['template_id'] ?? 0);
@@ -81,9 +93,21 @@ class local_earlyalert_record_log_ws extends external_api
             $data->date_message_sent = 0;
             $data->timecreated = time();
             $data->timemodified = time();
-            $EMAIL_LOG = new email_report_log();
-            $id = $EMAIL_LOG->insert_record($data);
-            $id > 0 ? array_push($ids, $id) : error_log('error saving message');
+
+            // Attempt to save the email log record
+            try {
+                $EMAIL_LOG = new email_report_log();
+                $id = $EMAIL_LOG->insert_record($data);
+                if ($id > 0) {
+                    array_push($ids, $id);
+                } else {
+                    error_log('Early Alert - Failed to save email log for student ID ' .
+                             $student['student_id'] . ': insert_record returned 0 or false');
+                }
+            } catch (\Exception $e) {
+                error_log('Early Alert - Exception while saving email log for student ID ' .
+                         $student['student_id'] . ': ' . $e->getMessage());
+            }
         }
 
         return sizeof($ids);

@@ -64,10 +64,22 @@ class oracle_client {
         if ($this->conn) {
             return;
         }
+
+        // Check if credentials are configured
+        if (empty($this->user) || empty($this->pass) || empty($this->connstring)) {
+            $missing = [];
+            if (empty($this->user)) $missing[] = 'user';
+            if (empty($this->pass)) $missing[] = 'password';
+            if (empty($this->connstring)) $missing[] = 'connection string';
+            throw new \Exception('Oracle connection credentials not configured. Missing: ' . implode(', ', $missing));
+        }
+
         $this->conn = @oci_connect($this->user, $this->pass, $this->connstring);
         if (!$this->conn) {
             $e = oci_error();
             $message = isset($e['message']) ? $e['message'] : 'Unknown Oracle connection error';
+            // Log detailed error for debugging
+            error_log('Oracle connection failed - User: ' . $this->user . ', Connection string: ' . $this->connstring . ', Error: ' . $message);
             throw new \Exception('Oracle connect failed: ' . $message);
         }
     }
