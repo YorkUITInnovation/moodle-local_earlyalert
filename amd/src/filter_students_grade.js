@@ -1,6 +1,6 @@
 import ajax from 'core/ajax';
 import Templates from 'core/templates';
-import ModalFactory from 'core/modal_factory';
+import ModalCancel from 'core/modal_cancel';
 import ModalEvents from 'core/modal_events';
 import {get_string as getString} from 'core/str';
 import notification from 'core/notification';
@@ -744,9 +744,8 @@ var current_modal = null;
 
 function setup_preview_buttons_from_template(student_template_data) {
     //console.log('Modal created with: ',student_template_data);
-    ModalFactory.create({
+    ModalCancel.create({
         title: getString('preview_email', 'local_earlyalert'),
-        type: ModalFactory.types.CANCEL,
         body: Templates.render('local_earlyalert/preview_student_email', {
             name: student_template_data.template_name,
             student_name: student_template_data.student_name,
@@ -756,7 +755,7 @@ function setup_preview_buttons_from_template(student_template_data) {
         }),
         large: true,
 
-    }).done(modal => {
+    }).then(modal => {
         modal.show();
         current_modal = modal;
         return current_modal;

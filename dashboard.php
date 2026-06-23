@@ -145,6 +145,7 @@ if (!empty($course_data['rows']) && $course_id) {
 
 if ($teacher || $is_impersonating) {
     $course_data_for_grades = [];
+    $i = 0;
     // Prepare course data fro grades
     if (!empty($course_data) && array_key_exists('rows', $course_data)) {
         for ($x = 0; $x < count($course_data['rows']); $x++) {

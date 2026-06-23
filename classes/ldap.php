@@ -60,7 +60,10 @@ class ldap
                 throw new \Exception("Could not bind to LDAP server." . ldap_error($this->ldap_conn));
             }
         } catch (\Exception $e) {
-            die($e->getMessage());
+            // Log the error and re-throw instead of dying
+            // This prevents breaking the response stream
+            error_log('LDAP Error: ' . $e->getMessage());
+            throw $e;
         }
     }
 
@@ -131,7 +134,9 @@ class ldap
 
             return $results;
         } catch (\Exception $e) {
-            die($e->getMessage());
+            // Log the error but don't die - let caller handle it
+            error_log('LDAP query error: ' . $e->getMessage());
+            throw $e;
         }
     }
 

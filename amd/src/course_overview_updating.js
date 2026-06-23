@@ -1,6 +1,6 @@
 import ajax from 'core/ajax';
 import Templates from 'core/templates';
-import ModalFactory from 'core/modal_factory';
+import ModalCancel from 'core/modal_cancel';
 import {get_string as getString} from 'core/str';
 import {add as addToast} from 'core/toast';
 
@@ -90,9 +90,8 @@ function preview_message() {
                     logid: logId
                 }
             }])[0].then(function (response) {
-                ModalFactory.create({
+                ModalCancel.create({
                     title: getString('preview_email', 'local_earlyalert'),
-                    type: ModalFactory.types.CANCEL,
                     body: Templates.render('local_earlyalert/preview_student_email', response),
                     large: true,
                 }).then(modal => {
