@@ -76,6 +76,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                     $email->get_instructor_id(),
                     $email->get_trigger_grade_letter(),
                     $email->get_assignment_name(),
+                    $email->get_custom_message(),
                 );
                 $subject = $prepare_template->subject;
                 $body = $prepare_template->message;

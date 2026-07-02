@@ -102,6 +102,8 @@ class local_earlyalert_record_log_ws extends external_api {
             $data->trigger_grade = ($student['trigger_grade'] ?? 0);
             $data->actual_grade = self::convertGradeToNumeric($student['actual_grade'] ?? '');
             $data->custom_message = ($student['custom_message'] ?? '');
+            $data->subject = ($student['subject'] ?? '');
+            $data->body = ($student['message'] ?? '');
             //all logs default to unadvised
             $data->student_advised_by_advisor = 0;
             $data->student_advised_by_instructor = 0;

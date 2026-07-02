@@ -1,156 +1,356 @@
-{{^show_grades}}
-    <style>
-        .early-alert-grade-column {
-            display: none;
-        }
-    </style>
-{{/show_grades}}
-<input type="hidden" id="early-alert-alert-type" value="{{alert_type}}">
-<input type="hidden" id="early_alert_filter_course_id" value="{{course_id}}">
-<input type="hidden" id="early_alert_course_name" value="{{fullname}}">
-<input type="hidden" id="early-alert-teacher-user-id" value="{{teacher_user_id}}">
-{{#impersonate}}
-    <div class="row">
-        <div class="col-md-3">
-            <label for="search" class="col-form-label">
-                {{#str}}impersonate_user, local_earlyalert{{/str}}
-            </label>
-            <select id="search" name="search" class="form-control"></select>
+<div class="earlyalert-redesign" id="earlyalert-dashboard"
+     data-teacher-user-id="{{teacher_user_id}}"
+     data-show-grades="{{show_grades}}">
+    <input type="hidden" id="early-alert-teacher-user-id" value="{{teacher_user_id}}">
+
+    {{#impersonate}}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label for="search" class="form-label">{{strings.impersonate_user}}</label>
+            <select id="search" class="form-select"></select>
         </div>
-        <div class="col-md-3">
-            <label for="course-search" class="col-form-label">
-                {{#str}}course_list, local_earlyalert{{/str}}
-            </label>
-            <select id="course-search" name="course-search" class="form-control"></select>
+        <div class="col-md-4">
+            <label for="course-search" class="form-label">{{strings.course_list}}</label>
+            <select id="course-search" class="form-select"></select>
         </div>
     </div>
-    {{#impersonated_user}}
-        <div class="row mt-3">
-            <div class="col">
-                <div class="alert alert-info">
-                    <b>{{#str}}impersonating_user, local_earlyalert{{/str}}:</b> {{impersonated_user}}
+    {{/impersonate}}
+
+    <div id="earlyalert-dashboard-view" data-region="dashboard-view">
+        <!-- Title removed per design -->
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card ea-metric-card h-100">
+                    <div class="card-body">
+                        <div class="text-muted small text-uppercase">{{strings.metric_total_alerts}}</div>
+                        <div class="display-6 fw-bold">{{metric_total_alerts}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card ea-metric-card h-100">
+                    <div class="card-body">
+                        <div class="text-muted small text-uppercase">{{strings.metric_students_at_risk}}</div>
+                        <div class="display-6 fw-bold">{{metric_students_at_risk}}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card ea-metric-card h-100">
+                    <div class="card-body">
+                        <div class="text-muted small text-uppercase">{{strings.metric_pending_actions}}</div>
+                        <div class="display-6 fw-bold">{{metric_pending_actions}}</div>
+                    </div>
                 </div>
             </div>
         </div>
-    {{/impersonated_user}}
-{{/impersonate}}
-{{^impersonate}}
-    <div class="row">
-        <div class="col-md-3">
-            <label for="course-search" class="col-form-label">
-                {{#str}}course_list, local_earlyalert{{/str}}
-            </label>
-            <select id="course-search" name="course-search" class="form-control"></select>
-        </div>
-    </div>
-{{/impersonate}}
-{{^rows}}
-    <div class="row mt-4">
-        <div class="col">
-            <div class="alert alert-info">
-                <b>{{#str}}no_courses, local_earlyalert{{/str}}</b>
+
+        <div class="card">
+            <div class="card-header bg-white">
+                <h2 class="h4 mb-0">{{strings.active_courses}}</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead>
+                    <tr>
+                        <th>{{strings.course_code_title}}</th>
+                        <th>{{strings.enrollment}}</th>
+                        <th>{{strings.alerts_term}}</th>
+                        <th>{{strings.risk_level}}</th>
+                        <th class="text-end">{{strings.actions}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#courses}}
+                    <tr data-action="earlyalert/select-course"
+                        data-course-id="{{id}}"
+                        data-course-name="{{fullname}}"
+                        class="ea-course-row">
+                        <td>
+                            <div class="fw-semibold">{{fullname}}</div>
+                        </td>
+                        <td>{{enrollment}}</td>
+                        <td>{{alerts}}</td>
+                        <td>
+                            <span class="badge bg-{{riskbadge}}">{{risklevel}}</span>
+                        </td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-action="earlyalert/open-course">
+                                {{strings.start_alert_flow}}
+                            </button>
+                        </td>
+                    </tr>
+                    {{/courses}}
+                    {{^has_courses}}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">{{strings.no_courses}}</td>
+                    </tr>
+                    {{/has_courses}}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-{{/rows}}
-{{#rows}}
-    <div class="row mt-4">
-        <div class="col">
-            <div class="card-deck">
-                {{#courses}}
-                    {{#is_selected}}
+
+    <div id="earlyalert-workflow-view" data-region="workflow-view" class="d-none">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+            <div>
+                <div class="text-muted small" id="ea-selected-course-label"></div>
+                <h2 class="h3 mb-0">{{strings.send_early_alert}}</h2>
+            </div>
+            <button type="button" class="btn btn-link" data-action="earlyalert/back-dashboard">{{strings.back_to_dashboard}}</button>
+        </div>
+
+        <div class="card">
+            <div class="card-body border-bottom">
+                <div class="ea-steps d-flex align-items-center gap-4" data-region="wizard-steps">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-circle bg-primary" data-step="1" style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">1</span>
+                        <span class="ea-step-label" data-step="1">{{strings.alert_type}}</span>
+                    </div>
+                    <div class="flex-grow-1" style="height:2px;background:#dee2e6;"></div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-circle bg-secondary" data-step="2" style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">2</span>
+                        <span class="ea-step-label" data-step="2">{{strings.grade_threshold_and_students}}</span>
+                    </div>
+                    <div class="flex-grow-1" style="height:2px;background:#dee2e6;"></div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-circle bg-secondary" data-step="3" style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">3</span>
+                        <span class="ea-step-label" data-step="3">{{strings.compose_and_send}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body" data-region="step-1">
+                <h3 class="h4">{{strings.choose_alert_type}}</h3>
+                <p class="text-muted">{{strings.choose_alert_type_help}}</p>
+                <div class="card-group" data-region="alert-type-cards">
                     <div class="card">
-                        <div class="card-header">
-                            <h6><a href="{{config.wwwroot}}/course/view.php?id={{id}}">{{fullname}}</a></h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="alert alert-danger text-center">
-                                <b>{{#str}}available_alert_types, local_earlyalert{{/str}}</b>
-                            </div>
-                            <h5>{{#str}}send_alert_based_on, local_earlyalert{{/str}}</h5>
-                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-6 g-5">
-
-                                <div class="col mb-4">
-                                    <div class="card" style="">
-                                        <div class="card-body d-flex justify-content-center align-items-center">
-                                            <img src="{{config.wwwroot}}/local/earlyalert/pix/low_grade.png"
-                                                 class="img-fluid" alt="Grade">
-                                        </div>
-                                        <div class="card-footer d-flex justify-content-center align-items-center">
-                                            <button
-                                                    type="button"
-                                                    data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
-                                            data-course_id="{{id}}"
-                                            data-name="{{fullname}}"
-                                            data-link="grade"
-                                            class="btn btn-outline-danger btn-sm early-alert-type-button"
-                                            role="button" aria-pressed="true">{{#str}}low_grade, local_earlyalert{{/str}}</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col mb-4">
-                                    <div class="card">
-                                        <div class="card-body d-flex justify-content-center align-items-center">
-                                            <img src="{{config.wwwroot}}/local/earlyalert/pix/missed_assignment.png"
-                                                 class="img-fluid" alt="Assignment">
-                                        </div>
-                                        <div class="card-footer d-flex justify-content-center align-items-center">
-                                            <button type="button"
-                                                    data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
-                                            sd data-course_id= "{{id}}"
-                                            data-name= "{{fullname}}"
-                                            data-link="assign"
-                                            class="btn btn-outline-danger btn-sm early-alert-type-button"
-                                            role="button" aria-pressed="true">{{#str}}missed_assignment, local_earlyalert{{/str}}</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col mb-4">
-                                    <div class="card">
-                                        <div class="card-body d-flex justify-content-center align-items-center">
-                                            <img src="{{config.wwwroot}}/local/earlyalert/pix/missed_exam.png"
-                                                 class="img-fluid" alt="Exam">
-                                        </div>
-                                        <div class="card-footer d-flex justify-content-center align-items-center">
-                                            <button type="button"
-                                                    data-href="{{config.wwwroot}}/local/earlyalert/dashboard.php?course_id={{id}}"
-                                            data-course_id= "{{id}}"
-                                            data-name= "{{fullname}}"
-                                            data-link="exam"
-                                            class="btn btn-outline-danger btn-sm early-alert-type-button"
-                                            role="button" aria-pressed="true">{{#str}}missed_exam, local_earlyalert{{/str}}</a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <p>
-                                <button type="button" class="btn btn-outline-secondary btn-course-overview" data-course_id="{{id}}">
-                                    {{#str}}course_overview, local_earlyalert{{/str}}
-                                </button>
-                            </p>
-                            {{#str}}course_overview_instructions, local_earlyalert{{/str}}
+                        <div class="card-body p-0">
+                            <button type="button" class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3" data-alert-type="grade">
+                                <span class="d-block fw-semibold">{{strings.low_grade}}</span>
+                                <span class="text-muted small">{{strings.alert_type_low_grade_help}}</span>
+                            </button>
                         </div>
                     </div>
-                    {{/is_selected}}
-                {{/courses}}
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <button type="button" class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3" data-alert-type="assign">
+                                <span class="d-block fw-semibold">{{strings.missed_assignment}}</span>
+                                <span class="text-muted small">{{strings.alert_type_assignment_help}}</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <button type="button" class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3" data-alert-type="exam">
+                                <span class="d-block fw-semibold">{{strings.missed_exam}}</span>
+                                <span class="text-muted small">{{strings.alert_type_exam_help}}</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <button type="button" class="btn btn-outline-success rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3" data-alert-type="commendation">
+                                <span class="d-block fw-semibold">{{strings.alert_type_commendation}}</span>
+                                <span class="text-muted small">{{strings.alert_type_commendation_help}}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-primary" data-action="earlyalert/go-step-2" disabled>
+                        {{strings.continue}}
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body d-none" data-region="step-2">
+                <div class="row g-4">
+                    <div class="col-xl-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-white">
+                                <h3 class="h5 mb-0">{{strings.alert_criteria}}</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label" for="ea-grade-items">{{strings.grade_items}}</label>
+                                    <select id="ea-grade-items" class="form-select" multiple size="6"></select>
+                                    <div class="form-text">{{strings.filter_on}}: {{strings.overall_course_grade}} / {{strings.multi_assignments_quizzes}}</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="ea-condition">{{strings.condition}}</label>
+                                    <select id="ea-condition" class="form-select">
+                                        <option value="below">&lt;= (Below or equal to)</option>
+                                        <option value="above">&gt;= (Above or equal to)</option>
+                                        <option value="missing">Missing (no grade submitted)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3" id="ea-threshold-wrap">
+                                    <label class="form-label" for="ea-grade-threshold">{{strings.threshold}}</label>
+                                    <select id="ea-grade-threshold" class="form-select">
+                                        <option value="10">F (0-59%)</option>
+                                        <option value="9">E (0-59%)</option>
+                                        <option value="8">D (60-62%)</option>
+                                        <option value="7" selected>D+ (63-66%)</option>
+                                        <option value="6">C (67-72%)</option>
+                                        <option value="5">C+ (73-76%)</option>
+                                        <option value="4">B (77-82%)</option>
+                                        <option value="3">B+ (83-86%)</option>
+                                        <option value="2">A (87-92%)</option>
+                                        <option value="1">A+ (93%+)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-0">
+                                    <button type="button" class="btn btn-outline-primary w-100" data-action="earlyalert/apply-filters">
+                                        {{strings.apply_filter}}
+                                    </button>
+                                </div>
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" id="ea-include-all-students">
+                                    <label class="form-check-label" for="ea-include-all-students">{{strings.not_using_gradebook}}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-8">
+                        <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
+                            <h3 class="h5 mb-0">{{strings.flagged_students}}</h3>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <div class="text-danger fw-semibold" id="ea-selected-count">0 {{strings.selected}}</div>
+                                <div class="text-muted small" id="ea-table-range">{{strings.showing_range_default}}</div>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/clear-selection">{{strings.clear_selection}}</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/export-selected">{{strings.export_csv}}</button>
+                            </div>
+                        </div>
+                        <div class="input-group mb-2">
+                            <input type="search" id="ea-search" class="form-control" placeholder="{{strings.search_students}}">
+                            <button class="btn btn-outline-secondary" type="button" data-action="earlyalert/search">{{strings.search}}</button>
+                        </div>
+                        <div class="table-responsive border rounded">
+                            <table class="table table-sm table-hover mb-0" id="ea-students-table">
+                                <thead>
+                                <tr>
+                                    <th style="width:40px;"><input type="checkbox" id="ea-check-all-page"></th>
+                                    <th>
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-action="earlyalert/sort" data-sort-by="name">
+                                            {{strings.student_name}} <span id="ea-sort-indicator-name">-</span>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-action="earlyalert/sort" data-sort-by="idnumber">
+                                            {{strings.student_id}} <span id="ea-sort-indicator-idnumber">-</span>
+                                        </button>
+                                    </th>
+                                    <th>
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-action="earlyalert/sort" data-sort-by="grade">
+                                            {{strings.grade}} <span id="ea-sort-indicator-grade">-</span>
+                                        </button>
+                                    </th>
+                                    <th class="text-end">{{strings.preview}}</th>
+                                </tr>
+                                </thead>
+                                <tbody data-region="students-table-body">
+                                <tr><td colspan="5" class="text-center text-muted py-4">{{strings.loading}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <label class="small text-muted mb-0" for="ea-per-page">{{strings.items_per_page}}</label>
+                                <select id="ea-per-page" class="form-select form-select-sm" style="width:auto;">
+                                    <option value="10" selected>10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span class="text-muted small" id="ea-pagination-summary"></span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/prev-page">{{strings.previous}}</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/next-page">{{strings.next}}</button>
+                                </div>
+                                <label class="small text-muted mb-0" for="ea-page-input">{{strings.go_to_page}}</label>
+                                <input type="number" id="ea-page-input" class="form-control form-control-sm" min="1" value="1" style="width:90px;">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/go-page">Go</button>
+                                <span class="small text-muted" id="ea-total-pages">{{strings.of_pages}}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <button type="button" class="btn btn-outline-secondary" data-action="earlyalert/back-step-1">
+                                {{strings.back}}
+                            </button>
+                            <button type="button" class="btn btn-primary" data-action="earlyalert/go-step-3" disabled>
+                                {{strings.continue}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body d-none" data-region="step-3">
+                <h3 class="h4">{{strings.compose_message}}</h3>
+                <p class="text-muted" id="ea-compose-summary"></p>
+
+                <div class="mb-3">
+                    <label for="ea-template-select" class="form-label">{{strings.message_template}}</label>
+                    <select id="ea-template-select" class="form-select"></select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="ea-message-subject" class="form-label">{{strings.subject_line}}</label>
+                    <input type="text" id="ea-message-subject" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                        <label for="ea-custom-message" class="form-label mb-0">{{strings.message_body}}</label>
+                        <button type="button" class="btn btn-link btn-sm text-decoration-none" data-action="earlyalert/reset-template">{{strings.reset_to_template}}</button>
+                    </div>
+                    <textarea id="ea-custom-message" class="form-control" rows="9"></textarea>
+                    <div class="form-text">{{strings.compose_help_text}}</div>
+                </div>
+
+                <div class="border rounded p-3 bg-light mb-3">
+                    <div class="text-muted small fw-semibold mb-2">{{strings.available_tokens}}</div>
+                    <div class="d-flex gap-2 flex-wrap" id="ea-token-list"></div>
+                </div>
+
+                <div class="alert alert-light border" id="ea-message-preview-container">
+                    <div class="fw-semibold mb-1">{{strings.preview_email}}</div>
+                    <div class="text-muted small mb-2">{{strings.sample_preview_note}}</div>
+                    <div id="ea-message-preview-subject" class="fw-semibold mb-2"></div>
+                    <div id="ea-message-preview-text" class="text-muted">{{strings.preview_message_placeholder}}</div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" data-action="earlyalert/back-step-2">{{strings.back}}</button>
+                    <button type="button" class="btn btn-danger" data-action="earlyalert/send-alerts">
+                        {{strings.send_alert_now}}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-{{/rows}}
-{{#has_students}}
-<div class="row mt-3">
-    <div class="col">
-        <div class="card">
-            <div class="card-body">
-                <div id="early-alert-student-results" class="col early-alert-student-results">
+
+    <div class="modal fade" id="ea-preview-modal" tabindex="-1" aria-hidden="true" aria-labelledby="ea-preview-modal-title">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="ea-preview-modal-title">{{strings.message_preview}}</h5>
+                        <div class="text-muted small"><span>{{strings.to_label}}:</span> <span id="ea-preview-modal-recipient"></span></div>
+                    </div>
+                    <button type="button" class="btn-close" data-action="earlyalert/close-preview" aria-label="{{strings.close}}"></button>
+                </div>
+                <div class="modal-body" id="ea-preview-modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-action="earlyalert/close-preview">{{strings.close}}</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{{/has_students}}

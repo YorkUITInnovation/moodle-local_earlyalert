@@ -1,1060 +1,1070 @@
-import ajax from 'core/ajax';
-import Templates from 'core/templates';
-import ModalCancel from 'core/modal_cancel';
-import ModalEvents from 'core/modal_events';
-import {get_string as getString} from 'core/str';
-import notification from 'core/notification';
-import {get_format as formatString} from 'core/str';
-import selectBox from 'local_earlyalert/select_box';
-import config from 'core/config';
-import selectCourseBox from 'local_earlyalert/select_course_box';
+import * as Ajax from 'core/ajax';
+import * as Str from 'core/str';
+import * as Notification from 'core/notification';
 
-const DEFAULT_GRADE_ID = 7; // D+
-const DEFAULT_GRADE_LETTER = 'D+';
-const SHOW_ALL_STUDENTS_ID = -1;
-
-const strings = {};
-
-export const init = async() => {
-    // Pre-load all required strings needed due to the promise nature of getString and not making the request for student data complex with getString calls
-    [
-        strings.low_grade,
-        strings.missed_assignment,
-        strings.missed_exam,
-    ] = await Promise.all([
-        getString('low_grade', 'local_earlyalert'),
-        getString('missed_assignment', 'local_earlyalert'),
-        getString('missed_exam', 'local_earlyalert'),
-    ]);
-
-    alert_type_button();
-    get_users();
-    // Set up the custom message listener globally - not tied to any specific alert type
-    setup_custom_message_listener();
-    // Set up toggle functionality for custom message containers
-    setup_custom_message_toggles();
+const STATE = {
+    courseId: 0,
+    courseName: '',
+    teacherUserId: 0,
+    alertType: '',
+    selectedStudents: new Map(),
+    studentDataById: new Map(),
+    page: 1,
+    perPage: 10,
+    totalPages: 1,
+    totalStudents: 0,
+    rangeStart: 0,
+    rangeEnd: 0,
+    condition: 'below',
+    thresholdId: 7,
+    filterMode: 'course',
+    gradeItemId: 0,
+    gradeItemIds: [],
+    includeAllStudents: false,
+    gradeItemsLoadedForCourse: 0,
+    previewData: null,
+    sortBy: 'name',
+    sortDir: 'none',
+    composeTemplates: [],
+    composeTemplateId: '',
 };
 
-/**
- * Sets up event listeners for the custom message textarea
- * Updates the preview text and refreshes templates when the custom message changes
- */
-function setup_custom_message_listener() {
-    // Single shared textarea for all alert types
-    const textarea = document.getElementById('early-alert-custom-message');
-    const preview = document.querySelector('.custom-message-preview');
-
-    if (!textarea || !preview) {
-        console.log('No custom message textarea or preview found');
-        return;
-    }
-
-    // Clear previous listeners by cloning
-    const new_textarea = textarea.cloneNode(true);
-    textarea.parentNode.replaceChild(new_textarea, textarea);
-
-    const updatePreview = () => {
-        const message = (new_textarea.value || '').trim();
-        if (window.currentTemplateCache) {
-            window.currentTemplateCache.set('custom_message', message);
-        }
-    };
-
-    new_textarea.addEventListener('input', updatePreview);
-    new_textarea.addEventListener('blur', () => {
-        // Rebuild cache and refresh previews on blur
-        const templateCache = build_template_cache();
-        const alert_type_el = document.getElementById('early-alert-alert-type');
-        const alert_type = alert_type_el ? alert_type_el.value : '';
-        if (alert_type === 'assign') {
-            const at = document.getElementById('early-alert-assignment-title');
-            const assignmentTitle = at ? (at.value || '') : '';
-            templateCache.set('assignment_title', assignmentTitle);
-            setup_preview_emails_with_titles(templateCache);
-        } else {
-            setup_preview_buttons(templateCache);
-        }
-    });
-}
-
-// Helper function to rebuild the template cache
-function build_template_cache() {
-    // This function no longer rebuilds the cache from scratch.
-    // It now updates the existing global cache with the latest user inputs.
-    const final_cache = window.currentTemplateCache || new Map();
-
-    const course_name = document.getElementById('early_alert_course_name').value;
-    const textarea_el = document.getElementById('early-alert-custom-message');
-    const custom_message = textarea_el ? textarea_el.value.trim() : '';
-
-    final_cache.set('course_name', course_name);
-    final_cache.set('custom_message', custom_message);
-
-    // Update assignment title if relevant
-    const alert_type_el = document.getElementById('early-alert-alert-type');
-    const alert_type = alert_type_el ? alert_type_el.value : '';
-    if (alert_type === 'assign') {
-        const at = document.getElementById('early-alert-assignment-title');
-        const assignmentTitle = at ? (at.value || '') : '';
-        final_cache.set('assignment_title', assignmentTitle);
-    }
-
-    window.currentTemplateCache = final_cache;
-    return final_cache;
-}
-
-function alert_type_button() {
-    // Get data-link when .early-alert-type-button link is clicked
-    document.addEventListener('click', function (event) {
-        if (event.target.classList.contains('early-alert-type-button')) {
-            let alert_type = event.target.getAttribute('data-link');
-            let course_name = event.target.getAttribute('data-name');
-            let course_id = event.target.getAttribute('data-course_id');
-            let teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
-            // Choose default grade letter dynamically: 7 for grade alerts, -1 for others (no grade filter)
-            const default_grade_letter_id = (alert_type === 'grade') ? DEFAULT_GRADE_ID : SHOW_ALL_STUDENTS_ID;
-            setup_filter_students_by_grade(course_id, default_grade_letter_id, course_name, alert_type, teacher_user_id);
-        }
-    });
-}
-
-
-/**
- * Adds students with grades
- */
-
-function filter_students_by_grade_select() {
-    // Get the selected grade value from the dropdown
-    const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
-    const not_using_gradebook_checkbox = document.getElementById('early-alert-not-using-gradebook-checkbox');
-    const course_id = document.getElementById('early_alert_filter_course_id').value;
-    const course_name = document.getElementById('early_alert_course_name').value;
-    const alert_type = document.getElementById('early-alert-alert-type').value;
-    const teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
-
-    // Setup listener for drop down selection
-    grade_select.addEventListener('change', function (e) {
-        let grade_letter_id = e.target.value;
-        const current_course_name = document.getElementById('early_alert_course_name').value;
-        // Check if "Not using Gradebook" is checked
-        if (not_using_gradebook_checkbox && not_using_gradebook_checkbox.checked) {
-            // Rebuild template cache with new grade for template parameters
-            const templateCache = build_template_cache();
-            setup_preview_buttons(templateCache);
-        } else {
-            setup_filter_students_by_grade(course_id, grade_letter_id, current_course_name, alert_type, teacher_user_id);
-        }
-    });
-
-    // Setup listener for "Not using Gradebook" checkbox
-    if (not_using_gradebook_checkbox) {
-        not_using_gradebook_checkbox.addEventListener('change', function(e) {
-            const current_grade = grade_select.value; //get current grade selection at time of checkbox change
-            const current_course_name = document.getElementById('early_alert_course_name').value;
-            if (e.target.checked) {
-                // Show all students regardless of grade selection, but preserve dropdown value
-                setup_filter_students_by_grade(course_id, SHOW_ALL_STUDENTS_ID, current_course_name, alert_type, teacher_user_id);
-            } else {
-                setup_filter_students_by_grade(course_id, current_grade, current_course_name, alert_type, teacher_user_id);
-            }
-        });
-    }
-}
-
-function filter_students_by_assignment() {
-    // Get the selected grade value from the dropdown
-    const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
-    const course_id = document.getElementById('early_alert_filter_course_id').value;
-    const course_name = document.getElementById('early_alert_course_name').value;
-    const alert_type = document.getElementById('early-alert-alert-type').value;
-    const teacher_user_id = document.getElementById('early-alert-teacher-user-id').value;
-
-    // Setup listener for assignment title input
-    const assignment_input = document.getElementById('early-alert-assignment-title');
-
-    // Add an input event listener for real-time preview of the assignment title
-    assignment_input.addEventListener('input', function() {
-        const title = assignment_input.value.trim();
-        // Validate the assignment title
-        validateAssignmentTitle(title);
-    });
-
-    // Only update the full preview on focus out to reduce processing
-    assignment_input.addEventListener('focusout', function(evt) {
-        var assignment_title = assignment_input.value.trim();
-
-        // Validate the assignment title
-        if (validateAssignmentTitle(assignment_title)) {
-            // For assignment alerts, do not filter by grade; pass -1 to include all students
-            setup_filter_students_by_grade(course_id, SHOW_ALL_STUDENTS_ID, course_name, alert_type, teacher_user_id, assignment_title);
-        }
-    });
-    validateAssignmentTitle(assignment_input.value.trim());
-}
-
-/**
- * Fetches the student list based on the course_id and grade_letter_id
- * @param course_id
- * @param grade_letter_id
- * @param course_name
- * @param alert_type
- */
-function setup_filter_students_by_grade(course_id, grade_letter_id, course_name, alert_type, teacher_user_id, assignment_title = "") {
-    let selected_students = [];
-    // convert course_id into an integer
-    course_id = parseInt(course_id);
-    grade_letter_id = parseInt(grade_letter_id);
-    // Add course_id to element with id early_alert_filter_course_id
-    document.getElementById('early_alert_filter_course_id').value = course_id;
-    // Add alert type to element with id early-alert-alert-type
-    document.getElementById('early-alert-alert-type').value = alert_type;
-    // Add course name to element with id early_alert_course_name
-    document.getElementById('early_alert_course_name').value = course_name;
-
-    // Only display if course_id is greater than 0
-    if (course_id > 0) {
-        Templates.render('local_earlyalert/loader', {})
-            .then(function (html, js) {
-                // Insert the rendered template into the target element
-                document.getElementById('early-alert-student-results').innerHTML = html;
-                Templates.runTemplateJS(js);
-            })
-            .catch(function (error) {
-                console.error('Failed to render template:', error);
-            });
-
-        var finalCache = new Map();
-
-        // Fetch student list and templates in one call
-        var get_students_and_templates = ajax.call([
-            {
-                methodname: 'local_earlyalert_course_student_templates',
-                args: {"teacher_user_id": teacher_user_id, "id": course_id, "alert_type": alert_type, "grade_letter_id": grade_letter_id}
-            }
-        ]);
-
-        get_students_and_templates[0].then(response => {
-                const student_data = response; // Response is already an array
-
-                // Reformat the data to display in a grid
-                let num_students = student_data.length;
-                let num_rows = Math.min(3, Math.ceil(num_students / 3));
-                let num_cols = Math.ceil(num_students / num_rows);
-                let display_data = {
-                    num_rows: num_rows,
-                    num_cols: num_cols,
-                    student_rows: []
-                };
-
-                // Initialize rows array
-                for (let r = 0; r < num_rows; r++) {
-                    display_data.student_rows[r] = {students: []};
-                }
-
-                let row = 0;
-                let col = 0;
-
-                student_data.forEach(result => {
-                    if (typeof result === 'object') {
-                        result.faculty = result.faculty ? result.faculty : '';
-                        result.major = result.major ? result.major : '';
-                        result.campus = result.campus ? result.campus : '';
-                        result.courseid = course_id;
-                        display_data.student_rows[row].students[col] = result;
-                        col++;
-                        if (col === num_cols) {
-                            col = 0;
-                            row++;
-                        }
-                    }
-                });
-
-                // Set hascustommessage to true if any template has it enabled
-                let hascustommessage = student_data.some(
-                    t => t && t.hascustommessage === 1
-                ) ? 1 : 0;
-                display_data.hascustommessage = hascustommessage;
-
-                if (alert_type === 'grade') {
-                    // Add alert_type to display_data
-                    display_data.alert_type = strings.low_grade;
-                    display_data.grade = true;
-                }
-
-                if (alert_type === 'assign') {
-                    // Add alert_type to display_data
-                    display_data.alert_type = strings.missed_assignment;
-                    display_data.assign = true;
-                }
-
-                if (alert_type === 'exam') {
-                    // Add alert_type to display_data
-                    display_data.alert_type = strings.missed_exam;
-                    display_data.exam = true;
-                }
-
-                display_data.fullname = course_name;
-                // Render the template with display_data
-                Templates.render('local_earlyalert/course_student_list', display_data)
-                    .then(function (html, js) {
-                        // Insert the rendered template into the target element
-                        document.getElementById('early-alert-student-results').innerHTML = html;
-                        Templates.runTemplateJS(js);
-
-                        // Focus on the checkbox when student list is being rendered
-                        focusOnCheckall();
-
-                        // (Re)attach custom message listeners and toggles now that the DOM was re-rendered
-                        setup_custom_message_listener();
-                        setup_custom_message_toggles();
-                        // set default grade letter selected
-                        if (alert_type === 'grade') {
-                            let grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
-                            const not_using_gradebook_checkbox = document.getElementById('early-alert-not-using-gradebook-checkbox');
-
-                            // If showing all students (grade_letter_id === -1)
-                            if (grade_letter_id === SHOW_ALL_STUDENTS_ID) {
-                                // Store current value before any changes
-                                if (not_using_gradebook_checkbox) {
-                                    not_using_gradebook_checkbox.checked = true;
-                                }
-
-                                grade_select.value = DEFAULT_GRADE_ID; // default to 7 when showing all students
-                            } else if (grade_letter_id > 0) {
-                                // Normal grade filtering - set dropdown value and uncheck checkbox
-                                grade_select.value = grade_letter_id;
-                                if (not_using_gradebook_checkbox) {
-                                    not_using_gradebook_checkbox.checked = false;
-                                }
-                            }
-
-                            // Setup listener for filtering students by grade drop down
-                            filter_students_by_grade_select();
-                        }
-                        if (alert_type === 'assign') {
-                            document.getElementById('early-alert-assignment-title').value = assignment_title;
-                            // Setup assignment field validation and event handlers
-                            filter_students_by_assignment();
-                        }
-
-                        check_allnone_listener(selected_students);
-
-                        // Populate the template cache from the template data
-                        student_data.forEach(result => {
-                            if (typeof result === 'object') {
-                                let finalMessage = {
-                                    subject: result.subject,
-                                    message: result.message,
-                                    templateid: result.templateid,
-                                    revision_id: result.revision_id,
-                                    course_id: result.course_id,
-                                    instructor_id: result.instructor_id,
-                                    triggered_from_user_id: result.triggered_from_user_id,
-                                };
-                                finalCache.set(result.templateKey, finalMessage);
-                            }
-                        });
-
-                        finalCache.set('course_name', course_name);
-                        // Ensure custom_message key exists even before user types so downstream lookups never get undefined
-                        if (!finalCache.has('custom_message')) {
-                            finalCache.set('custom_message', '');
-                        }
-
-                        // Store the cache globally so we can access it later when the custom message changes
-                        window.currentTemplateCache = finalCache;
-
-                        // case where assignment titles are taken from user input
-                        if (alert_type === 'assign') // we have to setup the assignment title before previewing!
-                        {
-                            finalCache.set('assignment_title', assignment_title);
-                            if (assignment_title) { // there is a case where previews were setup without titles then dont create modals
-                                setup_preview_emails_with_titles(finalCache); // call back function
-                            }
-
-                        } else { // for other alert types
-                            // built templates with template keys sent to setup previews
-                            setup_preview_buttons(finalCache);
-                        }
-                    })
-                    .catch(function (error) {
-                        console.error('Failed to render template:', error);
-                    });
-            }).catch(function (error) {
-                console.error('Failed to fetch student or template data:', error);
-            });
-    }
-}
-
-function check_all_student_grades(selected_students) {
-    const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
-    student_ids_selected.value = [];
-    const check_all_none_checkbox = document.getElementById('early-alert-checkall-student-checkbox');
-    check_all_none_checkbox.checked = true;
-    //check box for grade showing - remove later
-    const student_checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']");
-    // check box for grade showing - remove later
-    student_checkboxes.forEach(function (checkbox) {
-        checkbox.checked = true;
-        selected_students.push(checkbox.getAttribute('data-student-id'));
-    });
-    student_ids_selected.value = JSON.stringify(selected_students);
-}
-
-// function to save to hidden field on submit if anyone unchecks student records
-function check_individual_students_checkboxes_for_submit() {
-    let selected_students = [];
-    const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
-    const student_checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']");
-    student_checkboxes.forEach(function (checkbox) {
-        if (checkbox.checked) {
-            selected_students.push(checkbox.getAttribute('data-student-id'));
-        }
-    });
-    student_ids_selected.value = JSON.stringify(selected_students);
-}
-
-function check_allnone_listener(selected_students) {
-    // Add an event listener to the select all checkbox
-    const check_all_none_checkbox_orig = document.getElementById('early-alert-checkall-student-checkbox');
-    const student_ids_selected = document.getElementById("early-alert-student-ids") || {};
-
-    // Clone the button to remove any existing listeners before adding a new one
-    const check_all_none_checkbox = check_all_none_checkbox_orig.cloneNode(true);
-    check_all_none_checkbox_orig.parentNode.replaceChild(check_all_none_checkbox, check_all_none_checkbox_orig);
-
-    check_all_none_checkbox.addEventListener('click', function () {
-        student_ids_selected.value = [];
-        // Get all checkboxes within the list, but exclude the 'not using gradebook' checkbox
-        let checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']:not(#early-alert-not-using-gradebook-checkbox)");
-        // Loop through each checkbox and toggle its selection based on the state of the select all checkbox
-        checkboxes.forEach(function (checkbox) {
-            if (check_all_none_checkbox.checked) {
-                checkbox.checked = true;
-                selected_students.push(checkbox.getAttribute('data-student-id'));
-            } else {
-                checkbox.checked = false;
-                selected_students = selected_students.filter(item => item !== checkbox.getAttribute('data-student-id'));
-            }
-        });
-        student_ids_selected.value = JSON.stringify(selected_students);
-    });
-}
-
-/**
- * Validates the assignment title and updates UI accordingly
- * @param {string} title - The assignment title to validate
- * @returns {boolean} - Whether the title is valid
- */
-function validateAssignmentTitle(title) {
-    const errorElement = document.getElementById('assignment-title-error');
-    const sendButtons = document.querySelectorAll('.early-alert-send-button');
-    const previewButtons = document.querySelectorAll('.early-alert-preview-button');
-
-    if (!title) {
-        // Title is required - show error and disable buttons
-        if (errorElement) {
-            errorElement.style.display = 'block';
-        }
-
-        // Disable send and preview buttons
-        sendButtons.forEach(button => {
-            button.disabled = true;
-            button.title = 'Assignment title is required';
-        });
-
-        previewButtons.forEach(button => {
-            button.disabled = true;
-            button.classList.add('disabled');
-            button.title = 'Assignment title is required';
-        });
-
-        return false;
-    } else {
-        // Title is valid - hide error and enable buttons
-        if (errorElement) {
-            errorElement.style.display = 'none';
-        }
-
-        // Enable send and preview buttons
-        sendButtons.forEach(button => {
-            button.disabled = false;
-            button.title = '';
-        });
-
-        previewButtons.forEach(button => {
-            button.disabled = false;
-            button.classList.remove('disabled');
-            button.title = '';
-        });
-
-        return true;
-    }
-}
-
-function setup_preview_buttons(templateCache) {
-    // Get the early-alert-alert-type value
-    const alert_type = document.getElementById('early-alert-alert-type').value;
-
-    // Get the custom message from the template cache
-    const custom_message = templateCache.get('custom_message') || '';
-    const course_name = templateCache.get('course_name') || document.getElementById('early_alert_course_name').value;
-
-    // Store ALL the student data and template cache etc when its processed
-    let student_template_cache_array = [];
-
-    // Remove any existing click event listeners from preview buttons first
-    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
-    preview_buttons.forEach(button => {
-        const clone = button.cloneNode(true);
-        button.parentNode.replaceChild(clone, button);
-    });
-
-    // Now add new event listeners
-    const fresh_buttons = document.querySelectorAll(".early-alert-preview-button");
-    fresh_buttons.forEach(function (button) {
-        let record_data = {};
-        const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
-        const gradeColumn = button.closest('tr').querySelector('.early-alert-grade-column');
-        const gradeBadge = gradeColumn ? gradeColumn.querySelector('.badge') : null;
-        const assigngrade = gradeBadge ? gradeBadge.innerHTML : 'No Grade';
-        let selected_grade = '';
-        let selected_grade_value = 0;
-        if (alert_type === 'grade') { // we only use grade/select etc in this alert type
-            const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
-            selected_grade = grade_select.options[grade_select.selectedIndex].text;
-            selected_grade_value = grade_select.value;
-        }
-
-        let templateObj = {};
-        if (checkbox) {
-            // now, access the parent <tr> element (the table row)
-            const table_row = checkbox.parentNode;
-            // extract the student name from the second <td> element within the table row
-            const student_name_td = table_row.nextElementSibling;
-            // fix and parse the name
-            const student_lname_fname = student_name_td.firstChild;
-            var student_name_arr = [];
-            var student_name = "";
-            student_lname_fname.data.split(/\s*,\s*/).forEach(function (me) {
-                student_name_arr.push(me);
-            });
-            student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-
-            var student_id = checkbox.getAttribute('data-student-id');
-            var student_idnumber = checkbox.getAttribute('data-student-idnumber');
-            const studentCampusAttr = checkbox.getAttribute('data-student-campus');
-            const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
-            const studentMajorAttr = checkbox.getAttribute('data-student-major');
-            const studentLangAttr = checkbox.getAttribute('data-student-lang');
-            const courseIdAttr = checkbox.getAttribute('data-courseid');
-            // uses data found in the checkbox element attributes to create a key to find the template
-            var templateKey = student_idnumber;
-            var templateEmailContent = '';
-            var templateEmailSubject = '';
-
-            // templateCache is checked for the template key and if found the email subject and content are set
-            if (templateCache.has(templateKey)) {
-                templateEmailSubject = templateCache.get(templateKey).subject;
-                templateEmailContent = templateCache.get(templateKey).message;
-                templateObj = templateCache.get(templateKey);
-            } else {
-                templateEmailSubject = 'Template not found';
-                templateEmailContent = 'Template not found';
-            }
-        }
-
-        var assignment_title = templateCache.get('assignment_title') || '';
-
-        var params = {
-            studentname: student_name_arr,
-            assignmentgrade: assigngrade,
-            assignmenttitle: assignment_title,
-            coursename: course_name,
-            customgrade: selected_grade ? selected_grade : DEFAULT_GRADE_LETTER,
-            defaultgrade: DEFAULT_GRADE_LETTER,
-            custommessage: custom_message
-        };
-
-        // Apply the replacements
-        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
-        var changedTemplateEmailSubject = addUserInfo(templateEmailSubject, params);
-
-        // Double-check that [custommessage] is definitely replaced
-        if (changedTemplateEmailContent.includes('[custommessage]')) {
-            changedTemplateEmailContent = changedTemplateEmailContent.replace('[custommessage]', custom_message || '');
-        }
-
-        // assemble record data for individual buttons which includes student and template data
-        record_data.student_id = student_id;
-        record_data.student_name = student_name;
-        record_data.course_name = course_name;
-        record_data.templateEmailSubject = changedTemplateEmailSubject;
-        record_data.templateEmailContent = changedTemplateEmailContent;
-        record_data.template_id = templateObj.templateid;
-        record_data.revision_id = templateObj.revision_id;
-        record_data.triggered_from_user_id = templateObj.triggered_from_user_id;
-        record_data.target_user_id = student_id;
-        record_data.course_id = templateObj.course_id;
-        record_data.instructor_id = templateObj.instructor_id;
-        record_data.assignment_name = params.assignmenttitle;
-        record_data.actual_grade = assigngrade;
-        record_data.trigger_grade = selected_grade_value;
-        record_data.custom_message = custom_message;
-
-        // case where previews are just added to grade alert type and missed exam etc
-        if (alert_type !== 'assign') {
-            button.addEventListener('click', function () {
-                //console.log('Data sent to template from template cache:', record_data);
-                setup_preview_buttons_from_template(record_data);
-            });
-        }
-        // add record to student_template_cache_array to have data to submit / email
-        student_template_cache_array.push(record_data);
-    });
-
-    // once we have all the data we can setup the emails to submit with the template cache data and student ids BUT we have to manage and select the users if they are checked/unchceked
-    setup_send_emails(student_template_cache_array);
-}
-
-function setup_preview_emails_with_titles(templateCache) {
-    // Get the early-alert-alert-type value
-    const alert_type = document.getElementById('early-alert-alert-type').value;
-
-    // Get the custom message from the template cache instead of directly from DOM
-    const customMessage = templateCache.get('custom_message') || '';
-    const course_name = templateCache.get('course_name') || document.getElementById('early_alert_course_name').value;
-
-    // store ALL the student data and template cache etc when its processed
-    let student_template_cache_array = [];
-
-    // Remove any existing click event listeners from preview buttons first
-    const preview_buttons = document.querySelectorAll(".early-alert-preview-button");
-    preview_buttons.forEach(button => {
-        const clone = button.cloneNode(true);
-        button.parentNode.replaceChild(clone, button);
-    });
-
-    // Now add new event listeners
-    const fresh_buttons = document.querySelectorAll(".early-alert-preview-button");
-    fresh_buttons.forEach(function (button) {
-        let record_data = {};
-        const checkbox = button.closest('tr').querySelector('.early-alert-student-checkbox');
-        const gradeColumn = button.closest('tr').querySelector('.early-alert-grade-column');
-        const gradeBadge = gradeColumn ? gradeColumn.querySelector('.badge') : null;
-        const assigngrade = gradeBadge ? gradeBadge.innerHTML : 'No Grade';
-        let selected_grade = '';
-        let selected_grade_value = 0;
-        if (alert_type === 'grade') { // we only use grade/select etc in this alert type
-            const grade_select = document.getElementById('id_early_alert_filter_grade_select') || {};
-            selected_grade = grade_select.options[grade_select.selectedIndex].text;
-            selected_grade_value = grade_select.value;
-        }
-
-        let templateObj = {};
-        if (checkbox) {
-            // now, access the parent <tr> element (the table row)
-            const table_row = checkbox.parentNode;
-            // extract the student name from the second <td> element within the table row
-            const student_name_td = table_row.nextElementSibling;
-            // fix and parse the name
-            const student_lname_fname = student_name_td.firstChild;
-            var student_name_arr = [];
-            var student_name = "";
-            student_lname_fname.data.split(/\s*,\s*/).forEach(function (me) {
-                student_name_arr.push(me);
-            });
-            student_name = student_name_arr[1] + ' ' + student_name_arr[0];
-
-            var student_id = checkbox.getAttribute('data-student-id');
-            var student_idnumber = checkbox.getAttribute('data-student-idnumber');
-            const studentCampusAttr = checkbox.getAttribute('data-student-campus');
-            const studentFacultyAttr = checkbox.getAttribute('data-student-faculty');
-            const studentMajorAttr = checkbox.getAttribute('data-student-major');
-            const studentLangAttr = checkbox.getAttribute('data-student-lang');
-            const courseIdAttr = checkbox.getAttribute('data-courseid');
-            var templateKey = student_idnumber;
-            var templateEmailContent = '';
-            var templateEmailSubject = '';
-
-            // For debugging - can be removed later
-           // console.log('Generated template keys for student ID ' + student_id + ':');
-           // console.log('Course template key: '+ templateKey);
-
-            // The order of checks determines the template precedence.
-            // templateCache is checked for the template key and if found the email subject and content are set
-            if (templateCache.has(templateKey)) {
-                templateEmailSubject = templateCache.get(templateKey).subject;
-                templateEmailContent = templateCache.get(templateKey).message;
-                templateObj = templateCache.get(templateKey);
-            } else {
-                templateEmailSubject = 'Template not found';
-                templateEmailContent = 'Template not found';
-            }
-        }
-
-        var assignment_title = templateCache.get('assignment_title') || '';
-
-        var params = {
-            studentname: student_name_arr,
-            assignmentgrade: assigngrade,
-            assignmenttitle: assignment_title,
-            coursename: course_name,
-            customgrade: selected_grade ? selected_grade : DEFAULT_GRADE_LETTER,
-            defaultgrade: DEFAULT_GRADE_LETTER,
-            custommessage: customMessage
-        };
-
-        // Apply the replacements
-        var changedTemplateEmailContent = addUserInfo(templateEmailContent, params);
-        var changedTemplateEmailSubject = addUserInfo(templateEmailSubject, params);
-
-        // Double-check that [custommessage] is definitely replaced
-        if (changedTemplateEmailContent.includes('[custommessage]')) {
-            changedTemplateEmailContent = changedTemplateEmailContent.replace('[custommessage]', customMessage || '');
-        }
-
-        // assemble record data for individual buttons which includes student and template data
-        record_data.student_id = student_id;
-        record_data.student_name = student_name;
-        record_data.course_name = course_name;
-        record_data.templateEmailSubject = changedTemplateEmailSubject;
-        record_data.templateEmailContent = changedTemplateEmailContent;
-        record_data.template_id = templateObj.templateid;
-        record_data.revision_id = templateObj.revision_id;
-        record_data.triggered_from_user_id = templateObj.triggered_from_user_id;
-        record_data.target_user_id = student_id;
-        record_data.course_id = templateObj.course_id;
-        record_data.instructor_id = templateObj.instructor_id;
-        record_data.assignment_name = params.assignmenttitle;
-        record_data.actual_grade = assigngrade;
-        record_data.trigger_grade = selected_grade_value;
-        record_data.custom_message = customMessage;
-
-        button.addEventListener('click', function () {
-            setup_preview_buttons_from_template(record_data);
-        });
-        student_template_cache_array.push(record_data);
-    });
-
-    setup_send_emails(student_template_cache_array);
-}
-
-var current_modal = null;
-
-function setup_preview_buttons_from_template(student_template_data) {
-    //console.log('Modal created with: ',student_template_data);
-    ModalCancel.create({
-        title: getString('preview_email', 'local_earlyalert'),
-        body: Templates.render('local_earlyalert/preview_student_email', {
-            name: student_template_data.template_name,
-            student_name: student_template_data.student_name,
-            subject: student_template_data.templateEmailSubject,
-            message: student_template_data.templateEmailContent,
-            instructor_name: ''
-        }),
-        large: true,
-
-    }).then(modal => {
-        modal.show();
-        current_modal = modal;
-        return current_modal;
-    });
-
-}
-
-function setup_send_emails(student_template_cache_array) {
-    const send_button = document.getElementById('early-alert-send-button1');
-    const send_button2 = document.getElementById('early-alert-send-button2');
-
-    // Remove any existing event listeners by cloning the buttons
-    if (send_button) {
-        const new_send_button = send_button.cloneNode(true);
-        send_button.parentNode.replaceChild(new_send_button, send_button);
-        new_send_button.addEventListener('click', function () {
-            // Always rebuild the array based on currently checked students
-            maintain_student_template_data_for_submit(student_template_cache_array, true);
-        });
-    }
-
-    if (send_button2) {
-        const new_send_button2 = send_button2.cloneNode(true);
-        send_button2.parentNode.replaceChild(new_send_button2, send_button2);
-        new_send_button2.addEventListener('click', function () {
-            // Always rebuild the array based on currently checked students
-            maintain_student_template_data_for_submit(student_template_cache_array, true);
-        });
-    }
-}
-
-// Only send for currently checked students, not all in the cache array
-function maintain_student_template_data_for_submit(student_template_cache_array, forceRebuild = false) {
-    check_individual_students_checkboxes_for_submit();
-    var student_ids_array = JSON.parse(document.getElementById("early-alert-student-ids").value); // hidden field ids
-
-    // If forceRebuild is true, rebuild the array from DOM state
-    let filtered_array = [];
-    if (forceRebuild) {
-        // Rebuild from DOM: only include checked students
-        const student_checkboxes = document.querySelectorAll("input[class^='early-alert-student-checkbox']");
-        student_checkboxes.forEach(function (checkbox) {
-            if (checkbox.checked) {
-                const student_id = checkbox.getAttribute('data-student-id');
-                // Find the matching record in the cache array
-                const record = student_template_cache_array.find(stu => stu.student_id == student_id);
-                if (record) filtered_array.push(record);
-            }
-        });
-    } else {
-        // remove students from template cache if they have been unchecked
-        filtered_array = student_template_cache_array.filter(student => student_ids_array.includes(student.student_id));
-    }
-
-    filtered_array.length > 0 ? create_notification_dialog(filtered_array) : notification.alert('No students selected', 'Please select at least one student to send emails.');
-}
-
-function create_notification_dialog(student_template_cache_array) {
-
-    // Get the data id attribute value
-    var send_string = getString('send_email', 'local_earlyalert');
-    var send_dialog_text = getString('send_dialog_text', 'local_earlyalert');
-    var send = getString('send', 'local_earlyalert');
-    var cancel = getString('cancel', 'local_earlyalert');
-    var could_not_send_email = getString('could_not_send_email', 'local_earlyalert');
-    var sent_dialog_text = getString('sent_dialog_text', 'local_earlyalert');
-
-    // Notification
-    notification.confirm(send_string, send_dialog_text, send, cancel, function () {
-
-        // send emails and save records
-        var sendEmail = ajax.call([{
-            methodname: 'local_earlyalert_report_log_insert',
-            args: {
-                template_data: JSON.stringify(student_template_cache_array),
-            }
-        }]);
-        sendEmail[0].done(function () {
-            // success
-            sendEmail[0].then(result => {
-                    notification.alert('Email', getString('sent_dialog_text', 'local_earlyalert', result));
-                }
-            );
-        }).fail(function () {
-            notification.alert(could_not_send_email);
-        });
-    });
-}
-
-function get_users() {
-    const params = new URLSearchParams(window.location.search);
-    let user_id = params.get('user_id');
-    // If user_id is not in URL, use the hidden input value (logged-in user)
-    if (!user_id) {
-        const teacherUserIdInput = document.getElementById('early-alert-teacher-user-id');
-        if (teacherUserIdInput) {
-            user_id = teacherUserIdInput.value;
-        }
-    }
-    selectBox.init('#search', 'local_earlyalert_get_users', "Select a user");
-    selectCourseBox.init('#course-search', 'local_earlyalert_get_courses', user_id, "Select a course");
-    let search = document.getElementById('search');
-    let courseSearch = document.getElementById('course-search');
-
-    if (!courseSearch) return;
-
-    let userId = search ? search.value : user_id; // fallback to logged-in user
-
-    // On course change, reload page with user_id and course_id
-    courseSearch.addEventListener('change', function (event) {
-        const courseId = courseSearch.value;
-        if (courseId) {
-            window.location.href = config.wwwroot + '/local/earlyalert/dashboard.php?user_id=' + user_id + '&course_id=' + courseId;
-        }
-    });
-    // If a user is already selected, populate courses for that user
-    if (search && courseSearch) {
-        // On user change, update courses and clear selection
-        search.addEventListener('change', function (event) {
-            const newUserId = search.value;
-            selectCourseBox.init('#course-search', 'local_earlyalert_get_courses', newUserId, "Select a course");
-            // Clear the course selection
-            courseSearch.value = '';
-        });
-    }
-
-    // Set the selected value on courseSearch if course_id is present in URL
-    const course_id = params.get('course_id');
-    if (course_id && courseSearch) {
-        // Wait for the dropdown to be populated, then set the value
-        const setSelectedCourse = () => {
-            if (courseSearch.options.length > 1) {
-                courseSearch.value = course_id;
-            } else {
-                setTimeout(setSelectedCourse, 50);
-            }
-        };
-        setSelectedCourse();
-    }
-}
-
-function addUserInfo(emailText, params) {
-    // Define text replacements
-    const textReplace = [
-        '[firstname]',
-        '[fullname]',
-        '[usergrade]',
-        '[grade]',
-        '[coursename]',
-        '[assignmenttitle]',
-        '[custommessage]'
+const SELECTORS = {
+    dashboardView: '#earlyalert-dashboard-view',
+    workflowView: '#earlyalert-workflow-view',
+    courseRow: '[data-action="earlyalert/select-course"]',
+    openCourse: '[data-action="earlyalert/open-course"]',
+    backDashboard: '[data-action="earlyalert/back-dashboard"]',
+    backStep1: '[data-action="earlyalert/back-step-1"]',
+    backStep2: '[data-action="earlyalert/back-step-2"]',
+    goStep2: '[data-action="earlyalert/go-step-2"]',
+    goStep3: '[data-action="earlyalert/go-step-3"]',
+    applyFilters: '[data-action="earlyalert/apply-filters"]',
+    sendAlerts: '[data-action="earlyalert/send-alerts"]',
+    search: '[data-action="earlyalert/search"]',
+    prevPage: '[data-action="earlyalert/prev-page"]',
+    nextPage: '[data-action="earlyalert/next-page"]',
+    goPage: '[data-action="earlyalert/go-page"]',
+    closePreview: '[data-action="earlyalert/close-preview"]',
+    clearSelection: '[data-action="earlyalert/clear-selection"]',
+    exportSelected: '[data-action="earlyalert/export-selected"]',
+    sort: '[data-action="earlyalert/sort"]',
+    resetTemplate: '[data-action="earlyalert/reset-template"]',
+    alertOption: '.ea-alert-option',
+    gradeItems: '#ea-grade-items',
+};
+
+const STRINGS = {};
+const TOKEN_LIST = ['[Student Name]', '[Course Name]', '[Grade Item]', '[Assignment Name]', '[Instructor Name]'];
+const SORT_ICON = {
+    none: '-',
+    asc: '↑',
+    desc: '↓',
+};
+
+const loadStrings = async() => {
+    const keys = [
+        'selected',
+        'loading',
+        'no_students_found',
+        'preview_email',
+        'send_email',
+        'send_dialog_text',
+        'send',
+        'cancel',
+        'alert_sent_successfully',
+        'preview_message_placeholder',
+        'overall_course_grade',
+        'clear_selection',
+        'export_csv',
+        'message_template',
+        'subject_line',
+        'message_body',
+        'available_tokens',
+        'sample_preview_note',
+        'reset_to_template',
+        'student_id',
     ];
+    const values = await Promise.all(keys.map(key => Str.get_string(key, 'local_earlyalert').catch(() => key)));
+    keys.forEach((key, index) => {
+        STRINGS[key] = values[index];
+    });
+};
 
-    // Build replacement info
-    let uniqueMatches = {};
-    for (let i = 0; i < textReplace.length; i++) {
-        if (emailText.includes(textReplace[i])) {
-            // Perform action for each unique match found
-            switch (i) {
-                case 0:
-                    // firstname action
-                    let firstNameText = params.studentname[1] ? params.studentname[1] : '{USER_NOT_FOUND}';
-                    uniqueMatches[i] = firstNameText;
-                    break;
-                case 1:
-                    // fullname action
-                    let targetUser = params.studentname[1] ? `${params.studentname[1]} ${params.studentname[0]}` : '{USER_NOT_FOUND}';
-                    uniqueMatches[i] = targetUser;
-                    break;
-                case 2:
-                    // usergrade action
-                    let userGradeText = params.assignmentgrade || '{USER GRADE NOT PROVIDED/FOUND}';
-                    uniqueMatches[i] = userGradeText;
-                    break;
-                case 3:
-                    // grade acton
-                    let defaultGradeText = params.customgrade || (params.defaultgrade ? params.defaultgrade : '{GRADE NOT PROVIDED/FOUND}');
-                    uniqueMatches[i] = defaultGradeText;
-                    break;
-                case 4:
-                    // coursename action
-                    let courseTitleText = params.coursename || '{COURSE TITLE NOT FOUND}';
-                    uniqueMatches[i] = courseTitleText;
-                    break;
-                case 5:
-                    // assignmenttitle action
-                    let assignmentTitleText = params.assignmenttitle || '{ASSIGNMENT TITLE NOT FOUND}';
-                    uniqueMatches[i] = assignmentTitleText;
-                    break;
-                case 6:
-                    // custommessage action
-                    let customMessageText = params.custommessage || '';
-                    uniqueMatches[i] = customMessageText;
-                    break;
+const root = () => document.getElementById('earlyalert-dashboard');
+
+let previewModalInstance = null;
+
+const escapeHtml = value => String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const decodeHtml = value => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = value || '';
+    return textarea.value;
+};
+
+const sanitizeHtml = html => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    doc.querySelectorAll('script,iframe,object,embed,form,style').forEach(node => node.remove());
+
+    doc.querySelectorAll('*').forEach(el => {
+        Array.from(el.attributes).forEach(attr => {
+            const name = attr.name.toLowerCase();
+            const value = (attr.value || '').trim().toLowerCase();
+            if (name.startsWith('on')) {
+                el.removeAttribute(attr.name);
             }
-        }
-    }
-    // Replace the text with the matched values
-    for (let i = 0; i < textReplace.length; i++) {
-        if (uniqueMatches[i]) {
-            emailText = emailText.replace(textReplace[i], uniqueMatches[i]);
-        }
-    }
-    return emailText;
-}
+            if ((name === 'href' || name === 'src') && value.startsWith('javascript:')) {
+                el.removeAttribute(attr.name);
+            }
+        });
+    });
 
-/**
- * Focuses on the check all/none checkbox when the student list is rendered
- */
-function focusOnCheckall() {
-    // Use setTimeout to ensure DOM is fully rendered
-    setTimeout(() => {
-        // Find the check all/none checkbox
-        const check_all_none_checkbox = document.getElementById('early-alert-checkall-student-checkbox');
+    return doc.body.innerHTML;
+};
 
-        if (check_all_none_checkbox) {
-            // Scroll to the check all checkbox smoothly
-            check_all_none_checkbox.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-
-            // Focus on the checkbox for keyboard navigation
-            check_all_none_checkbox.focus();
-        }
-    }, 100); // Small delay to ensure DOM is ready
-}
-
-/**
- * Sets up toggle functionality for the single custom message container
- */
-function setup_custom_message_toggles() {
-    const btn = document.getElementById('toggle-custom-message');
-    const container = document.getElementById('custom-message-container');
-
-    if (!btn || !container) {
+const renderMessageHtml = (target, message) => {
+    if (!target) {
         return;
     }
 
-    // Replace button to clear any previous listeners from re-renders
-    const button = btn.cloneNode(true);
-    btn.parentNode.replaceChild(button, btn);
+    if (!message) {
+        target.textContent = STRINGS.preview_message_placeholder || '';
+        return;
+    }
 
-    const setOpenState = (open) => {
-        // Sync aria state
-        button.setAttribute('aria-expanded', String(open));
-        // Update label and styles
-        if (open) {
-            button.innerHTML = '<i class="fa fa-minus"></i> Hide Custom Message';
-            button.classList.remove('btn-outline-secondary');
-            button.classList.add('btn-outline-primary');
+    const decoded = decodeHtml(message);
+    const hasHtml = /<\/?[a-z][\s\S]*>/i.test(decoded);
+    if (!hasHtml) {
+        target.innerHTML = escapeHtml(decoded).replace(/\n/g, '<br>');
+        return;
+    }
+
+    target.innerHTML = sanitizeHtml(decoded);
+};
+
+const parseGradePercent = gradeText => {
+    const match = String(gradeText || '').match(/([0-9]+(?:\.[0-9]+)?)%/);
+    if (!match) {
+        return Number.NaN;
+    }
+    return parseFloat(match[1]);
+};
+
+const compareValues = (left, right) => {
+    if (left < right) {
+        return -1;
+    }
+    if (left > right) {
+        return 1;
+    }
+    return 0;
+};
+
+const getStudentSortValue = (student, sortBy) => {
+    if (sortBy === 'idnumber') {
+        return String(student.idnumber || '').toLowerCase();
+    }
+    if (sortBy === 'grade') {
+        const percent = parseGradePercent(student.grade || '');
+        return Number.isNaN(percent) ? Number.NEGATIVE_INFINITY : percent;
+    }
+    return `${String(student.last_name || '').toLowerCase()} ${String(student.first_name || '').toLowerCase()}`;
+};
+
+const sortStudents = students => {
+    if (!Array.isArray(students) || STATE.sortDir === 'none') {
+        return students || [];
+    }
+
+    const multiplier = STATE.sortDir === 'asc' ? 1 : -1;
+    return [...students].sort((a, b) => {
+        const av = getStudentSortValue(a, STATE.sortBy);
+        const bv = getStudentSortValue(b, STATE.sortBy);
+        const result = compareValues(av, bv);
+        if (result !== 0) {
+            return result * multiplier;
+        }
+        const fallbackA = `${String(a.last_name || '').toLowerCase()} ${String(a.first_name || '').toLowerCase()}`;
+        const fallbackB = `${String(b.last_name || '').toLowerCase()} ${String(b.first_name || '').toLowerCase()}`;
+        return compareValues(fallbackA, fallbackB);
+    });
+};
+
+const updateSortIndicators = () => {
+    ['name', 'idnumber', 'grade'].forEach(key => {
+        const node = document.getElementById(`ea-sort-indicator-${key}`);
+        if (!node) {
+            return;
+        }
+        if (STATE.sortBy === key) {
+            node.textContent = SORT_ICON[STATE.sortDir] || SORT_ICON.none;
         } else {
-            button.innerHTML = '<i class="fa fa-plus"></i> Show Custom Message';
-            button.classList.remove('btn-outline-primary');
-            button.classList.add('btn-outline-secondary');
+            node.textContent = SORT_ICON.none;
+        }
+    });
+};
+
+const getPreviewModal = () => {
+    const modalEl = document.getElementById('ea-preview-modal');
+    if (!modalEl) {
+        return null;
+    }
+
+    if (!previewModalInstance && window.bootstrap && window.bootstrap.Modal) {
+        previewModalInstance = new window.bootstrap.Modal(modalEl);
+    }
+    return {modalEl, instance: previewModalInstance};
+};
+
+const openPreviewModal = () => {
+    const modal = getPreviewModal();
+    if (!modal) {
+        return;
+    }
+
+    if (modal.instance) {
+        modal.instance.show();
+    } else {
+        modal.modalEl.classList.add('show');
+        modal.modalEl.style.display = 'block';
+    }
+};
+
+const closePreviewModal = () => {
+    const modal = getPreviewModal();
+    if (!modal) {
+        return;
+    }
+
+    if (modal.instance) {
+        modal.instance.hide();
+    } else {
+        modal.modalEl.classList.remove('show');
+        modal.modalEl.style.display = 'none';
+    }
+};
+
+const showDashboard = () => {
+    document.querySelector(SELECTORS.dashboardView)?.classList.remove('d-none');
+    document.querySelector(SELECTORS.workflowView)?.classList.add('d-none');
+};
+
+const showWorkflow = () => {
+    document.querySelector(SELECTORS.dashboardView)?.classList.add('d-none');
+    document.querySelector(SELECTORS.workflowView)?.classList.remove('d-none');
+};
+
+const updateSelectionState = () => {
+    const count = STATE.selectedStudents.size;
+    const selectedCount = document.getElementById('ea-selected-count');
+    if (selectedCount) {
+        selectedCount.textContent = `${count} ${STRINGS.selected || 'selected'}`;
+    }
+
+    const toCompose = document.querySelector(SELECTORS.goStep3);
+    if (toCompose) {
+        toCompose.disabled = count === 0;
+    }
+};
+
+const updateRangeIndicator = (page, perPage, total) => {
+    const rangeEl = document.getElementById('ea-table-range');
+    if (!rangeEl) {
+        return;
+    }
+    if (!total) {
+        rangeEl.textContent = 'Showing 0-0 of 0';
+        return;
+    }
+    const start = ((page - 1) * perPage) + 1;
+    const end = Math.min(page * perPage, total);
+    STATE.rangeStart = start;
+    STATE.rangeEnd = end;
+    STATE.totalStudents = total;
+    rangeEl.textContent = `Showing ${start}-${end} of ${total}`;
+};
+
+const setLoadingRows = () => {
+    const tbody = document.querySelector('[data-region="students-table-body"]');
+    if (!tbody) {
+        return;
+    }
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">${escapeHtml(STRINGS.loading || 'Loading...')}</td></tr>`;
+};
+
+const deriveFilterModeFromSelection = () => {
+    const select = document.querySelector(SELECTORS.gradeItems);
+    if (!select) {
+        STATE.filterMode = 'course';
+        STATE.gradeItemId = 0;
+        STATE.gradeItemIds = [];
+        return;
+    }
+
+    const selected = Array.from(select.selectedOptions)
+        .map(option => parseInt(option.value || '0', 10))
+        .filter(value => !Number.isNaN(value));
+
+    if (!selected.length || selected.includes(0)) {
+        STATE.filterMode = 'course';
+        STATE.gradeItemId = 0;
+        STATE.gradeItemIds = [];
+        return;
+    }
+
+    if (selected.length === 1) {
+        STATE.filterMode = 'single';
+        STATE.gradeItemId = selected[0];
+        STATE.gradeItemIds = [];
+        return;
+    }
+
+    STATE.filterMode = 'multi';
+    STATE.gradeItemId = 0;
+    STATE.gradeItemIds = selected;
+};
+
+const updatePaginationUi = response => {
+    STATE.totalPages = Math.max(1, Math.ceil((response.total || 0) / (response.perpage || STATE.perPage)));
+
+    const summary = document.getElementById('ea-pagination-summary');
+    if (summary) {
+        summary.textContent = `${response.total} total`;
+    }
+
+    updateRangeIndicator(response.page || 1, response.perpage || STATE.perPage, response.total || 0);
+
+    const totalPagesLabel = document.getElementById('ea-total-pages');
+    if (totalPagesLabel) {
+        totalPagesLabel.textContent = `of ${STATE.totalPages}`;
+    }
+
+    const pageInput = document.getElementById('ea-page-input');
+    if (pageInput) {
+        pageInput.value = String(response.page || 1);
+        pageInput.max = String(STATE.totalPages);
+    }
+
+    const prev = document.querySelector(SELECTORS.prevPage);
+    const next = document.querySelector(SELECTORS.nextPage);
+    if (prev) {
+        prev.disabled = response.page <= 1;
+    }
+    if (next) {
+        next.disabled = response.page >= STATE.totalPages;
+    }
+};
+
+const loadGradeItems = () => {
+    if (!STATE.courseId || STATE.gradeItemsLoadedForCourse === STATE.courseId) {
+        return Promise.resolve();
+    }
+
+    const select = document.querySelector(SELECTORS.gradeItems);
+    if (!select) {
+        return Promise.resolve();
+    }
+
+    return Ajax.call([{
+        methodname: 'local_earlyalert_get_course_grade_items',
+        args: {courseid: STATE.courseId}
+    }])[0].then(items => {
+        const optionHtml = [];
+        optionHtml.push(`<option value="0" selected>${escapeHtml(STRINGS.overall_course_grade || 'Overall Course Grade')}</option>`);
+        (items || []).forEach(item => {
+            if (parseInt(item.id, 10) !== 0 && item.itemtype !== 'course') {
+                optionHtml.push(`<option value="${parseInt(item.id, 10)}">${escapeHtml(item.name || '')}</option>`);
+            }
+        });
+        select.innerHTML = optionHtml.join('');
+        STATE.gradeItemsLoadedForCourse = STATE.courseId;
+        deriveFilterModeFromSelection();
+    }).catch(Notification.exception);
+};
+
+const loadStudents = () => {
+    if (!STATE.courseId || !STATE.alertType) {
+        return;
+    }
+
+    deriveFilterModeFromSelection();
+    setLoadingRows();
+
+    const search = document.getElementById('ea-search')?.value || '';
+
+    Ajax.call([{methodname: 'local_earlyalert_get_course_students_page', args: {
+        courseid: STATE.courseId,
+        teacher_user_id: STATE.teacherUserId,
+        alert_type: STATE.alertType,
+        filtermode: STATE.filterMode,
+        condition: STATE.condition,
+        thresholdid: STATE.thresholdId,
+        gradeitemid: STATE.gradeItemId,
+        gradeitemids: JSON.stringify(STATE.gradeItemIds),
+        includeallstudents: STATE.includeAllStudents,
+        search,
+        page: STATE.page,
+        perpage: STATE.perPage,
+        sortby: STATE.sortBy,
+        sortdir: STATE.sortDir,
+    }}])[0].then(response => {
+        const tbody = document.querySelector('[data-region="students-table-body"]');
+        if (!tbody) {
+            return;
+        }
+
+        if (!response.students || !response.students.length) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">${escapeHtml(STRINGS.no_students_found || 'No students found')}</td></tr>`;
+            updatePaginationUi(response);
+            return;
+        }
+
+        const students = sortStudents(response.students);
+
+        tbody.innerHTML = students.map(student => {
+            STATE.studentDataById.set(student.id, student);
+            const checked = STATE.selectedStudents.has(student.id) ? 'checked' : '';
+            const fullname = `${student.last_name || ''}, ${student.first_name || ''}`.trim();
+            const email = student.email ? `<div class="small text-muted">${escapeHtml(student.email)}</div>` : '';
+            return `
+                <tr>
+                    <td><input type="checkbox" class="form-check-input ea-student-checkbox" data-student-id="${student.id}" ${checked}></td>
+                    <td>
+                        <div class="fw-semibold">${escapeHtml(fullname)}</div>
+                        ${email}
+                    </td>
+                    <td>${escapeHtml(student.idnumber || '')}</td>
+                    <td><span class="badge bg-light text-dark border">${escapeHtml(student.grade || '')}</span></td>
+                    <td class="text-end"><button type="button" class="btn btn-outline-secondary btn-sm ea-student-preview" data-student-id="${student.id}">${escapeHtml(STRINGS.preview_email || 'Preview')}</button></td>
+                </tr>`;
+        }).join('');
+
+        updatePaginationUi(response);
+        updateSelectionState();
+        updateSortIndicators();
+    }).catch(Notification.exception);
+};
+
+const getTemplateDefaultsForAlertType = alertType => {
+    const tokenStudent = '[Student Name]';
+    const tokenCourse = '[Course Name]';
+    const tokenGradeItem = '[Grade Item]';
+    const tokenAssignment = '[Assignment Name]';
+    const tokenInstructor = '[Instructor Name]';
+
+    if (alertType === 'assign') {
+        return [{
+            id: 'default-assignment',
+            name: 'Default - Missed Assignment',
+            subject: `Check-in regarding ${tokenCourse}`,
+            body: `Dear ${tokenStudent},\n\nI am reaching out because you missed ${tokenAssignment} in ${tokenCourse}. Please connect with me so we can plan your next steps.\n\nBest regards,\n${tokenInstructor}`,
+        }];
+    }
+
+    if (alertType === 'exam') {
+        return [{
+            id: 'default-exam',
+            name: 'Default - Missed Test/Quiz',
+            subject: `Follow-up for ${tokenCourse}`,
+            body: `Dear ${tokenStudent},\n\nI noticed a missed test/quiz in ${tokenCourse}. Please reach out so we can discuss support options and your plan going forward.\n\nBest regards,\n${tokenInstructor}`,
+        }];
+    }
+
+    if (alertType === 'commendation') {
+        return [{
+            id: 'default-commendation',
+            name: 'Default - Commendation',
+            subject: `Great progress in ${tokenCourse}`,
+            body: `Dear ${tokenStudent},\n\nI want to acknowledge your strong progress in ${tokenCourse}. Keep up the excellent work.\n\nBest regards,\n${tokenInstructor}`,
+        }];
+    }
+
+    return [{
+        id: 'default-grade',
+        name: 'Default - Low Grade Alert',
+        subject: `Check-in regarding ${tokenCourse}`,
+        body: `Dear ${tokenStudent},\n\nI am reaching out because your current grade in ${tokenCourse} (${tokenGradeItem}) is below the expected threshold.\n\nPlease do not hesitate to reply if you have any questions.\n\nBest regards,\n${tokenInstructor}`,
+    }];
+};
+
+const renderTokenList = () => {
+    const container = document.getElementById('ea-token-list');
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = TOKEN_LIST
+        .map(token => `<span class="badge bg-white border text-dark">${escapeHtml(token)}</span>`)
+        .join('');
+};
+
+const getSampleStudent = () => ({
+    first_name: 'Alex',
+    last_name: 'Johnson',
+});
+
+const getPlaceholderMap = student => {
+    const fullname = student ? `${student.first_name || ''} ${student.last_name || ''}`.trim() : 'Student Name';
+    return {
+        '[Student Name]': fullname || 'Student Name',
+        '[Course Name]': STATE.courseName || 'Course Name',
+        '[Grade Item]': STRINGS.overall_course_grade || 'Overall Course Grade',
+        '[Assignment Name]': 'Assignment Name',
+        '[Instructor Name]': 'Instructor',
+    };
+};
+
+const applyPlaceholders = (text, map) => {
+    let output = String(text || '');
+    Object.entries(map).forEach(([token, value]) => {
+        output = output.split(token).join(value);
+    });
+    return output;
+};
+
+const updateComposeSummary = () => {
+    const summary = document.getElementById('ea-compose-summary');
+    if (!summary) {
+        return;
+    }
+
+    const count = STATE.selectedStudents.size;
+    summary.textContent = `Sending to ${count} students. Personalization tokens are filled automatically when sent.`;
+};
+
+const renderComposePreview = () => {
+    const subjectNode = document.getElementById('ea-message-preview-subject');
+    const bodyNode = document.getElementById('ea-message-preview-text');
+    if (!subjectNode || !bodyNode) {
+        return;
+    }
+
+    const sampleStudent = getSampleStudent();
+    const map = getPlaceholderMap(sampleStudent);
+
+    const subjectInput = document.getElementById('ea-message-subject');
+    const messageInput = document.getElementById('ea-custom-message');
+    const subject = applyPlaceholders(subjectInput?.value || '', map);
+    const body = applyPlaceholders(messageInput?.value || '', map);
+
+    subjectNode.textContent = subject;
+    renderMessageHtml(bodyNode, body);
+};
+
+const applyTemplate = templateId => {
+    const template = STATE.composeTemplates.find(item => item.id === templateId) || STATE.composeTemplates[0];
+    if (!template) {
+        return;
+    }
+
+    STATE.composeTemplateId = template.id;
+    const subjectInput = document.getElementById('ea-message-subject');
+    const messageInput = document.getElementById('ea-custom-message');
+    if (subjectInput) {
+        subjectInput.value = template.subject;
+    }
+    if (messageInput) {
+        messageInput.value = template.body;
+    }
+    renderComposePreview();
+};
+
+const initComposeForm = () => {
+    STATE.composeTemplates = getTemplateDefaultsForAlertType(STATE.alertType);
+
+    const select = document.getElementById('ea-template-select');
+    if (select) {
+        select.innerHTML = STATE.composeTemplates.map(template =>
+            `<option value="${escapeHtml(template.id)}">${escapeHtml(template.name)}</option>`
+        ).join('');
+        STATE.composeTemplateId = STATE.composeTemplates[0]?.id || '';
+        if (STATE.composeTemplateId) {
+            select.value = STATE.composeTemplateId;
+        }
+    }
+
+    renderTokenList();
+    applyTemplate(STATE.composeTemplateId);
+    updateComposeSummary();
+};
+
+const updatePreview = () => {
+    renderComposePreview();
+};
+
+const previewStudent = studentid => {
+    const customMessage = document.getElementById('ea-custom-message')?.value || '';
+    Ajax.call([{methodname: 'local_earlyalert_get_student_preview_template', args: {
+        courseid: STATE.courseId,
+        teacher_user_id: STATE.teacherUserId,
+        studentid,
+        alert_type: STATE.alertType,
+        thresholdid: STATE.thresholdId,
+        assignment_title: '',
+        custom_message: customMessage,
+    }}])[0].then(response => {
+        STATE.previewData = response;
+        const student = STATE.studentDataById.get(studentid) || {};
+        const recipient = document.getElementById('ea-preview-modal-recipient');
+        if (recipient) {
+            recipient.textContent = `${student.first_name || ''} ${student.last_name || ''}`.trim();
+        }
+
+        const modalBody = document.getElementById('ea-preview-modal-body');
+        renderMessageHtml(modalBody, response.message || '');
+        openPreviewModal();
+    }).catch(Notification.exception);
+};
+
+const exportSelectedStudents = () => {
+    const selectedIds = Array.from(STATE.selectedStudents.keys());
+    if (!selectedIds.length) {
+        Notification.alert('', STRINGS.no_students_found || 'No students selected');
+        return;
+    }
+
+    const rows = selectedIds
+        .map(id => STATE.studentDataById.get(id))
+        .filter(Boolean);
+
+    if (!rows.length) {
+        Notification.alert('', STRINGS.no_students_found || 'No students selected');
+        return;
+    }
+
+    const toCsv = value => {
+        const raw = String(value || '');
+        return `"${raw.replace(/"/g, '""')}"`;
+    };
+
+    const header = ['Student Name', 'Email', STRINGS.student_id || 'Student ID', 'Grade'];
+    const lines = [header.map(toCsv).join(',')];
+
+    rows.forEach(student => {
+        const fullname = `${student.last_name || ''}, ${student.first_name || ''}`.trim();
+        lines.push([
+            toCsv(fullname),
+            toCsv(student.email || ''),
+            toCsv(student.idnumber || ''),
+            toCsv(student.grade || ''),
+        ].join(','));
+    });
+
+    const blob = new Blob([`${lines.join('\n')}\n`], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `early-alert-selected-${STATE.courseId}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+};
+
+const clearSelection = () => {
+    STATE.selectedStudents.clear();
+    document.querySelectorAll('.ea-student-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+
+    const checkAll = document.getElementById('ea-check-all-page');
+    if (checkAll) {
+        checkAll.checked = false;
+    }
+
+    updateSelectionState();
+    updateComposeSummary();
+};
+
+const sendAlerts = () => {
+    const ids = Array.from(STATE.selectedStudents.keys());
+    if (!ids.length) {
+        Notification.alert('', STRINGS.no_students_found || 'No students selected');
+        return;
+    }
+
+    Notification.confirm(
+        STRINGS.send_email || 'Send Email',
+        STRINGS.send_dialog_text || 'Are you sure you want to send the alert emails?',
+        STRINGS.send || 'Send',
+        STRINGS.cancel || 'Cancel',
+        () => {
+            Ajax.call([{methodname: 'local_earlyalert_report_log_insert', args: {
+                template_data: JSON.stringify(ids.map(studentid => {
+                    const student = STATE.studentDataById.get(studentid) || {};
+                    return {
+                        student_id: studentid,
+                        template_id: student.templateid || 0,
+                        revision_id: student.revision_id || 0,
+                        triggered_from_user_id: student.triggered_from_user_id || STATE.teacherUserId,
+                        course_id: STATE.courseId,
+                        instructor_id: student.instructor_id || STATE.teacherUserId,
+                        assignment_name: '',
+                        trigger_grade: STATE.thresholdId,
+                        actual_grade: student.grade || '',
+                        custom_message: document.getElementById('ea-custom-message')?.value || '',
+                    };
+                })),
+            }}])[0].then(() => {
+                Notification.alert('', STRINGS.alert_sent_successfully || 'Alert sent successfully');
+            }).catch(Notification.exception);
+        }
+    );
+};
+
+const showStep = step => {
+    document.querySelectorAll('[data-region^="step-"]').forEach(region => region.classList.add('d-none'));
+    document.querySelector(`[data-region="step-${step}"]`)?.classList.remove('d-none');
+
+    document.querySelectorAll('.ea-step-label').forEach(stepNode => {
+        const badgeEl = stepNode.previousElementSibling;
+        if (!badgeEl || !badgeEl.classList.contains('badge')) {
+            return;
+        }
+        const stepNum = parseInt(badgeEl.dataset.step || '0', 10);
+        if (stepNum === step) {
+            badgeEl.classList.remove('bg-secondary');
+            badgeEl.classList.add('bg-primary');
+            stepNode.classList.add('fw-semibold');
+        } else if (stepNum < step) {
+            badgeEl.classList.add('bg-success');
+            badgeEl.classList.remove('bg-primary', 'bg-secondary');
+            stepNode.classList.remove('fw-semibold');
+        } else {
+            badgeEl.classList.add('bg-secondary');
+            badgeEl.classList.remove('bg-primary', 'bg-success');
+            stepNode.classList.remove('fw-semibold');
+        }
+    });
+
+    if (step === 2) {
+        loadGradeItems().then(() => {
+            loadStudents();
+        }).catch(Notification.exception);
+    }
+    if (step === 3) {
+        initComposeForm();
+        updatePreview();
+    }
+};
+
+const openCourseFlow = (courseId, courseName) => {
+    STATE.courseId = parseInt(courseId || '0', 10);
+    STATE.courseName = courseName || '';
+    STATE.alertType = '';
+    STATE.selectedStudents.clear();
+    STATE.studentDataById.clear();
+    STATE.previewData = null;
+    STATE.page = 1;
+    STATE.totalPages = 1;
+    STATE.perPage = 10;
+    STATE.includeAllStudents = false;
+    STATE.filterMode = 'course';
+    STATE.gradeItemId = 0;
+    STATE.gradeItemIds = [];
+    STATE.gradeItemsLoadedForCourse = 0;
+    STATE.sortBy = 'name';
+    STATE.sortDir = 'none';
+
+    document.getElementById('ea-selected-course-label').textContent = STATE.courseName;
+    document.querySelectorAll(SELECTORS.alertOption).forEach(button => button.classList.remove('active'));
+
+    const next = document.querySelector(SELECTORS.goStep2);
+    if (next) {
+        next.disabled = true;
+    }
+    const toCompose = document.querySelector(SELECTORS.goStep3);
+    if (toCompose) {
+        toCompose.disabled = true;
+    }
+
+    const perPageSelect = document.getElementById('ea-per-page');
+    if (perPageSelect) {
+        perPageSelect.value = '10';
+    }
+    const includeAll = document.getElementById('ea-include-all-students');
+    if (includeAll) {
+        includeAll.checked = false;
+    }
+
+    updateSortIndicators();
+    showWorkflow();
+    showStep(1);
+};
+
+const updateNextStepButton = () => {
+    const next = document.querySelector(SELECTORS.goStep2);
+    if (next) {
+        next.disabled = !STATE.alertType;
+    }
+};
+
+const cycleSort = column => {
+    if (STATE.sortBy !== column) {
+        STATE.sortBy = column;
+        STATE.sortDir = 'asc';
+        return;
+    }
+
+    if (STATE.sortDir === 'none') {
+        STATE.sortDir = 'asc';
+        return;
+    }
+    if (STATE.sortDir === 'asc') {
+        STATE.sortDir = 'desc';
+        return;
+    }
+
+    STATE.sortDir = 'none';
+};
+
+export const init = async() => {
+    await loadStrings();
+    const dashboard = root();
+    if (!dashboard) {
+        return;
+    }
+
+    STATE.teacherUserId = parseInt(dashboard.dataset.teacherUserId || '0', 10);
+
+    document.addEventListener('click', event => {
+        const courseRow = event.target.closest(SELECTORS.courseRow);
+        if (courseRow || event.target.closest(SELECTORS.openCourse)) {
+            const row = courseRow || event.target.closest(SELECTORS.openCourse)?.closest(SELECTORS.courseRow);
+            if (row) {
+                openCourseFlow(row.dataset.courseId, row.dataset.courseName);
+            }
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.backDashboard)) {
+            showDashboard();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.backStep1)) {
+            showStep(1);
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.backStep2)) {
+            showStep(2);
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.closePreview)) {
+            closePreviewModal();
+            return;
+        }
+
+        const sortButton = event.target.closest(SELECTORS.sort);
+        if (sortButton) {
+            const sortBy = sortButton.dataset.sortBy || 'name';
+            cycleSort(sortBy);
+            loadStudents();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.clearSelection)) {
+            clearSelection();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.exportSelected)) {
+            exportSelectedStudents();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.alertOption)) {
+            const button = event.target.closest(SELECTORS.alertOption);
+            STATE.alertType = button.dataset.alertType || '';
+
+            if (STATE.alertType === 'assign' || STATE.alertType === 'exam') {
+                STATE.condition = 'missing';
+            } else if (STATE.alertType === 'commendation') {
+                STATE.condition = 'above';
+            } else {
+                STATE.condition = 'below';
+            }
+
+            const conditionSelect = document.getElementById('ea-condition');
+            if (conditionSelect) {
+                conditionSelect.value = STATE.condition;
+            }
+
+            document.querySelectorAll(SELECTORS.alertOption).forEach(option => option.classList.remove('active'));
+            button.classList.add('active');
+            updateNextStepButton();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.goStep2)) {
+            if (STATE.alertType) {
+                showStep(2);
+            }
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.goStep3)) {
+            showStep(3);
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.applyFilters)) {
+            STATE.page = 1;
+            loadStudents();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.search)) {
+            STATE.page = 1;
+            loadStudents();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.prevPage)) {
+            if (STATE.page > 1) {
+                STATE.page--;
+                loadStudents();
+            }
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.nextPage)) {
+            if (STATE.page < STATE.totalPages) {
+                STATE.page++;
+                loadStudents();
+            }
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.goPage)) {
+            const pageInput = document.getElementById('ea-page-input');
+            if (pageInput) {
+                const requested = parseInt(pageInput.value || '1', 10);
+                STATE.page = Math.max(1, Math.min(STATE.totalPages, requested || 1));
+                loadStudents();
+            }
+            return;
+        }
+
+        if (event.target.matches('.ea-student-preview')) {
+            previewStudent(parseInt(event.target.dataset.studentId || '0', 10));
+            return;
+        }
+
+        if (event.target.matches('.ea-student-checkbox')) {
+            const studentId = parseInt(event.target.dataset.studentId || '0', 10);
+            if (event.target.checked) {
+                STATE.selectedStudents.set(studentId, true);
+            } else {
+                STATE.selectedStudents.delete(studentId);
+            }
+            updateSelectionState();
+            updateComposeSummary();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.resetTemplate)) {
+            applyTemplate(STATE.composeTemplateId);
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.sendAlerts)) {
+            sendAlerts();
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.target.id === 'ea-search' && event.key === 'Enter') {
+            event.preventDefault();
+            STATE.page = 1;
+            loadStudents();
+        }
+    });
+
+    document.addEventListener('input', event => {
+        if (event.target.id === 'ea-custom-message' || event.target.id === 'ea-message-subject') {
+            updatePreview();
+        }
+    });
+
+    const updateThresholdVisibility = () => {
+        const thresholdWrap = document.getElementById('ea-threshold-wrap');
+        if (!thresholdWrap) {
+            return;
+        }
+        if (STATE.condition === 'missing') {
+            thresholdWrap.style.display = 'none';
+        } else {
+            thresholdWrap.style.display = 'block';
         }
     };
 
-    // Ensure base collapse class exists
-    if (!container.classList.contains('collapse')) {
-        container.classList.add('collapse');
+    document.addEventListener('change', event => {
+        if (event.target.id === 'ea-grade-threshold') {
+            STATE.thresholdId = parseInt(event.target.value || '7', 10);
+        }
+        if (event.target.id === 'ea-condition') {
+            STATE.condition = event.target.value;
+            updateThresholdVisibility();
+        }
+        if (event.target.id === 'ea-grade-items') {
+            deriveFilterModeFromSelection();
+        }
+        if (event.target.id === 'ea-include-all-students') {
+            STATE.includeAllStudents = !!event.target.checked;
+        }
+        if (event.target.id === 'ea-per-page') {
+            STATE.perPage = parseInt(event.target.value || '10', 10);
+            STATE.page = 1;
+            loadStudents();
+        }
+        if (event.target.id === 'ea-check-all-page') {
+            document.querySelectorAll('.ea-student-checkbox').forEach(checkbox => {
+                checkbox.checked = event.target.checked;
+                const studentId = parseInt(checkbox.dataset.studentId || '0', 10);
+                if (event.target.checked) {
+                    STATE.selectedStudents.set(studentId, true);
+                } else {
+                    STATE.selectedStudents.delete(studentId);
+                }
+            });
+            updateSelectionState();
+            updateComposeSummary();
+        }
+        if (event.target.id === 'ea-template-select') {
+            STATE.composeTemplateId = event.target.value;
+            applyTemplate(STATE.composeTemplateId);
+        }
+    });
+
+    updateNextStepButton();
+    updateSortIndicators();
+    updateThresholdVisibility();
+    
+    // Initialize step badge colors
+    document.querySelectorAll('.ea-step-label').forEach(stepNode => {
+        const badgeEl = stepNode.previousElementSibling;
+        if (badgeEl && badgeEl.classList.contains('badge')) {
+            badgeEl.classList.add('bg-secondary');
+            badgeEl.classList.remove('bg-primary', 'bg-success');
+        }
+    });
+    const firstBadge = document.querySelector('[data-step="1"]');
+    if (firstBadge) {
+        firstBadge.classList.remove('bg-secondary');
+        firstBadge.classList.add('bg-primary');
     }
-
-    // Initialize UI based on current state
-    setOpenState(container.classList.contains('show'));
-
-    // Handle click without relying on Bootstrap jQuery events
-    button.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const willOpen = !container.classList.contains('show');
-        container.classList.toggle('show', willOpen);
-        setOpenState(willOpen);
-        if (willOpen) {
-            // Focus textarea when opening
-            setTimeout(() => {
-                const ta = container.querySelector('.early-alert-custom-message');
-                if (ta) ta.focus();
-            }, 0);
-        }
+    
+    document.querySelectorAll(SELECTORS.courseRow).forEach(row => {
+        row.style.cursor = 'pointer';
     });
-
-    // Hover effects
-    button.addEventListener('mouseenter', () => {
-        if (container.classList.contains('show')) {
-            button.classList.add('btn-primary');
-            button.classList.remove('btn-outline-primary');
-        } else {
-            button.classList.add('btn-secondary');
-            button.classList.remove('btn-outline-secondary');
-        }
-    });
-    button.addEventListener('mouseleave', () => {
-        if (container.classList.contains('show')) {
-            button.classList.remove('btn-primary');
-            button.classList.add('btn-outline-primary');
-        } else {
-            button.classList.remove('btn-secondary');
-            button.classList.add('btn-outline-secondary');
-        }
-    });
-}
+};
