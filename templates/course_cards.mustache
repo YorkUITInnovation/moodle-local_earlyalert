@@ -167,6 +167,10 @@
             </div>
 
             <div class="card-body d-none" data-region="step-2">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="text-muted small">{{strings.selected_alert_type}}:</span>
+                    <span class="badge bg-light text-dark border" id="ea-step-2-alert-type"></span>
+                </div>
                 <div class="row g-4">
                     <div class="col-xl-4">
                         <div class="card h-100">
@@ -175,9 +179,17 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
+                                    <label class="form-label" for="ea-grade-filter-mode">{{strings.filter_on}}</label>
+                                    <select id="ea-grade-filter-mode" class="form-select">
+                                        <option value="course" selected>{{strings.overall_course_grade}}</option>
+                                        <option value="single">{{strings.single_assignment_quiz}}</option>
+                                        <option value="multi">{{strings.multi_assignments_quizzes}}</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3" id="ea-grade-items-wrap">
                                     <label class="form-label" for="ea-grade-items">{{strings.grade_items}}</label>
                                     <select id="ea-grade-items" class="form-select" multiple size="6"></select>
-                                    <div class="form-text">{{strings.filter_on}}: {{strings.overall_course_grade}} / {{strings.multi_assignments_quizzes}}</div>
+                                    <div class="form-text">{{strings.grade_items_help}}</div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label" for="ea-condition">{{strings.condition}}</label>
@@ -186,21 +198,35 @@
                                         <option value="above">&gt;= (Above or equal to)</option>
                                         <option value="missing">Missing (no grade submitted)</option>
                                     </select>
+                                    <div class="form-text">{{strings.condition_locked_help}}</div>
                                 </div>
                                 <div class="mb-3" id="ea-threshold-wrap">
-                                    <label class="form-label" for="ea-grade-threshold">{{strings.threshold}}</label>
-                                    <select id="ea-grade-threshold" class="form-select">
-                                        <option value="10">F (0-59%)</option>
-                                        <option value="9">E (0-59%)</option>
-                                        <option value="8">D (60-62%)</option>
-                                        <option value="7" selected>D+ (63-66%)</option>
-                                        <option value="6">C (67-72%)</option>
-                                        <option value="5">C+ (73-76%)</option>
-                                        <option value="4">B (77-82%)</option>
-                                        <option value="3">B+ (83-86%)</option>
-                                        <option value="2">A (87-92%)</option>
-                                        <option value="1">A+ (93%+)</option>
+                                    <label class="form-label" for="ea-threshold-mode">{{strings.threshold}}</label>
+                                    <select id="ea-threshold-mode" class="form-select mb-2">
+                                        <option value="letter" selected>{{strings.threshold_mode_letter}}</option>
+                                        <option value="percent">{{strings.threshold_mode_percent}}</option>
                                     </select>
+                                    <div id="ea-threshold-letter-wrap">
+                                        <select id="ea-grade-threshold" class="form-select">
+                                            <option value="10">F (0-39%)</option>
+                                            <option value="9">E (40-49%)</option>
+                                            <option value="8">D (50-54%)</option>
+                                            <option value="7" selected>D+ (55-59%)</option>
+                                            <option value="6">C (60-64%)</option>
+                                            <option value="5">C+ (65-69%)</option>
+                                            <option value="4">B (70-74%)</option>
+                                            <option value="3">B+ (75-79%)</option>
+                                            <option value="2">A (80-89%)</option>
+                                            <option value="1">A+ (90-100%)</option>
+                                        </select>
+                                    </div>
+                                    <div id="ea-threshold-percent-wrap" class="d-none">
+                                        <div class="input-group">
+                                            <input type="number" id="ea-threshold-percent" class="form-control" min="0" max="100" step="0.1" value="55" placeholder="55.0">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-text">{{strings.threshold_help}}</div>
                                 </div>
                                 <div class="mb-0">
                                     <button type="button" class="btn btn-outline-primary w-100" data-action="earlyalert/apply-filters">
@@ -249,11 +275,12 @@
                                             {{strings.grade}} <span id="ea-sort-indicator-grade">-</span>
                                         </button>
                                     </th>
+                                    <th>{{strings.matched_items}}</th>
                                     <th class="text-end">{{strings.preview}}</th>
                                 </tr>
                                 </thead>
                                 <tbody data-region="students-table-body">
-                                <tr><td colspan="5" class="text-center text-muted py-4">{{strings.loading}}</td></tr>
+                                <tr><td colspan="6" class="text-center text-muted py-4">{{strings.loading}}</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -293,35 +320,25 @@
 
             <div class="card-body d-none" data-region="step-3">
                 <h3 class="h4">{{strings.compose_message}}</h3>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="text-muted small">{{strings.selected_alert_type}}:</span>
+                    <span class="badge bg-light text-dark border" id="ea-step-3-alert-type"></span>
+                </div>
                 <p class="text-muted" id="ea-compose-summary"></p>
 
-                <div class="mb-3">
-                    <label for="ea-template-select" class="form-label">{{strings.message_template}}</label>
-                    <select id="ea-template-select" class="form-select"></select>
+                <div class="alert alert-info border mb-3">
+                    {{strings.etemplate_template_note}}
                 </div>
 
                 <div class="mb-3">
-                    <label for="ea-message-subject" class="form-label">{{strings.subject_line}}</label>
-                    <input type="text" id="ea-message-subject" class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
-                        <label for="ea-custom-message" class="form-label mb-0">{{strings.message_body}}</label>
-                        <button type="button" class="btn btn-link btn-sm text-decoration-none" data-action="earlyalert/reset-template">{{strings.reset_to_template}}</button>
-                    </div>
-                    <textarea id="ea-custom-message" class="form-control" rows="9"></textarea>
-                    <div class="form-text">{{strings.compose_help_text}}</div>
-                </div>
-
-                <div class="border rounded p-3 bg-light mb-3">
-                    <div class="text-muted small fw-semibold mb-2">{{strings.available_tokens}}</div>
-                    <div class="d-flex gap-2 flex-wrap" id="ea-token-list"></div>
+                    <label for="ea-custom-message" class="form-label">{{strings.additional_message}}</label>
+                    <textarea id="ea-custom-message" class="form-control" rows="5"></textarea>
+                    <div class="form-text">{{strings.additional_message_help}}</div>
                 </div>
 
                 <div class="alert alert-light border" id="ea-message-preview-container">
-                    <div class="fw-semibold mb-1">{{strings.preview_email}}</div>
-                    <div class="text-muted small mb-2">{{strings.sample_preview_note}}</div>
+                    <div class="fw-semibold mb-1">{{strings.resolved_preview}}</div>
+                    <div class="text-muted small mb-2">{{strings.resolved_preview_note}}</div>
                     <div id="ea-message-preview-subject" class="fw-semibold mb-2"></div>
                     <div id="ea-message-preview-text" class="text-muted">{{strings.preview_message_placeholder}}</div>
                 </div>

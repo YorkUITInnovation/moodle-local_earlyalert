@@ -64,9 +64,13 @@ class oracle_client {
         if ($this->conn) {
             return;
         }
-        $this->conn = @oci_connect($this->user, $this->pass, $this->connstring);
+        if (!function_exists('oci_connect')) {
+            throw new \Exception('Oracle OCI8 extension is not installed.');
+        }
+
+        $this->conn = @\oci_connect($this->user, $this->pass, $this->connstring);
         if (!$this->conn) {
-            $e = oci_error();
+            $e = \oci_error();
             $message = isset($e['message']) ? $e['message'] : 'Unknown Oracle connection error';
             throw new \Exception('Oracle connect failed: ' . $message);
         }
@@ -83,9 +87,9 @@ class oracle_client {
      */
     public function prepare_and_execute($sql, $binds = array()) {
         $this->connect();
-        $stid = @oci_parse($this->conn, $sql);
+        $stid = @\oci_parse($this->conn, $sql);
         if (!$stid) {
-            $e = oci_error($this->conn);
+            $e = \oci_error($this->conn);
             $message = isset($e['message']) ? $e['message'] : 'Unknown Oracle parse error';
             throw new \Exception('Oracle parse failed: ' . $message);
         }
@@ -95,15 +99,15 @@ class oracle_client {
                 $bindname = (strpos($name, ':') === 0) ? $name : (':' . $name);
                 // Use a variable to ensure by-reference binding works as expected.
                 $var = $value;
-                if (!@oci_bind_by_name($stid, $bindname, $var)) {
-                    $e = oci_error($stid);
+                if (!@\oci_bind_by_name($stid, $bindname, $var)) {
+                    $e = \oci_error($stid);
                     $message = isset($e['message']) ? $e['message'] : 'Unknown Oracle bind error';
                     throw new \Exception('Oracle bind failed for ' . $bindname . ': ' . $message);
                 }
             }
         }
-        if (!@oci_execute($stid)) {
-            $e = oci_error($stid);
+        if (!@\oci_execute($stid)) {
+            $e = \oci_error($stid);
             $message = isset($e['message']) ? $e['message'] : 'Unknown Oracle execute error';
             throw new \Exception('Oracle execute failed: ' . $message);
         }
@@ -122,10 +126,10 @@ class oracle_client {
     public function execute_query($sql, $binds = array()) {
         $stid = $this->prepare_and_execute($sql, $binds);
         $rows = array();
-        while ($row = oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
+        while ($row = \oci_fetch_array($stid, OCI_ASSOC + OCI_RETURN_NULLS)) {
             $rows[] = $row;
         }
-        oci_free_statement($stid);
+        \oci_free_statement($stid);
         return $rows;
     }
 
@@ -139,8 +143,8 @@ class oracle_client {
      */
     public function execute_non_query($sql, $binds = array()) {
         $stid = $this->prepare_and_execute($sql, $binds);
-        $count = oci_num_rows($stid);
-        oci_free_statement($stid);
+        $count = \oci_num_rows($stid);
+        \oci_free_statement($stid);
         return (int)$count;
     }
 
@@ -151,7 +155,7 @@ class oracle_client {
      */
     public function close() {
         if ($this->conn) {
-            @oci_close($this->conn);
+            @\oci_close($this->conn);
             $this->conn = null;
         }
     }

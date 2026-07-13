@@ -17,6 +17,8 @@ const STATE = {
     rangeEnd: 0,
     condition: 'below',
     thresholdId: 7,
+    thresholdMode: 'letter',
+    thresholdPercent: 55,
     filterMode: 'course',
     gradeItemId: 0,
     gradeItemIds: [],
@@ -27,6 +29,7 @@ const STATE = {
     sortDir: 'none',
     composeTemplates: [],
     composeTemplateId: '',
+    previewRequestId: 0,
 };
 
 const SELECTORS = {
@@ -51,11 +54,11 @@ const SELECTORS = {
     sort: '[data-action="earlyalert/sort"]',
     resetTemplate: '[data-action="earlyalert/reset-template"]',
     alertOption: '.ea-alert-option',
+    gradeFilterMode: '#ea-grade-filter-mode',
     gradeItems: '#ea-grade-items',
 };
 
 const STRINGS = {};
-const TOKEN_LIST = ['[Student Name]', '[Course Name]', '[Grade Item]', '[Assignment Name]', '[Instructor Name]'];
 const SORT_ICON = {
     none: '-',
     asc: '↑',
@@ -296,12 +299,104 @@ const setLoadingRows = () => {
     if (!tbody) {
         return;
     }
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">${escapeHtml(STRINGS.loading || 'Loading...')}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">${escapeHtml(STRINGS.loading || 'Loading...')}</td></tr>`;
+};
+
+const getConditionForAlertType = alertType => {
+    if (alertType === 'assign' || alertType === 'exam') {
+        return 'missing';
+    }
+    if (alertType === 'commendation') {
+        return 'above';
+    }
+    return 'below';
+};
+
+const updateThresholdVisibility = () => {
+    const thresholdWrap = document.getElementById('ea-threshold-wrap');
+    if (!thresholdWrap) {
+        return;
+    }
+    thresholdWrap.style.display = STATE.condition === 'missing' ? 'none' : 'block';
+    const letterWrap = document.getElementById('ea-threshold-letter-wrap');
+    const percentWrap = document.getElementById('ea-threshold-percent-wrap');
+    if (letterWrap) {
+        letterWrap.classList.toggle('d-none', STATE.thresholdMode !== 'letter');
+    }
+    if (percentWrap) {
+        percentWrap.classList.toggle('d-none', STATE.thresholdMode !== 'percent');
+    }
+};
+
+const updateConditionForAlertType = () => {
+    STATE.condition = getConditionForAlertType(STATE.alertType);
+    const conditionSelect = document.getElementById('ea-condition');
+    if (conditionSelect) {
+        conditionSelect.value = STATE.condition;
+        conditionSelect.disabled = true;
+    }
+    updateThresholdVisibility();
+};
+
+const getAlertTypeLabel = () => {
+    const selected = document.querySelector(`${SELECTORS.alertOption}.active .fw-semibold`);
+    return selected ? selected.textContent.trim() : '';
+};
+
+const updateSelectedAlertTypeDisplay = () => {
+    const label = getAlertTypeLabel();
+    ['ea-step-2-alert-type', 'ea-step-3-alert-type'].forEach(id => {
+        const node = document.getElementById(id);
+        if (node) {
+            node.textContent = label;
+        }
+    });
+};
+
+const updateGradeFilterControls = () => {
+    const modeSelect = document.querySelector(SELECTORS.gradeFilterMode);
+    const itemSelect = document.querySelector(SELECTORS.gradeItems);
+    const itemWrap = document.getElementById('ea-grade-items-wrap');
+    const mode = modeSelect?.value || STATE.filterMode || 'course';
+
+    STATE.filterMode = ['course', 'single', 'multi'].includes(mode) ? mode : 'course';
+    if (modeSelect) {
+        modeSelect.value = STATE.filterMode;
+    }
+    if (!itemSelect) {
+        return;
+    }
+
+    const isCourseMode = STATE.filterMode === 'course';
+    itemSelect.disabled = isCourseMode;
+    itemSelect.multiple = STATE.filterMode === 'multi';
+    itemSelect.size = STATE.filterMode === 'multi' ? 6 : 1;
+    if (itemWrap) {
+        itemWrap.style.display = isCourseMode ? 'none' : 'block';
+    }
+
+    if (isCourseMode) {
+        Array.from(itemSelect.options).forEach(option => {
+            option.selected = false;
+        });
+        return;
+    }
+
+    const gradeOptions = Array.from(itemSelect.options);
+    const selectedGradeOptions = Array.from(itemSelect.selectedOptions);
+    if (!selectedGradeOptions.length && gradeOptions.length) {
+        gradeOptions[0].selected = true;
+    }
 };
 
 const deriveFilterModeFromSelection = () => {
+    updateGradeFilterControls();
+
+    const modeSelect = document.querySelector(SELECTORS.gradeFilterMode);
+    STATE.filterMode = modeSelect?.value || STATE.filterMode || 'course';
+
     const select = document.querySelector(SELECTORS.gradeItems);
-    if (!select) {
+    if (!select || STATE.filterMode === 'course') {
         STATE.filterMode = 'course';
         STATE.gradeItemId = 0;
         STATE.gradeItemIds = [];
@@ -312,16 +407,9 @@ const deriveFilterModeFromSelection = () => {
         .map(option => parseInt(option.value || '0', 10))
         .filter(value => !Number.isNaN(value));
 
-    if (!selected.length || selected.includes(0)) {
-        STATE.filterMode = 'course';
-        STATE.gradeItemId = 0;
-        STATE.gradeItemIds = [];
-        return;
-    }
-
-    if (selected.length === 1) {
+    if (STATE.filterMode === 'single') {
         STATE.filterMode = 'single';
-        STATE.gradeItemId = selected[0];
+        STATE.gradeItemId = selected[0] || 0;
         STATE.gradeItemIds = [];
         return;
     }
@@ -329,6 +417,17 @@ const deriveFilterModeFromSelection = () => {
     STATE.filterMode = 'multi';
     STATE.gradeItemId = 0;
     STATE.gradeItemIds = selected;
+};
+
+const getThresholdPercentArg = () => {
+    if (STATE.thresholdMode !== 'percent') {
+        return -1;
+    }
+    const raw = parseFloat(String(STATE.thresholdPercent));
+    if (Number.isNaN(raw)) {
+        return -1;
+    }
+    return Math.max(0, Math.min(100, raw));
 };
 
 const updatePaginationUi = response => {
@@ -377,7 +476,6 @@ const loadGradeItems = () => {
         args: {courseid: STATE.courseId}
     }])[0].then(items => {
         const optionHtml = [];
-        optionHtml.push(`<option value="0" selected>${escapeHtml(STRINGS.overall_course_grade || 'Overall Course Grade')}</option>`);
         (items || []).forEach(item => {
             if (parseInt(item.id, 10) !== 0 && item.itemtype !== 'course') {
                 optionHtml.push(`<option value="${parseInt(item.id, 10)}">${escapeHtml(item.name || '')}</option>`);
@@ -385,6 +483,7 @@ const loadGradeItems = () => {
         });
         select.innerHTML = optionHtml.join('');
         STATE.gradeItemsLoadedForCourse = STATE.courseId;
+        updateGradeFilterControls();
         deriveFilterModeFromSelection();
     }).catch(Notification.exception);
 };
@@ -394,6 +493,7 @@ const loadStudents = () => {
         return;
     }
 
+    updateConditionForAlertType();
     deriveFilterModeFromSelection();
     setLoadingRows();
 
@@ -406,6 +506,7 @@ const loadStudents = () => {
         filtermode: STATE.filterMode,
         condition: STATE.condition,
         thresholdid: STATE.thresholdId,
+        thresholdpercent: getThresholdPercentArg(),
         gradeitemid: STATE.gradeItemId,
         gradeitemids: JSON.stringify(STATE.gradeItemIds),
         includeallstudents: STATE.includeAllStudents,
@@ -421,7 +522,7 @@ const loadStudents = () => {
         }
 
         if (!response.students || !response.students.length) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">${escapeHtml(STRINGS.no_students_found || 'No students found')}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">${escapeHtml(STRINGS.no_students_found || 'No students found')}</td></tr>`;
             updatePaginationUi(response);
             return;
         }
@@ -433,6 +534,13 @@ const loadStudents = () => {
             const checked = STATE.selectedStudents.has(student.id) ? 'checked' : '';
             const fullname = `${student.last_name || ''}, ${student.first_name || ''}`.trim();
             const email = student.email ? `<div class="small text-muted">${escapeHtml(student.email)}</div>` : '';
+            const matchedItems = String(student.matcheditems || '')
+                .split('\n')
+                .map(item => item.trim())
+                .filter(Boolean);
+            const matchedItemsHtml = matchedItems.length
+                ? matchedItems.map(item => `<div>${escapeHtml(item)}</div>`).join('')
+                : '<span class="text-muted">-</span>';
             return `
                 <tr>
                     <td><input type="checkbox" class="form-check-input ea-student-checkbox" data-student-id="${student.id}" ${checked}></td>
@@ -442,6 +550,7 @@ const loadStudents = () => {
                     </td>
                     <td>${escapeHtml(student.idnumber || '')}</td>
                     <td><span class="badge bg-light text-dark border">${escapeHtml(student.grade || '')}</span></td>
+                    <td class="small">${matchedItemsHtml}</td>
                     <td class="text-end"><button type="button" class="btn btn-outline-secondary btn-sm ea-student-preview" data-student-id="${student.id}">${escapeHtml(STRINGS.preview_email || 'Preview')}</button></td>
                 </tr>`;
         }).join('');
@@ -450,83 +559,6 @@ const loadStudents = () => {
         updateSelectionState();
         updateSortIndicators();
     }).catch(Notification.exception);
-};
-
-const getTemplateDefaultsForAlertType = alertType => {
-    const tokenStudent = '[Student Name]';
-    const tokenCourse = '[Course Name]';
-    const tokenGradeItem = '[Grade Item]';
-    const tokenAssignment = '[Assignment Name]';
-    const tokenInstructor = '[Instructor Name]';
-
-    if (alertType === 'assign') {
-        return [{
-            id: 'default-assignment',
-            name: 'Default - Missed Assignment',
-            subject: `Check-in regarding ${tokenCourse}`,
-            body: `Dear ${tokenStudent},\n\nI am reaching out because you missed ${tokenAssignment} in ${tokenCourse}. Please connect with me so we can plan your next steps.\n\nBest regards,\n${tokenInstructor}`,
-        }];
-    }
-
-    if (alertType === 'exam') {
-        return [{
-            id: 'default-exam',
-            name: 'Default - Missed Test/Quiz',
-            subject: `Follow-up for ${tokenCourse}`,
-            body: `Dear ${tokenStudent},\n\nI noticed a missed test/quiz in ${tokenCourse}. Please reach out so we can discuss support options and your plan going forward.\n\nBest regards,\n${tokenInstructor}`,
-        }];
-    }
-
-    if (alertType === 'commendation') {
-        return [{
-            id: 'default-commendation',
-            name: 'Default - Commendation',
-            subject: `Great progress in ${tokenCourse}`,
-            body: `Dear ${tokenStudent},\n\nI want to acknowledge your strong progress in ${tokenCourse}. Keep up the excellent work.\n\nBest regards,\n${tokenInstructor}`,
-        }];
-    }
-
-    return [{
-        id: 'default-grade',
-        name: 'Default - Low Grade Alert',
-        subject: `Check-in regarding ${tokenCourse}`,
-        body: `Dear ${tokenStudent},\n\nI am reaching out because your current grade in ${tokenCourse} (${tokenGradeItem}) is below the expected threshold.\n\nPlease do not hesitate to reply if you have any questions.\n\nBest regards,\n${tokenInstructor}`,
-    }];
-};
-
-const renderTokenList = () => {
-    const container = document.getElementById('ea-token-list');
-    if (!container) {
-        return;
-    }
-
-    container.innerHTML = TOKEN_LIST
-        .map(token => `<span class="badge bg-white border text-dark">${escapeHtml(token)}</span>`)
-        .join('');
-};
-
-const getSampleStudent = () => ({
-    first_name: 'Alex',
-    last_name: 'Johnson',
-});
-
-const getPlaceholderMap = student => {
-    const fullname = student ? `${student.first_name || ''} ${student.last_name || ''}`.trim() : 'Student Name';
-    return {
-        '[Student Name]': fullname || 'Student Name',
-        '[Course Name]': STATE.courseName || 'Course Name',
-        '[Grade Item]': STRINGS.overall_course_grade || 'Overall Course Grade',
-        '[Assignment Name]': 'Assignment Name',
-        '[Instructor Name]': 'Instructor',
-    };
-};
-
-const applyPlaceholders = (text, map) => {
-    let output = String(text || '');
-    Object.entries(map).forEach(([token, value]) => {
-        output = output.split(token).join(value);
-    });
-    return output;
 };
 
 const updateComposeSummary = () => {
@@ -539,6 +571,24 @@ const updateComposeSummary = () => {
     summary.textContent = `Sending to ${count} students. Personalization tokens are filled automatically when sent.`;
 };
 
+const getCustomMessage = () => document.getElementById('ea-custom-message')?.value || '';
+
+const getFirstSelectedStudentId = () => {
+    const selectedIds = Array.from(STATE.selectedStudents.keys());
+    return selectedIds.find(id => STATE.studentDataById.has(id)) || selectedIds[0] || 0;
+};
+
+const fetchStudentPreview = studentid => Ajax.call([{methodname: 'local_earlyalert_get_student_preview_template', args: {
+    courseid: STATE.courseId,
+    teacher_user_id: STATE.teacherUserId,
+    studentid,
+    alert_type: STATE.alertType,
+    thresholdid: STATE.thresholdId,
+    thresholdpercent: getThresholdPercentArg(),
+    assignment_title: '',
+    custom_message: getCustomMessage(),
+}}])[0];
+
 const renderComposePreview = () => {
     const subjectNode = document.getElementById('ea-message-preview-subject');
     const bodyNode = document.getElementById('ea-message-preview-text');
@@ -546,53 +596,36 @@ const renderComposePreview = () => {
         return;
     }
 
-    const sampleStudent = getSampleStudent();
-    const map = getPlaceholderMap(sampleStudent);
-
-    const subjectInput = document.getElementById('ea-message-subject');
-    const messageInput = document.getElementById('ea-custom-message');
-    const subject = applyPlaceholders(subjectInput?.value || '', map);
-    const body = applyPlaceholders(messageInput?.value || '', map);
-
-    subjectNode.textContent = subject;
-    renderMessageHtml(bodyNode, body);
-};
-
-const applyTemplate = templateId => {
-    const template = STATE.composeTemplates.find(item => item.id === templateId) || STATE.composeTemplates[0];
-    if (!template) {
+    const studentId = getFirstSelectedStudentId();
+    if (!studentId) {
+        subjectNode.textContent = '';
+        renderMessageHtml(bodyNode, STRINGS.preview_message_placeholder || '');
         return;
     }
 
-    STATE.composeTemplateId = template.id;
-    const subjectInput = document.getElementById('ea-message-subject');
-    const messageInput = document.getElementById('ea-custom-message');
-    if (subjectInput) {
-        subjectInput.value = template.subject;
-    }
-    if (messageInput) {
-        messageInput.value = template.body;
-    }
-    renderComposePreview();
+    const requestId = ++STATE.previewRequestId;
+    subjectNode.textContent = STRINGS.loading || 'Loading...';
+    bodyNode.textContent = '';
+
+    fetchStudentPreview(studentId).then(response => {
+        if (requestId !== STATE.previewRequestId) {
+            return;
+        }
+        subjectNode.textContent = response.subject || '';
+        renderMessageHtml(bodyNode, response.message || '');
+    }).catch(error => {
+        if (requestId !== STATE.previewRequestId) {
+            return;
+        }
+        subjectNode.textContent = '';
+        renderMessageHtml(bodyNode, STRINGS.preview_message_placeholder || '');
+        Notification.exception(error);
+    });
 };
 
 const initComposeForm = () => {
-    STATE.composeTemplates = getTemplateDefaultsForAlertType(STATE.alertType);
-
-    const select = document.getElementById('ea-template-select');
-    if (select) {
-        select.innerHTML = STATE.composeTemplates.map(template =>
-            `<option value="${escapeHtml(template.id)}">${escapeHtml(template.name)}</option>`
-        ).join('');
-        STATE.composeTemplateId = STATE.composeTemplates[0]?.id || '';
-        if (STATE.composeTemplateId) {
-            select.value = STATE.composeTemplateId;
-        }
-    }
-
-    renderTokenList();
-    applyTemplate(STATE.composeTemplateId);
     updateComposeSummary();
+    renderComposePreview();
 };
 
 const updatePreview = () => {
@@ -600,16 +633,7 @@ const updatePreview = () => {
 };
 
 const previewStudent = studentid => {
-    const customMessage = document.getElementById('ea-custom-message')?.value || '';
-    Ajax.call([{methodname: 'local_earlyalert_get_student_preview_template', args: {
-        courseid: STATE.courseId,
-        teacher_user_id: STATE.teacherUserId,
-        studentid,
-        alert_type: STATE.alertType,
-        thresholdid: STATE.thresholdId,
-        assignment_title: '',
-        custom_message: customMessage,
-    }}])[0].then(response => {
+    fetchStudentPreview(studentid).then(response => {
         STATE.previewData = response;
         const student = STATE.studentDataById.get(studentid) || {};
         const recipient = document.getElementById('ea-preview-modal-recipient');
@@ -644,7 +668,7 @@ const exportSelectedStudents = () => {
         return `"${raw.replace(/"/g, '""')}"`;
     };
 
-    const header = ['Student Name', 'Email', STRINGS.student_id || 'Student ID', 'Grade'];
+    const header = ['Student Name', 'Email', STRINGS.student_id || 'Student ID', 'Grade', 'Matched Items'];
     const lines = [header.map(toCsv).join(',')];
 
     rows.forEach(student => {
@@ -654,6 +678,7 @@ const exportSelectedStudents = () => {
             toCsv(student.email || ''),
             toCsv(student.idnumber || ''),
             toCsv(student.grade || ''),
+            toCsv(student.matcheditems || ''),
         ].join(','));
     });
 
@@ -683,6 +708,24 @@ const clearSelection = () => {
     updateComposeSummary();
 };
 
+const buildResolvedAlertPayload = studentid => fetchStudentPreview(studentid).then(response => {
+    const student = STATE.studentDataById.get(studentid) || {};
+    return {
+        student_id: studentid,
+        template_id: response.templateid || 0,
+        revision_id: response.revision_id || 0,
+        triggered_from_user_id: response.triggered_from_user_id || STATE.teacherUserId,
+        course_id: response.course_id || STATE.courseId,
+        instructor_id: response.instructor_id || STATE.teacherUserId,
+        assignment_name: '',
+        trigger_grade: STATE.thresholdId,
+        actual_grade: student.grade || '',
+        custom_message: getCustomMessage(),
+        subject: response.subject || '',
+        message: response.message || '',
+    };
+});
+
 const sendAlerts = () => {
     const ids = Array.from(STATE.selectedStudents.keys());
     if (!ids.length) {
@@ -696,24 +739,18 @@ const sendAlerts = () => {
         STRINGS.send || 'Send',
         STRINGS.cancel || 'Cancel',
         () => {
-            Ajax.call([{methodname: 'local_earlyalert_report_log_insert', args: {
-                template_data: JSON.stringify(ids.map(studentid => {
-                    const student = STATE.studentDataById.get(studentid) || {};
-                    return {
-                        student_id: studentid,
-                        template_id: student.templateid || 0,
-                        revision_id: student.revision_id || 0,
-                        triggered_from_user_id: student.triggered_from_user_id || STATE.teacherUserId,
-                        course_id: STATE.courseId,
-                        instructor_id: student.instructor_id || STATE.teacherUserId,
-                        assignment_name: '',
-                        trigger_grade: STATE.thresholdId,
-                        actual_grade: student.grade || '',
-                        custom_message: document.getElementById('ea-custom-message')?.value || '',
-                    };
-                })),
-            }}])[0].then(() => {
-                Notification.alert('', STRINGS.alert_sent_successfully || 'Alert sent successfully');
+            Promise.all(ids.map(buildResolvedAlertPayload)).then(templateData => {
+                const missingTemplates = templateData.filter(item => !item.template_id);
+                if (missingTemplates.length) {
+                    Notification.alert('', 'One or more selected students do not have an active eTemplate for this alert. No alerts were queued.');
+                    return;
+                }
+
+                Ajax.call([{methodname: 'local_earlyalert_report_log_insert', args: {
+                    template_data: JSON.stringify(templateData),
+                }}])[0].then(() => {
+                    Notification.alert('', STRINGS.alert_sent_successfully || 'Alert sent successfully');
+                }).catch(Notification.exception);
             }).catch(Notification.exception);
         }
     );
@@ -745,11 +782,15 @@ const showStep = step => {
     });
 
     if (step === 2) {
+        updateConditionForAlertType();
+        updateSelectedAlertTypeDisplay();
+        updateGradeFilterControls();
         loadGradeItems().then(() => {
             loadStudents();
         }).catch(Notification.exception);
     }
     if (step === 3) {
+        updateSelectedAlertTypeDisplay();
         initComposeForm();
         updatePreview();
     }
@@ -766,6 +807,8 @@ const openCourseFlow = (courseId, courseName) => {
     STATE.totalPages = 1;
     STATE.perPage = 10;
     STATE.includeAllStudents = false;
+    STATE.thresholdMode = 'letter';
+    STATE.thresholdPercent = 63;
     STATE.filterMode = 'course';
     STATE.gradeItemId = 0;
     STATE.gradeItemIds = [];
@@ -789,10 +832,26 @@ const openCourseFlow = (courseId, courseName) => {
     if (perPageSelect) {
         perPageSelect.value = '10';
     }
+    const filterModeSelect = document.querySelector(SELECTORS.gradeFilterMode);
+    if (filterModeSelect) {
+        filterModeSelect.value = 'course';
+    }
+    const thresholdModeSelect = document.getElementById('ea-threshold-mode');
+    if (thresholdModeSelect) {
+        thresholdModeSelect.value = 'letter';
+    }
+    const thresholdPercentInput = document.getElementById('ea-threshold-percent');
+    if (thresholdPercentInput) {
+        thresholdPercentInput.value = '63';
+    }
     const includeAll = document.getElementById('ea-include-all-students');
     if (includeAll) {
         includeAll.checked = false;
     }
+
+    updateSelectedAlertTypeDisplay();
+    updateGradeFilterControls();
+    updateThresholdVisibility();
 
     updateSortIndicators();
     showWorkflow();
@@ -885,22 +944,10 @@ export const init = async() => {
         if (event.target.closest(SELECTORS.alertOption)) {
             const button = event.target.closest(SELECTORS.alertOption);
             STATE.alertType = button.dataset.alertType || '';
-
-            if (STATE.alertType === 'assign' || STATE.alertType === 'exam') {
-                STATE.condition = 'missing';
-            } else if (STATE.alertType === 'commendation') {
-                STATE.condition = 'above';
-            } else {
-                STATE.condition = 'below';
-            }
-
-            const conditionSelect = document.getElementById('ea-condition');
-            if (conditionSelect) {
-                conditionSelect.value = STATE.condition;
-            }
-
             document.querySelectorAll(SELECTORS.alertOption).forEach(option => option.classList.remove('active'));
             button.classList.add('active');
+            updateConditionForAlertType();
+            updateSelectedAlertTypeDisplay();
             updateNextStepButton();
             return;
         }
@@ -973,7 +1020,11 @@ export const init = async() => {
         }
 
         if (event.target.closest(SELECTORS.resetTemplate)) {
-            applyTemplate(STATE.composeTemplateId);
+            const messageInput = document.getElementById('ea-custom-message');
+            if (messageInput) {
+                messageInput.value = '';
+            }
+            updatePreview();
             return;
         }
 
@@ -991,30 +1042,35 @@ export const init = async() => {
     });
 
     document.addEventListener('input', event => {
-        if (event.target.id === 'ea-custom-message' || event.target.id === 'ea-message-subject') {
+        if (event.target.id === 'ea-custom-message') {
             updatePreview();
         }
     });
-
-    const updateThresholdVisibility = () => {
-        const thresholdWrap = document.getElementById('ea-threshold-wrap');
-        if (!thresholdWrap) {
-            return;
-        }
-        if (STATE.condition === 'missing') {
-            thresholdWrap.style.display = 'none';
-        } else {
-            thresholdWrap.style.display = 'block';
-        }
-    };
 
     document.addEventListener('change', event => {
         if (event.target.id === 'ea-grade-threshold') {
             STATE.thresholdId = parseInt(event.target.value || '7', 10);
         }
-        if (event.target.id === 'ea-condition') {
-            STATE.condition = event.target.value;
+        if (event.target.id === 'ea-threshold-mode') {
+            STATE.thresholdMode = event.target.value === 'percent' ? 'percent' : 'letter';
             updateThresholdVisibility();
+        }
+        if (event.target.id === 'ea-threshold-percent') {
+            const value = parseFloat(event.target.value || '0');
+            if (!Number.isNaN(value)) {
+                STATE.thresholdPercent = Math.max(0, Math.min(100, value));
+                event.target.value = String(STATE.thresholdPercent);
+            }
+        }
+        if (event.target.id === 'ea-condition') {
+            updateConditionForAlertType();
+        }
+        if (event.target.id === 'ea-grade-filter-mode') {
+            STATE.filterMode = event.target.value;
+            STATE.page = 1;
+            updateGradeFilterControls();
+            deriveFilterModeFromSelection();
+            loadStudents();
         }
         if (event.target.id === 'ea-grade-items') {
             deriveFilterModeFromSelection();
@@ -1040,14 +1096,11 @@ export const init = async() => {
             updateSelectionState();
             updateComposeSummary();
         }
-        if (event.target.id === 'ea-template-select') {
-            STATE.composeTemplateId = event.target.value;
-            applyTemplate(STATE.composeTemplateId);
-        }
     });
 
     updateNextStepButton();
     updateSortIndicators();
+    updateGradeFilterControls();
     updateThresholdVisibility();
     
     // Initialize step badge colors

@@ -89,6 +89,14 @@ class local_earlyalert_course_grades_ws extends external_api {
                 $grade_range = helper::get_moodle_grade_percent_range($grade_letter_id);
             }
 
+            // Resolve [grade] placeholder text for use in the bulk preview.
+            $gradeletter = null;
+            if ($grade_letter_id > 0) {
+                $gradelettersobj = new \local_earlyalert\grade_letters();
+                $graderange = $gradelettersobj->get_grade_percentage_range();
+                $gradeletter = $graderange[$grade_letter_id]['letter'] ?? null;
+            }
+
             //lets cache all possible email templates based off of these students...
             $templateCache = array();
             $i = 1;
@@ -137,19 +145,31 @@ class local_earlyalert_course_grades_ws extends external_api {
 
                 if ($template) {
                     $email = new \local_etemplate\email($template->id);
-                    $template_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
+                    $preload_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
+
+                    // Resolve remaining placeholders ([grade], [assignmenttitle], [custommessage]) in the
+                    // bulk preview. [assignmenttitle] and [custommessage] are not known at this stage so
+                    // they are passed as null and left as-is in the message (they are resolved at send time).
+                    $resolved_data = \local_etemplate\email::replace_message_placeholders(
+                        $preload_data->message,
+                        $preload_data->subject,
+                        $courseid,
+                        $student_record,
+                        $teacher_user_id,
+                        $gradeletter
+                    );
 
                     // Merge student data with template data
                     $student_and_template_data = array_merge($student, [
                         'templateKey' => $templateKey,
-                        'subject' => $template_data->subject,
-                        'message' => $template_data->message,
-                        'templateid' => $template_data->templateid,
-                        'revision_id' => $template_data->revision_id,
+                        'subject' => $resolved_data->subject,
+                        'message' => $resolved_data->message,
+                        'templateid' => $preload_data->templateid,
+                        'revision_id' => $preload_data->revision_id,
                         'course_id' => $courseid,
                         'hascustommessage' => isset($template->hascustommessage) ? (int)$template->hascustommessage : 0,
-                        'instructor_id' => $template_data->instructor_id,
-                        'triggered_from_user_id' => $template_data->triggered_from_user_id
+                        'instructor_id' => $preload_data->instructor_id,
+                        'triggered_from_user_id' => $preload_data->triggered_from_user_id
                     ]);
 
                     $templateCache[$templateKey] = $student_and_template_data;
@@ -252,6 +272,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'filtermode' => new external_value(PARAM_TEXT, 'course|single|multi', VALUE_DEFAULT, 'course'),
             'condition' => new external_value(PARAM_TEXT, 'below|above|missing', VALUE_DEFAULT, 'below'),
             'thresholdid' => new external_value(PARAM_INT, 'Grade letter id', VALUE_DEFAULT, 7),
+            'thresholdpercent' => new external_value(PARAM_FLOAT, 'Numeric threshold percent', VALUE_DEFAULT, -1),
             'gradeitemid' => new external_value(PARAM_INT, 'Single grade item id', VALUE_DEFAULT, 0),
             'gradeitemids' => new external_value(PARAM_RAW, 'JSON array of grade item ids for multi mode', VALUE_DEFAULT, '[]'),
             'includeallstudents' => new external_value(PARAM_BOOL, 'Include all students regardless of grade filter', VALUE_DEFAULT, false),
@@ -272,6 +293,7 @@ class local_earlyalert_course_grades_ws extends external_api {
      * @param string $filtermode
      * @param string $condition
      * @param int $thresholdid
+    * @param float $thresholdpercent
      * @param int $gradeitemid
      * @param string $gradeitemids
     * @param bool $includeallstudents
@@ -289,6 +311,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         $filtermode,
         $condition,
         $thresholdid,
+        $thresholdpercent,
         $gradeitemid,
         $gradeitemids,
         $includeallstudents,
@@ -307,6 +330,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'filtermode' => $filtermode,
             'condition' => $condition,
             'thresholdid' => $thresholdid,
+            'thresholdpercent' => $thresholdpercent,
             'gradeitemid' => $gradeitemid,
             'gradeitemids' => $gradeitemids,
             'includeallstudents' => $includeallstudents,
@@ -359,9 +383,15 @@ class local_earlyalert_course_grades_ws extends external_api {
         }
 
         $mode = in_array($params['filtermode'], ['course', 'single', 'multi']) ? $params['filtermode'] : 'course';
-        $condition = in_array($params['condition'], ['below', 'above', 'missing']) ? $params['condition'] : 'below';
-        $thresholdmax = $selectedrange['max'] ?? 59.99;
-        $thresholdmin = $selectedrange['min'] ?? 0;
+        $condition = self::get_condition_for_alert_type((string)$params['alert_type']);
+        $thresholdpercent = (float)$params['thresholdpercent'];
+        if ($thresholdpercent >= 0 && $thresholdpercent <= 100) {
+            $thresholdmin = $thresholdpercent;
+            $thresholdmax = $thresholdpercent;
+        } else {
+            $thresholdmax = $selectedrange['max'] ?? 59.99;
+            $thresholdmin = $selectedrange['min'] ?? 0;
+        }
         $applygradefilters = empty($params['includeallstudents']);
 
         if ($applygradefilters && $mode === 'course') {
@@ -375,6 +405,8 @@ class local_earlyalert_course_grades_ws extends external_api {
                 LEFT JOIN {grade_grades} gg_single ON gg_single.itemid = gi_single.id AND gg_single.userid = u.id
             ";
             $wheres[] = self::build_grade_condition_sql('gg_single.finalgrade', 'gi_single.grademax', $condition, $thresholdmin, $thresholdmax, $sqlparams, 's');
+        } else if ($applygradefilters && $mode === 'single') {
+            $wheres[] = '1 = 0';
         }
 
         if ($applygradefilters && $mode === 'multi') {
@@ -387,6 +419,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             if (!empty($selecteditemids)) {
                 list($insql, $inparams) = $DB->get_in_or_equal($selecteditemids, SQL_PARAMS_NAMED, 'mid');
                 $sqlparams = array_merge($sqlparams, $inparams);
+                                $sqlparams['multicourseid'] = (int)$params['courseid'];
                 $subparams = [];
                 $subsql = self::build_grade_condition_sql('ggm.finalgrade', 'gim.grademax', $condition, $thresholdmin, $thresholdmax, $subparams, 'm');
                 $sqlparams = array_merge($sqlparams, $subparams);
@@ -394,10 +427,12 @@ class local_earlyalert_course_grades_ws extends external_api {
                     SELECT 1
                       FROM {grade_items} gim
                       LEFT JOIN {grade_grades} ggm ON ggm.itemid = gim.id AND ggm.userid = u.id
-                     WHERE gim.courseid = :courseid
+                                         WHERE gim.courseid = :multicourseid
                        AND gim.id {$insql}
                        AND {$subsql}
                 )";
+            } else {
+                $wheres[] = '1 = 0';
             }
         }
 
@@ -443,6 +478,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         $records = array_values($records);
 
         $displaygradebyuser = [];
+        $matcheditemsbyuser = [];
         if (!empty($records)) {
             $pageuserids = array_map(static function($row) {
                 return (int)$row->id;
@@ -461,6 +497,17 @@ class local_earlyalert_course_grades_ws extends external_api {
                 }
                 $selecteditemids = array_values(array_filter(array_map('intval', $selecteditemids)));
                 $displaygradebyuser = self::get_grade_display_for_multi_items($selecteditemids, $pageuserids, $condition);
+            }
+
+            if ($mode === 'single' && !empty($params['gradeitemid'])) {
+                $matcheditemsbyuser = self::get_matched_grade_items([(int)$params['gradeitemid']], $pageuserids, $condition, $thresholdmin, $thresholdmax);
+            } else if ($mode === 'multi') {
+                $selecteditemids = json_decode((string)$params['gradeitemids'], true);
+                if (!is_array($selecteditemids)) {
+                    $selecteditemids = [];
+                }
+                $selecteditemids = array_values(array_filter(array_map('intval', $selecteditemids)));
+                $matcheditemsbyuser = self::get_matched_grade_items($selecteditemids, $pageuserids, $condition, $thresholdmin, $thresholdmax);
             }
         }
 
@@ -501,6 +548,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                 'idnumber' => (string)$row->idnumber,
                 'email' => (string)$row->email,
                 'grade' => $displaygradebyuser[(int)$row->id] ?? 'No Grade',
+                'matcheditems' => implode("\n", $matcheditemsbyuser[(int)$row->id] ?? []),
                 'campus' => (string)$row->campus,
                 'faculty' => (string)$row->faculty,
                 'major' => (string)$row->major,
@@ -536,6 +584,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                 'idnumber' => new external_value(PARAM_TEXT, 'Student id number'),
                 'email' => new external_value(PARAM_TEXT, 'Email'),
                 'grade' => new external_value(PARAM_TEXT, 'Display grade'),
+                'matcheditems' => new external_value(PARAM_RAW, 'Matched selected grade items'),
                 'campus' => new external_value(PARAM_TEXT, 'Campus'),
                 'faculty' => new external_value(PARAM_TEXT, 'Faculty'),
                 'major' => new external_value(PARAM_TEXT, 'Major'),
@@ -580,16 +629,14 @@ class local_earlyalert_course_grades_ws extends external_api {
         $sql = "SELECT id, itemname, itemtype, itemmodule
                   FROM {grade_items}
                  WHERE courseid = :courseid
-                   AND (itemtype = 'course' OR (itemtype = 'mod' AND itemmodule IN ('assign', 'quiz')))
+                                     AND itemtype = 'mod'
+                                     AND itemmodule IN ('assign', 'quiz')
               ORDER BY sortorder ASC";
 
         $items = $DB->get_records_sql($sql, ['courseid' => (int)$params['courseid']]);
         $results = [];
         foreach ($items as $item) {
             $label = trim((string)$item->itemname);
-            if ($item->itemtype === 'course') {
-                $label = get_string('overall_course_grade', 'local_earlyalert');
-            }
             if ($label === '') {
                 $label = get_string('unnamed_grade_item', 'local_earlyalert');
             }
@@ -628,6 +675,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'studentid' => new external_value(PARAM_INT, 'Student id', VALUE_REQUIRED),
             'alert_type' => new external_value(PARAM_TEXT, 'Alert type', VALUE_DEFAULT, 'grade'),
             'thresholdid' => new external_value(PARAM_INT, 'Grade threshold id', VALUE_DEFAULT, 7),
+            'thresholdpercent' => new external_value(PARAM_FLOAT, 'Numeric threshold percent', VALUE_DEFAULT, -1),
             'assignment_title' => new external_value(PARAM_RAW_TRIMMED, 'Assignment/quiz title', VALUE_DEFAULT, ''),
             'custom_message' => new external_value(PARAM_RAW, 'Custom instructor message', VALUE_DEFAULT, ''),
         ]);
@@ -641,6 +689,7 @@ class local_earlyalert_course_grades_ws extends external_api {
      * @param int $studentid
      * @param string $alert_type
      * @param int $thresholdid
+     * @param float $thresholdpercent
      * @param string $assignment_title
      * @param string $custom_message
      * @return array
@@ -651,6 +700,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         $studentid,
         $alert_type,
         $thresholdid,
+        $thresholdpercent,
         $assignment_title,
         $custom_message
     ) {
@@ -662,6 +712,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'studentid' => $studentid,
             'alert_type' => $alert_type,
             'thresholdid' => $thresholdid,
+            'thresholdpercent' => $thresholdpercent,
             'assignment_title' => $assignment_title,
             'custom_message' => $custom_message,
         ]);
@@ -721,7 +772,12 @@ class local_earlyalert_course_grades_ws extends external_api {
 
         $gradeletters = new \local_earlyalert\grade_letters();
         $graderange = $gradeletters->get_grade_percentage_range();
-        $gradetext = $graderange[(int)$params['thresholdid']]['letter'] ?? 'D+';
+        $thresholdpercent = (float)$params['thresholdpercent'];
+        if ($thresholdpercent >= 0 && $thresholdpercent <= 100) {
+            $gradetext = rtrim(rtrim(number_format($thresholdpercent, 1, '.', ''), '0'), '.') . '%';
+        } else {
+            $gradetext = $graderange[(int)$params['thresholdid']]['letter'] ?? 'D+';
+        }
 
         $prepared = \local_etemplate\email::replace_message_placeholders(
             (string)$preload->message,
@@ -864,12 +920,12 @@ class local_earlyalert_course_grades_ws extends external_api {
         list($iteminsql, $itemparams) = $DB->get_in_or_equal($gradeitemids, SQL_PARAMS_NAMED, 'iid');
         list($userinsql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'uid');
 
-        $sql = "SELECT gg.userid, gg.finalgrade, gi.grademax
+                $sql = "SELECT gg.userid, gg.finalgrade, gi.grademax
                   FROM {grade_items} gi
              LEFT JOIN {grade_grades} gg ON gg.itemid = gi.id
                  WHERE gi.id {$iteminsql}
                    AND gg.userid {$userinsql}";
-        $records = $DB->get_records_sql($sql, $itemparams + $userparams);
+                $records = $DB->get_recordset_sql($sql, $itemparams + $userparams);
 
         $accum = [];
         foreach ($records as $record) {
@@ -881,6 +937,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                 $accum[$userid][] = ((float)$record->finalgrade / (float)$record->grademax) * 100;
             }
         }
+        $records->close();
 
         foreach ($accum as $userid => $percentages) {
             if (empty($percentages)) {
@@ -896,6 +953,85 @@ class local_earlyalert_course_grades_ws extends external_api {
         }
 
         return $results;
+    }
+
+    /**
+     * Returns selected grade items that match the current condition for each user.
+     *
+     * @param array $gradeitemids
+     * @param array $userids
+     * @param string $condition
+     * @param float $thresholdmin
+     * @param float $thresholdmax
+     * @return array
+     */
+    private static function get_matched_grade_items(array $gradeitemids, array $userids, $condition, $thresholdmin, $thresholdmax) {
+        global $DB;
+
+        $results = [];
+        foreach ($userids as $userid) {
+            $results[(int)$userid] = [];
+        }
+
+        if (empty($gradeitemids) || empty($userids)) {
+            return $results;
+        }
+
+        list($iteminsql, $itemparams) = $DB->get_in_or_equal($gradeitemids, SQL_PARAMS_NAMED, 'miid');
+        list($userinsql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'muid');
+
+        $sql = "SELECT CONCAT(u.id, '_', gi.id) AS recordid,
+                       u.id AS userid,
+                       gi.itemname,
+                       gg.finalgrade,
+                       gi.grademax
+                  FROM {user} u
+                  JOIN {grade_items} gi ON gi.id {$iteminsql}
+             LEFT JOIN {grade_grades} gg ON gg.itemid = gi.id AND gg.userid = u.id
+                 WHERE u.id {$userinsql}
+              ORDER BY gi.sortorder ASC, gi.itemname ASC";
+
+        $records = $DB->get_recordset_sql($sql, $itemparams + $userparams);
+        foreach ($records as $record) {
+            $userid = (int)$record->userid;
+            $finalgrade = $record->finalgrade;
+            $grademax = $record->grademax;
+            $match = false;
+
+            if ($condition === 'missing') {
+                $match = $finalgrade === null;
+            } else if ($finalgrade !== null && $grademax !== null && (float)$grademax > 0) {
+                $percent = ((float)$finalgrade / (float)$grademax) * 100;
+                $match = $condition === 'above' ? $percent >= $thresholdmin : $percent <= $thresholdmax;
+            }
+
+            if ($match) {
+                $itemname = trim((string)$record->itemname);
+                if ($itemname === '') {
+                    $itemname = get_string('unnamed_grade_item', 'local_earlyalert');
+                }
+                $results[$userid][] = $itemname . ' (' . self::format_grade_display($finalgrade, $grademax) . ')';
+            }
+        }
+        $records->close();
+
+        return $results;
+    }
+
+    /**
+     * Returns the locked filtering condition for an alert type.
+     *
+     * @param string $alerttype
+     * @return string
+     */
+    private static function get_condition_for_alert_type($alerttype) {
+        if ($alerttype === 'assign' || $alerttype === 'exam') {
+            return 'missing';
+        }
+        if ($alerttype === 'commendation') {
+            return 'above';
+        }
+        return 'below';
     }
 
     /**

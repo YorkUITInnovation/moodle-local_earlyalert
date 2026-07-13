@@ -59,17 +59,22 @@ class local_earlyalert_users_ws extends external_api {
         global $DB;
         raise_memory_limit(MEMORY_UNLIMITED);
         $params = self::validate_parameters(self::get_users_parameters(), array('search' => $search));
+        $mdl_users = [];
         if (strlen($search) >= 3) {
-            $sql = "select * from {user} u where ";
-            $name = str_replace(' ', '%', $search);
-            $sql .= " (Concat(u.firstname, ' ', u.lastname ) like '%$search%' or (u.idnumber like '%$search%') or (u.email like '%$search%') or (u.username like '%$search%'))";
-            //How the ajax call with search via the form autocomplete
-            $sql .= " Order by u.lastname";
-            //How the ajax call with search via the form autocomplete
-            $mdl_users = $DB->get_records_sql($sql, array($search));
-        }
-        else {
-            //            $sql = "select * from {user} Order By lastname"; $mdlUsers = [];
+            $searchparam = '%' . $DB->sql_like_escape($search) . '%';
+            $nameparam   = '%' . $DB->sql_like_escape(str_replace(' ', '%', $search)) . '%';
+            $sql = "SELECT * FROM {user} u WHERE (
+                " . $DB->sql_like($DB->sql_fullname('u.firstname', 'u.lastname'), ':namesearch', false) . "
+                OR " . $DB->sql_like('u.idnumber', ':idnumber', false) . "
+                OR " . $DB->sql_like('u.email', ':email', false) . "
+                OR " . $DB->sql_like('u.username', ':username', false) . "
+            ) ORDER BY u.lastname";
+            $mdl_users = $DB->get_records_sql($sql, [
+                'namesearch' => $nameparam,
+                'idnumber'   => $searchparam,
+                'email'      => $searchparam,
+                'username'   => $searchparam,
+            ]);
         }
         $users = [];
         $i = 0;
