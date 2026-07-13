@@ -116,17 +116,6 @@ CONST GRADE_A_PLUS = 1;
      */
     private $date_message_sent;
 
-    /**
-     *
-     * @var string
-     */
-    private $subject;
-
-    /**
-     *
-     * @var string
-     */
-    private $body;
     private $user_read;
 
     /**
@@ -260,30 +249,6 @@ CONST GRADE_A_PLUS = 1;
         return $this->template_id;
     }
 
-    /**
-     * @return name - varchar (255)
-     */
-    public function get_name(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @return subject - varchar (255)
-     */
-    public function get_subject(): string
-    {
-        return $this->subject;
-    }
-
-    /**
-     * @return message - longtext (-1)
-     */
-    public function get_body(): string
-    {
-        return $this->body;
-    }
-
     public function get_user_read(): int
     {
         return $this->user_read;
@@ -295,26 +260,14 @@ CONST GRADE_A_PLUS = 1;
     }
 
     public function get_trigger_grade_letter(): string {
-        switch ($this->trigger_grade) {
-            case self::GRADE_F:
-                return 'F';
-            case self::GRADE_E:
-                return 'E';
-            case self::GRADE_C:
-                return 'C';
-            case self::GRADE_C_PLUS:
-                return 'C+';
-            case self::GRADE_B:
-                return 'B';
-            case self::GRADE_B_PLUS:
-                return 'B+';
-            case self::GRADE_A_PLUS:
-                return 'A+';
-            case self::GRADE_A:
-                return 'A';
-            default:
-                return 'D+';
+        global $DB;
+        if ($this->trigger_grade > 0) {
+            $letter = $DB->get_field('grade_letters', 'letter', ['id' => $this->trigger_grade, 'contextid' => 1]);
+            if ($letter !== false && $letter !== null && $letter !== '') {
+                return (string)$letter;
+            }
         }
+        return 'D+'; // fallback default
     }
 
     public function get_course_name(): string
@@ -367,21 +320,15 @@ CONST GRADE_A_PLUS = 1;
     {
         global $DB;
         if ($student = $DB->get_record('user', array('id' => $this->target_user_id))) {
-            $sql = "Select
-                    uid.data As major
-                From
-                    {user_info_data} uid Inner Join
-                    {user_info_field} uif On uid.fieldid = uif.id Inner Join
-                    {user} u On u.id = uid.userid
-                Where
-                    uid.userid = " . $this->target_user_id . " And
-                    uif.shortname = 'ldapmajor'";
-            if ($student_info = $DB->get_record_sql($sql)) {
+            $sql = "SELECT uid.data AS major
+                    FROM {user_info_data} uid
+                    JOIN {user_info_field} uif ON uid.fieldid = uif.id
+                    WHERE uid.userid = :userid AND uif.shortname = 'ldapmajor'";
+            if ($student_info = $DB->get_record_sql($sql, ['userid' => $this->target_user_id])) {
                 $student->major = $student_info->major;
             }
             return $student;
         }
-        //return $DB->get_record('user', array('id' => $this->target_user_id));
         return false;
     }
 
@@ -471,30 +418,6 @@ CONST GRADE_A_PLUS = 1;
     public function set_templateid($template_id)
     {
         $this->template_id = $template_id;
-    }
-
-    /**
-     * @param Type: varchar (255)
-     */
-    public function set_name($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @param Type: varchar (255)
-     */
-    public function set_subject($subject)
-    {
-        $this->subject = $subject;
-    }
-
-    /**
-     * @param Type: longtext (-1)
-     */
-    public function set_body($body)
-    {
-        $this->body = $body;
     }
 
     /**

@@ -1,10 +1,3 @@
-import ajax from 'core/ajax';
-import Templates from 'core/templates';
-import ModalFactory from 'core/modal_factory';
-import ModalEvents from 'core/modal_events';
-import {get_string as getString} from 'core/str';
-import notification from 'core/notification';
-import {get_format as formatString} from 'core/str';
 import selectBox from 'local_earlyalert/select_box';
 import config from 'core/config';
 

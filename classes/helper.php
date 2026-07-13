@@ -208,8 +208,14 @@ class helper
 
 
         try {
-            // Start the LDAP connection in case we need it
-            $LDAP = new ldap();
+            // Start the LDAP connection in case we need it (optional - continue without it if it fails)
+            $LDAP = null;
+            try {
+                $LDAP = new ldap();
+            } catch (\Exception $ldap_error) {
+                error_log('LDAP connection failed, will use database data only: ' . $ldap_error->getMessage());
+                // Continue without LDAP - we'll just use what's in the database
+            }
             // Set profile field ids
 //            $campus_profile_field = new \stdClass();
 //            if ($campus_profile_field != $DB->get_record('user_profile_field', ['shortname' => 'campus'], 'id')) {
@@ -265,26 +271,30 @@ class helper
                         //has campus
                         $studentcampus = $campus->campus;
                     } else {
-                        // Get user info from ldap
-                        if (!empty($mdl_user) && !empty($mdl_user->id) && !empty($mdl_user->idnumber) && $campus_profile_field->id != 0) {
+                        // Get user info from ldap if available
+                        if ($LDAP !== null && !empty($mdl_user) && !empty($mdl_user->id) && !empty($mdl_user->idnumber) && $campus_profile_field->id != 0) {
+                            try {
+                                // get user profile record if ldap found a user
+                                $user_profile = profile_user_record($mdl_user->id);
+                                $student_info = $LDAP->get_student_info($mdl_user->idnumber);
 
-                            // get user profile record if ldap found a user
-                            $user_profile = profile_user_record($mdl_user->id);
-                            $student_info = $LDAP->get_student_info($mdl_user->idnumber);
+                                // try getting campus from stream
+                                $campus = helper::get_campus_from_stream($student_info['pystream']);
 
-                            // try getting campus from stream
-                            $campus = helper::get_campus_from_stream($student_info['pystream']);
-
-                            // Update campus profile field
-                            $params = [
-                                'userid' => $student->id,
-                                'fieldid' => $campus_profile_field->id,
-                                'data' => $campus,
-                                'dataformat' => 0,
-                            ];
-                            $DB->insert_record('user_info_data', $params);
+                                // Update campus profile field
+                                $params = [
+                                    'userid' => $student->id,
+                                    'fieldid' => $campus_profile_field->id,
+                                    'data' => $campus,
+                                    'dataformat' => 0,
+                                ];
+                                $DB->insert_record('user_info_data', $params);
+                            } catch (\Exception $ldap_query_error) {
+                                error_log('Failed to fetch LDAP data for student ' . $mdl_user->idnumber . ': ' . $ldap_query_error->getMessage());
+                                // Continue without LDAP data
+                            }
                         }
-                        $studentcampus = $campus;
+                        $studentcampus = isset($campus) ? $campus : '';
                     }
                     if ($faculty = $DB->get_record_sql("SELECT uid.data AS 'faculty'
                             FROM {user_info_data} uid

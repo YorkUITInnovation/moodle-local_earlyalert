@@ -77,16 +77,24 @@ class local_earlyalert_record_log_ws extends external_api {
         forEach($students as $student) {
             // Get idnumber from user student_id
             $user = $DB->get_record('user', array('id' => $student['student_id']), '*', MUST_EXIST);
-            // Oracle SQL
-            $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID=:sisid";
-            $params = [':sisid' => trim($user->idnumber)];
-            $OCI = new \local_earlyalert\oracle_client();
-            $OCI->connect();
-            $stid = $OCI->execute_query($sql, $params);
-
             $student_profile = '';
-            if (count($stid) > 0) {
-                $student_profile = json_encode($stid[0]);
+            // Oracle profile enrichment is optional. If OCI8 is unavailable,
+            // continue queuing alerts without student_profile metadata.
+            if (function_exists('oci_connect')) {
+                try {
+                    $sql = "SELECT * FROM V222.VIEW_MOODLE_EARLY_ALERTS WHERE SISID=:sisid";
+                    $oraclebinds = [':sisid' => trim($user->idnumber)];
+                    $OCI = new \local_earlyalert\oracle_client();
+                    $OCI->connect();
+                    $stid = $OCI->execute_query($sql, $oraclebinds);
+                    if (!empty($stid)) {
+                        $student_profile = json_encode($stid[0]);
+                    }
+                } catch (\Throwable $e) {
+                    error_log('local_earlyalert Oracle profile lookup failed: ' . $e->getMessage());
+                }
+            } else {
+                error_log('local_earlyalert OCI8 extension not available; skipping Oracle profile lookup.');
             }
             // add to data structure
             $data= new stdClass();
