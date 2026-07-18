@@ -67,12 +67,18 @@ class local_earlyalert_course_grades_ws extends external_api {
                 case 'exam':
                     $message_type = email::MESSAGE_TYPE_EXAM;
                     break;
+                case 'commendation':
+                    $message_type = email::MESSAGE_TYPE_CATCHALL;
+                    break;
+                default:
+                    $message_type = email::MESSAGE_TYPE_GRADE;
+                    break;
             }
 
             // Get course idnumber to get faculty course name and course number
-            $course = $DB->get_record('course', array('id' => $courseid), 'idnumber');
-            // Convert course idnumber to array by _
-            $course_idnumber = explode('_', $course->idnumber);
+            $course = $DB->get_record('course', array('id' => $courseid), 'idnumber', MUST_EXIST);
+            // Convert course idnumber to array by _, padding to avoid undefined offsets.
+            $course_idnumber = array_pad(explode('_', (string)($course->idnumber ?? '')), 5, '');
             // Capture faculty, course name and course number
             $course_name = $course_idnumber[2];
             $course_number = $course_idnumber[4];
@@ -93,7 +99,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             $gradeletter = null;
             if ($grade_letter_id > 0) {
                 $selectedgraderange = helper::get_moodle_grade_percent_range($grade_letter_id);
-                $gradeletter = $selectedgraderange['letter'] ?? null;
+                $gradeletter = (!empty($selectedgraderange) && isset($selectedgraderange['letter'])) ? $selectedgraderange['letter'] : null;
             }
 
             //lets cache all possible email templates based off of these students...
@@ -123,6 +129,9 @@ class local_earlyalert_course_grades_ws extends external_api {
 
                 // Get student record
                 $student_record = $DB->get_record('user', array('idnumber' => $student['idnumber']));
+                if (empty($student_record) || !is_object($student_record)) {
+                    continue;
+                }
                 // Get student Language
                 $lang = self::process_lang_for_templates($student['lang']);
 
@@ -145,30 +154,49 @@ class local_earlyalert_course_grades_ws extends external_api {
                 if ($template) {
                     $email = new \local_etemplate\email($template->id);
                     $preload_data = $email->preload_template($courseid, $student_record, $teacher_user_id);
+                    if (empty($preload_data) || !is_object($preload_data)) {
+                        continue;
+                    }
+
+                    $preloadmessage = property_exists($preload_data, 'message') ? (string)$preload_data->message : '';
+                    $preloadsubject = property_exists($preload_data, 'subject') ? (string)$preload_data->subject : '';
+                    $preloadtemplateid = property_exists($preload_data, 'templateid') ? (int)$preload_data->templateid : 0;
+                    $preloadrevisionid = property_exists($preload_data, 'revision_id') ? (int)$preload_data->revision_id : 0;
+                    $preloadinstructorid = property_exists($preload_data, 'instructor_id') ? (int)$preload_data->instructor_id : 0;
+                    $preloadtriggeredfromuserid =
+                        property_exists($preload_data, 'triggered_from_user_id') ? (int)$preload_data->triggered_from_user_id : 0;
+                    $hascustommessage = self::template_has_custom_message($template, $preloadmessage);
+                    if (!$hascustommessage && (int)$message_type === (int)email::MESSAGE_TYPE_CATCHALL) {
+                        $hascustommessage = true;
+                    }
 
                     // Resolve remaining placeholders ([grade], [assignmenttitle], [custommessage]) in the
                     // bulk preview. [assignmenttitle] and [custommessage] are not known at this stage so
                     // they are passed as null and left as-is in the message (they are resolved at send time).
                     $resolved_data = \local_etemplate\email::replace_message_placeholders(
-                        $preload_data->message,
-                        $preload_data->subject,
+                        $preloadmessage,
+                        $preloadsubject,
                         $courseid,
                         $student_record,
                         $teacher_user_id,
                         $gradeletter
                     );
+                    $resolvedsubject = is_object($resolved_data) && property_exists($resolved_data, 'subject') ?
+                        (string)$resolved_data->subject : '';
+                    $resolvedmessage = is_object($resolved_data) && property_exists($resolved_data, 'message') ?
+                        (string)$resolved_data->message : '';
 
                     // Merge student data with template data
                     $student_and_template_data = array_merge($student, [
                         'templateKey' => $templateKey,
-                        'subject' => $resolved_data->subject,
-                        'message' => $resolved_data->message,
-                        'templateid' => $preload_data->templateid,
-                        'revision_id' => $preload_data->revision_id,
+                        'subject' => $resolvedsubject,
+                        'message' => $resolvedmessage,
+                        'templateid' => $preloadtemplateid,
+                        'revision_id' => $preloadrevisionid,
                         'course_id' => $courseid,
-                        'hascustommessage' => isset($template->hascustommessage) ? (int)$template->hascustommessage : 0,
-                        'instructor_id' => $preload_data->instructor_id,
-                        'triggered_from_user_id' => $preload_data->triggered_from_user_id
+                        'hascustommessage' => (int)$hascustommessage,
+                        'instructor_id' => $preloadinstructorid,
+                        'triggered_from_user_id' => $preloadtriggeredfromuserid
                     ]);
 
                     $templateCache[$templateKey] = $student_and_template_data;
@@ -862,7 +890,20 @@ class local_earlyalert_course_grades_ws extends external_api {
         $coursecontext = \context_course::instance((int)$params['courseid']);
         self::validate_context($coursecontext);
 
-        $student = $DB->get_record('user', ['id' => (int)$params['studentid']], '*', MUST_EXIST);
+        // Ensure warnings/notices never leak HTML into AJAX JSON responses.
+        set_error_handler(function ($severity, $message, $file, $line) {
+            $handled = E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE;
+            if (($severity & $handled) === 0) {
+                return false;
+            }
+            if (!(error_reporting() & $severity)) {
+                return false;
+            }
+            throw new \ErrorException($message, 0, $severity, $file, $line);
+        });
+
+        try {
+            $student = $DB->get_record('user', ['id' => (int)$params['studentid']], '*', MUST_EXIST);
 
         $campus = (string)$DB->get_field_sql("SELECT uid.data
                                                FROM {user_info_data} uid
@@ -896,33 +937,48 @@ class local_earlyalert_course_grades_ws extends external_api {
             $template = helper::get_email_template($campus, $faculty, $major, $coursename, $coursenumber, $messageType, 'en');
         }
 
-        if (!$template) {
-            return [
-                'templateid' => 0,
-                'revision_id' => 0,
-                'triggered_from_user_id' => (int)$params['teacher_user_id'],
-                'instructor_id' => (int)$params['teacher_user_id'],
-                'target_user_id' => (int)$student->id,
-                'course_id' => (int)$course->id,
-                'subject' => get_string('preview_unavailable_subject', 'local_earlyalert'),
-                'message' => get_string('preview_unavailable_message', 'local_earlyalert'),
-            ];
-        }
+            if (!$template) {
+                return self::build_preview_unavailable_response(
+                    (int)$params['teacher_user_id'],
+                    (int)$student->id,
+                    (int)$course->id
+                );
+            }
 
         $templateemail = new \local_etemplate\email((int)$template->id);
         $preload = $templateemail->preload_template((int)$course->id, $student, (int)$params['teacher_user_id']);
+            if (empty($preload) || !is_object($preload)) {
+                return self::build_preview_unavailable_response(
+                    (int)$params['teacher_user_id'],
+                    (int)$student->id,
+                    (int)$course->id
+                );
+            }
+
+        $preloadmessage = property_exists($preload, 'message') ? (string)$preload->message : '';
+        $preloadsubject = property_exists($preload, 'subject') ? (string)$preload->subject : '';
+        $preloadtemplateid = property_exists($preload, 'templateid') ? (int)$preload->templateid : 0;
+        $preloadrevisionid = property_exists($preload, 'revision_id') ? (int)$preload->revision_id : 0;
+        $preloadtriggeredfromuserid = property_exists($preload, 'triggered_from_user_id') ?
+            (int)$preload->triggered_from_user_id : (int)$params['teacher_user_id'];
+        $preloadinstructorid = property_exists($preload, 'instructor_id') ?
+            (int)$preload->instructor_id : (int)$params['teacher_user_id'];
+        $hascustommessage = self::template_has_custom_message($template, $preloadmessage);
+        if (!$hascustommessage && (int)$messageType === (int)email::MESSAGE_TYPE_CATCHALL) {
+            $hascustommessage = true;
+        }
 
         $thresholdpercent = (float)$params['thresholdpercent'];
         if ($thresholdpercent >= 0 && $thresholdpercent <= 100) {
             $gradetext = rtrim(rtrim(number_format($thresholdpercent, 1, '.', ''), '0'), '.') . '%';
         } else {
             $selectedrange = helper::get_moodle_grade_percent_range((int)$params['thresholdid']);
-            $gradetext = $selectedrange['letter'] ?? 'D+';
+            $gradetext = (!empty($selectedrange) && isset($selectedrange['letter'])) ? $selectedrange['letter'] : 'D+';
         }
 
         $prepared = \local_etemplate\email::replace_message_placeholders(
-            (string)$preload->message,
-            (string)$preload->subject,
+            $preloadmessage,
+            $preloadsubject,
             (int)$course->id,
             $student,
             (int)$params['teacher_user_id'],
@@ -931,16 +987,73 @@ class local_earlyalert_course_grades_ws extends external_api {
             (string)$params['custom_message']
         );
 
+            return [
+                'templateid' => $preloadtemplateid,
+                'revision_id' => $preloadrevisionid,
+                'triggered_from_user_id' => $preloadtriggeredfromuserid,
+                'instructor_id' => $preloadinstructorid,
+                'target_user_id' => (int)$student->id,
+                'course_id' => (int)$course->id,
+                'hascustommessage' => $hascustommessage,
+                'subject' => is_object($prepared) && property_exists($prepared, 'subject') ? (string)$prepared->subject : '',
+                'message' => is_object($prepared) && property_exists($prepared, 'message') ? (string)$prepared->message : '',
+            ];
+        } catch (\Throwable $t) {
+            return self::build_preview_unavailable_response(
+                (int)$params['teacher_user_id'],
+                isset($student) && is_object($student) ? (int)$student->id : (int)$params['studentid'],
+                isset($course) && is_object($course) ? (int)$course->id : (int)$params['courseid']
+            );
+        } finally {
+            restore_error_handler();
+        }
+    }
+
+    /**
+     * Builds a safe fallback response for preview API failures.
+     *
+     * @param int $teacheruserid
+     * @param int $studentid
+     * @param int $courseid
+     * @return array
+     */
+    private static function build_preview_unavailable_response($teacheruserid, $studentid, $courseid) {
         return [
-            'templateid' => (int)$preload->templateid,
-            'revision_id' => (int)$preload->revision_id,
-            'triggered_from_user_id' => (int)$preload->triggered_from_user_id,
-            'instructor_id' => (int)$preload->instructor_id,
-            'target_user_id' => (int)$student->id,
-            'course_id' => (int)$course->id,
-            'subject' => (string)$prepared->subject,
-            'message' => (string)$prepared->message,
+            'templateid' => 0,
+            'revision_id' => 0,
+            'triggered_from_user_id' => $teacheruserid,
+            'instructor_id' => $teacheruserid,
+            'target_user_id' => $studentid,
+            'course_id' => $courseid,
+            'hascustommessage' => false,
+            'subject' => get_string('preview_unavailable_subject', 'local_earlyalert'),
+            'message' => get_string('preview_unavailable_message', 'local_earlyalert'),
         ];
+    }
+
+    /**
+     * Detect whether the resolved template supports the [custommessage] token.
+     *
+     * @param mixed $template
+     * @param string $preloadmessage
+     * @return bool
+     */
+    private static function template_has_custom_message($template, $preloadmessage = '') {
+        if (!is_object($template)) {
+            return false;
+        }
+
+        if (property_exists($template, 'hascustommessage') && !empty($template->hascustommessage)) {
+            return true;
+        }
+
+        // Prefer raw template content because preload may already replace/strip unknown tokens.
+        $templatemessage = property_exists($template, 'message') ? (string)$template->message : '';
+        if ($templatemessage !== '' && stripos($templatemessage, '[custommessage]') !== false) {
+            return true;
+        }
+
+        return stripos((string)$preloadmessage, '[custommessage]') !== false;
     }
 
     /**
@@ -956,6 +1069,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'instructor_id' => new external_value(PARAM_INT, 'Instructor user id'),
             'target_user_id' => new external_value(PARAM_INT, 'Target student id'),
             'course_id' => new external_value(PARAM_INT, 'Course id'),
+            'hascustommessage' => new external_value(PARAM_BOOL, 'Whether template contains [custommessage] token'),
             'subject' => new external_value(PARAM_RAW, 'Preview subject'),
             'message' => new external_value(PARAM_RAW, 'Preview body'),
         ]);

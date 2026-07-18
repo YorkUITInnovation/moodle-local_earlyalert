@@ -285,6 +285,10 @@
                         <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
                             <h3 class="h5 mb-0">{{strings.flagged_students}}</h3>
                             <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="ea-edit-custom-message-btn"
+                                    data-action="earlyalert/open-custom-message">
+                                    {{strings.edit_message}}
+                                </button>
                                 <div class="text-danger fw-semibold" id="ea-selected-count">0 {{strings.selected}}</div>
                                 <div class="text-muted small" id="ea-table-range">{{strings.showing_range_default}}</div>
                                 <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/clear-selection">{{strings.clear_selection}}</button>
@@ -370,12 +374,6 @@
                     {{strings.etemplate_template_note}}
                 </div>
 
-                <div class="mb-3">
-                    <label for="ea-custom-message" class="form-label">{{strings.additional_message}}</label>
-                    <textarea id="ea-custom-message" class="form-control" rows="5"></textarea>
-                    <div class="form-text">{{strings.additional_message_help}}</div>
-                </div>
-
                 <div class="alert alert-light border" id="ea-message-preview-container">
                     <div class="fw-semibold mb-1">{{strings.resolved_preview}}</div>
                     <div class="text-muted small mb-2">{{strings.resolved_preview_note}}</div>
@@ -406,6 +404,26 @@
                 <div class="modal-body" id="ea-preview-modal-body"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-action="earlyalert/close-preview">{{strings.close}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ea-custom-message-modal" tabindex="-1" aria-hidden="true" aria-labelledby="ea-custom-message-modal-title">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ea-custom-message-modal-title">{{strings.edit_message}}</h5>
+                    <button type="button" class="btn-close" data-action="earlyalert/close-custom-message" aria-label="{{strings.close}}"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="ea-custom-message-modal-text" class="form-label">{{strings.additional_message}}</label>
+                    <textarea id="ea-custom-message-modal-text" class="form-control" rows="6"></textarea>
+                    <div class="form-text">{{strings.additional_message_help}}</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-action="earlyalert/close-custom-message">{{strings.cancel}}</button>
+                    <button type="button" class="btn btn-primary" data-action="earlyalert/save-custom-message">{{strings.save_changes}}</button>
                 </div>
             </div>
         </div>

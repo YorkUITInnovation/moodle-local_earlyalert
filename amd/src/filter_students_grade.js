@@ -31,6 +31,10 @@ const STATE = {
     composeTemplates: [],
     composeTemplateId: '',
     previewRequestId: 0,
+    customMessage: '',
+    supportsCustomMessage: false,
+    customMessageCheckRequestId: 0,
+    currentPageStudentIds: [],
 };
 
 const SELECTORS = {
@@ -54,6 +58,9 @@ const SELECTORS = {
     exportSelected: '[data-action="earlyalert/export-selected"]',
     sort: '[data-action="earlyalert/sort"]',
     resetTemplate: '[data-action="earlyalert/reset-template"]',
+    openCustomMessage: '[data-action="earlyalert/open-custom-message"]',
+    closeCustomMessage: '[data-action="earlyalert/close-custom-message"]',
+    saveCustomMessage: '[data-action="earlyalert/save-custom-message"]',
     alertOption: '.ea-alert-option',
     gradeFilterMode: '#ea-grade-filter-mode',
     gradeItems: '#ea-grade-items',
@@ -104,6 +111,7 @@ const loadStrings = async() => {
 const root = () => document.getElementById('earlyalert-dashboard');
 
 let previewModalInstance = null;
+let customMessageModalInstance = null;
 
 const escapeHtml = value => String(value)
     .replace(/&/g, '&amp;')
@@ -233,6 +241,18 @@ const getPreviewModal = () => {
     return {modalEl, instance: previewModalInstance};
 };
 
+const getCustomMessageModal = () => {
+    const modalEl = document.getElementById('ea-custom-message-modal');
+    if (!modalEl) {
+        return null;
+    }
+
+    if (!customMessageModalInstance && window.bootstrap && window.bootstrap.Modal) {
+        customMessageModalInstance = new window.bootstrap.Modal(modalEl);
+    }
+    return {modalEl, instance: customMessageModalInstance};
+};
+
 const openPreviewModal = () => {
     const modal = getPreviewModal();
     if (!modal) {
@@ -261,6 +281,89 @@ const closePreviewModal = () => {
     }
 };
 
+const openCustomMessageModal = () => {
+    const modal = getCustomMessageModal();
+    if (!modal) {
+        return;
+    }
+
+    if (modal.instance) {
+        modal.instance.show();
+    } else {
+        modal.modalEl.classList.add('show');
+        modal.modalEl.style.display = 'block';
+    }
+};
+
+const closeCustomMessageModal = () => {
+    const modal = getCustomMessageModal();
+    if (!modal) {
+        return;
+    }
+
+    if (modal.instance) {
+        modal.instance.hide();
+    } else {
+        modal.modalEl.classList.remove('show');
+        modal.modalEl.style.display = 'none';
+    }
+};
+
+const updateCustomMessageUi = () => {
+    const editButton = document.getElementById('ea-edit-custom-message-btn');
+    if (editButton) {
+        // Commendation templates map to catch-all messages and should always allow custom edits.
+        const shouldShow = STATE.supportsCustomMessage || STATE.alertType === 'commendation';
+        editButton.classList.toggle('d-none', !shouldShow);
+        editButton.disabled = !shouldShow;
+    }
+};
+
+const setCustomMessage = value => {
+    STATE.customMessage = String(value || '');
+
+    const modalField = document.getElementById('ea-custom-message-modal-text');
+    if (modalField && modalField.value !== STATE.customMessage) {
+        modalField.value = STATE.customMessage;
+    }
+};
+
+const getCustomMessage = () => STATE.customMessage;
+
+const getPreviewProbeStudentId = () => {
+    const selectedIds = Array.from(STATE.selectedStudents.keys());
+    if (selectedIds.length) {
+        return selectedIds.find(id => STATE.studentDataById.has(id)) || selectedIds[0] || 0;
+    }
+    return STATE.currentPageStudentIds[0] || 0;
+};
+
+const refreshCustomMessageSupport = () => {
+    const probeStudentId = getPreviewProbeStudentId();
+    if (!probeStudentId || !STATE.courseId || !STATE.alertType) {
+        STATE.supportsCustomMessage = false;
+        updateCustomMessageUi();
+        return;
+    }
+
+    const requestId = ++STATE.customMessageCheckRequestId;
+    fetchStudentPreview(probeStudentId).then(response => {
+        if (requestId !== STATE.customMessageCheckRequestId) {
+            return;
+        }
+
+        STATE.supportsCustomMessage = !!response.hascustommessage;
+        updateCustomMessageUi();
+    }).catch(() => {
+        if (requestId !== STATE.customMessageCheckRequestId) {
+            return;
+        }
+
+        STATE.supportsCustomMessage = false;
+        updateCustomMessageUi();
+    });
+};
+
 const showDashboard = () => {
     document.querySelector(SELECTORS.dashboardView)?.classList.remove('d-none');
     document.querySelector(SELECTORS.workflowView)?.classList.add('d-none');
@@ -282,6 +385,8 @@ const updateSelectionState = () => {
     if (toCompose) {
         toCompose.disabled = count === 0;
     }
+
+    refreshCustomMessageSupport();
 };
 
 const updateRangeIndicator = (page, perPage, total) => {
@@ -544,12 +649,17 @@ const loadStudents = () => {
         }
 
         if (!response.students || !response.students.length) {
+            STATE.currentPageStudentIds = [];
             tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">${escapeHtml(STRINGS.no_students_found || 'No students found')}</td></tr>`;
             updatePaginationUi(response);
+            refreshCustomMessageSupport();
             return;
         }
 
         const students = sortStudents(response.students);
+        STATE.currentPageStudentIds = students
+            .map(student => parseInt(student.id, 10))
+            .filter(studentid => !Number.isNaN(studentid));
 
         tbody.innerHTML = students.map(student => {
             STATE.studentDataById.set(student.id, student);
@@ -592,8 +702,6 @@ const updateComposeSummary = () => {
     const count = STATE.selectedStudents.size;
     summary.textContent = `Sending to ${count} students. Personalization tokens are filled automatically when sent.`;
 };
-
-const getCustomMessage = () => document.getElementById('ea-custom-message')?.value || '';
 
 const getFirstSelectedStudentId = () => {
     const selectedIds = Array.from(STATE.selectedStudents.keys());
@@ -646,6 +754,8 @@ const renderComposePreview = () => {
 };
 
 const initComposeForm = () => {
+    setCustomMessage(STATE.customMessage);
+    updateCustomMessageUi();
     updateComposeSummary();
     renderComposePreview();
 };
@@ -825,6 +935,10 @@ const openCourseFlow = (courseId, courseName) => {
     STATE.selectedStudents.clear();
     STATE.studentDataById.clear();
     STATE.previewData = null;
+    STATE.customMessage = '';
+    STATE.supportsCustomMessage = false;
+    STATE.customMessageCheckRequestId = 0;
+    STATE.currentPageStudentIds = [];
     STATE.page = 1;
     STATE.totalPages = 1;
     STATE.perPage = 10;
@@ -878,6 +992,8 @@ const openCourseFlow = (courseId, courseName) => {
     updateSelectedAlertTypeDisplay();
     updateGradeFilterControls();
     updateThresholdVisibility();
+    setCustomMessage('');
+    updateCustomMessageUi();
 
     updateSortIndicators();
     showWorkflow();
@@ -946,6 +1062,28 @@ export const init = async() => {
 
         if (event.target.closest(SELECTORS.closePreview)) {
             closePreviewModal();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.openCustomMessage)) {
+            if (!STATE.supportsCustomMessage && STATE.alertType !== 'commendation') {
+                return;
+            }
+            setCustomMessage(STATE.customMessage);
+            openCustomMessageModal();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.closeCustomMessage)) {
+            closeCustomMessageModal();
+            return;
+        }
+
+        if (event.target.closest(SELECTORS.saveCustomMessage)) {
+            const modalField = document.getElementById('ea-custom-message-modal-text');
+            setCustomMessage(modalField?.value || '');
+            closeCustomMessageModal();
+            updatePreview();
             return;
         }
 
@@ -1046,10 +1184,7 @@ export const init = async() => {
         }
 
         if (event.target.closest(SELECTORS.resetTemplate)) {
-            const messageInput = document.getElementById('ea-custom-message');
-            if (messageInput) {
-                messageInput.value = '';
-            }
+            setCustomMessage('');
             updatePreview();
             return;
         }
@@ -1064,12 +1199,6 @@ export const init = async() => {
             event.preventDefault();
             STATE.page = 1;
             loadStudents();
-        }
-    });
-
-    document.addEventListener('input', event => {
-        if (event.target.id === 'ea-custom-message') {
-            updatePreview();
         }
     });
 
@@ -1135,7 +1264,8 @@ export const init = async() => {
     updateSortIndicators();
     updateGradeFilterControls();
     updateThresholdVisibility();
-    
+    updateCustomMessageUi();
+
     // Initialize step badge colors
     document.querySelectorAll('.ea-step-label').forEach(stepNode => {
         const badgeEl = stepNode.previousElementSibling;
@@ -1149,7 +1279,7 @@ export const init = async() => {
         firstBadge.classList.remove('bg-secondary');
         firstBadge.classList.add('bg-primary');
     }
-    
+
     document.querySelectorAll(SELECTORS.courseRow).forEach(row => {
         row.style.cursor = 'pointer';
     });
