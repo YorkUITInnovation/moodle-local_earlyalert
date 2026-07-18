@@ -14,11 +14,6 @@ function sendEmails() {
 
     document.querySelectorAll('.early-alert-send-button').forEach(button => {
         button.addEventListener('click', function () {
-            // Get value from element with id early_alert_filter_course_id
-            var course_id = document.getElementById('early_alert_filter_course_id').value;
-            var alert_type = document.getElementById('early-alert-alert-type').value;
-            var course_name = document.getElementById('early_alert_course_name').value;
-
             // Get all checked checkboxes fromelement with class early_alert_course_name and add to array called ids
             var ids = [];
             document.querySelectorAll('.early_alert_course_name').forEach(checkbox => {
@@ -33,7 +28,6 @@ function sendEmails() {
             var cancel = getString('cancel', 'local_earlyalert');
             var sent_email = getString('sent_email', 'local_earlyalert');
             var could_not_send_email = getString('could_not_send_email', 'local_earlyalert');
-            var sent_dialog_text = getString('sent_dialog_text', 'local_earlyalert');
 
             // Notification
             notification.confirm(send_string, send_dialog_text, send, cancel, function () {

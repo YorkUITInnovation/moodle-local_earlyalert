@@ -5,7 +5,9 @@ import {get_string as getString} from 'core/str';
 const selectBox = {
     init: function(selector, method, placeholder) {
         const selectElement = document.querySelector(selector);
-        if (!selectElement) return;
+        if (!selectElement) {
+            return;
+        }
 
         const searchInput = document.createElement('input');
         searchInput.type = 'text';
@@ -27,7 +29,9 @@ const selectBox = {
         opt.textContent = placeholder;
         searchInput.addEventListener('input', function () {
             const searchTerm = searchInput.value || "";
-            if (searchTerm.length < 3) return; // Minimum 3 characters to search
+            if (searchTerm.length < 3) {
+                return; // Minimum 3 characters to search
+            }
 
             ajax.call([{
                 methodname: method,
@@ -35,12 +39,18 @@ const selectBox = {
                 done: function (response) {
                     updateOptions(selectElement, response);
                 },
-                fail: function (error) {
-                    console.error(error);
+                fail: function () {
                 }
             }]);
         });
 
+        /**
+         * Update select options from search results.
+         *
+         * @param {HTMLSelectElement} select
+         * @param {Array} options
+         * @returns {void}
+         */
         function updateOptions(select, options) {
             // If multiple attribute is set, and a or multiple options are selected, do not clear the options
             if (select.hasAttribute('multiple')) {
@@ -69,20 +79,24 @@ const selectBox = {
         }
 
         // Helper: update label with selected option
+        /**
+         * Update select label with the currently selected option.
+         *
+         * @returns {void}
+         */
         function updateLabelWithSelectedOption() {
             const label = selectElement.labels[0];
             if (label && selectElement.selectedIndex > 0) {
                 const selectedText = selectElement.options[selectElement.selectedIndex].textContent;
-                getString('impersonate_user', 'local_earlyalert', selectedText).then(function(labelText) { // Use getString to translate the label text and resolve it
+                getString('impersonate_user', 'local_earlyalert', selectedText)
+                    .then(function(labelText) {
                     label.textContent = labelText;
-                    console.log('resolved label text:', labelText);
                 });
             }
         }
 
         if (selectElement.hasAttribute('multiple')) {
             selectElement.addEventListener('change', function () {
-                const selectedOptions = Array.from(selectElement.selectedOptions).map(opt => opt.value);
                 // updateLabelWithSelectedOption();
             });
         } else {

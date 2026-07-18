@@ -10,6 +10,11 @@ export const init = () => {
     preview_message();
 };
 
+/**
+ * Attach instructor follow-up status update handlers.
+ *
+ * @returns {void}
+ */
 function update_student_status_for_instructor() {
 
     // Select all checkboxes with the class .checkbox-instructor-followup
@@ -27,14 +32,13 @@ function update_student_status_for_instructor() {
                     logid: logId,
                     status: status
                 },
-            }])[0].then(function (response) {
+            }])[0].then(function () {
                 // Show Toast notification
                 addToast(getString('advised_success_toast', 'local_earlyalert'), {
                     delay: 10000,
                     closeButton: true,
                 });
-            }).catch(function (error) {
-                console.error('Failed to update student status:', error);
+            }).catch(function () {
                 addToast(getString('advised_failed_toast', 'local_earlyalert'), {
                     delay: 10000,
                     closeButton: true,
@@ -44,6 +48,11 @@ function update_student_status_for_instructor() {
     });
 }
 
+/**
+ * Attach advisor follow-up status update handlers.
+ *
+ * @returns {void}
+ */
 function update_student_status_for_advisor() {
     // Select all checkboxes with the class .checkbox-advisor-followup
     const checkboxes = document.querySelectorAll('.checkbox-advisor-followup');
@@ -61,14 +70,13 @@ function update_student_status_for_advisor() {
                     logid: logId,
                     status: status
                 }
-            }])[0].then(function (response) {
+            }])[0].then(function () {
                 // Show Toast notification
                 addToast(getString('advised_success_toast', 'local_earlyalert'), {
                     delay: 10000,
                     closeButton: true,
                 });
-            }).catch(function (error) {
-                console.error('Failed to update student status:', error);
+            }).catch(function () {
                 addToast(getString('advised_failed_toast', 'local_earlyalert'), {
                     delay: 10000,
                     closeButton: true,
@@ -78,6 +86,11 @@ function update_student_status_for_advisor() {
     });
 }
 
+/**
+ * Attach preview modal handlers for alert messages.
+ *
+ * @returns {void}
+ */
 function preview_message() {
     const previewButtons = document.querySelectorAll('.btn-early-alert-preview-message');
 
@@ -97,8 +110,7 @@ function preview_message() {
                 }).then(modal => {
                     modal.show();
                 });
-            }).catch(function (error) {
-                console.error('Failed to preview message:', error);
+            }).catch(function () {
             });
         });
     });

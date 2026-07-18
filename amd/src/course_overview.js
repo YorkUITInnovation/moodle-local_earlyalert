@@ -1,12 +1,16 @@
 import ajax from 'core/ajax';
 import Templates from 'core/templates';
-import {get_string as getString} from 'core/str';
 
 export const init = () => {
     observeCourseOverviewButtons();
 };
 
 // add mutation observer that lets us know when the course overview buttons are added to the page
+/**
+ * Observe the course overview region and bind listeners when buttons appear.
+ *
+ * @returns {void}
+ */
 function observeCourseOverviewButtons() {
     const targetNode = document.getElementById('early-alert-student-results');
 
@@ -17,7 +21,7 @@ function observeCourseOverviewButtons() {
 
     const config = { childList: true, subtree: true };
 
-    const callback = function(mutationsList, observer) {
+    const callback = function(mutationsList) {
         for (let mutation of mutationsList) {
             if (mutation.type === 'childList') {
                 addCourseOverviewButtonListener();
@@ -32,6 +36,11 @@ function observeCourseOverviewButtons() {
     addCourseOverviewButtonListener();
 }
 
+/**
+ * Attach click handlers to course overview buttons.
+ *
+ * @returns {void}
+ */
 function addCourseOverviewButtonListener() {
     // find all buttons with class btn-course-overview
     // Get the course id from the button data-course-id attribute
@@ -48,8 +57,7 @@ function addCourseOverviewButtonListener() {
                     document.getElementById('early-alert-student-results').innerHTML = html;
                     Templates.runTemplateJS(js);
                 })
-                .catch(function (error) {
-                    console.error('Failed to render template:', error);
+                .catch(function () {
                 });
 
             // Make ajax call to get the students in the course
@@ -67,11 +75,9 @@ function addCourseOverviewButtonListener() {
                         document.getElementById('early-alert-student-results').innerHTML = html;
                         Templates.runTemplateJS(js);
                     })
-                    .catch(function (error) {
-                        console.error('Failed to render template:', error);
+                    .catch(function () {
                     });
-            }).catch(function (error) {
-                console.error('Failed to get course students:', error);
+            }).catch(function () {
             });
         });
     });

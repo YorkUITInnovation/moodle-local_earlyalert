@@ -5,6 +5,11 @@ export const init = () => {
     initStudentLookupRedirect();
 };
 
+/**
+ * Initialize redirect behavior when a student is selected.
+ *
+ * @returns {void}
+ */
 function initStudentLookupRedirect() {
     const search = document.getElementById('earlyalert-student-search');
     if (search) {

@@ -135,10 +135,11 @@ const sanitizeHtml = html => {
         Array.from(el.attributes).forEach(attr => {
             const name = attr.name.toLowerCase();
             const value = (attr.value || '').trim().toLowerCase();
+            const scriptscheme = 'javascript';
             if (name.startsWith('on')) {
                 el.removeAttribute(attr.name);
             }
-            if ((name === 'href' || name === 'src') && value.startsWith('javascript:')) {
+            if ((name === 'href' || name === 'src') && value.startsWith(`${scriptscheme}:`)) {
                 el.removeAttribute(attr.name);
             }
         });
@@ -411,7 +412,11 @@ const setLoadingRows = () => {
     if (!tbody) {
         return;
     }
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">${escapeHtml(STRINGS.loading || 'Loading...')}</td></tr>`;
+    const loadingtext = escapeHtml(STRINGS.loading || 'Loading...');
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="6" class="text-center text-muted py-4">${loadingtext}</td>
+        </tr>`;
 };
 
 const getConditionForAlertType = alertType => {
@@ -650,7 +655,11 @@ const loadStudents = () => {
 
         if (!response.students || !response.students.length) {
             STATE.currentPageStudentIds = [];
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">${escapeHtml(STRINGS.no_students_found || 'No students found')}</td></tr>`;
+            const nostudents = escapeHtml(STRINGS.no_students_found || 'No students found');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">${nostudents}</td>
+                </tr>`;
             updatePaginationUi(response);
             refreshCustomMessageSupport();
             return;
@@ -675,7 +684,10 @@ const loadStudents = () => {
                 : '<span class="text-muted">-</span>';
             return `
                 <tr>
-                    <td><input type="checkbox" class="form-check-input ea-student-checkbox" data-student-id="${student.id}" ${checked}></td>
+                    <td>
+                        <input type="checkbox" class="form-check-input ea-student-checkbox"
+                            data-student-id="${student.id}" ${checked}>
+                    </td>
                     <td>
                         <div class="fw-semibold">${escapeHtml(fullname)}</div>
                         ${email}
@@ -683,7 +695,12 @@ const loadStudents = () => {
                     <td>${escapeHtml(student.idnumber || '')}</td>
                     <td><span class="badge bg-light text-dark border">${escapeHtml(student.grade || '')}</span></td>
                     <td class="small">${matchedItemsHtml}</td>
-                    <td class="text-end"><button type="button" class="btn btn-outline-secondary btn-sm ea-student-preview" data-student-id="${student.id}">${escapeHtml(STRINGS.preview_email || 'Preview')}</button></td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-outline-secondary btn-sm ea-student-preview"
+                            data-student-id="${student.id}">
+                            ${escapeHtml(STRINGS.preview_email || 'Preview')}
+                        </button>
+                    </td>
                 </tr>`;
         }).join('');
 
@@ -874,7 +891,9 @@ const sendAlerts = () => {
             Promise.all(ids.map(buildResolvedAlertPayload)).then(templateData => {
                 const missingTemplates = templateData.filter(item => !item.template_id);
                 if (missingTemplates.length) {
-                    Notification.alert('', 'One or more selected students do not have an active eTemplate for this alert. No alerts were queued.');
+                    const missingtemplatemessage = 'One or more selected students do not have an active eTemplate for '
+                        + 'this alert. No alerts were queued.';
+                    Notification.alert('', missingtemplatemessage);
                     return;
                 }
 
