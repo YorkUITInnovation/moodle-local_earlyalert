@@ -427,8 +427,10 @@ class local_earlyalert_course_grades_ws extends external_api {
 
         if ($applygradefilters && $mode === 'single' && !empty($params['gradeitemid'])) {
             $sqlparams['singleitemid'] = (int)$params['gradeitemid'];
+            $sqlparams['singleitemnow'] = time();
             $fromsql .= "
                 LEFT JOIN {grade_items} gi_single ON gi_single.id = :singleitemid
+                    AND (gi_single.hidden = 0 OR (gi_single.hidden > 1 AND gi_single.hidden < :singleitemnow))
                 LEFT JOIN {grade_grades} gg_single ON gg_single.itemid = gi_single.id AND gg_single.userid = u.id
             ";
             $wheres[] = self::build_grade_condition_sql(
@@ -457,6 +459,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                 list($insql, $inparams) = $DB->get_in_or_equal($selecteditemids, SQL_PARAMS_NAMED, 'mid');
                 $sqlparams = array_merge($sqlparams, $inparams);
                 $sqlparams['multicourseid'] = (int)$params['courseid'];
+                $sqlparams['multinow'] = time();
 
                 if ($multimode === 'any') {
                     $subparams = [];
@@ -477,6 +480,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                           LEFT JOIN {grade_grades} ggm ON ggm.itemid = gim.id AND ggm.userid = u.id
                                          WHERE gim.courseid = :multicourseid
                            AND gim.id {$insql}
+                           AND (gim.hidden = 0 OR (gim.hidden > 1 AND gim.hidden < :multinow))
                            AND {$subsql}
                     )";
                 } else if ($multimode === 'average') {
@@ -502,6 +506,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                           JOIN {grade_grades} ggm ON ggm.itemid = gim.id
                          WHERE gim.courseid = :multicourseid
                            AND gim.id {$insql}
+                           AND (gim.hidden = 0 OR (gim.hidden > 1 AND gim.hidden < :multinow))
                            AND ggm.finalgrade IS NOT NULL
                       GROUP BY ggm.userid
                         HAVING {$averagehavingsql}
@@ -529,6 +534,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                           JOIN {grade_grades} ggm ON ggm.itemid = gim.id
                          WHERE gim.courseid = :multicourseid
                            AND gim.id {$insql}
+                           AND (gim.hidden = 0 OR (gim.hidden > 1 AND gim.hidden < :multinow))
                             AND ggm.finalgrade IS NOT NULL
                            AND gim.aggregationcoef IS NOT NULL
                            AND gim.aggregationcoef > 0
@@ -762,10 +768,14 @@ class local_earlyalert_course_grades_ws extends external_api {
         $sql = "SELECT id, itemname, itemtype, itemmodule
                   FROM {grade_items}
                  WHERE courseid = :courseid
-                    AND itemtype != 'course'
+                   AND itemtype != 'course'
+                   AND (hidden = 0 OR (hidden > 1 AND hidden < :now))
               ORDER BY sortorder ASC";
 
-        $items = $DB->get_records_sql($sql, ['courseid' => (int)$params['courseid']]);
+        $items = $DB->get_records_sql($sql, [
+            'courseid' => (int)$params['courseid'],
+            'now' => time(),
+        ]);
         $results = [];
         foreach ($items as $item) {
             $label = trim((string)$item->itemname);
@@ -1070,11 +1080,15 @@ class local_earlyalert_course_grades_ws extends external_api {
         }
 
         list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'uid');
-        $params = ['itemid' => $gradeitemid] + $inparams;
+        $params = [
+            'itemid' => $gradeitemid,
+            'now' => time(),
+        ] + $inparams;
         $sql = "SELECT gg.userid, gg.finalgrade, gi.grademax
                   FROM {grade_grades} gg
                   JOIN {grade_items} gi ON gi.id = gg.itemid
                  WHERE gg.itemid = :itemid
+                   AND (gi.hidden = 0 OR (gi.hidden > 1 AND gi.hidden < :now))
                    AND gg.userid {$insql}";
         $records = $DB->get_records_sql($sql, $params);
 
@@ -1111,13 +1125,15 @@ class local_earlyalert_course_grades_ws extends external_api {
 
         list($iteminsql, $itemparams) = $DB->get_in_or_equal($gradeitemids, SQL_PARAMS_NAMED, 'iid');
         list($userinsql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'uid');
+        $params = ['now' => time()] + $itemparams + $userparams;
 
                 $sql = "SELECT gg.userid, gg.finalgrade, gi.grademax
                   FROM {grade_items} gi
              LEFT JOIN {grade_grades} gg ON gg.itemid = gi.id
                  WHERE gi.id {$iteminsql}
+                   AND (gi.hidden = 0 OR (gi.hidden > 1 AND gi.hidden < :now))
                    AND gg.userid {$userinsql}";
-                $records = $DB->get_recordset_sql($sql, $itemparams + $userparams);
+                $records = $DB->get_recordset_sql($sql, $params);
 
         $accum = [];
         foreach ($records as $record) {
@@ -1179,6 +1195,7 @@ class local_earlyalert_course_grades_ws extends external_api {
 
         list($iteminsql, $itemparams) = $DB->get_in_or_equal($gradeitemids, SQL_PARAMS_NAMED, 'miid');
         list($userinsql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'muid');
+        $params = ['now' => time()] + $itemparams + $userparams;
 
         $sql = "SELECT CONCAT(u.id, '_', gi.id) AS recordid,
                        u.id AS userid,
@@ -1189,9 +1206,10 @@ class local_earlyalert_course_grades_ws extends external_api {
                   JOIN {grade_items} gi ON gi.id {$iteminsql}
              LEFT JOIN {grade_grades} gg ON gg.itemid = gi.id AND gg.userid = u.id
                  WHERE u.id {$userinsql}
+                   AND (gi.hidden = 0 OR (gi.hidden > 1 AND gi.hidden < :now))
               ORDER BY gi.sortorder ASC, gi.itemname ASC";
 
-        $records = $DB->get_recordset_sql($sql, $itemparams + $userparams);
+        $records = $DB->get_recordset_sql($sql, $params);
         foreach ($records as $record) {
             $userid = (int)$record->userid;
             $finalgrade = $record->finalgrade;
@@ -1258,6 +1276,7 @@ class local_earlyalert_course_grades_ws extends external_api {
 
         list($iteminsql, $itemparams) = $DB->get_in_or_equal($gradeitemids, SQL_PARAMS_NAMED, 'miid');
         list($userinsql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'muid');
+        $params = ['now' => time()] + $itemparams + $userparams;
 
         if ($multimode === 'weighted') {
             $sql = "SELECT u.id AS userid,
@@ -1268,11 +1287,12 @@ class local_earlyalert_course_grades_ws extends external_api {
                       JOIN {grade_items} gi ON gi.id {$iteminsql}
                  LEFT JOIN {grade_grades} gg ON gg.itemid = gi.id AND gg.userid = u.id
                      WHERE u.id {$userinsql}
+                       AND (gi.hidden = 0 OR (gi.hidden > 1 AND gi.hidden < :now))
                        AND gg.finalgrade IS NOT NULL
                        AND gi.aggregationcoef IS NOT NULL
                        AND gi.aggregationcoef > 0
                   GROUP BY u.id";
-            $records = $DB->get_records_sql($sql, $itemparams + $userparams);
+            $records = $DB->get_records_sql($sql, $params);
 
             foreach ($records as $record) {
                 $userid = (int)$record->userid;
@@ -1305,9 +1325,10 @@ class local_earlyalert_course_grades_ws extends external_api {
                       JOIN {grade_items} gi ON gi.id {$iteminsql}
                  LEFT JOIN {grade_grades} gg ON gg.itemid = gi.id AND gg.userid = u.id
                      WHERE u.id {$userinsql}
+                       AND (gi.hidden = 0 OR (gi.hidden > 1 AND gi.hidden < :now))
                        AND gg.finalgrade IS NOT NULL
                   GROUP BY u.id";
-            $records = $DB->get_records_sql($sql, $itemparams + $userparams);
+            $records = $DB->get_records_sql($sql, $params);
 
             foreach ($records as $record) {
                 $userid = (int)$record->userid;
