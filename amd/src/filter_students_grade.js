@@ -24,6 +24,7 @@ const STATE = {
     gradeItemIds: [],
     includeAllStudents: false,
     gradeItemsLoadedForCourse: 0,
+    multiMode: 'any',
     previewData: null,
     sortBy: 'name',
     sortDir: 'none',
@@ -56,6 +57,8 @@ const SELECTORS = {
     alertOption: '.ea-alert-option',
     gradeFilterMode: '#ea-grade-filter-mode',
     gradeItems: '#ea-grade-items',
+    multiModeWrap: '#ea-multi-mode-wrap',
+    multiModeRadios: 'input[name="ea-multi-mode"]',
 };
 
 const STRINGS = {};
@@ -87,6 +90,10 @@ const loadStrings = async() => {
         'sample_preview_note',
         'reset_to_template',
         'student_id',
+        'multi_mode',
+        'multi_mode_any',
+        'multi_mode_average',
+        'multi_mode_weighted',
     ];
     const values = await Promise.all(keys.map(key => Str.get_string(key, 'local_earlyalert').catch(() => key)));
     keys.forEach((key, index) => {
@@ -330,10 +337,14 @@ const updateThresholdVisibility = () => {
 
 const updateConditionForAlertType = () => {
     STATE.condition = getConditionForAlertType(STATE.alertType);
-    const conditionSelect = document.getElementById('ea-condition');
-    if (conditionSelect) {
-        conditionSelect.value = STATE.condition;
-        conditionSelect.disabled = true;
+    const conditionDisplay = document.getElementById('ea-condition-display');
+    if (conditionDisplay) {
+        const conditionLabels = {
+            'below': '<= (Below or equal to)',
+            'above': '>= (Above or equal to)',
+            'missing': 'Missing (no grade submitted)',
+        };
+        conditionDisplay.textContent = conditionLabels[STATE.condition] || STATE.condition;
     }
     updateThresholdVisibility();
 };
@@ -357,6 +368,7 @@ const updateGradeFilterControls = () => {
     const modeSelect = document.querySelector(SELECTORS.gradeFilterMode);
     const itemSelect = document.querySelector(SELECTORS.gradeItems);
     const itemWrap = document.getElementById('ea-grade-items-wrap');
+    const multiModeWrap = document.getElementById('ea-multi-mode-wrap');
     const mode = modeSelect?.value || STATE.filterMode || 'course';
 
     STATE.filterMode = ['course', 'single', 'multi'].includes(mode) ? mode : 'course';
@@ -368,11 +380,15 @@ const updateGradeFilterControls = () => {
     }
 
     const isCourseMode = STATE.filterMode === 'course';
+    const isMultiMode = STATE.filterMode === 'multi';
     itemSelect.disabled = isCourseMode;
-    itemSelect.multiple = STATE.filterMode === 'multi';
-    itemSelect.size = STATE.filterMode === 'multi' ? 6 : 1;
+    itemSelect.multiple = isMultiMode;
+    itemSelect.size = isMultiMode ? 6 : 1;
     if (itemWrap) {
         itemWrap.style.display = isCourseMode ? 'none' : 'block';
+    }
+    if (multiModeWrap) {
+        multiModeWrap.classList.toggle('d-none', !isMultiMode);
     }
 
     if (isCourseMode) {
@@ -417,6 +433,11 @@ const deriveFilterModeFromSelection = () => {
     STATE.filterMode = 'multi';
     STATE.gradeItemId = 0;
     STATE.gradeItemIds = selected;
+
+    const multiModeRadio = document.querySelector(`${SELECTORS.multiModeRadios}:checked`);
+    if (multiModeRadio) {
+        STATE.multiMode = multiModeRadio.value;
+    }
 };
 
 const getThresholdPercentArg = () => {
@@ -504,6 +525,7 @@ const loadStudents = () => {
         teacher_user_id: STATE.teacherUserId,
         alert_type: STATE.alertType,
         filtermode: STATE.filterMode,
+        multimode: STATE.multiMode,
         condition: STATE.condition,
         thresholdid: STATE.thresholdId,
         thresholdpercent: getThresholdPercentArg(),
@@ -816,7 +838,11 @@ const openCourseFlow = (courseId, courseName) => {
     STATE.sortBy = 'name';
     STATE.sortDir = 'none';
 
-    document.getElementById('ea-selected-course-label').textContent = STATE.courseName;
+    const courseLink = document.getElementById('ea-selected-course-link');
+    if (courseLink) {
+        courseLink.textContent = STATE.courseName;
+        courseLink.href = `/course/view.php?id=${STATE.courseId}`;
+    }
     document.querySelectorAll(SELECTORS.alertOption).forEach(button => button.classList.remove('active'));
 
     const next = document.querySelector(SELECTORS.goStep2);
@@ -1075,8 +1101,15 @@ export const init = async() => {
         if (event.target.id === 'ea-grade-items') {
             deriveFilterModeFromSelection();
         }
+        if (event.target.matches(SELECTORS.multiModeRadios)) {
+            STATE.multiMode = event.target.value;
+            STATE.page = 1;
+            loadStudents();
+        }
         if (event.target.id === 'ea-include-all-students') {
             STATE.includeAllStudents = !!event.target.checked;
+            STATE.page = 1;
+            loadStudents();
         }
         if (event.target.id === 'ea-per-page') {
             STATE.perPage = parseInt(event.target.value || '10', 10);

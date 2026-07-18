@@ -92,9 +92,8 @@ class local_earlyalert_course_grades_ws extends external_api {
             // Resolve [grade] placeholder text for use in the bulk preview.
             $gradeletter = null;
             if ($grade_letter_id > 0) {
-                $gradelettersobj = new \local_earlyalert\grade_letters();
-                $graderange = $gradelettersobj->get_grade_percentage_range();
-                $gradeletter = $graderange[$grade_letter_id]['letter'] ?? null;
+                $selectedgraderange = helper::get_moodle_grade_percent_range($grade_letter_id);
+                $gradeletter = $selectedgraderange['letter'] ?? null;
             }
 
             //lets cache all possible email templates based off of these students...
@@ -113,8 +112,8 @@ class local_earlyalert_course_grades_ws extends external_api {
                         $include_student = false;
                     } else {
                         $grade_value = (float)$student_grade;
-                        // Check if student's grade falls within the selected letter grade range
-                        $include_student =  $grade_value <= $grade_range['max']; // include them if its less than or equal to max grade selected
+                        // Check if the student's grade falls within the selected letter grade range.
+                        $include_student = $grade_value >= $grade_range['min'] && $grade_value <= $grade_range['max'];
                     }
                 }
 
@@ -270,6 +269,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'teacher_user_id' => new external_value(PARAM_INT, 'Teacher user id', VALUE_REQUIRED),
             'alert_type' => new external_value(PARAM_TEXT, 'Alert type', VALUE_DEFAULT, 'grade'),
             'filtermode' => new external_value(PARAM_TEXT, 'course|single|multi', VALUE_DEFAULT, 'course'),
+            'multimode' => new external_value(PARAM_TEXT, 'any|average|weighted', VALUE_DEFAULT, 'any'),
             'condition' => new external_value(PARAM_TEXT, 'below|above|missing', VALUE_DEFAULT, 'below'),
             'thresholdid' => new external_value(PARAM_INT, 'Grade letter id', VALUE_DEFAULT, 7),
             'thresholdpercent' => new external_value(PARAM_FLOAT, 'Numeric threshold percent', VALUE_DEFAULT, -1),
@@ -291,6 +291,7 @@ class local_earlyalert_course_grades_ws extends external_api {
      * @param int $teacher_user_id
      * @param string $alert_type
      * @param string $filtermode
+     * @param string $multimode
      * @param string $condition
      * @param int $thresholdid
     * @param float $thresholdpercent
@@ -309,6 +310,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         $teacher_user_id,
         $alert_type,
         $filtermode,
+        $multimode,
         $condition,
         $thresholdid,
         $thresholdpercent,
@@ -328,6 +330,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'teacher_user_id' => $teacher_user_id,
             'alert_type' => $alert_type,
             'filtermode' => $filtermode,
+            'multimode' => $multimode,
             'condition' => $condition,
             'thresholdid' => $thresholdid,
             'thresholdpercent' => $thresholdpercent,
@@ -349,9 +352,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         $offset = ($page - 1) * $perpage;
         $search = trim((string)$params['search']);
 
-        $gradeletters = new \local_earlyalert\grade_letters();
-        $graderange = $gradeletters->get_grade_percentage_range();
-        $selectedrange = $graderange[(int)$params['thresholdid']] ?? null;
+        $selectedrange = helper::get_moodle_grade_percent_range((int)$params['thresholdid']);
 
         $courseitem = $DB->get_record('grade_items', ['courseid' => (int)$params['courseid'], 'itemtype' => 'course'], 'id,grademax');
 
@@ -384,18 +385,44 @@ class local_earlyalert_course_grades_ws extends external_api {
 
         $mode = in_array($params['filtermode'], ['course', 'single', 'multi']) ? $params['filtermode'] : 'course';
         $condition = self::get_condition_for_alert_type((string)$params['alert_type']);
+        $multimode = in_array($params['multimode'], ['any', 'average', 'weighted']) ? $params['multimode'] : 'any';
         $thresholdpercent = (float)$params['thresholdpercent'];
-        if ($thresholdpercent >= 0 && $thresholdpercent <= 100) {
-            $thresholdmin = $thresholdpercent;
-            $thresholdmax = $thresholdpercent;
+
+        $uselettergraderange = !($thresholdpercent >= 0 && $thresholdpercent <= 100);
+
+        if (!$uselettergraderange) {
+            if ($condition === 'above') {
+                $thresholdmin = $thresholdpercent;
+                $thresholdmax = 100;
+            } else {
+                $thresholdmin = 0;
+                $thresholdmax = $thresholdpercent;
+            }
         } else {
-            $thresholdmax = $selectedrange['max'] ?? 59.99;
-            $thresholdmin = $selectedrange['min'] ?? 0;
+            if (!empty($selectedrange)) {
+                $thresholdmin = $selectedrange['min'];
+                $thresholdmax = $selectedrange['max'];
+            } else {
+                $thresholdmin = 101;
+                $thresholdmax = 100;
+            }
         }
+
+        $multimodethresholdmin = $thresholdmin;
+        $multimodethresholdmax = $thresholdmax;
         $applygradefilters = empty($params['includeallstudents']);
 
         if ($applygradefilters && $mode === 'course') {
-            $wheres[] = self::build_grade_condition_sql('gg_course.finalgrade', 'gi_course.grademax', $condition, $thresholdmin, $thresholdmax, $sqlparams, 'c');
+            $wheres[] = self::build_grade_condition_sql(
+                'gg_course.finalgrade',
+                'gi_course.grademax',
+                $condition,
+                $thresholdmin,
+                $thresholdmax,
+                $sqlparams,
+                'c',
+                $uselettergraderange
+            );
         }
 
         if ($applygradefilters && $mode === 'single' && !empty($params['gradeitemid'])) {
@@ -404,7 +431,16 @@ class local_earlyalert_course_grades_ws extends external_api {
                 LEFT JOIN {grade_items} gi_single ON gi_single.id = :singleitemid
                 LEFT JOIN {grade_grades} gg_single ON gg_single.itemid = gi_single.id AND gg_single.userid = u.id
             ";
-            $wheres[] = self::build_grade_condition_sql('gg_single.finalgrade', 'gi_single.grademax', $condition, $thresholdmin, $thresholdmax, $sqlparams, 's');
+            $wheres[] = self::build_grade_condition_sql(
+                'gg_single.finalgrade',
+                'gi_single.grademax',
+                $condition,
+                $thresholdmin,
+                $thresholdmax,
+                $sqlparams,
+                's',
+                $uselettergraderange
+            );
         } else if ($applygradefilters && $mode === 'single') {
             $wheres[] = '1 = 0';
         }
@@ -415,22 +451,91 @@ class local_earlyalert_course_grades_ws extends external_api {
                 $selecteditemids = [];
             }
             $selecteditemids = array_values(array_filter(array_map('intval', $selecteditemids)));
+            $multimode = in_array($params['multimode'], ['any', 'average', 'weighted']) ? $params['multimode'] : 'any';
 
             if (!empty($selecteditemids)) {
                 list($insql, $inparams) = $DB->get_in_or_equal($selecteditemids, SQL_PARAMS_NAMED, 'mid');
                 $sqlparams = array_merge($sqlparams, $inparams);
-                                $sqlparams['multicourseid'] = (int)$params['courseid'];
-                $subparams = [];
-                $subsql = self::build_grade_condition_sql('ggm.finalgrade', 'gim.grademax', $condition, $thresholdmin, $thresholdmax, $subparams, 'm');
-                $sqlparams = array_merge($sqlparams, $subparams);
-                $wheres[] = "EXISTS (
-                    SELECT 1
-                      FROM {grade_items} gim
-                      LEFT JOIN {grade_grades} ggm ON ggm.itemid = gim.id AND ggm.userid = u.id
+                $sqlparams['multicourseid'] = (int)$params['courseid'];
+
+                if ($multimode === 'any') {
+                    $subparams = [];
+                    $subsql = self::build_grade_condition_sql(
+                        'ggm.finalgrade',
+                        'gim.grademax',
+                        $condition,
+                        $thresholdmin,
+                        $thresholdmax,
+                        $subparams,
+                        'm',
+                        $uselettergraderange
+                    );
+                    $sqlparams = array_merge($sqlparams, $subparams);
+                    $wheres[] = "EXISTS (
+                        SELECT 1
+                          FROM {grade_items} gim
+                          LEFT JOIN {grade_grades} ggm ON ggm.itemid = gim.id AND ggm.userid = u.id
                                          WHERE gim.courseid = :multicourseid
-                       AND gim.id {$insql}
-                       AND {$subsql}
-                )";
+                           AND gim.id {$insql}
+                           AND {$subsql}
+                    )";
+                } else if ($multimode === 'average') {
+                    $averagepercentexpr = "CASE
+                        WHEN SUM(CASE WHEN ggm.finalgrade IS NOT NULL THEN gim.grademax ELSE 0 END) = 0 THEN NULL
+                        ELSE (
+                            SUM(CASE WHEN ggm.finalgrade IS NOT NULL THEN ggm.finalgrade ELSE 0 END) /
+                            SUM(CASE WHEN ggm.finalgrade IS NOT NULL THEN gim.grademax ELSE 0 END)
+                        ) * 100
+                    END";
+                    $averagehavingsql = self::build_percent_condition_sql(
+                        $averagepercentexpr,
+                        $condition,
+                        $multimodethresholdmin,
+                        $multimodethresholdmax,
+                        $sqlparams,
+                        'ma',
+                        $uselettergraderange
+                    );
+                    $wheres[] = "u.id IN (
+                        SELECT ggm.userid
+                          FROM {grade_items} gim
+                          JOIN {grade_grades} ggm ON ggm.itemid = gim.id
+                         WHERE gim.courseid = :multicourseid
+                           AND gim.id {$insql}
+                           AND ggm.finalgrade IS NOT NULL
+                      GROUP BY ggm.userid
+                        HAVING {$averagehavingsql}
+                    )";
+                } else if ($multimode === 'weighted') {
+                    $weightedpercentexpr = "CASE
+                        WHEN SUM(CASE WHEN ggm.finalgrade IS NOT NULL THEN COALESCE(gim.grademax, 0) * COALESCE(gim.aggregationcoef, 0) ELSE 0 END) = 0 THEN NULL
+                        ELSE (
+                            SUM(CASE WHEN ggm.finalgrade IS NOT NULL THEN ggm.finalgrade * COALESCE(gim.aggregationcoef, 0) ELSE 0 END) /
+                            SUM(CASE WHEN ggm.finalgrade IS NOT NULL THEN COALESCE(gim.grademax, 0) * COALESCE(gim.aggregationcoef, 0) ELSE 0 END)
+                        ) * 100
+                    END";
+                    $weightedhavingsql = self::build_percent_condition_sql(
+                        $weightedpercentexpr,
+                        $condition,
+                        $multimodethresholdmin,
+                        $multimodethresholdmax,
+                        $sqlparams,
+                        'mw',
+                        $uselettergraderange
+                    );
+                    $wheres[] = "u.id IN (
+                        SELECT ggm.userid
+                          FROM {grade_items} gim
+                          JOIN {grade_grades} ggm ON ggm.itemid = gim.id
+                         WHERE gim.courseid = :multicourseid
+                           AND gim.id {$insql}
+                            AND ggm.finalgrade IS NOT NULL
+                           AND gim.aggregationcoef IS NOT NULL
+                           AND gim.aggregationcoef > 0
+                      GROUP BY ggm.userid
+                        HAVING {$weightedhavingsql}
+                    )";
+                }
             } else {
                 $wheres[] = '1 = 0';
             }
@@ -488,7 +593,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                 foreach ($records as $row) {
                     $displaygradebyuser[(int)$row->id] = self::format_grade_display($row->coursefinalgrade, $row->coursegrademax);
                 }
-            } else if ($mode === 'single' && !empty($params['gradeitemid'])) {
+            } else             if ($mode === 'single' && !empty($params['gradeitemid'])) {
                 $displaygradebyuser = self::get_grade_display_for_item((int)$params['gradeitemid'], $pageuserids);
             } else if ($mode === 'multi') {
                 $selecteditemids = json_decode((string)$params['gradeitemids'], true);
@@ -500,14 +605,42 @@ class local_earlyalert_course_grades_ws extends external_api {
             }
 
             if ($mode === 'single' && !empty($params['gradeitemid'])) {
-                $matcheditemsbyuser = self::get_matched_grade_items([(int)$params['gradeitemid']], $pageuserids, $condition, $thresholdmin, $thresholdmax);
+                $matcheditemsbyuser = self::get_matched_grade_items(
+                    [(int)$params['gradeitemid']],
+                    $pageuserids,
+                    $condition,
+                    $thresholdmin,
+                    $thresholdmax,
+                    $uselettergraderange
+                );
             } else if ($mode === 'multi') {
                 $selecteditemids = json_decode((string)$params['gradeitemids'], true);
                 if (!is_array($selecteditemids)) {
                     $selecteditemids = [];
                 }
                 $selecteditemids = array_values(array_filter(array_map('intval', $selecteditemids)));
-                $matcheditemsbyuser = self::get_matched_grade_items($selecteditemids, $pageuserids, $condition, $thresholdmin, $thresholdmax);
+                $multimode = in_array($params['multimode'], ['any', 'average', 'weighted']) ? $params['multimode'] : 'any';
+
+                if ($multimode === 'any') {
+                    $matcheditemsbyuser = self::get_matched_grade_items(
+                        $selecteditemids,
+                        $pageuserids,
+                        $condition,
+                        $thresholdmin,
+                        $thresholdmax,
+                        $uselettergraderange
+                    );
+                } else {
+                    $matcheditemsbyuser = self::get_average_grade_for_multi_items(
+                        $selecteditemids,
+                        $pageuserids,
+                        $multimode,
+                        $condition,
+                        $thresholdmin,
+                        $thresholdmax,
+                        $uselettergraderange
+                    );
+                }
             }
         }
 
@@ -629,8 +762,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         $sql = "SELECT id, itemname, itemtype, itemmodule
                   FROM {grade_items}
                  WHERE courseid = :courseid
-                                     AND itemtype = 'mod'
-                                     AND itemmodule IN ('assign', 'quiz')
+                    AND itemtype != 'course'
               ORDER BY sortorder ASC";
 
         $items = $DB->get_records_sql($sql, ['courseid' => (int)$params['courseid']]);
@@ -770,13 +902,12 @@ class local_earlyalert_course_grades_ws extends external_api {
         $templateemail = new \local_etemplate\email((int)$template->id);
         $preload = $templateemail->preload_template((int)$course->id, $student, (int)$params['teacher_user_id']);
 
-        $gradeletters = new \local_earlyalert\grade_letters();
-        $graderange = $gradeletters->get_grade_percentage_range();
         $thresholdpercent = (float)$params['thresholdpercent'];
         if ($thresholdpercent >= 0 && $thresholdpercent <= 100) {
             $gradetext = rtrim(rtrim(number_format($thresholdpercent, 1, '.', ''), '0'), '.') . '%';
         } else {
-            $gradetext = $graderange[(int)$params['thresholdid']]['letter'] ?? 'D+';
+            $selectedrange = helper::get_moodle_grade_percent_range((int)$params['thresholdid']);
+            $gradetext = $selectedrange['letter'] ?? 'D+';
         }
 
         $prepared = \local_etemplate\email::replace_message_placeholders(
@@ -830,22 +961,83 @@ class local_earlyalert_course_grades_ws extends external_api {
      * @param float $thresholdmax
      * @param array $params
      * @param string $prefix
+     * @param bool $uselettergraderange
      * @return string
      */
-    private static function build_grade_condition_sql($gradefield, $grademaxfield, $condition, $thresholdmin, $thresholdmax, &$params, $prefix) {
+    private static function build_grade_condition_sql(
+        $gradefield,
+        $grademaxfield,
+        $condition,
+        $thresholdmin,
+        $thresholdmax,
+        &$params,
+        $prefix,
+        $uselettergraderange = false
+    ) {
         if ($condition === 'missing') {
             return "{$gradefield} IS NULL";
         }
 
+        $percentexpr = "CASE WHEN {$gradefield} IS NULL OR {$grademaxfield} IS NULL OR {$grademaxfield} = 0 THEN NULL ELSE ({$gradefield} / {$grademaxfield}) * 100 END";
+
+        return self::build_percent_condition_sql(
+            $percentexpr,
+            $condition,
+            $thresholdmin,
+            $thresholdmax,
+            $params,
+            $prefix,
+            $uselettergraderange
+        );
+    }
+
+    /**
+     * Build SQL for a percent-based threshold comparison.
+     *
+     * @param string $percentexpr
+     * @param string $condition
+     * @param float $thresholdmin
+     * @param float $thresholdmax
+     * @param array $params
+     * @param string $prefix
+     * @param bool $uselettergraderange
+     * @return string
+     */
+    private static function build_percent_condition_sql(
+        $percentexpr,
+        $condition,
+        $thresholdmin,
+        $thresholdmax,
+        &$params,
+        $prefix,
+        $uselettergraderange = false
+    ) {
         $params[$prefix . 'thresholdmin'] = $thresholdmin;
         $params[$prefix . 'thresholdmax'] = $thresholdmax;
 
-        $percentexpr = "CASE WHEN {$gradefield} IS NULL OR {$grademaxfield} IS NULL OR {$grademaxfield} = 0 THEN NULL ELSE ({$gradefield} / {$grademaxfield}) * 100 END";
-        if ($condition === 'above') {
-            return "{$percentexpr} >= :" . $prefix . "thresholdmin";
+        if ($uselettergraderange || $condition === 'above') {
+            return "{$percentexpr} >= :" . $prefix . "thresholdmin AND {$percentexpr} <= :" . $prefix . "thresholdmax";
         }
 
         return "{$percentexpr} <= :" . $prefix . "thresholdmax";
+    }
+
+    /**
+     * Check whether a percent value matches the requested threshold.
+     *
+     * @param float $percent
+     * @param string $condition
+     * @param float $thresholdmin
+     * @param float $thresholdmax
+     * @param bool $uselettergraderange
+     * @return bool
+     */
+    private static function grade_matches_threshold($percent, $condition, $thresholdmin, $thresholdmax, $uselettergraderange = false) {
+        if ($uselettergraderange || $condition === 'above') {
+            return $percent >= $thresholdmin && $percent <= $thresholdmax;
+        }
+
+        return $percent <= $thresholdmax;
     }
 
     /**
@@ -963,9 +1155,17 @@ class local_earlyalert_course_grades_ws extends external_api {
      * @param string $condition
      * @param float $thresholdmin
      * @param float $thresholdmax
+     * @param bool $uselettergraderange
      * @return array
      */
-    private static function get_matched_grade_items(array $gradeitemids, array $userids, $condition, $thresholdmin, $thresholdmax) {
+    private static function get_matched_grade_items(
+        array $gradeitemids,
+        array $userids,
+        $condition,
+        $thresholdmin,
+        $thresholdmax,
+        $uselettergraderange = false
+    ) {
         global $DB;
 
         $results = [];
@@ -1002,7 +1202,13 @@ class local_earlyalert_course_grades_ws extends external_api {
                 $match = $finalgrade === null;
             } else if ($finalgrade !== null && $grademax !== null && (float)$grademax > 0) {
                 $percent = ((float)$finalgrade / (float)$grademax) * 100;
-                $match = $condition === 'above' ? $percent >= $thresholdmin : $percent <= $thresholdmax;
+                $match = self::grade_matches_threshold(
+                    $percent,
+                    $condition,
+                    $thresholdmin,
+                    $thresholdmax,
+                    $uselettergraderange
+                );
             }
 
             if ($match) {
@@ -1014,6 +1220,118 @@ class local_earlyalert_course_grades_ws extends external_api {
             }
         }
         $records->close();
+
+        return $results;
+    }
+
+    /**
+     * Returns average/weighted average grade for multi-item mode with matched items list.
+     *
+     * @param array $gradeitemids
+     * @param array $userids
+     * @param string $multimode
+     * @param string $condition
+     * @param float $thresholdmin
+     * @param float $thresholdmax
+     * @param bool $uselettergraderange
+     * @return array
+     */
+    private static function get_average_grade_for_multi_items(
+        array $gradeitemids,
+        array $userids,
+        $multimode,
+        $condition,
+        $thresholdmin,
+        $thresholdmax,
+        $uselettergraderange = false
+    ) {
+        global $DB;
+
+        $results = [];
+        foreach ($userids as $userid) {
+            $results[(int)$userid] = [];
+        }
+
+        if (empty($gradeitemids) || empty($userids)) {
+            return $results;
+        }
+
+        list($iteminsql, $itemparams) = $DB->get_in_or_equal($gradeitemids, SQL_PARAMS_NAMED, 'miid');
+        list($userinsql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'muid');
+
+        if ($multimode === 'weighted') {
+            $sql = "SELECT u.id AS userid,
+                           SUM(COALESCE(gg.finalgrade, 0) * COALESCE(gi.aggregationcoef, 0)) AS weightedsum,
+                           SUM(COALESCE(gi.grademax, 0) * COALESCE(gi.aggregationcoef, 0)) AS weightedmaxsum,
+                           GROUP_CONCAT(CONCAT(gi.itemname, ' (', COALESCE(gg.finalgrade, 'No Grade'), '/', gi.grademax, ')') SEPARATOR '\n') AS itemlist
+                      FROM {user} u
+                      JOIN {grade_items} gi ON gi.id {$iteminsql}
+                 LEFT JOIN {grade_grades} gg ON gg.itemid = gi.id AND gg.userid = u.id
+                     WHERE u.id {$userinsql}
+                       AND gg.finalgrade IS NOT NULL
+                       AND gi.aggregationcoef IS NOT NULL
+                       AND gi.aggregationcoef > 0
+                  GROUP BY u.id";
+            $records = $DB->get_records_sql($sql, $itemparams + $userparams);
+
+            foreach ($records as $record) {
+                $userid = (int)$record->userid;
+                $weightedsum = (float)$record->weightedsum;
+                $weightedmaxsum = (float)$record->weightedmaxsum;
+
+                if ($weightedmaxsum > 0) {
+                    $percent = ($weightedsum / $weightedmaxsum) * 100;
+                    $match = self::grade_matches_threshold(
+                        $percent,
+                        $condition,
+                        $thresholdmin,
+                        $thresholdmax,
+                        $uselettergraderange
+                    );
+
+                    if ($match) {
+                        $avgpercent = number_format($percent, 1) . '%';
+                        $itemlist = $record->itemlist ?? '';
+                        $results[$userid][] = 'Average: ' . $avgpercent . "\n" . $itemlist;
+                    }
+                }
+            }
+        } else {
+            $sql = "SELECT u.id AS userid,
+                           SUM(gg.finalgrade) AS gradesum,
+                           SUM(gi.grademax) AS grademaxsum,
+                           GROUP_CONCAT(CONCAT(gi.itemname, ' (', COALESCE(gg.finalgrade, 'No Grade'), '/', gi.grademax, ')') SEPARATOR '\n') AS itemlist
+                      FROM {user} u
+                      JOIN {grade_items} gi ON gi.id {$iteminsql}
+                 LEFT JOIN {grade_grades} gg ON gg.itemid = gi.id AND gg.userid = u.id
+                     WHERE u.id {$userinsql}
+                       AND gg.finalgrade IS NOT NULL
+                  GROUP BY u.id";
+            $records = $DB->get_records_sql($sql, $itemparams + $userparams);
+
+            foreach ($records as $record) {
+                $userid = (int)$record->userid;
+                $gradesum = $record->gradesum;
+                $grademaxsum = $record->grademaxsum;
+
+                if ($gradesum !== null && $grademaxsum !== null && (float)$grademaxsum > 0) {
+                    $percent = ((float)$gradesum / (float)$grademaxsum) * 100;
+                    $match = self::grade_matches_threshold(
+                        $percent,
+                        $condition,
+                        $thresholdmin,
+                        $thresholdmax,
+                        $uselettergraderange
+                    );
+
+                    if ($match) {
+                        $avgpercent = number_format($percent, 1) . '%';
+                        $itemlist = $record->itemlist ?? '';
+                        $results[$userid][] = 'Average: ' . $avgpercent . "\n" . $itemlist;
+                    }
+                }
+            }
+        }
 
         return $results;
     }

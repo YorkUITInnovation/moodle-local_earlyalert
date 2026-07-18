@@ -57,15 +57,24 @@ class grade_letters
 
         $grade_ranges = [];
         $letters_array = array_values($grade_letters); // Re-index numerically
+        $highestboundary = 0.0;
+        foreach ($letters_array as $letterrecord) {
+            $highestboundary = max($highestboundary, (float)$letterrecord->lowerboundary);
+        }
+
+        // Moodle grade letters may be stored either as percentages (55, 60, ...)
+        // or as normalized fractions (0.55, 0.60, ...). Convert everything to
+        // percentage values so filtering logic can compare against 0-100 grades.
+        $scalefactor = $highestboundary <= 1.0 ? 100.0 : 1.0;
 
         for ($i = 0; $i < count($letters_array); $i++) {
             $current_letter = $letters_array[$i];
-            $min = (float)$current_letter->lowerboundary;
+            $min = (float)$current_letter->lowerboundary * $scalefactor;
 
             if ($i < count($letters_array) - 1) {
                 // The max is the min of the next grade, minus a small amount.
                 $next_letter = $letters_array[$i + 1];
-                $max = (float)$next_letter->lowerboundary - 0.01;
+                $max = ((float)$next_letter->lowerboundary * $scalefactor) - 0.01;
             } else {
                 // This is the highest grade, so the max is 100.
                 $max = 100.0;

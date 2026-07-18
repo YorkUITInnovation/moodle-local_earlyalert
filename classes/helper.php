@@ -377,12 +377,45 @@ class helper
         try {
             $grade_letters = new \local_earlyalert\grade_letters();
             $grade_ranges = $grade_letters->get_grade_percentage_range();
+
             if ($grade_letter_id > 0 && isset($grade_ranges[$grade_letter_id])) {
                 return $grade_ranges[$grade_letter_id];
-            } else {
-                // Explicitly return null to indicate no filtering
-                return null;
             }
+
+            if ($grade_letter_id > 0 && !empty($grade_ranges)) {
+                // Fallback for UIs that send a fixed ordinal (1 = highest grade, N = lowest grade)
+                // instead of the actual grade_letters table id.
+                $orderedranges = array_values($grade_ranges);
+                $rangecount = count($orderedranges);
+                if ($grade_letter_id <= $rangecount) {
+                    $index = $rangecount - $grade_letter_id;
+                    if (isset($orderedranges[$index])) {
+                        return $orderedranges[$index];
+                    }
+                }
+            }
+
+            if ($grade_letter_id > 0) {
+                $standardranges = [
+                    10 => ['min' => 0.0, 'max' => 39.99, 'letter' => 'F'],
+                    9 => ['min' => 40.0, 'max' => 49.99, 'letter' => 'E'],
+                    8 => ['min' => 50.0, 'max' => 54.99, 'letter' => 'D'],
+                    7 => ['min' => 55.0, 'max' => 59.99, 'letter' => 'D+'],
+                    6 => ['min' => 60.0, 'max' => 64.99, 'letter' => 'C'],
+                    5 => ['min' => 65.0, 'max' => 69.99, 'letter' => 'C+'],
+                    4 => ['min' => 70.0, 'max' => 74.99, 'letter' => 'B'],
+                    3 => ['min' => 75.0, 'max' => 79.99, 'letter' => 'B+'],
+                    2 => ['min' => 80.0, 'max' => 89.99, 'letter' => 'A'],
+                    1 => ['min' => 90.0, 'max' => 100.0, 'letter' => 'A+'],
+                ];
+
+                if (isset($standardranges[$grade_letter_id])) {
+                    return $standardranges[$grade_letter_id];
+                }
+            }
+
+            // Explicitly return null to indicate no filtering.
+            return null;
 
         } catch (\Exception $e) {
             base::debug_to_console('it died'. $e->getMessage());
