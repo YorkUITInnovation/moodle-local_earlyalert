@@ -49,7 +49,7 @@ $student = helper::is_student();
 //if ($student) {
 //    redirect($CFG->wwwroot . '/my');
 //}
-// rebuild 2 
+// rebuild 2
 if (!$impersonate && (!$teacher || is_siteadmin($USER->id))) {
     redirect($CFG->wwwroot . '/my');
 }
@@ -193,7 +193,7 @@ $dashboarddata['strings'] = [
     'preview_email' => get_string('preview_email', 'local_earlyalert'),
     'message_preview' => get_string('message_preview', 'local_earlyalert'),
     'to_label' => get_string('to_label', 'local_earlyalert'),
-    'close' => get_string('close'),
+    'close' => get_string('close', 'local_earlyalert'),
     'preview_message_placeholder' => get_string('preview_message_placeholder', 'local_earlyalert'),
     'back' => get_string('back'),
     'send_alert_now' => get_string('send_alert_now', 'local_earlyalert'),
