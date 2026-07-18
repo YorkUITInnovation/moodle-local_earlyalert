@@ -37,6 +37,18 @@
     background-color: #e0f7fa;
 }
 
+/* Ensure all alert-type card text is white on hover. */
+#earlyalert-dashboard .ea-alert-option:hover,
+#earlyalert-dashboard .ea-alert-option:hover * {
+    color: #ffffff !important;
+}
+
+/* Keep selected alert-type card text white as well. */
+#earlyalert-dashboard .ea-alert-option.active,
+#earlyalert-dashboard .ea-alert-option.active * {
+    color: #ffffff !important;
+}
+
 .custom-message-container {
     margin-top: 10px;
     padding: 15px;

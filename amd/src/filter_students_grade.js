@@ -1113,6 +1113,9 @@ export const init = async() => {
             updateConditionForAlertType();
             updateSelectedAlertTypeDisplay();
             updateNextStepButton();
+            if (STATE.alertType) {
+                showStep(2);
+            }
             return;
         }
 
