@@ -24,6 +24,8 @@
 
 require_once("../../config.php");
 require_once($CFG->libdir . "/externallib.php");
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/local/earlyalert/classes/form/student_lookup.php');
 
 global $CFG, $OUTPUT, $PAGE, $DB, $USER;
 
@@ -42,6 +44,7 @@ if (!has_capability('local/earlyalert:access_early_alert', $context)) {
 $PAGE->requires->js_call_amd('local_earlyalert/student_lookup', 'init');
 
 $user_id = optional_param('user_id', 0, PARAM_INT);
+$selectedstudent = null;
 // Initialize an empty array to hold the combined courses
 $combined_courses = [];
 $course_data = [];
@@ -114,12 +117,21 @@ if ($user_id) {
     }
 
     $student = $DB->get_record('user', ['id' => $user_id], 'id,firstname,lastname,email,idnumber', MUST_EXIST);
+    $selectedstudent = $student;
     $combined_courses['userid']= $student->id;
     $combined_courses['firstname']= $student->firstname;
     $combined_courses['lastname']= $student->lastname;
     $combined_courses['email']= $student->email;
     $combined_courses['idnumber']= $student->idnumber;
 }
+
+$lookupform = new \local_earlyalert\form\student_lookup(null, [
+    'selectedstudent' => $selectedstudent,
+]);
+
+ob_start();
+$lookupform->display();
+$combined_courses['lookupform'] = ob_get_clean();
 
 echo base::page(
     new moodle_url('/local/earlyalert/student_lookup.php'),

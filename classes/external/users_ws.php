@@ -63,18 +63,20 @@ class local_earlyalert_users_ws extends external_api {
         if (strlen($search) >= 3) {
             $searchparam = '%' . $DB->sql_like_escape($search) . '%';
             $nameparam   = '%' . $DB->sql_like_escape(str_replace(' ', '%', $search)) . '%';
-            $sql = "SELECT * FROM {user} u WHERE (
-                " . $DB->sql_like($DB->sql_fullname('u.firstname', 'u.lastname'), ':namesearch', false) . "
+            $sql = "SELECT * FROM {user} u WHERE u.deleted = 0 AND (
+                " . $DB->sql_like('u.firstname', ':firstname', false) . "
+                OR " . $DB->sql_like('u.lastname', ':lastname', false) . "
+                OR " . $DB->sql_like($DB->sql_fullname('u.firstname', 'u.lastname'), ':fullname', false) . "
                 OR " . $DB->sql_like('u.idnumber', ':idnumber', false) . "
                 OR " . $DB->sql_like('u.email', ':email', false) . "
-                OR " . $DB->sql_like('u.username', ':username', false) . "
-            ) ORDER BY u.lastname";
+            ) ORDER BY u.lastname, u.firstname";
             $mdl_users = $DB->get_records_sql($sql, [
-                'namesearch' => $nameparam,
+                'firstname'  => $searchparam,
+                'lastname'   => $searchparam,
+                'fullname'   => $nameparam,
                 'idnumber'   => $searchparam,
                 'email'      => $searchparam,
-                'username'   => $searchparam,
-            ]);
+            ], 0, 50);
         }
         $users = [];
         $i = 0;
