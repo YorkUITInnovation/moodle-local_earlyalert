@@ -40,6 +40,7 @@ if (!has_capability('local/earlyalert:access_early_alert', $context)) {
 $PAGE->requires->css('/local/earlyalert/css/styles.css');
 // Load AMD module.
 $PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
+$PAGE->requires->js_call_amd('local_earlyalert/impersonate_user_lookup', 'init');
 
 
 $impersonate = has_capability('local/earlyalert:impersonate', $context, $USER->id);
@@ -74,6 +75,8 @@ if ($user_id != $USER->id) {
 }
 
 $show_grades = $CFG->earlyalert_showgrades;
+
+$selectedimpersonateuser = $DB->get_record('user', ['id' => $user_id], 'id,firstname,lastname,email,idnumber', MUST_EXIST);
 
 if ($teacher || $is_impersonating) {
     $show_active_only = !empty($CFG->earlyalert_showactivecourses);
@@ -233,6 +236,10 @@ if ($show_grades) {
 if ($impersonate) {
     $course_data['impersonate'] = true;
     $dashboarddata['impersonate'] = true;
+    $dashboarddata['impersonate_selected_user_id'] = (int)$selectedimpersonateuser->id;
+    $dashboarddata['impersonate_selected_user_label'] = trim(
+        $selectedimpersonateuser->firstname . ' ' . $selectedimpersonateuser->lastname
+    ) . ' - ' . $selectedimpersonateuser->email . ' (' . $selectedimpersonateuser->idnumber . ')';
 }
 
 // Debug: Let's see what's actually in course_data when it's passed to the template
@@ -312,6 +319,7 @@ if (!empty($course_data['rows'])) {
             $dashboarddata['courses'][] = [
                 'id' => (int)$course->id,
                 'fullname' => format_string($course->fullname),
+                'selected' => ((int)$course_id === (int)$course->id),
                 'enrollment' => $enrollment,
                 'alerts' => $alertsforcourse,
                 'pending' => $pendingforcourse,
