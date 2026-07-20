@@ -220,5 +220,19 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 20260720002, 'local', 'earlyalert');
     }
 
+    if ($oldversion < 20260720003) {
+
+        // Define snapshot status field to be added to local_earlyalert_report_log.
+        $table = new xmldb_table('local_earlyalert_report_log');
+
+        $field = new xmldb_field('snapshot_status', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'messagejson');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 20260720003, 'local', 'earlyalert');
+    }
+
     return true;
 }

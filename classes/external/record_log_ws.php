@@ -116,6 +116,7 @@ class local_earlyalert_record_log_ws extends external_api {
             $data->student_advised_by_advisor = 0;
             $data->student_advised_by_instructor = 0;
             $data->student_profile = $student_profile;
+            $data->snapshot_status = 'pending';
             //all logs default to unsent
             $data->date_message_sent = 0;
             $data->timecreated = time();

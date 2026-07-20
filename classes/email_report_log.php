@@ -222,6 +222,12 @@ CONST GRADE_A_PLUS = 1;
      */
     private $messagejson;
 
+    /**
+     *
+     * @var string
+     */
+    private $snapshot_status;
+
 
     public function __construct($id = 0)
     {
@@ -261,6 +267,7 @@ CONST GRADE_A_PLUS = 1;
         $this->student_profile = $result->student_profile ?? '';
         $this->subjectjson = $result->subjectjson ?? '';
         $this->messagejson = $result->messagejson ?? '';
+        $this->snapshot_status = $result->snapshot_status ?? '';
         $this->date_message_sent = $result->date_message_sent ?? 0;
         $this->timecreated = $result->timecreated ?? 0;
         $this->timecreated_hr = '';
@@ -706,6 +713,13 @@ CONST GRADE_A_PLUS = 1;
      */
     public function get_messagejson(): string {
         return $this->messagejson;
+    }
+
+    /**
+     * @return string
+     */
+    public function get_snapshot_status(): string {
+        return $this->snapshot_status;
     }
 
     /**

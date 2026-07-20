@@ -128,6 +128,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                     $context,
                     $threshold
                 ));
+                $emailtoprocess->snapshot_status = 'pending';
                 $emailtoprocess->timemodified = $resolvedat;
                 try {
                     $DB->update_record('local_earlyalert_report_log', $emailtoprocess);
@@ -145,6 +146,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                     }
                     mtrace("Alert sent to " . $email->getTargetUserId());
                     $emailtoprocess->date_message_sent = time();
+                    $emailtoprocess->snapshot_status = 'sent';
                     $emailtoprocess->timemodified = $emailtoprocess->date_message_sent;
                     try {
                         if ($DB->update_record('local_earlyalert_report_log', $emailtoprocess)) {
@@ -164,6 +166,13 @@ class process_mail_queue extends \core\task\scheduled_task {
                 } catch (\Exception $e) {
                     // Log or handle the exception in some way
                     mtrace('Error sending email: ' . $e->getMessage());
+                    $emailtoprocess->snapshot_status = 'failed';
+                    $emailtoprocess->timemodified = time();
+                    try {
+                        $DB->update_record('local_earlyalert_report_log', $emailtoprocess);
+                    } catch (\Exception $inner) {
+                        mtrace("Error updating failed snapshot status: " . $inner->getMessage());
+                    }
                 }
             }
         } else {
