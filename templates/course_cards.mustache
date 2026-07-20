@@ -11,15 +11,6 @@
                 <option value="{{impersonate_selected_user_id}}" selected>{{impersonate_selected_user_label}}</option>
             </select>
         </div>
-        <div class="col-md-4">
-            <label for="course-search" class="form-label">{{strings.course_list}}</label>
-            <select id="course-search" class="form-select">
-                <option value="">{{strings.search}}</option>
-                {{#courses}}
-                    <option value="{{id}}" {{#selected}}selected{{/selected}}>{{fullname}}</option>
-                {{/courses}}
-            </select>
-        </div>
     </div>
     {{/impersonate}}
 
