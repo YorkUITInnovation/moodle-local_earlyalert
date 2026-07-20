@@ -59,6 +59,7 @@ class local_earlyalert_users_ws extends external_api {
         global $DB;
         raise_memory_limit(MEMORY_UNLIMITED);
         $params = self::validate_parameters(self::get_users_parameters(), array('search' => $search));
+        $mdl_users = [];
         if (strlen($search) >= 3) {
             $sql = "select * from {user} u where ";
             $name = str_replace(' ', '%', $search);
