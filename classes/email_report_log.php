@@ -77,6 +77,12 @@ CONST GRADE_A_PLUS = 1;
      * @var int
      */
     private $instructor_id;
+
+    /**
+     *
+     * @var string
+     */
+    private $assignment_name;
     /**
      *
      * @var int
@@ -88,6 +94,18 @@ CONST GRADE_A_PLUS = 1;
      * @var int
      */
     private $trigger_grade;
+
+    /**
+     *
+     * @var string
+     */
+    private $threshold_mode;
+
+    /**
+     *
+     * @var float|null
+     */
+    private $threshold_percent;
 
     /**
      *
@@ -110,6 +128,30 @@ CONST GRADE_A_PLUS = 1;
      * @var int
      */
     private $student_advised;
+
+    /**
+     *
+     * @var int
+     */
+    private $student_advised_by_advisor;
+
+    /**
+     *
+     * @var int
+     */
+    private $student_advised_by_instructor;
+
+    /**
+     *
+     * @var string
+     */
+    private $custom_message;
+
+    /**
+     *
+     * @var string
+     */
+    private $student_profile;
     /**
      *
      * @var int
@@ -156,6 +198,30 @@ CONST GRADE_A_PLUS = 1;
 
     private $data;
 
+    /**
+     *
+     * @var string
+     */
+    private $lang;
+
+    /**
+     *
+     * @var int
+     */
+    private $usermodified;
+
+    /**
+     *
+     * @var string
+     */
+    private $subjectjson;
+
+    /**
+     *
+     * @var string
+     */
+    private $messagejson;
+
 
     public function __construct($id = 0)
     {
@@ -186,10 +252,15 @@ CONST GRADE_A_PLUS = 1;
         $this->instructor_id = $result->instructor_id ?? 0;
         $this->assignment_name = $result->assignment_name ?? '';
         $this->trigger_grade = $result->trigger_grade ?? '';
+        $this->threshold_mode = $result->threshold_mode ?? '';
+        $this->threshold_percent = isset($result->threshold_percent) ? (float)$result->threshold_percent : null;
         $this->actual_grade = $result->actual_grade ?? 0;
         $this->student_advised_by_advisor = $result->student_advised_by_advisor ?? 0;
         $this->student_advised_by_instructor = $result->student_advised_by_instructor ?? 0;
         $this->custom_message = $result->custom_message ?? '';
+        $this->student_profile = $result->student_profile ?? '';
+        $this->subjectjson = $result->subjectjson ?? '';
+        $this->messagejson = $result->messagejson ?? '';
         $this->date_message_sent = $result->date_message_sent ?? 0;
         $this->timecreated = $result->timecreated ?? 0;
         $this->timecreated_hr = '';
@@ -287,6 +358,20 @@ CONST GRADE_A_PLUS = 1;
     public function get_trigger_grade()
     {
         return $this->trigger_grade;
+    }
+
+    /**
+     * @return string
+     */
+    public function get_threshold_mode(): string {
+        return $this->threshold_mode;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function get_threshold_percent(): ?float {
+        return $this->threshold_percent;
     }
 
     public function get_student_advised_by_advisor(): int
@@ -607,6 +692,51 @@ CONST GRADE_A_PLUS = 1;
      */
     public function get_custom_message() {
         return $this->custom_message;
+    }
+
+    /**
+     * @return string
+     */
+    public function get_subjectjson(): string {
+        return $this->subjectjson;
+    }
+
+    /**
+     * @return string
+     */
+    public function get_messagejson(): string {
+        return $this->messagejson;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function get_subject_snapshot(): ?array {
+        return $this->decode_snapshot_json($this->subjectjson);
+    }
+
+    /**
+     * @return array|null
+     */
+    public function get_message_snapshot(): ?array {
+        return $this->decode_snapshot_json($this->messagejson);
+    }
+
+    /**
+     * @param string $json
+     * @return array|null
+     */
+    private function decode_snapshot_json(string $json): ?array {
+        if ($json === '') {
+            return null;
+        }
+
+        $data = json_decode($json, true);
+        if (!is_array($data)) {
+            return null;
+        }
+
+        return $data;
     }
 
     /**
