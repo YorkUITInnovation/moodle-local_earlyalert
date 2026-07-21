@@ -187,6 +187,16 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         // Define send-time message snapshot fields to be added to local_earlyalert_report_log.
         $table = new xmldb_table('local_earlyalert_report_log');
 
+        $field = new xmldb_field('student_profile', XMLDB_TYPE_TEXT, null, null, null, null, null, 'date_message_sent');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('custom_message', XMLDB_TYPE_TEXT, null, null, null, null, null, 'student_profile');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
         $field = new xmldb_field('subjectjson', XMLDB_TYPE_TEXT, null, null, null, null, null, 'student_profile');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
