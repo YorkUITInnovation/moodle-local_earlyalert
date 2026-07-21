@@ -487,7 +487,9 @@ const updateSelectedAlertTypeDisplay = () => {
     const requestedLabel = label;
     const requestedCourseName = STATE.courseName;
     // Build HTML with styled alert_type (red color #CA3129)
-    const html = `You are selecting an alert based on a <span style="color: #CA3129;">${escapeHtml(requestedLabel)}</span> for ${escapeHtml(requestedCourseName)}`;
+    const html = 'You are selecting an alert based on a '
+        + `<span style="color: #CA3129;">${escapeHtml(requestedLabel)}</span> `
+        + `for ${escapeHtml(requestedCourseName)}`;
     workflowTitle.innerHTML = html;
 };
 
@@ -962,15 +964,38 @@ const sendAlerts = () => {
                 Ajax.call([{methodname: 'local_earlyalert_report_log_insert', args: {
                     template_data: JSON.stringify(validTemplates),
                 }}])[0].then(() => {
-                    let message = STRINGS.alert_sent_successfully || 'Alert sent successfully';
-                    if (skippedItems.length) {
-                        const skippedLines = skippedItems.map(item => {
-                            const s = STATE.studentDataById.get(item.student_id) || {};
-                            return `  • ${s.first_name || ''} ${s.last_name || ''} (${s.idnumber || ''}) — ${s.email || ''}`.trim();
-                        }).join('\n');
-                        message += `\n\n${skippedItems.length} student(s) skipped (no active eTemplate):\n${skippedLines}`;
-                    }
-                    Notification.alert('', message);
+                    Str.get_string('sent_dialog_text', 'local_earlyalert', validTemplates.length)
+                        .then(successMessage => {
+                            let message = successMessage;
+                            if (skippedItems.length) {
+                                const skippedLines = skippedItems.map(item => {
+                                    const s = STATE.studentDataById.get(item.student_id) || {};
+                                    return (
+                                        `  • ${s.first_name || ''} ${s.last_name || ''} `
+                                        + `(${s.idnumber || ''}) — ${s.email || ''}`
+                                    ).trim();
+                                }).join('\n');
+                                message += `\n\n${skippedItems.length} student(s) skipped (no active eTemplate):\n${skippedLines}`;
+                            }
+                            Notification.alert('', message);
+                        })
+                        .catch(() => {
+                            let message = (
+                                `${STRINGS.alert_sent_successfully || 'Alert sent successfully'} `
+                                + `(${validTemplates.length})`
+                            );
+                            if (skippedItems.length) {
+                                const skippedLines = skippedItems.map(item => {
+                                    const s = STATE.studentDataById.get(item.student_id) || {};
+                                    return (
+                                        `  • ${s.first_name || ''} ${s.last_name || ''} `
+                                        + `(${s.idnumber || ''}) — ${s.email || ''}`
+                                    ).trim();
+                                }).join('\n');
+                                message += `\n\n${skippedItems.length} student(s) skipped (no active eTemplate):\n${skippedLines}`;
+                            }
+                            Notification.alert('', message);
+                        });
                 }).catch(Notification.exception);
             }).catch(Notification.exception);
         }
