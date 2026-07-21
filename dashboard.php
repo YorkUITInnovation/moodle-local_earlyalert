@@ -41,6 +41,7 @@ $PAGE->requires->css('/local/earlyalert/css/styles.css');
 // Load AMD module.
 $PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
 $PAGE->requires->js_call_amd('local_earlyalert/impersonate_user_lookup', 'init');
+$PAGE->requires->js_call_amd('local_earlyalert/course_overview', 'init');
 
 
 $impersonate = has_capability('local/earlyalert:impersonate', $context, $USER->id);
@@ -211,6 +212,7 @@ $dashboarddata['strings'] = [
     'preview_message_placeholder' => get_string('preview_message_placeholder', 'local_earlyalert'),
     'back' => get_string('back'),
     'send_alert_now' => get_string('send_alert_now', 'local_earlyalert'),
+    'course_overview' => get_string('course_overview', 'local_earlyalert'),
 ];
 
 // Ensure teacher_user_id is always set regardless of the course data structure

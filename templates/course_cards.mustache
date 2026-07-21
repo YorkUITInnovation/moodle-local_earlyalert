@@ -62,9 +62,8 @@
                     </thead>
                     <tbody>
                     {{#courses}}
-                        <tr data-action="earlyalert/select-course"
-                            data-course-id="{{id}}"
-                            data-course-name="{{fullname}}"
+                        <tr
+
                             class="ea-course-row">
                             <td>
                                 <div class="fw-semibold">{{fullname}}</div>
@@ -76,8 +75,14 @@
                             </td>
                             <td class="text-end">
                                 <button type="button" class="btn btn-outline-primary btn-sm"
-                                        data-action="earlyalert/open-course">
+                                        data-action="earlyalert/select-course"
+                                        data-course-id="{{id}}"
+                                        data-course-name="{{fullname}}">
                                     {{strings.start_alert_flow}}
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm btn-course-overview"
+                                        data-course-id="{{id}}">
+                                    {{strings.course_overview}}
                                 </button>
                             </td>
                         </tr>
@@ -89,6 +94,12 @@
                     {{/has_courses}}
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <div class="card mt-3 ea-course-overview-container">
+            <div class="card-body">
+                <div id="early-alert-student-results" class="mt-3"></div>
             </div>
         </div>
     </div>

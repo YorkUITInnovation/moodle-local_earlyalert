@@ -2,6 +2,11 @@ import ajax from 'core/ajax';
 import Templates from 'core/templates';
 
 export const init = () => {
+    const container = document.querySelector('.ea-course-overview-container');
+    if (container) {
+        container.classList.add('d-none');
+    }
+
     observeCourseOverviewButtons();
 };
 
@@ -48,8 +53,18 @@ function addCourseOverviewButtonListener() {
     // Display the students in the course
     const courseOverviewButtons = document.querySelectorAll('.btn-course-overview');
     courseOverviewButtons.forEach(button => {
+        if (button.dataset.courseOverviewBound === '1') {
+            return;
+        }
+
+        button.dataset.courseOverviewBound = '1';
         button.addEventListener('click', function() {
-            const courseId = this.getAttribute('data-course_id');
+            const container = document.querySelector('.ea-course-overview-container');
+            if (container) {
+                container.classList.remove('d-none');
+            }
+
+            const courseId = this.getAttribute('data-course-id') || this.getAttribute('data-course_id');
             //Show loader
             Templates.render('local_earlyalert/loader', {})
                 .then(function (html, js) {

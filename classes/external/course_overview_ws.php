@@ -74,6 +74,10 @@ class local_earlyalert_course_overview_ws extends external_api {
         $context = \context_system::instance();
         self::validate_context($context);
 
+        // Get course name.
+        $course = $DB->get_record('course', ['id' => $id], 'id,fullname');
+        $course_name = $course ? $course->fullname : '';
+
         // Get all logs
         $sql_unique_students = "SELECT DISTINCT target_user_id as userid FROM {local_earlyalert_report_log} WHERE course_id = $id";
         $unique_students = $DB->get_records_sql($sql_unique_students);
@@ -100,8 +104,12 @@ class local_earlyalert_course_overview_ws extends external_api {
                 $student = $LOG->get_student();
                 // Get teacher record
                 $teacher = $LOG->get_instructor();
-                // Get unit record
-                $unit = $LOG->get_unit_information();
+                // Get unit record — tables may not exist in all environments.
+                try {
+                    $unit = $LOG->get_unit_information();
+                } catch (\Exception $e) {
+                    $unit = false;
+                }
 
                 // Build data object
                 $data = new \stdClass();
@@ -114,16 +122,16 @@ class local_earlyalert_course_overview_ws extends external_api {
                 $data->student_advised_by_advisor = $LOG->get_student_advised_by_advisor();
                 $data->student_advised_by_instructor = $LOG->get_student_advised_by_instructor();
                 $data->date_sent = $LOG->get_date_sent();
-                $data->first_name = $student->firstname;
-                $data->last_name = $student->lastname;
+                $data->first_name = $student ? $student->firstname : '';
+                $data->last_name = $student ? $student->lastname : '';
                 $data->grade = $LOG->get_actual_grade();
-                $data->idnumber = $student->idnumber;
-                $data->campus = $unit->campus;
-                $data->faculty = $unit->unit;
-                $data->major = $student->major;
-                $data->teacher_firstname = $teacher->firstname;
-                $data->teacher_lastname = $teacher->lastname;
-                $data->teacher_email = $teacher->email;
+                $data->idnumber = $student ? $student->idnumber : '';
+                $data->campus = ($unit && isset($unit->campus)) ? $unit->campus : '';
+                $data->faculty = ($unit && isset($unit->unit)) ? $unit->unit : '';
+                $data->major = ($student && isset($student->major)) ? $student->major : '';
+                $data->teacher_firstname = $teacher ? $teacher->firstname : '';
+                $data->teacher_lastname = $teacher ? $teacher->lastname : '';
+                $data->teacher_email = $teacher ? $teacher->email : '';
                 $data->custom_message = $LOG->get_custom_message();
                 // Add data to results
                 $results[$i]->logs[$x] = $data;
@@ -135,7 +143,7 @@ class local_earlyalert_course_overview_ws extends external_api {
             $i++;
         }
         raise_memory_limit(MEMORY_STANDARD);
-        return ['students' => $results];
+        return ['students' => $results, 'course_name' => $course_name];
     }
 
 
@@ -146,6 +154,7 @@ class local_earlyalert_course_overview_ws extends external_api {
     {
         return new external_single_structure(
             array(
+                'course_name' => new external_value(PARAM_TEXT, 'Course full name'),
                 'students' => new external_multiple_structure(
                     new external_single_structure(
                         array(
