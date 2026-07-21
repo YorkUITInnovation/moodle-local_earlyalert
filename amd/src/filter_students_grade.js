@@ -922,6 +922,7 @@ const buildResolvedAlertPayload = studentid => fetchStudentPreview(studentid).th
         instructor_id: response.instructor_id || STATE.teacherUserId,
         assignment_name: '',
         trigger_grade: STATE.thresholdId,
+        alert_type: STATE.alertType,
         threshold_mode: STATE.thresholdMode,
         threshold_percent: STATE.thresholdMode === 'percent' ? getThresholdPercentArg() : null,
         actual_grade: student.grade || '',
@@ -963,6 +964,7 @@ const sendAlerts = () => {
 
                 Ajax.call([{methodname: 'local_earlyalert_report_log_insert', args: {
                     template_data: JSON.stringify(validTemplates),
+                    alert_type: STATE.alertType,
                 }}])[0].then(() => {
                     Str.get_string('sent_dialog_text', 'local_earlyalert', validTemplates.length)
                         .then(successMessage => {

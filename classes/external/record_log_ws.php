@@ -44,7 +44,8 @@ class local_earlyalert_record_log_ws extends external_api {
     {
         return new external_function_parameters(
             array(
-                'template_data' => new external_value(PARAM_RAW, 'All selected student ids', VALUE_OPTIONAL , '')
+                'template_data' => new external_value(PARAM_RAW, 'Resolved template payload for selected students', VALUE_OPTIONAL, ''),
+                'alert_type' => new external_value(PARAM_RAW, 'Selected alert type token', VALUE_OPTIONAL, '')
             )
         );
     }
@@ -56,13 +57,14 @@ class local_earlyalert_record_log_ws extends external_api {
      * @throws invalid_parameter_exception
      * @throws restricted_context_exception
      */
-    public static function insert_email_log($template_data)
+    public static function insert_email_log($template_data = '', $alert_type = '')
     {
         global $CFG, $USER, $DB, $PAGE;
 
         //Parameter validation
         $params = self::validate_parameters(self::insert_email_log_parameters(), array(
-                'template_data' => $template_data
+                'template_data' => $template_data,
+                'alert_type' => $alert_type
             )
         );
 
@@ -74,6 +76,7 @@ class local_earlyalert_record_log_ws extends external_api {
         $id=0;
         $ids=[];
         $students = json_decode($template_data, true);
+        $requestalerttype = self::normalize_alert_type($params['alert_type'] ?? '');
         forEach($students as $student) {
             // Get idnumber from user student_id
             $user = $DB->get_record('user', array('id' => $student['student_id']), '*', MUST_EXIST);
@@ -122,6 +125,11 @@ class local_earlyalert_record_log_ws extends external_api {
                 'assignments' => $assignments,
                 'average_type' => $averagetype,
             ];
+            $payloadalerttype = $student['alert_type'] ?? ($student['alerttype'] ?? '');
+            $alerttype = self::normalize_alert_type($payloadalerttype);
+            if ($alerttype === '' && $requestalerttype !== '') {
+                $alerttype = $requestalerttype;
+            }
             $data->template_id = ($student['template_id'] ?? 0);
             $data->revision_id = ($student['revision_id'] ?? 0);
             $data->triggered_from_user_id = ($student['triggered_from_user_id'] ?? 0);
@@ -132,6 +140,7 @@ class local_earlyalert_record_log_ws extends external_api {
             $data->instructor_id = ($student['instructor_id'] ?? 0);
             $data->assignment_name = ($student['assignment_name'] ?? 0);
             $data->trigger_grade = ($student['trigger_grade'] ?? 0);
+            $data->alert_type = $alerttype;
             $data->threshold_mode = ($student['threshold_mode'] ?? 'letter');
             $data->threshold_percent = isset($student['threshold_percent']) ? (float)$student['threshold_percent'] : null;
             $data->actual_grade = self::convertGradeToNumeric($student['actual_grade'] ?? '');
@@ -177,6 +186,36 @@ class local_earlyalert_record_log_ws extends external_api {
 
         // For letter grades or other text, return -1
         return -1;
+    }
+
+    /**
+     * Normalize known alert type labels/tokens to canonical DB values.
+     *
+     * @param mixed $value raw alert type value
+     * @return string one of: grade, assign, exam, commendation, or ''
+     */
+    private static function normalize_alert_type($value) {
+        $raw = trim(strtolower((string)$value));
+        if ($raw === '') {
+            return '';
+        }
+
+        $map = [
+            'grade' => 'grade',
+            'low_grade' => 'grade',
+            'low grade' => 'grade',
+            'assign' => 'assign',
+            'assignment' => 'assign',
+            'missed_assignment' => 'assign',
+            'missed assignment' => 'assign',
+            'exam' => 'exam',
+            'missed_exam' => 'exam',
+            'missed exam' => 'exam',
+            'missed test/quiz' => 'exam',
+            'commendation' => 'commendation',
+        ];
+
+        return $map[$raw] ?? '';
     }
 
     /**

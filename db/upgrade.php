@@ -258,5 +258,19 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 20260721000, 'local', 'earlyalert');
     }
 
+    if ($oldversion < 20260721001) {
+
+        // Define alert type field to be added to local_earlyalert_report_log.
+        $table = new xmldb_table('local_earlyalert_report_log');
+
+        $field = new xmldb_field('alert_type', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'trigger_grade');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 20260721001, 'local', 'earlyalert');
+    }
+
     return true;
 }

@@ -236,8 +236,14 @@ $dashboarddata['metric_students_at_risk'] = (int)$DB->count_records_sql(
     "SELECT COUNT(DISTINCT target_user_id)
        FROM {local_earlyalert_report_log}
       WHERE instructor_id = :instructorid
-        AND student_advised_by_instructor = 0",
-    ['instructorid' => $user_id]
+        AND student_advised_by_instructor = 0
+        AND alert_type IN (:riskgrade, :riskassign, :riskexam)",
+    [
+        'instructorid' => $user_id,
+        'riskgrade' => 'grade',
+        'riskassign' => 'assign',
+        'riskexam' => 'exam',
+    ]
 );
 
 if ($teacher || $is_impersonating) {
