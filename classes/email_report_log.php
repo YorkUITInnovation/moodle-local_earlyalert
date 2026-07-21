@@ -226,6 +226,12 @@ CONST GRADE_A_PLUS = 1;
      *
      * @var string
      */
+    private $grade_details_json;
+
+    /**
+     *
+     * @var string
+     */
     private $snapshot_status;
 
 
@@ -267,6 +273,7 @@ CONST GRADE_A_PLUS = 1;
         $this->student_profile = $result->student_profile ?? '';
         $this->subjectjson = $result->subjectjson ?? '';
         $this->messagejson = $result->messagejson ?? '';
+        $this->grade_details_json = $result->grade_details_json ?? '';
         $this->snapshot_status = $result->snapshot_status ?? '';
         $this->date_message_sent = $result->date_message_sent ?? 0;
         $this->timecreated = $result->timecreated ?? 0;
@@ -379,6 +386,49 @@ CONST GRADE_A_PLUS = 1;
      */
     public function get_threshold_percent(): ?float {
         return $this->threshold_percent;
+    }
+
+    /**
+     * Return normalized grade details captured at send time.
+     *
+     * @return array{assignments: array, average_type: string}
+     */
+    public function get_grade_details(): array
+    {
+        $default = [
+            'assignments' => [],
+            'average_type' => '',
+        ];
+
+        if (empty($this->grade_details_json)) {
+            return $default;
+        }
+
+        $decoded = json_decode($this->grade_details_json, true);
+        if (!is_array($decoded)) {
+            return $default;
+        }
+
+        $assignments = [];
+        if (!empty($decoded['assignments']) && is_array($decoded['assignments'])) {
+            foreach ($decoded['assignments'] as $assignment) {
+                $assignmentname = trim((string)$assignment);
+                if ($assignmentname !== '') {
+                    $assignments[] = $assignmentname;
+                }
+            }
+        }
+
+        $averagetype = '';
+        if (isset($decoded['average_type'])
+                && in_array($decoded['average_type'], ['any', 'average', 'weighted'], true)) {
+            $averagetype = $decoded['average_type'];
+        }
+
+        return [
+            'assignments' => $assignments,
+            'average_type' => $averagetype,
+        ];
     }
 
     public function get_student_advised_by_advisor(): int

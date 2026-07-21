@@ -78,8 +78,9 @@ class process_mail_queue extends \core\task\scheduled_task {
                     $email->get_assignment_name(),
                     $email->get_custom_message(),
                 );
+                $gradedetails = $email->get_grade_details();
                 $subject = $prepare_template->subject;
-                $body = $prepare_template->message;
+                $body = $this->replace_grade_details_placeholder($prepare_template->message, $gradedetails);
                 $course_id = $emailtoprocess->course_id;
                 $resolvedat = time();
                 $teacher = $DB->get_record('user', ['id' => $email->get_instructor_id()], 'firstname, lastname');
@@ -93,6 +94,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                     'assignmenttitle' => $email->get_assignment_name(),
                     'grade' => $email->get_trigger_grade_letter(),
                     'custommessage' => $email->get_custom_message(),
+                    'grade_details' => $gradedetails,
                 ];
                 $thresholdmode = $email->get_threshold_mode();
                 $thresholdpercent = $email->get_threshold_percent();
@@ -302,6 +304,61 @@ class process_mail_queue extends \core\task\scheduled_task {
     private function encode_message_snapshot(array $payload): string {
         $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         return $json === false ? '' : $json;
+    }
+
+    /**
+     * Replace [gradedetails] token with formatted grade details text.
+     *
+     * @param string $message
+     * @param array $gradedetails
+     * @return string
+     */
+    private function replace_grade_details_placeholder(string $message, array $gradedetails): string {
+        if (strpos($message, '[gradedetails]') === false) {
+            return $message;
+        }
+
+        $replacement = $this->format_grade_details_text($gradedetails);
+        return str_replace('[gradedetails]', $replacement, $message);
+    }
+
+    /**
+     * Build human-readable gradedetails placeholder text from captured metadata.
+     *
+     * @param array $gradedetails
+     * @return string
+     */
+    private function format_grade_details_text(array $gradedetails): string {
+        $lines = [];
+
+        $assignments = [];
+        if (!empty($gradedetails['assignments']) && is_array($gradedetails['assignments'])) {
+            foreach ($gradedetails['assignments'] as $assignment) {
+                $name = trim((string)$assignment);
+                if ($name !== '') {
+                    $assignments[] = $name;
+                }
+            }
+        }
+
+        if (!empty($assignments)) {
+            $lines[] = get_string('gradedetails_assignments', 'local_earlyalert', implode(', ', $assignments));
+        }
+
+        $averagetype = '';
+        if (!empty($gradedetails['average_type'])) {
+            $averagetype = trim((string)$gradedetails['average_type']);
+        }
+
+        if ($averagetype !== '') {
+            $modekey = 'gradedetails_average_type_' . $averagetype;
+            $modevalue = get_string_manager()->string_exists($modekey, 'local_earlyalert')
+                ? get_string($modekey, 'local_earlyalert')
+                : $averagetype;
+            $lines[] = get_string('gradedetails_average_type', 'local_earlyalert', $modevalue);
+        }
+
+        return implode("\n", $lines);
     }
 
 }

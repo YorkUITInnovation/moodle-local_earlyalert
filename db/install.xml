@@ -25,6 +25,7 @@
         <FIELD NAME="student_profile" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="subjectjson" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="messagejson" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="grade_details_json" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="snapshot_status" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="date_message_sent" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>

@@ -98,6 +98,30 @@ class local_earlyalert_record_log_ws extends external_api {
             }
             // add to data structure
             $data= new stdClass();
+            $gradedetails = $student['grade_details'] ?? [];
+            if (!is_array($gradedetails)) {
+                $gradedetails = [];
+            }
+            $assignments = [];
+            if (!empty($gradedetails['assignments']) && is_array($gradedetails['assignments'])) {
+                foreach ($gradedetails['assignments'] as $assignment) {
+                    $assignmentname = trim((string)$assignment);
+                    if ($assignmentname !== '') {
+                        $assignments[] = $assignmentname;
+                    }
+                }
+            }
+
+            $averagetype = '';
+            if (isset($gradedetails['average_type'])
+                    && in_array($gradedetails['average_type'], ['any', 'average', 'weighted'], true)) {
+                $averagetype = $gradedetails['average_type'];
+            }
+
+            $normalizedgradedetails = [
+                'assignments' => $assignments,
+                'average_type' => $averagetype,
+            ];
             $data->template_id = ($student['template_id'] ?? 0);
             $data->revision_id = ($student['revision_id'] ?? 0);
             $data->triggered_from_user_id = ($student['triggered_from_user_id'] ?? 0);
@@ -112,6 +136,7 @@ class local_earlyalert_record_log_ws extends external_api {
             $data->threshold_percent = isset($student['threshold_percent']) ? (float)$student['threshold_percent'] : null;
             $data->actual_grade = self::convertGradeToNumeric($student['actual_grade'] ?? '');
             $data->custom_message = ($student['custom_message'] ?? '');
+            $data->grade_details_json = json_encode($normalizedgradedetails);
             //all logs default to unadvised
             $data->student_advised_by_advisor = 0;
             $data->student_advised_by_instructor = 0;

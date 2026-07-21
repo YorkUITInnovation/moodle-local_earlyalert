@@ -743,6 +743,7 @@ const fetchStudentPreview = studentid => Ajax.call([{methodname: 'local_earlyale
     thresholdpercent: getThresholdPercentArg(),
     assignment_title: '',
     custom_message: getCustomMessage(),
+    grade_details_json: JSON.stringify(getGradeDetailsForSnapshot()),
 }}])[0];
 
 const renderComposePreview = () => {
@@ -866,6 +867,31 @@ const clearSelection = () => {
     updateComposeSummary();
 };
 
+const getGradeDetailsForSnapshot = () => {
+    if (STATE.includeAllStudents || STATE.filterMode === 'course') {
+        return {
+            assignments: [],
+            average_type: '',
+        };
+    }
+
+    const itemSelect = document.getElementById('ea-grade-items');
+    const assignments = itemSelect
+        ? Array.from(itemSelect.selectedOptions || [])
+            .map(option => (option.textContent || '').trim())
+            .filter(Boolean)
+        : [];
+
+    const averageType = STATE.filterMode === 'multi'
+        ? (['any', 'average', 'weighted'].includes(STATE.multiMode) ? STATE.multiMode : '')
+        : '';
+
+    return {
+        assignments,
+        average_type: averageType,
+    };
+};
+
 const buildResolvedAlertPayload = studentid => fetchStudentPreview(studentid).then(response => {
     const student = STATE.studentDataById.get(studentid) || {};
     return {
@@ -881,6 +907,7 @@ const buildResolvedAlertPayload = studentid => fetchStudentPreview(studentid).th
         threshold_percent: STATE.thresholdMode === 'percent' ? getThresholdPercentArg() : null,
         actual_grade: student.grade || '',
         custom_message: getCustomMessage(),
+        grade_details: getGradeDetailsForSnapshot(),
         subject: response.subject || '',
         message: response.message || '',
     };

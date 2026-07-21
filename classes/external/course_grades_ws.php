@@ -848,6 +848,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'thresholdpercent' => new external_value(PARAM_FLOAT, 'Numeric threshold percent', VALUE_DEFAULT, -1),
             'assignment_title' => new external_value(PARAM_RAW_TRIMMED, 'Assignment/quiz title', VALUE_DEFAULT, ''),
             'custom_message' => new external_value(PARAM_RAW, 'Custom instructor message', VALUE_DEFAULT, ''),
+            'grade_details_json' => new external_value(PARAM_RAW, 'Grade details json', VALUE_DEFAULT, ''),
         ]);
     }
 
@@ -862,6 +863,7 @@ class local_earlyalert_course_grades_ws extends external_api {
      * @param float $thresholdpercent
      * @param string $assignment_title
      * @param string $custom_message
+     * @param string $grade_details_json
      * @return array
      */
     public static function get_student_preview_template(
@@ -872,7 +874,8 @@ class local_earlyalert_course_grades_ws extends external_api {
         $thresholdid,
         $thresholdpercent,
         $assignment_title,
-        $custom_message
+        $custom_message,
+        $grade_details_json = ''
     ) {
         global $DB;
 
@@ -885,6 +888,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'thresholdpercent' => $thresholdpercent,
             'assignment_title' => $assignment_title,
             'custom_message' => $custom_message,
+            'grade_details_json' => $grade_details_json,
         ]);
 
         $coursecontext = \context_course::instance((int)$params['courseid']);
@@ -987,6 +991,12 @@ class local_earlyalert_course_grades_ws extends external_api {
             (string)$params['custom_message']
         );
 
+        $gradedetails = self::decode_grade_details_json((string)$params['grade_details_json']);
+        $preparedmessage = is_object($prepared) && property_exists($prepared, 'message')
+            ? (string)$prepared->message
+            : '';
+        $preparedmessage = self::replace_grade_details_placeholder($preparedmessage, $gradedetails);
+
             return [
                 'templateid' => $preloadtemplateid,
                 'revision_id' => $preloadrevisionid,
@@ -996,7 +1006,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                 'course_id' => (int)$course->id,
                 'hascustommessage' => $hascustommessage,
                 'subject' => is_object($prepared) && property_exists($prepared, 'subject') ? (string)$prepared->subject : '',
-                'message' => is_object($prepared) && property_exists($prepared, 'message') ? (string)$prepared->message : '',
+                'message' => $preparedmessage,
             ];
         } catch (\Throwable $t) {
             return self::build_preview_unavailable_response(
@@ -1054,6 +1064,90 @@ class local_earlyalert_course_grades_ws extends external_api {
         }
 
         return stripos((string)$preloadmessage, '[custommessage]') !== false;
+    }
+
+    /**
+     * Decode and normalize grade details from preview payload.
+     *
+     * @param string $json
+     * @return array{assignments: array, average_type: string}
+     */
+    private static function decode_grade_details_json(string $json): array {
+        $default = [
+            'assignments' => [],
+            'average_type' => '',
+        ];
+
+        if ($json === '') {
+            return $default;
+        }
+
+        $decoded = json_decode($json, true);
+        if (!is_array($decoded)) {
+            return $default;
+        }
+
+        $assignments = [];
+        if (!empty($decoded['assignments']) && is_array($decoded['assignments'])) {
+            foreach ($decoded['assignments'] as $assignment) {
+                $name = trim((string)$assignment);
+                if ($name !== '') {
+                    $assignments[] = $name;
+                }
+            }
+        }
+
+        $averagetype = '';
+        if (!empty($decoded['average_type'])
+                && in_array($decoded['average_type'], ['any', 'average', 'weighted'], true)) {
+            $averagetype = $decoded['average_type'];
+        }
+
+        return [
+            'assignments' => $assignments,
+            'average_type' => $averagetype,
+        ];
+    }
+
+    /**
+     * Replace [gradedetails] placeholder in preview message.
+     *
+     * @param string $message
+     * @param array $gradedetails
+     * @return string
+     */
+    private static function replace_grade_details_placeholder(string $message, array $gradedetails): string {
+        if (strpos($message, '[gradedetails]') === false) {
+            return $message;
+        }
+
+        return str_replace('[gradedetails]', self::format_grade_details_text($gradedetails), $message);
+    }
+
+    /**
+     * Format grade details text for preview message.
+     *
+     * @param array $gradedetails
+     * @return string
+     */
+    private static function format_grade_details_text(array $gradedetails): string {
+        $lines = [];
+
+        if (!empty($gradedetails['assignments'])) {
+            $lines[] = get_string('gradedetails_assignments', 'local_earlyalert',
+                implode(', ', $gradedetails['assignments']));
+        }
+
+        $averagetype = !empty($gradedetails['average_type']) ? (string)$gradedetails['average_type'] : '';
+        if ($averagetype !== '') {
+            $modekey = 'gradedetails_average_type_' . $averagetype;
+            $modevalue = get_string_manager()->string_exists($modekey, 'local_earlyalert')
+                ? get_string($modekey, 'local_earlyalert')
+                : $averagetype;
+            $lines[] = get_string('gradedetails_average_type', 'local_earlyalert', $modevalue);
+        }
+
+        return implode("\n", $lines);
     }
 
     /**
