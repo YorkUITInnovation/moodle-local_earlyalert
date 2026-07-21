@@ -6,8 +6,8 @@
     {{#impersonate}}
         <div class="row mb-4">
             <div class="col-md-4">
-                <label for="search" class="form-label">{{strings.impersonate_user}}</label>
-                <select id="search" class="form-select" data-placeholder="{{strings.search}}">
+                <label for="search" class="form-label">{{#str}}impersonate_user, local_earlyalert{{/str}}</label>
+                <select id="search" class="form-select" data-placeholder="{{#str}}search, core{{/str}}">
                     <option value="{{impersonate_selected_user_id}}"
                             selected>{{impersonate_selected_user_label}}</option>
                 </select>
@@ -22,7 +22,7 @@
             <div class="col-md-4">
                 <div class="card ea-metric-card h-100">
                     <div class="card-body">
-                        <div class="text-muted small text-uppercase">{{strings.metric_total_alerts}}</div>
+                        <div class="text-muted small text-uppercase">{{#str}}metric_total_alerts, local_earlyalert{{/str}}</div>
                         <div class="display-6 fw-bold">{{metric_total_alerts}}</div>
                     </div>
                 </div>
@@ -30,7 +30,7 @@
             <div class="col-md-4">
                 <div class="card ea-metric-card h-100">
                     <div class="card-body">
-                        <div class="text-muted small text-uppercase">{{strings.metric_students_at_risk}}</div>
+                        <div class="text-muted small text-uppercase">{{#str}}metric_students_at_risk, local_earlyalert{{/str}}</div>
                         <div class="display-6 fw-bold">{{metric_students_at_risk}}</div>
                     </div>
                 </div>
@@ -38,7 +38,7 @@
             <div class="col-md-4">
                 <div class="card ea-metric-card h-100">
                     <div class="card-body">
-                        <div class="text-muted small text-uppercase">{{strings.metric_pending_actions}}</div>
+                        <div class="text-muted small text-uppercase">{{#str}}metric_pending_actions, local_earlyalert{{/str}}</div>
                         <div class="display-6 fw-bold">{{metric_pending_actions}}</div>
                     </div>
                 </div>
@@ -47,17 +47,17 @@
 
         <div class="card">
             <div class="card-header bg-white">
-                <h2 class="h4 mb-0">{{strings.active_courses}}</h2>
+                <h2 class="h4 mb-0">{{#str}}active_courses, local_earlyalert{{/str}}</h2>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0 align-middle">
                     <thead>
                     <tr>
-                        <th>{{strings.course_code_title}}</th>
-                        <th>{{strings.enrollment}}</th>
-                        <th>{{strings.alerts_term}}</th>
-                        <th>{{strings.risk_level}}</th>
-                        <th class="text-end">{{strings.actions}}</th>
+                        <th>{{#str}}course_code_title, local_earlyalert{{/str}}</th>
+                        <th>{{#str}}enrollment, local_earlyalert{{/str}}</th>
+                        <th>{{#str}}alerts_term, local_earlyalert{{/str}}</th>
+                        <th>{{#str}}risk_level, local_earlyalert{{/str}}</th>
+                        <th class="text-end">{{#str}}actions, core{{/str}}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -78,18 +78,18 @@
                                         data-action="earlyalert/select-course"
                                         data-course-id="{{id}}"
                                         data-course-name="{{fullname}}">
-                                    {{strings.start_alert_flow}}
+                                    {{#str}}start_alert_flow, local_earlyalert{{/str}}
                                 </button>
                                 <button type="button" class="btn btn-outline-primary btn-sm btn-course-overview"
                                         data-course-id="{{id}}">
-                                    {{strings.course_overview}}
+                                    {{#str}}course_overview, local_earlyalert{{/str}}
                                 </button>
                             </td>
                         </tr>
                     {{/courses}}
                     {{^has_courses}}
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">{{strings.no_courses}}</td>
+                            <td colspan="5" class="text-center text-muted py-4">{{#str}}no_courses, local_earlyalert{{/str}}</td>
                         </tr>
                     {{/has_courses}}
                     </tbody>
@@ -110,10 +110,10 @@
                 <div class="text-muted small mb-1">
                     <a id="ea-selected-course-link" href="#" class="text-decoration-none"></a>
                 </div>
-                <h2 id="ea-workflow-title" class="h3 mb-0">{{strings.send_early_alert}}</h2>
+                <h2 id="ea-workflow-title" class="h3 mb-0">{{#str}}send_early_alert, local_earlyalert{{/str}}</h2>
             </div>
             <button type="button" class="btn btn-link"
-                    data-action="earlyalert/back-dashboard">{{strings.back_to_dashboard}}</button>
+                    data-action="earlyalert/back-dashboard">{{#str}}back_to_dashboard, local_earlyalert{{/str}}</button>
         </div>
 
         <div class="card">
@@ -122,34 +122,34 @@
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge rounded-circle bg-primary" data-step="1"
                               style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">1</span>
-                        <span class="ea-step-label" data-step="1">{{strings.alert_type}}</span>
+                        <span class="ea-step-label" data-step="1">{{#str}}alert_type, local_earlyalert{{/str}}</span>
                     </div>
                     <div class="flex-grow-1" style="height:2px;background:#dee2e6;"></div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge rounded-circle bg-secondary" data-step="2"
                               style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">2</span>
-                        <span class="ea-step-label" data-step="2">{{strings.grade_threshold_and_students}}</span>
+                        <span class="ea-step-label" data-step="2">{{#str}}grade_threshold_and_students, local_earlyalert{{/str}}</span>
                     </div>
                     <div class="flex-grow-1" style="height:2px;background:#dee2e6;"></div>
 <!--                    <div class="d-flex align-items-center gap-2">-->
 <!--                        <span class="badge rounded-circle bg-secondary" data-step="3"-->
 <!--                              style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">3</span>-->
-<!--                        <span class="ea-step-label" data-step="3">{{strings.compose_and_send}}</span>-->
+<!--                        <span class="ea-step-label" data-step="3">{{#str}}compose_and_send, local_earlyalert{{/str}}</span>-->
 <!--                    </div>-->
                 </div>
             </div>
 
             <div class="card-body" data-region="step-1">
-                <h3 class="h4">{{strings.choose_alert_type}}</h3>
-                <p class="text-muted">{{strings.choose_alert_type_help}}</p>
+                <h3 class="h4">{{#str}}choose_alert_type, local_earlyalert{{/str}}</h3>
+                <p class="text-muted">{{#str}}choose_alert_type_help, local_earlyalert{{/str}}</p>
                 <div class="card-group" data-region="alert-type-cards">
                     <div class="card">
                         <div class="card-body p-0">
                             <button type="button"
                                     class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3"
                                     data-alert-type="grade">
-                                <span class="d-block fw-semibold">{{strings.low_grade}}</span>
-                                <span class="text-muted small">{{strings.alert_type_low_grade_help}}</span>
+                                <span class="d-block fw-semibold">{{#str}}low_grade, local_earlyalert{{/str}}</span>
+                                <span class="text-muted small">{{#str}}alert_type_low_grade_help, local_earlyalert{{/str}}</span>
                             </button>
                         </div>
                     </div>
@@ -158,8 +158,8 @@
                             <button type="button"
                                     class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3"
                                     data-alert-type="assign">
-                                <span class="d-block fw-semibold">{{strings.missed_assignment}}</span>
-                                <span class="text-muted small">{{strings.alert_type_assignment_help}}</span>
+                                <span class="d-block fw-semibold">{{#str}}missed_assignment, local_earlyalert{{/str}}</span>
+                                <span class="text-muted small">{{#str}}alert_type_assignment_help, local_earlyalert{{/str}}</span>
                             </button>
                         </div>
                     </div>
@@ -168,8 +168,8 @@
                             <button type="button"
                                     class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3"
                                     data-alert-type="exam">
-                                <span class="d-block fw-semibold">{{strings.missed_exam}}</span>
-                                <span class="text-muted small">{{strings.alert_type_exam_help}}</span>
+                                <span class="d-block fw-semibold">{{#str}}missed_exam, local_earlyalert{{/str}}</span>
+                                <span class="text-muted small">{{#str}}alert_type_exam_help, local_earlyalert{{/str}}</span>
                             </button>
                         </div>
                     </div>
@@ -178,8 +178,8 @@
                             <button type="button"
                                     class="btn btn-outline-success rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3"
                                     data-alert-type="commendation">
-                                <span class="d-block fw-semibold">{{strings.alert_type_commendation}}</span>
-                                <span class="text-muted small">{{strings.alert_type_commendation_help}}</span>
+                                <span class="d-block fw-semibold">{{#str}}alert_type_commendation, local_earlyalert{{/str}}</span>
+                                <span class="text-muted small">{{#str}}alert_type_commendation_help, local_earlyalert{{/str}}</span>
                             </button>
                         </div>
                     </div>
@@ -188,7 +188,7 @@
 
             <div class="card-body d-none" data-region="step-2">
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <span class="text-muted small">{{strings.selected_alert_type}}:</span>
+                    <span class="text-muted small">{{#str}}selected_alert_type, local_earlyalert{{/str}}:</span>
                     <span class="badge bg-light text-dark border" id="ea-step-2-alert-type"></span>
                 </div>
                 <div class="accordion mb-3" id="ea-step-2-criteria-help-accordion">
@@ -197,7 +197,7 @@
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#ea-step-2-criteria-help-collapse" aria-expanded="false"
                                     aria-controls="ea-step-2-criteria-help-collapse">
-                                {{strings.alert_criteria_help_title}}
+                                {{#str}}alert_criteria_help_title, local_earlyalert{{/str}}
                             </button>
                         </h2>
                         <div id="ea-step-2-criteria-help-collapse" class="accordion-collapse collapse"
@@ -205,7 +205,7 @@
                              data-bs-parent="#ea-step-2-criteria-help-accordion">
                             <div class="accordion-body">
                                 <div class="alert alert-info mb-0" role="alert">
-                                    {{{strings.grade_instructions}}}
+                                    {{#str}}grade_instructions, local_earlyalert{{/str}}
                                 </div>
                             </div>
                         </div>
@@ -215,25 +215,25 @@
                     <div class="col-xl-4">
                         <div class="card h-100">
                             <div class="card-header bg-white">
-                                <h3 class="h5 mb-0">{{strings.alert_criteria}}</h3>
+                                <h3 class="h5 mb-0">{{#str}}alert_criteria, local_earlyalert{{/str}}</h3>
                             </div>
                             <div class="card-body">
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" id="ea-include-all-students">
                                     <label class="form-check-label"
-                                           for="ea-include-all-students">{{strings.not_using_gradebook}}</label>
+                                           for="ea-include-all-students">{{#str}}not_using_gradebook, local_earlyalert{{/str}}</label>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">{{strings.condition}}</label>
+                                    <label class="form-label">{{#str}}condition, local_earlyalert{{/str}}</label>
                                     <div id="ea-condition-display" class="form-control-plaintext fw-semibold"></div>
-                                    <div class="form-text">{{strings.condition_locked_help}}</div>
+                                    <div class="form-text">{{#str}}condition_locked_help, local_earlyalert{{/str}}</div>
                                 </div>
                                 <div class="mb-3" id="ea-threshold-wrap">
-                                    <label class="form-label" for="ea-threshold-mode">{{strings.threshold}}</label>
+                                    <label class="form-label" for="ea-threshold-mode">{{#str}}threshold, local_earlyalert{{/str}}</label>
                                     <select id="ea-threshold-mode" class="form-select mb-2">
-                                        <option value="letter" selected>{{strings.threshold_mode_letter}}</option>
-                                        <option value="percent">{{strings.threshold_mode_percent}}</option>
+                                        <option value="letter" selected>{{#str}}threshold_mode_letter, local_earlyalert{{/str}}</option>
+                                        <option value="percent">{{#str}}threshold_mode_percent, local_earlyalert{{/str}}</option>
                                     </select>
                                     <div id="ea-threshold-letter-wrap">
                                         <select id="ea-grade-threshold" class="form-select">
@@ -256,50 +256,50 @@
                                             <span class="input-group-text">%</span>
                                         </div>
                                     </div>
-                                    <div class="form-text">{{strings.threshold_help}}</div>
+                                    <div class="form-text">{{#str}}threshold_help, local_earlyalert{{/str}}</div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label"
-                                           for="ea-grade-filter-mode">{{strings.filter_on}}</label>
+                                           for="ea-grade-filter-mode">{{#str}}filter_on, local_earlyalert{{/str}}</label>
                                     <select id="ea-grade-filter-mode" class="form-select">
-                                        <option value="course" selected>{{strings.overall_course_grade}}</option>
-                                        <option value="single">{{strings.single_assignment_quiz}}</option>
-                                        <option value="multi">{{strings.multi_assignments_quizzes}}</option>
+                                        <option value="course" selected>{{#str}}overall_course_grade, local_earlyalert{{/str}}</option>
+                                        <option value="single">{{#str}}single_assignment_quiz, local_earlyalert{{/str}}</option>
+                                        <option value="multi">{{#str}}multi_assignments_quizzes, local_earlyalert{{/str}}</option>
                                     </select>
                                 </div>
                                 <div class="mb-3" id="ea-grade-items-wrap">
-                                    <label class="form-label" for="ea-grade-items">{{strings.grade_items}}</label>
+                                    <label class="form-label" for="ea-grade-items">{{#str}}grade_items, local_earlyalert{{/str}}</label>
                                     <select id="ea-grade-items" class="form-select" multiple size="6"></select>
-                                    <div class="form-text">{{strings.grade_items_help}}</div>
+                                    <div class="form-text">{{#str}}grade_items_help, local_earlyalert{{/str}}</div>
                                 </div>
                                 <div id="ea-filter-mode-container">
                                     <div class="mb-3 d-none" id="ea-multi-mode-wrap">
-                                        <label class="form-label">{{strings.multi_mode}}</label>
+                                        <label class="form-label">{{#str}}multi_mode, local_earlyalert{{/str}}</label>
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="ea-multi-mode"
                                                    id="ea-multi-mode-any" value="any" checked>
                                             <label class="form-check-label"
-                                                   for="ea-multi-mode-any">{{strings.multi_mode_any}}</label>
+                                                   for="ea-multi-mode-any">{{#str}}multi_mode_any, local_earlyalert{{/str}}</label>
                                         </div>
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="ea-multi-mode"
                                                    id="ea-multi-mode-average" value="average">
                                             <label class="form-check-label"
-                                                   for="ea-multi-mode-average">{{strings.multi_mode_average}}</label>
+                                                   for="ea-multi-mode-average">{{#str}}multi_mode_average, local_earlyalert{{/str}}</label>
                                         </div>
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="ea-multi-mode"
                                                    id="ea-multi-mode-weighted" value="weighted">
                                             <label class="form-check-label"
-                                                   for="ea-multi-mode-weighted">{{strings.multi_mode_weighted}}</label>
+                                                   for="ea-multi-mode-weighted">{{#str}}multi_mode_weighted, local_earlyalert{{/str}}</label>
                                         </div>
                                     </div>
 
                                     <div class="mb-0">
                                         <button type="button" class="btn btn-outline-primary w-100"
                                                 data-action="earlyalert/apply-filters">
-                                            {{strings.apply_filter}}
+                                            {{#str}}apply_filter, local_earlyalert{{/str}}
                                         </button>
                                     </div>
                                 </div>
@@ -310,27 +310,27 @@
 
                     <div class="col-xl-8">
                         <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
-                            <h3 class="h5 mb-0">{{strings.flagged_students}}</h3>
+                            <h3 class="h5 mb-0">{{#str}}flagged_students, local_earlyalert{{/str}}</h3>
                             <div class="d-flex align-items-center gap-2 flex-wrap">
                                 <button type="button" class="btn btn-outline-secondary btn-sm d-none"
                                         id="ea-edit-custom-message-btn"
                                         data-action="earlyalert/open-custom-message">
-                                    {{strings.edit_message}}
+                                    {{#str}}edit_message, local_earlyalert{{/str}}
                                 </button>
-                                <div class="text-danger fw-semibold" id="ea-selected-count">0 {{strings.selected}}</div>
+                                <div class="text-danger fw-semibold" id="ea-selected-count">0 {{#str}}selected, local_earlyalert{{/str}}</div>
                                 <div class="text-muted small"
-                                     id="ea-table-range">{{strings.showing_range_default}}</div>
+                                     id="ea-table-range">{{#str}}showing_range_default, local_earlyalert{{/str}}</div>
                                 <button type="button" class="btn btn-outline-secondary btn-sm"
-                                        data-action="earlyalert/clear-selection">{{strings.clear_selection}}</button>
+                                        data-action="earlyalert/clear-selection">{{#str}}clear_selection, local_earlyalert{{/str}}</button>
                                 <button type="button" class="btn btn-outline-secondary btn-sm"
-                                        data-action="earlyalert/export-selected">{{strings.export_csv}}</button>
+                                        data-action="earlyalert/export-selected">{{#str}}export_csv, local_earlyalert{{/str}}</button>
                             </div>
                         </div>
                         <div class="input-group mb-2">
                             <input type="search" id="ea-search" class="form-control"
-                                   placeholder="{{strings.search_students}}">
+                                   placeholder="{{#str}}search_students, local_earlyalert{{/str}}">
                             <button class="btn btn-outline-secondary" type="button"
-                                    data-action="earlyalert/search">{{strings.search}}</button>
+                                    data-action="earlyalert/search">{{#str}}search, core{{/str}}</button>
                         </div>
                         <div class="table-responsive border rounded">
                             <table class="table table-sm table-hover mb-0" id="ea-students-table">
@@ -340,28 +340,28 @@
                                     <th>
                                         <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none"
                                                 data-action="earlyalert/sort" data-sort-by="name">
-                                            {{strings.student_name}} <span id="ea-sort-indicator-name">-</span>
+                                            {{#str}}student_name, local_earlyalert{{/str}} <span id="ea-sort-indicator-name">-</span>
                                         </button>
                                     </th>
                                     <th>
                                         <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none"
                                                 data-action="earlyalert/sort" data-sort-by="idnumber">
-                                            {{strings.student_id}} <span id="ea-sort-indicator-idnumber">-</span>
+                                            {{#str}}student_id, local_earlyalert{{/str}} <span id="ea-sort-indicator-idnumber">-</span>
                                         </button>
                                     </th>
                                     <th>
                                         <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none"
                                                 data-action="earlyalert/sort" data-sort-by="grade">
-                                            {{strings.grade}} <span id="ea-sort-indicator-grade">-</span>
+                                            {{#str}}grade, local_earlyalert{{/str}} <span id="ea-sort-indicator-grade">-</span>
                                         </button>
                                     </th>
-                                    <th>{{strings.matched_items}}</th>
-                                    <th class="text-end">{{strings.preview}}</th>
+                                    <th>{{#str}}matched_items, local_earlyalert{{/str}}</th>
+                                    <th class="text-end">{{#str}}preview, local_earlyalert{{/str}}</th>
                                 </tr>
                                 </thead>
                                 <tbody data-region="students-table-body">
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">{{strings.loading}}</td>
+                                    <td colspan="6" class="text-center text-muted py-4">{{#str}}loading, local_earlyalert{{/str}}</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -369,7 +369,7 @@
                         <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2 flex-wrap">
                                 <label class="small text-muted mb-0"
-                                       for="ea-per-page">{{strings.items_per_page}}</label>
+                                       for="ea-per-page">{{#str}}items_per_page, local_earlyalert{{/str}}</label>
                                 <select id="ea-per-page" class="form-select form-select-sm" style="width:auto;">
                                     <option value="10" selected>10</option>
                                     <option value="25">25</option>
@@ -381,26 +381,26 @@
                             <div class="d-flex align-items-center gap-2 flex-wrap">
                                 <div class="btn-group" role="group">
                                     <button type="button" class="btn btn-outline-secondary btn-sm"
-                                            data-action="earlyalert/prev-page">{{strings.previous}}</button>
+                                            data-action="earlyalert/prev-page">{{#str}}previous, core{{/str}}</button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm"
-                                            data-action="earlyalert/next-page">{{strings.next}}</button>
+                                            data-action="earlyalert/next-page">{{#str}}next, core{{/str}}</button>
                                 </div>
-                                <label class="small text-muted mb-0" for="ea-page-input">{{strings.go_to_page}}</label>
+                                <label class="small text-muted mb-0" for="ea-page-input">{{#str}}go_to_page, local_earlyalert{{/str}}</label>
                                 <input type="number" id="ea-page-input" class="form-control form-control-sm" min="1"
                                        value="1" style="width:90px;">
                                 <button type="button" class="btn btn-outline-secondary btn-sm"
                                         data-action="earlyalert/go-page">Go
                                 </button>
-                                <span class="small text-muted" id="ea-total-pages">{{strings.of_pages}}</span>
+                                <span class="small text-muted" id="ea-total-pages">{{#str}}of_pages, local_earlyalert, {total}{{/str}}</span>
                             </div>
                         </div>
                         <div class="d-flex justify-content-between mt-3">
                             <button type="button" class="btn btn-outline-secondary"
                                     data-action="earlyalert/back-step-1">
-                                {{strings.back}}
+                                {{#str}}back, core{{/str}}
                             </button>
                             <button type="button" class="btn btn-danger" data-action="earlyalert/send-alerts">
-                                {{strings.send_alert_now}}
+                                {{#str}}send_alert_now, local_earlyalert{{/str}}
                             </button>
                         </div>
                     </div>
@@ -408,29 +408,29 @@
             </div>
 
 <!--            <div class="card-body d-none" data-region="step-3">-->
-<!--                <h3 class="h4">{{strings.compose_message}}</h3>-->
+<!--                <h3 class="h4">{{#str}}compose_message, local_earlyalert{{/str}}</h3>-->
 <!--                <div class="d-flex align-items-center gap-2 mb-2">-->
-<!--                    <span class="text-muted small">{{strings.selected_alert_type}}:</span>-->
+<!--                    <span class="text-muted small">{{#str}}selected_alert_type, local_earlyalert{{/str}}:</span>-->
 <!--                    <span class="badge bg-light text-dark border" id="ea-step-3-alert-type"></span>-->
 <!--                </div>-->
 <!--                <p class="text-muted" id="ea-compose-summary"></p>-->
 
 <!--                <div class="alert alert-info border mb-3">-->
-<!--                    {{strings.etemplate_template_note}}-->
+<!--                    {{#str}}etemplate_template_note, local_earlyalert{{/str}}-->
 <!--                </div>-->
 
 <!--                <div class="alert alert-light border" id="ea-message-preview-container">-->
-<!--                    <div class="fw-semibold mb-1">{{strings.resolved_preview}}</div>-->
-<!--                    <div class="text-muted small mb-2">{{strings.resolved_preview_note}}</div>-->
+<!--                    <div class="fw-semibold mb-1">{{#str}}resolved_preview, local_earlyalert{{/str}}</div>-->
+<!--                    <div class="text-muted small mb-2">{{#str}}resolved_preview_note, local_earlyalert{{/str}}</div>-->
 <!--                    <div id="ea-message-preview-subject" class="fw-semibold mb-2"></div>-->
-<!--                    <div id="ea-message-preview-text" class="text-muted">{{strings.preview_message_placeholder}}</div>-->
+<!--                    <div id="ea-message-preview-text" class="text-muted">{{#str}}preview_message_placeholder, local_earlyalert{{/str}}</div>-->
 <!--                </div>-->
 
 <!--                <div class="d-flex justify-content-between">-->
 <!--                    <button type="button" class="btn btn-outline-secondary"-->
-<!--                            data-action="earlyalert/back-step-2">{{strings.back}}</button>-->
+<!--                            data-action="earlyalert/back-step-2">{{#str}}back, core{{/str}}</button>-->
 <!--                    <button type="button" class="btn btn-danger" data-action="earlyalert/send-alerts">-->
-<!--                        {{strings.send_alert_now}}-->
+<!--                        {{#str}}send_alert_now, local_earlyalert{{/str}}-->
 <!--                    </button>-->
 <!--                </div>-->
             </div>
@@ -443,17 +443,17 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <h5 class="modal-title" id="ea-preview-modal-title">{{strings.message_preview}}</h5>
-                        <div class="text-muted small"><span>{{strings.to_label}}:</span> <span
+                        <h5 class="modal-title" id="ea-preview-modal-title">{{#str}}message_preview, local_earlyalert{{/str}}</h5>
+                        <div class="text-muted small"><span>{{#str}}to_label, local_earlyalert{{/str}}:</span> <span
                                 id="ea-preview-modal-recipient"></span></div>
                     </div>
                     <button type="button" class="btn-close" data-action="earlyalert/close-preview"
-                            aria-label="{{strings.close}}"></button>
+                            aria-label="{{#str}}close, local_earlyalert{{/str}}"></button>
                 </div>
                 <div class="modal-body" id="ea-preview-modal-body"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
-                            data-action="earlyalert/close-preview">{{strings.close}}</button>
+                            data-action="earlyalert/close-preview">{{#str}}close, local_earlyalert{{/str}}</button>
                 </div>
             </div>
         </div>
@@ -464,20 +464,20 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="ea-custom-message-modal-title">{{strings.edit_message}}</h5>
+                    <h5 class="modal-title" id="ea-custom-message-modal-title">{{#str}}edit_message, local_earlyalert{{/str}}</h5>
                     <button type="button" class="btn-close" data-action="earlyalert/close-custom-message"
-                            aria-label="{{strings.close}}"></button>
+                            aria-label="{{#str}}close, local_earlyalert{{/str}}"></button>
                 </div>
                 <div class="modal-body">
-                    <label for="ea-custom-message-modal-text" class="form-label">{{strings.additional_message}}</label>
+                    <label for="ea-custom-message-modal-text" class="form-label">{{#str}}additional_message, local_earlyalert{{/str}}</label>
                     <textarea id="ea-custom-message-modal-text" class="form-control" rows="6"></textarea>
-                    <div class="form-text">{{strings.additional_message_help}}</div>
+                    <div class="form-text">{{#str}}additional_message_help, local_earlyalert{{/str}}</div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
-                            data-action="earlyalert/close-custom-message">{{strings.cancel}}</button>
+                            data-action="earlyalert/close-custom-message">{{#str}}cancel, core{{/str}}</button>
                     <button type="button" class="btn btn-primary"
-                            data-action="earlyalert/save-custom-message">{{strings.save_changes}}</button>
+                            data-action="earlyalert/save-custom-message">{{#str}}save_changes, local_earlyalert{{/str}}</button>
                 </div>
             </div>
         </div>
