@@ -175,7 +175,7 @@ $string['grade_instructions'] = '
     <li>Grades messages inform students they are averaging below a certain letter grade.
         <ul><li>The default has been set to a D+.</li></ul>
     </li> 
-    <li>Should you wish to adjust this for your course, please use the selector below.
+    <li>Should you wish to adjust this for your course, please use the threshold selectors below.
         <ul>
             <li>Note that this is the letter grade that will appear in the email (e.g. you are averaging a D+ or less)</li>
             <li>If you are using the gradebook, this is also how you sort your students to show only those averaging a specific grade or less (based on the gradebook course total). If you set the box to D+, for example, you will only see a list of students who are averaging a D+ or less in your list. In order for this feature to work properly, you must have “exclude empty grades” checked under “Grade category” in your eClass settings.</li>
@@ -217,7 +217,7 @@ $string['process_mail_queue'] = 'Process Early Alert queue';
 $string['raise_an_alert'] = 'Raise an Alert';
 $string['send'] = 'Send';
 $string['preview'] = 'Preview';
-$string['selected_alert_based_on'] = 'You are selecting an alert based on a';
+$string['selected_alert_based_on'] = 'You are selecting an alert based on a {$a->alert_type} for {$a->course_name}';
 $string['send_alert_based_on'] = 'Send an alert based on';
 $string['student_list'] = 'LIST OF STUDENTS:  IDNUMBER | first name last name';
 $string['view_message'] = 'View Message Details';

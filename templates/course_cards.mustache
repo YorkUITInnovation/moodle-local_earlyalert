@@ -110,7 +110,7 @@
                 <div class="text-muted small mb-1">
                     <a id="ea-selected-course-link" href="#" class="text-decoration-none"></a>
                 </div>
-                <h2 class="h3 mb-0">{{strings.send_early_alert}}</h2>
+                <h2 id="ea-workflow-title" class="h3 mb-0">{{strings.send_early_alert}}</h2>
             </div>
             <button type="button" class="btn btn-link"
                     data-action="earlyalert/back-dashboard">{{strings.back_to_dashboard}}</button>
@@ -205,27 +205,7 @@
                              data-bs-parent="#ea-step-2-criteria-help-accordion">
                             <div class="accordion-body">
                                 <div class="alert alert-info mb-0" role="alert">
-                                    <p class="mb-2">{{strings.alert_criteria_help_intro}}</p>
-                                    <ul class="mb-0">
-                                        <li>
-                                            <strong>{{strings.not_using_gradebook}}</strong>: {{strings.alert_criteria_help_view_all_desc}}
-                                        </li>
-                                        <li>
-                                            <strong>{{strings.filter_on}}</strong>: {{strings.alert_criteria_help_filter_on_desc}}
-                                        </li>
-                                        <li>
-                                            <strong>{{strings.grade_items}}</strong>: {{strings.alert_criteria_help_grade_items_desc}}
-                                        </li>
-                                        <li>
-                                            <strong>{{strings.multi_mode}}</strong>: {{strings.alert_criteria_help_multi_mode_desc}}
-                                        </li>
-                                        <li>
-                                            <strong>{{strings.condition}}</strong>: {{strings.alert_criteria_help_condition_desc}}
-                                        </li>
-                                        <li>
-                                            <strong>{{strings.threshold}}</strong>: {{strings.alert_criteria_help_threshold_desc}}
-                                        </li>
-                                    </ul>
+                                    {{{strings.grade_instructions}}}
                                 </div>
                             </div>
                         </div>

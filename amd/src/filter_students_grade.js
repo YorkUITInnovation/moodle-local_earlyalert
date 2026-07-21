@@ -79,6 +79,7 @@ const loadStrings = async() => {
     const keys = [
         'selected',
         'loading',
+        'send_early_alert',
         'no_students_found',
         'preview_email',
         'send_email',
@@ -472,6 +473,22 @@ const updateSelectedAlertTypeDisplay = () => {
             node.textContent = label;
         }
     });
+
+    const workflowTitle = document.getElementById('ea-workflow-title');
+    if (!workflowTitle) {
+        return;
+    }
+
+    if (!label || !STATE.courseName) {
+        workflowTitle.textContent = STRINGS.send_early_alert || 'Send an Early Alert';
+        return;
+    }
+
+    const requestedLabel = label;
+    const requestedCourseName = STATE.courseName;
+    // Build HTML with styled alert_type (red color #CA3129)
+    const html = `You are selecting an alert based on a <span style="color: #CA3129;">${escapeHtml(requestedLabel)}</span> for ${escapeHtml(requestedCourseName)}`;
+    workflowTitle.innerHTML = html;
 };
 
 const updateGradeFilterControls = () => {
