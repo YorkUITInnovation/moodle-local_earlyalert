@@ -868,6 +868,8 @@ const buildResolvedAlertPayload = studentid => fetchStudentPreview(studentid).th
         instructor_id: response.instructor_id || STATE.teacherUserId,
         assignment_name: '',
         trigger_grade: STATE.thresholdId,
+        threshold_mode: STATE.thresholdMode,
+        threshold_percent: STATE.thresholdMode === 'percent' ? getThresholdPercentArg() : null,
         actual_grade: student.grade || '',
         custom_message: getCustomMessage(),
         subject: response.subject || '',

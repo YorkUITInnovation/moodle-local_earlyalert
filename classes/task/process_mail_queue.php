@@ -80,7 +80,61 @@ class process_mail_queue extends \core\task\scheduled_task {
                 );
                 $subject = $prepare_template->subject;
                 $body = $prepare_template->message;
-                $course_id = $emailstoprocess->course_id;
+                $course_id = $emailtoprocess->course_id;
+                $resolvedat = time();
+                $teacher = $DB->get_record('user', ['id' => $email->get_instructor_id()], 'firstname, lastname');
+                $snapshotvalues = [
+                    'coursename' => $email->get_course_name(),
+                    'teacherfirstname' => $teacher->firstname ?? '',
+                    'teacherlastname' => $teacher->lastname ?? '',
+                    'facultyname' => null,
+                    'contactunit' => null,
+                    'firstname' => $student->firstname ?? '',
+                    'assignmenttitle' => $email->get_assignment_name(),
+                    'grade' => $email->get_trigger_grade_letter(),
+                    'custommessage' => $email->get_custom_message(),
+                ];
+                $thresholdmode = $email->get_threshold_mode();
+                $thresholdpercent = $email->get_threshold_percent();
+                $threshold = [
+                    'raw' => $email->get_trigger_grade(),
+                    'display' => $email->get_trigger_grade_letter(),
+                    'kind' => $this->resolve_threshold_kind($thresholdmode, $thresholdpercent),
+                    'mode' => $thresholdmode,
+                    'percent' => $thresholdpercent,
+                ];
+                $context = [
+                    'logid' => (int)$email->get_id(),
+                    'courseid' => (int)$email->getCourseId(),
+                    'targetuserid' => (int)$email->getTargetUserId(),
+                    'instructorid' => (int)$email->get_instructor_id(),
+                    'assignmentname' => $email->get_assignment_name(),
+                ];
+                $emailtoprocess->subjectjson = $this->encode_message_snapshot($this->build_message_snapshot_payload(
+                    $template->get_id(),
+                    $template->get_subject(),
+                    $subject,
+                    $snapshotvalues,
+                    $resolvedat,
+                    $context,
+                    $threshold
+                ));
+                $emailtoprocess->messagejson = $this->encode_message_snapshot($this->build_message_snapshot_payload(
+                    $template->get_id(),
+                    $template->get_message(),
+                    $body,
+                    $snapshotvalues,
+                    $resolvedat,
+                    $context,
+                    $threshold
+                ));
+                $emailtoprocess->snapshot_status = 'pending';
+                $emailtoprocess->timemodified = $resolvedat;
+                try {
+                    $DB->update_record('local_earlyalert_report_log', $emailtoprocess);
+                } catch (\Exception $e) {
+                    mtrace("Error saving message snapshot: " . $e->getMessage());
+                }
                 mtrace("attempting to send mail with this info:");
                 mtrace("student = " . print_r($student, TRUE));
                 mtrace("instructor id = " . print_r($email->get_instructor_id(), TRUE));
@@ -92,6 +146,8 @@ class process_mail_queue extends \core\task\scheduled_task {
                     }
                     mtrace("Alert sent to " . $email->getTargetUserId());
                     $emailtoprocess->date_message_sent = time();
+                    $emailtoprocess->snapshot_status = 'sent';
+                    $emailtoprocess->timemodified = $emailtoprocess->date_message_sent;
                     try {
                         if ($DB->update_record('local_earlyalert_report_log', $emailtoprocess)) {
                             mtrace("Alert flagged as sent");
@@ -110,6 +166,13 @@ class process_mail_queue extends \core\task\scheduled_task {
                 } catch (\Exception $e) {
                     // Log or handle the exception in some way
                     mtrace('Error sending email: ' . $e->getMessage());
+                    $emailtoprocess->snapshot_status = 'failed';
+                    $emailtoprocess->timemodified = time();
+                    try {
+                        $DB->update_record('local_earlyalert_report_log', $emailtoprocess);
+                    } catch (\Exception $inner) {
+                        mtrace("Error updating failed snapshot status: " . $inner->getMessage());
+                    }
                 }
             }
         } else {
@@ -144,6 +207,70 @@ class process_mail_queue extends \core\task\scheduled_task {
             mtrace("Error creating message object: " . $e->getMessage());
             return false;
         }
+
+        return false;
+    }
+
+    /**
+     * Build a JSON-serialisable snapshot payload for the resolved message content.
+     *
+     * @param int $templateid
+     * @param string $raw
+     * @param string $rendered
+     * @param array $values
+     * @param int $resolvedat
+     * @param array $context
+     * @param array $threshold
+     * @return array
+     */
+    private function build_message_snapshot_payload(
+        int $templateid,
+        string $raw,
+        string $rendered,
+        array $values,
+        int $resolvedat,
+        array $context,
+        array $threshold
+    ): array {
+        return [
+            'templateid' => $templateid,
+            'raw' => $raw,
+            'values' => $values,
+            'rendered' => $rendered,
+            'context' => $context,
+            'threshold' => $threshold,
+            'resolvedat' => $resolvedat,
+        ];
+    }
+
+    /**
+     * Resolve threshold kind for snapshot metadata.
+     *
+     * @param string $mode
+     * @param float|null $percent
+     * @return string
+     */
+    private function resolve_threshold_kind(string $mode, ?float $percent): string {
+        if ($mode === 'percent' && $percent !== null) {
+            return 'percentage';
+        }
+
+        if ($mode === 'letter') {
+            return 'letter';
+        }
+
+        return 'unknown';
+    }
+
+    /**
+     * Encode a snapshot payload for storage.
+     *
+     * @param array $payload
+     * @return string
+     */
+    private function encode_message_snapshot(array $payload): string {
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return $json === false ? '' : $json;
     }
 
 }

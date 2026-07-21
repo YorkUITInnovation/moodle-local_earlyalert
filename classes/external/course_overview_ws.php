@@ -348,11 +348,20 @@ class local_earlyalert_course_overview_ws extends external_api {
         // Get new log
         $LOG = new email_report_log($logid);
 
+        $subjectsnapshot = $LOG->get_subject_snapshot();
+        $messagesnapshot = $LOG->get_message_snapshot();
+        if (is_array($subjectsnapshot) && array_key_exists('rendered', $subjectsnapshot)
+                && is_array($messagesnapshot) && array_key_exists('rendered', $messagesnapshot)) {
+            return [
+                'subject' => $subjectsnapshot['rendered'],
+                'message' => $messagesnapshot['rendered'],
+            ];
+        }
+
         // Get etemplate
         $etemplate = $DB->get_record('local_et_email', ['id' => $LOG->get_templateid()], '*', MUST_EXIST);
 
         $student = $LOG->get_student();
-        $teacher = $LOG->get_instructor();
         $prepare_template = email::replace_message_placeholders(
             $etemplate->message,
             $etemplate->subject,

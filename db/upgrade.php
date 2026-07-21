@@ -182,5 +182,67 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026012900, 'local', 'earlyalert');
     }
 
+    if ($oldversion < 20260720001) {
+
+        // Define send-time message snapshot fields to be added to local_earlyalert_report_log.
+        $table = new xmldb_table('local_earlyalert_report_log');
+
+        $field = new xmldb_field('student_profile', XMLDB_TYPE_TEXT, null, null, null, null, null, 'date_message_sent');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('custom_message', XMLDB_TYPE_TEXT, null, null, null, null, null, 'student_profile');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('subjectjson', XMLDB_TYPE_TEXT, null, null, null, null, null, 'student_profile');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('messagejson', XMLDB_TYPE_TEXT, null, null, null, null, null, 'subjectjson');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 20260720001, 'local', 'earlyalert');
+    }
+
+    if ($oldversion < 20260720002) {
+
+        // Define threshold context fields to be added to local_earlyalert_report_log.
+        $table = new xmldb_table('local_earlyalert_report_log');
+
+        $field = new xmldb_field('threshold_mode', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'trigger_grade');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('threshold_percent', XMLDB_TYPE_NUMBER, '10,2', null, null, null, null, 'threshold_mode');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 20260720002, 'local', 'earlyalert');
+    }
+
+    if ($oldversion < 20260720003) {
+
+        // Define snapshot status field to be added to local_earlyalert_report_log.
+        $table = new xmldb_table('local_earlyalert_report_log');
+
+        $field = new xmldb_field('snapshot_status', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'messagejson');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 20260720003, 'local', 'earlyalert');
+    }
+
     return true;
 }

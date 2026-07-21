@@ -108,12 +108,15 @@ class local_earlyalert_record_log_ws extends external_api {
             $data->instructor_id = ($student['instructor_id'] ?? 0);
             $data->assignment_name = ($student['assignment_name'] ?? 0);
             $data->trigger_grade = ($student['trigger_grade'] ?? 0);
+            $data->threshold_mode = ($student['threshold_mode'] ?? 'letter');
+            $data->threshold_percent = isset($student['threshold_percent']) ? (float)$student['threshold_percent'] : null;
             $data->actual_grade = self::convertGradeToNumeric($student['actual_grade'] ?? '');
             $data->custom_message = ($student['custom_message'] ?? '');
             //all logs default to unadvised
             $data->student_advised_by_advisor = 0;
             $data->student_advised_by_instructor = 0;
             $data->student_profile = $student_profile;
+            $data->snapshot_status = 'pending';
             //all logs default to unsent
             $data->date_message_sent = 0;
             $data->timecreated = time();
