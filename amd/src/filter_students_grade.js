@@ -420,6 +420,19 @@ const setLoadingRows = () => {
         </tr>`;
 };
 
+const getAssignmentTitle = () => {
+    const input = document.getElementById('early-alert-assignment-title');
+    return input ? (input.value || '').trim() : '';
+};
+
+const updateAssignmentTitleVisibility = () => {
+    const wrap = document.getElementById('ea-assignment-title-wrap');
+    if (!wrap) {
+        return;
+    }
+    wrap.classList.toggle('d-none', STATE.alertType !== 'assign');
+};
+
 const getConditionForAlertType = alertType => {
     if (alertType === 'assign' || alertType === 'exam') {
         return 'missing';
@@ -458,6 +471,7 @@ const updateConditionForAlertType = () => {
         conditionDisplay.textContent = conditionLabels[STATE.condition] || STATE.condition;
     }
     updateThresholdVisibility();
+    updateAssignmentTitleVisibility();
 };
 
 const getAlertTypeLabel = () => {
@@ -760,7 +774,7 @@ const fetchStudentPreview = studentid => Ajax.call([{methodname: 'local_earlyale
     alert_type: STATE.alertType,
     thresholdid: STATE.thresholdId,
     thresholdpercent: getThresholdPercentArg(),
-    assignment_title: '',
+    assignment_title: getAssignmentTitle(),
     custom_message: getCustomMessage(),
     grade_details_json: JSON.stringify(getGradeDetailsForSnapshot()),
 }}])[0];
@@ -887,7 +901,7 @@ const clearSelection = () => {
 };
 
 const getGradeDetailsForSnapshot = () => {
-    if (STATE.includeAllStudents || STATE.filterMode === 'course') {
+    if (STATE.filterMode === 'course') {
         return {
             assignments: [],
             average_type: '',
@@ -901,7 +915,7 @@ const getGradeDetailsForSnapshot = () => {
             .filter(Boolean)
         : [];
 
-    const averageType = STATE.filterMode === 'multi'
+    const averageType = (!STATE.includeAllStudents && STATE.filterMode === 'multi')
         ? (['any', 'average', 'weighted'].includes(STATE.multiMode) ? STATE.multiMode : '')
         : '';
 
@@ -920,7 +934,7 @@ const buildResolvedAlertPayload = studentid => fetchStudentPreview(studentid).th
         triggered_from_user_id: response.triggered_from_user_id || STATE.teacherUserId,
         course_id: response.course_id || STATE.courseId,
         instructor_id: response.instructor_id || STATE.teacherUserId,
-        assignment_name: '',
+        assignment_name: getAssignmentTitle(),
         trigger_grade: STATE.thresholdId,
         alert_type: STATE.alertType,
         threshold_mode: STATE.thresholdMode,
@@ -1105,12 +1119,18 @@ const openCourseFlow = (courseId, courseName) => {
         includeAll.checked = false;
     }
 
+    const assignmentTitleInput = document.getElementById('early-alert-assignment-title');
+    if (assignmentTitleInput) {
+        assignmentTitleInput.value = '';
+    }
+
     updateSelectedAlertTypeDisplay();
     updateGradeFilterControls();
     updateFilterModeContainerVisibility();
     updateThresholdVisibility();
     setCustomMessage('');
     updateCustomMessageUi();
+    updateAssignmentTitleVisibility();
 
     updateSortIndicators();
     showWorkflow();
@@ -1387,6 +1407,7 @@ export const init = async() => {
     updateFilterModeContainerVisibility();
     updateThresholdVisibility();
     updateCustomMessageUi();
+    updateAssignmentTitleVisibility();
 
     // Initialize step badge colors
     document.querySelectorAll('.ea-step-label').forEach(stepNode => {
