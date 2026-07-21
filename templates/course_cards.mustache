@@ -4,14 +4,15 @@
     <input type="hidden" id="early-alert-teacher-user-id" value="{{teacher_user_id}}">
 
     {{#impersonate}}
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <label for="search" class="form-label">{{strings.impersonate_user}}</label>
-            <select id="search" class="form-select" data-placeholder="{{strings.search}}">
-                <option value="{{impersonate_selected_user_id}}" selected>{{impersonate_selected_user_label}}</option>
-            </select>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label for="search" class="form-label">{{strings.impersonate_user}}</label>
+                <select id="search" class="form-select" data-placeholder="{{strings.search}}">
+                    <option value="{{impersonate_selected_user_id}}"
+                            selected>{{impersonate_selected_user_label}}</option>
+                </select>
+            </div>
         </div>
-    </div>
     {{/impersonate}}
 
     <div id="earlyalert-dashboard-view" data-region="dashboard-view">
@@ -61,29 +62,30 @@
                     </thead>
                     <tbody>
                     {{#courses}}
-                    <tr data-action="earlyalert/select-course"
-                        data-course-id="{{id}}"
-                        data-course-name="{{fullname}}"
-                        class="ea-course-row">
-                        <td>
-                            <div class="fw-semibold">{{fullname}}</div>
-                        </td>
-                        <td>{{enrollment}}</td>
-                        <td>{{alerts}}</td>
-                        <td>
-                            <span class="badge bg-{{riskbadge}}">{{risklevel}}</span>
-                        </td>
-                        <td class="text-end">
-                            <button type="button" class="btn btn-outline-primary btn-sm" data-action="earlyalert/open-course">
-                                {{strings.start_alert_flow}}
-                            </button>
-                        </td>
-                    </tr>
+                        <tr data-action="earlyalert/select-course"
+                            data-course-id="{{id}}"
+                            data-course-name="{{fullname}}"
+                            class="ea-course-row">
+                            <td>
+                                <div class="fw-semibold">{{fullname}}</div>
+                            </td>
+                            <td>{{enrollment}}</td>
+                            <td>{{alerts}}</td>
+                            <td>
+                                <span class="badge bg-{{riskbadge}}">{{risklevel}}</span>
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-outline-primary btn-sm"
+                                        data-action="earlyalert/open-course">
+                                    {{strings.start_alert_flow}}
+                                </button>
+                            </td>
+                        </tr>
                     {{/courses}}
                     {{^has_courses}}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted py-4">{{strings.no_courses}}</td>
-                    </tr>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">{{strings.no_courses}}</td>
+                        </tr>
                     {{/has_courses}}
                     </tbody>
                 </table>
@@ -99,24 +101,28 @@
                 </div>
                 <h2 class="h3 mb-0">{{strings.send_early_alert}}</h2>
             </div>
-            <button type="button" class="btn btn-link" data-action="earlyalert/back-dashboard">{{strings.back_to_dashboard}}</button>
+            <button type="button" class="btn btn-link"
+                    data-action="earlyalert/back-dashboard">{{strings.back_to_dashboard}}</button>
         </div>
 
         <div class="card">
             <div class="card-body border-bottom">
                 <div class="ea-steps d-flex align-items-center gap-4" data-region="wizard-steps">
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge rounded-circle bg-primary" data-step="1" style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">1</span>
+                        <span class="badge rounded-circle bg-primary" data-step="1"
+                              style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">1</span>
                         <span class="ea-step-label" data-step="1">{{strings.alert_type}}</span>
                     </div>
                     <div class="flex-grow-1" style="height:2px;background:#dee2e6;"></div>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge rounded-circle bg-secondary" data-step="2" style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">2</span>
+                        <span class="badge rounded-circle bg-secondary" data-step="2"
+                              style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">2</span>
                         <span class="ea-step-label" data-step="2">{{strings.grade_threshold_and_students}}</span>
                     </div>
                     <div class="flex-grow-1" style="height:2px;background:#dee2e6;"></div>
                     <div class="d-flex align-items-center gap-2">
-                        <span class="badge rounded-circle bg-secondary" data-step="3" style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">3</span>
+                        <span class="badge rounded-circle bg-secondary" data-step="3"
+                              style="min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;">3</span>
                         <span class="ea-step-label" data-step="3">{{strings.compose_and_send}}</span>
                     </div>
                 </div>
@@ -128,7 +134,9 @@
                 <div class="card-group" data-region="alert-type-cards">
                     <div class="card">
                         <div class="card-body p-0">
-                            <button type="button" class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3" data-alert-type="grade">
+                            <button type="button"
+                                    class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3"
+                                    data-alert-type="grade">
                                 <span class="d-block fw-semibold">{{strings.low_grade}}</span>
                                 <span class="text-muted small">{{strings.alert_type_low_grade_help}}</span>
                             </button>
@@ -136,7 +144,9 @@
                     </div>
                     <div class="card">
                         <div class="card-body p-0">
-                            <button type="button" class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3" data-alert-type="assign">
+                            <button type="button"
+                                    class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3"
+                                    data-alert-type="assign">
                                 <span class="d-block fw-semibold">{{strings.missed_assignment}}</span>
                                 <span class="text-muted small">{{strings.alert_type_assignment_help}}</span>
                             </button>
@@ -144,7 +154,9 @@
                     </div>
                     <div class="card">
                         <div class="card-body p-0">
-                            <button type="button" class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3" data-alert-type="exam">
+                            <button type="button"
+                                    class="btn btn-outline-danger rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3"
+                                    data-alert-type="exam">
                                 <span class="d-block fw-semibold">{{strings.missed_exam}}</span>
                                 <span class="text-muted small">{{strings.alert_type_exam_help}}</span>
                             </button>
@@ -152,7 +164,9 @@
                     </div>
                     <div class="card">
                         <div class="card-body p-0">
-                            <button type="button" class="btn btn-outline-success rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3" data-alert-type="commendation">
+                            <button type="button"
+                                    class="btn btn-outline-success rounded-0 w-100 h-100 text-start ea-alert-option d-flex flex-column align-items-start justify-content-start px-3 py-3"
+                                    data-alert-type="commendation">
                                 <span class="d-block fw-semibold">{{strings.alert_type_commendation}}</span>
                                 <span class="text-muted small">{{strings.alert_type_commendation_help}}</span>
                             </button>
@@ -170,23 +184,36 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="ea-step-2-criteria-help-heading">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#ea-step-2-criteria-help-collapse" aria-expanded="false"
-                                aria-controls="ea-step-2-criteria-help-collapse">
+                                    data-bs-target="#ea-step-2-criteria-help-collapse" aria-expanded="false"
+                                    aria-controls="ea-step-2-criteria-help-collapse">
                                 {{strings.alert_criteria_help_title}}
                             </button>
                         </h2>
                         <div id="ea-step-2-criteria-help-collapse" class="accordion-collapse collapse"
-                            aria-labelledby="ea-step-2-criteria-help-heading" data-bs-parent="#ea-step-2-criteria-help-accordion">
+                             aria-labelledby="ea-step-2-criteria-help-heading"
+                             data-bs-parent="#ea-step-2-criteria-help-accordion">
                             <div class="accordion-body">
                                 <div class="alert alert-info mb-0" role="alert">
                                     <p class="mb-2">{{strings.alert_criteria_help_intro}}</p>
                                     <ul class="mb-0">
-                                        <li><strong>{{strings.not_using_gradebook}}</strong>: {{strings.alert_criteria_help_view_all_desc}}</li>
-                                        <li><strong>{{strings.filter_on}}</strong>: {{strings.alert_criteria_help_filter_on_desc}}</li>
-                                        <li><strong>{{strings.grade_items}}</strong>: {{strings.alert_criteria_help_grade_items_desc}}</li>
-                                        <li><strong>{{strings.multi_mode}}</strong>: {{strings.alert_criteria_help_multi_mode_desc}}</li>
-                                        <li><strong>{{strings.condition}}</strong>: {{strings.alert_criteria_help_condition_desc}}</li>
-                                        <li><strong>{{strings.threshold}}</strong>: {{strings.alert_criteria_help_threshold_desc}}</li>
+                                        <li>
+                                            <strong>{{strings.not_using_gradebook}}</strong>: {{strings.alert_criteria_help_view_all_desc}}
+                                        </li>
+                                        <li>
+                                            <strong>{{strings.filter_on}}</strong>: {{strings.alert_criteria_help_filter_on_desc}}
+                                        </li>
+                                        <li>
+                                            <strong>{{strings.grade_items}}</strong>: {{strings.alert_criteria_help_grade_items_desc}}
+                                        </li>
+                                        <li>
+                                            <strong>{{strings.multi_mode}}</strong>: {{strings.alert_criteria_help_multi_mode_desc}}
+                                        </li>
+                                        <li>
+                                            <strong>{{strings.condition}}</strong>: {{strings.alert_criteria_help_condition_desc}}
+                                        </li>
+                                        <li>
+                                            <strong>{{strings.threshold}}</strong>: {{strings.alert_criteria_help_threshold_desc}}
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
@@ -202,36 +229,10 @@
                             <div class="card-body">
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" id="ea-include-all-students">
-                                    <label class="form-check-label" for="ea-include-all-students">{{strings.not_using_gradebook}}</label>
+                                    <label class="form-check-label"
+                                           for="ea-include-all-students">{{strings.not_using_gradebook}}</label>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label" for="ea-grade-filter-mode">{{strings.filter_on}}</label>
-                                    <select id="ea-grade-filter-mode" class="form-select">
-                                        <option value="course" selected>{{strings.overall_course_grade}}</option>
-                                        <option value="single">{{strings.single_assignment_quiz}}</option>
-                                        <option value="multi">{{strings.multi_assignments_quizzes}}</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3" id="ea-grade-items-wrap">
-                                    <label class="form-label" for="ea-grade-items">{{strings.grade_items}}</label>
-                                    <select id="ea-grade-items" class="form-select" multiple size="6"></select>
-                                    <div class="form-text">{{strings.grade_items_help}}</div>
-                                </div>
-                                <div class="mb-3 d-none" id="ea-multi-mode-wrap">
-                                    <label class="form-label">{{strings.multi_mode}}</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="ea-multi-mode" id="ea-multi-mode-any" value="any" checked>
-                                        <label class="form-check-label" for="ea-multi-mode-any">{{strings.multi_mode_any}}</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="ea-multi-mode" id="ea-multi-mode-average" value="average">
-                                        <label class="form-check-label" for="ea-multi-mode-average">{{strings.multi_mode_average}}</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="ea-multi-mode" id="ea-multi-mode-weighted" value="weighted">
-                                        <label class="form-check-label" for="ea-multi-mode-weighted">{{strings.multi_mode_weighted}}</label>
-                                    </div>
-                                </div>
+
                                 <div class="mb-3">
                                     <label class="form-label">{{strings.condition}}</label>
                                     <div id="ea-condition-display" class="form-control-plaintext fw-semibold"></div>
@@ -259,17 +260,59 @@
                                     </div>
                                     <div id="ea-threshold-percent-wrap" class="d-none">
                                         <div class="input-group">
-                                            <input type="number" id="ea-threshold-percent" class="form-control" min="0" max="100" step="0.1" value="55" placeholder="55.0">
+                                            <input type="number" id="ea-threshold-percent" class="form-control" min="0"
+                                                   max="100" step="0.1" value="55" placeholder="55.0">
                                             <span class="input-group-text">%</span>
                                         </div>
                                     </div>
                                     <div class="form-text">{{strings.threshold_help}}</div>
                                 </div>
-                                <div class="mb-0">
-                                    <button type="button" class="btn btn-outline-primary w-100" data-action="earlyalert/apply-filters">
-                                        {{strings.apply_filter}}
-                                    </button>
+
+                                <div class="mb-3">
+                                    <label class="form-label"
+                                           for="ea-grade-filter-mode">{{strings.filter_on}}</label>
+                                    <select id="ea-grade-filter-mode" class="form-select">
+                                        <option value="course" selected>{{strings.overall_course_grade}}</option>
+                                        <option value="single">{{strings.single_assignment_quiz}}</option>
+                                        <option value="multi">{{strings.multi_assignments_quizzes}}</option>
+                                    </select>
                                 </div>
+                                <div class="mb-3" id="ea-grade-items-wrap">
+                                    <label class="form-label" for="ea-grade-items">{{strings.grade_items}}</label>
+                                    <select id="ea-grade-items" class="form-select" multiple size="6"></select>
+                                    <div class="form-text">{{strings.grade_items_help}}</div>
+                                </div>
+                                <div id="ea-filter-mode-container">
+                                    <div class="mb-3 d-none" id="ea-multi-mode-wrap">
+                                        <label class="form-label">{{strings.multi_mode}}</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="ea-multi-mode"
+                                                   id="ea-multi-mode-any" value="any" checked>
+                                            <label class="form-check-label"
+                                                   for="ea-multi-mode-any">{{strings.multi_mode_any}}</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="ea-multi-mode"
+                                                   id="ea-multi-mode-average" value="average">
+                                            <label class="form-check-label"
+                                                   for="ea-multi-mode-average">{{strings.multi_mode_average}}</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="ea-multi-mode"
+                                                   id="ea-multi-mode-weighted" value="weighted">
+                                            <label class="form-check-label"
+                                                   for="ea-multi-mode-weighted">{{strings.multi_mode_weighted}}</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-0">
+                                        <button type="button" class="btn btn-outline-primary w-100"
+                                                data-action="earlyalert/apply-filters">
+                                            {{strings.apply_filter}}
+                                        </button>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -278,19 +321,25 @@
                         <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-2">
                             <h3 class="h5 mb-0">{{strings.flagged_students}}</h3>
                             <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="ea-edit-custom-message-btn"
-                                    data-action="earlyalert/open-custom-message">
+                                <button type="button" class="btn btn-outline-secondary btn-sm d-none"
+                                        id="ea-edit-custom-message-btn"
+                                        data-action="earlyalert/open-custom-message">
                                     {{strings.edit_message}}
                                 </button>
                                 <div class="text-danger fw-semibold" id="ea-selected-count">0 {{strings.selected}}</div>
-                                <div class="text-muted small" id="ea-table-range">{{strings.showing_range_default}}</div>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/clear-selection">{{strings.clear_selection}}</button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/export-selected">{{strings.export_csv}}</button>
+                                <div class="text-muted small"
+                                     id="ea-table-range">{{strings.showing_range_default}}</div>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        data-action="earlyalert/clear-selection">{{strings.clear_selection}}</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        data-action="earlyalert/export-selected">{{strings.export_csv}}</button>
                             </div>
                         </div>
                         <div class="input-group mb-2">
-                            <input type="search" id="ea-search" class="form-control" placeholder="{{strings.search_students}}">
-                            <button class="btn btn-outline-secondary" type="button" data-action="earlyalert/search">{{strings.search}}</button>
+                            <input type="search" id="ea-search" class="form-control"
+                                   placeholder="{{strings.search_students}}">
+                            <button class="btn btn-outline-secondary" type="button"
+                                    data-action="earlyalert/search">{{strings.search}}</button>
                         </div>
                         <div class="table-responsive border rounded">
                             <table class="table table-sm table-hover mb-0" id="ea-students-table">
@@ -298,17 +347,20 @@
                                 <tr>
                                     <th style="width:40px;"><input type="checkbox" id="ea-check-all-page"></th>
                                     <th>
-                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-action="earlyalert/sort" data-sort-by="name">
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none"
+                                                data-action="earlyalert/sort" data-sort-by="name">
                                             {{strings.student_name}} <span id="ea-sort-indicator-name">-</span>
                                         </button>
                                     </th>
                                     <th>
-                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-action="earlyalert/sort" data-sort-by="idnumber">
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none"
+                                                data-action="earlyalert/sort" data-sort-by="idnumber">
                                             {{strings.student_id}} <span id="ea-sort-indicator-idnumber">-</span>
                                         </button>
                                     </th>
                                     <th>
-                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-action="earlyalert/sort" data-sort-by="grade">
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none"
+                                                data-action="earlyalert/sort" data-sort-by="grade">
                                             {{strings.grade}} <span id="ea-sort-indicator-grade">-</span>
                                         </button>
                                     </th>
@@ -317,13 +369,16 @@
                                 </tr>
                                 </thead>
                                 <tbody data-region="students-table-body">
-                                <tr><td colspan="6" class="text-center text-muted py-4">{{strings.loading}}</td></tr>
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">{{strings.loading}}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
                             <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <label class="small text-muted mb-0" for="ea-per-page">{{strings.items_per_page}}</label>
+                                <label class="small text-muted mb-0"
+                                       for="ea-per-page">{{strings.items_per_page}}</label>
                                 <select id="ea-per-page" class="form-select form-select-sm" style="width:auto;">
                                     <option value="10" selected>10</option>
                                     <option value="25">25</option>
@@ -334,17 +389,23 @@
                             </div>
                             <div class="d-flex align-items-center gap-2 flex-wrap">
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/prev-page">{{strings.previous}}</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/next-page">{{strings.next}}</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            data-action="earlyalert/prev-page">{{strings.previous}}</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            data-action="earlyalert/next-page">{{strings.next}}</button>
                                 </div>
                                 <label class="small text-muted mb-0" for="ea-page-input">{{strings.go_to_page}}</label>
-                                <input type="number" id="ea-page-input" class="form-control form-control-sm" min="1" value="1" style="width:90px;">
-                                <button type="button" class="btn btn-outline-secondary btn-sm" data-action="earlyalert/go-page">Go</button>
+                                <input type="number" id="ea-page-input" class="form-control form-control-sm" min="1"
+                                       value="1" style="width:90px;">
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        data-action="earlyalert/go-page">Go
+                                </button>
                                 <span class="small text-muted" id="ea-total-pages">{{strings.of_pages}}</span>
                             </div>
                         </div>
                         <div class="d-flex justify-content-between mt-3">
-                            <button type="button" class="btn btn-outline-secondary" data-action="earlyalert/back-step-1">
+                            <button type="button" class="btn btn-outline-secondary"
+                                    data-action="earlyalert/back-step-1">
                                 {{strings.back}}
                             </button>
                             <button type="button" class="btn btn-primary" data-action="earlyalert/go-step-3" disabled>
@@ -375,7 +436,8 @@
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <button type="button" class="btn btn-outline-secondary" data-action="earlyalert/back-step-2">{{strings.back}}</button>
+                    <button type="button" class="btn btn-outline-secondary"
+                            data-action="earlyalert/back-step-2">{{strings.back}}</button>
                     <button type="button" class="btn btn-danger" data-action="earlyalert/send-alerts">
                         {{strings.send_alert_now}}
                     </button>
@@ -384,30 +446,36 @@
         </div>
     </div>
 
-    <div class="modal fade" id="ea-preview-modal" tabindex="-1" aria-hidden="true" aria-labelledby="ea-preview-modal-title">
+    <div class="modal fade" id="ea-preview-modal" tabindex="-1" aria-hidden="true"
+         aria-labelledby="ea-preview-modal-title">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
                         <h5 class="modal-title" id="ea-preview-modal-title">{{strings.message_preview}}</h5>
-                        <div class="text-muted small"><span>{{strings.to_label}}:</span> <span id="ea-preview-modal-recipient"></span></div>
+                        <div class="text-muted small"><span>{{strings.to_label}}:</span> <span
+                                id="ea-preview-modal-recipient"></span></div>
                     </div>
-                    <button type="button" class="btn-close" data-action="earlyalert/close-preview" aria-label="{{strings.close}}"></button>
+                    <button type="button" class="btn-close" data-action="earlyalert/close-preview"
+                            aria-label="{{strings.close}}"></button>
                 </div>
                 <div class="modal-body" id="ea-preview-modal-body"></div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-action="earlyalert/close-preview">{{strings.close}}</button>
+                    <button type="button" class="btn btn-secondary"
+                            data-action="earlyalert/close-preview">{{strings.close}}</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="ea-custom-message-modal" tabindex="-1" aria-hidden="true" aria-labelledby="ea-custom-message-modal-title">
+    <div class="modal fade" id="ea-custom-message-modal" tabindex="-1" aria-hidden="true"
+         aria-labelledby="ea-custom-message-modal-title">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="ea-custom-message-modal-title">{{strings.edit_message}}</h5>
-                    <button type="button" class="btn-close" data-action="earlyalert/close-custom-message" aria-label="{{strings.close}}"></button>
+                    <button type="button" class="btn-close" data-action="earlyalert/close-custom-message"
+                            aria-label="{{strings.close}}"></button>
                 </div>
                 <div class="modal-body">
                     <label for="ea-custom-message-modal-text" class="form-label">{{strings.additional_message}}</label>
@@ -415,8 +483,10 @@
                     <div class="form-text">{{strings.additional_message_help}}</div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-action="earlyalert/close-custom-message">{{strings.cancel}}</button>
-                    <button type="button" class="btn btn-primary" data-action="earlyalert/save-custom-message">{{strings.save_changes}}</button>
+                    <button type="button" class="btn btn-secondary"
+                            data-action="earlyalert/close-custom-message">{{strings.cancel}}</button>
+                    <button type="button" class="btn btn-primary"
+                            data-action="earlyalert/save-custom-message">{{strings.save_changes}}</button>
                 </div>
             </div>
         </div>

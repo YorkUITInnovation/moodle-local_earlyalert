@@ -515,6 +515,15 @@ const updateGradeFilterControls = () => {
     }
 };
 
+const updateFilterModeContainerVisibility = () => {
+    const filterModeContainer = document.getElementById('ea-filter-mode-container');
+    if (!filterModeContainer) {
+        return;
+    }
+
+    filterModeContainer.classList.toggle('d-none', STATE.includeAllStudents);
+};
+
 const deriveFilterModeFromSelection = () => {
     updateGradeFilterControls();
 
@@ -1012,6 +1021,7 @@ const openCourseFlow = (courseId, courseName) => {
 
     updateSelectedAlertTypeDisplay();
     updateGradeFilterControls();
+    updateFilterModeContainerVisibility();
     updateThresholdVisibility();
     setCustomMessage('');
     updateCustomMessageUi();
@@ -1262,6 +1272,7 @@ export const init = async() => {
         if (event.target.id === 'ea-include-all-students') {
             STATE.includeAllStudents = !!event.target.checked;
             STATE.page = 1;
+            updateFilterModeContainerVisibility();
             loadStudents();
         }
         if (event.target.id === 'ea-per-page') {
@@ -1287,6 +1298,7 @@ export const init = async() => {
     updateNextStepButton();
     updateSortIndicators();
     updateGradeFilterControls();
+    updateFilterModeContainerVisibility();
     updateThresholdVisibility();
     updateCustomMessageUi();
 
