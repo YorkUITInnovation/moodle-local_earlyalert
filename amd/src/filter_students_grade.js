@@ -900,18 +900,33 @@ const sendAlerts = () => {
         STRINGS.cancel || 'Cancel',
         () => {
             Promise.all(ids.map(buildResolvedAlertPayload)).then(templateData => {
-                const missingTemplates = templateData.filter(item => !item.template_id);
-                if (missingTemplates.length) {
-                    const missingtemplatemessage = 'One or more selected students do not have an active eTemplate for '
-                        + 'this alert. No alerts were queued.';
-                    Notification.alert('', missingtemplatemessage);
+                const validTemplates = templateData.filter(item => !!item.template_id);
+                const skippedItems = templateData.filter(item => !item.template_id);
+
+                if (!validTemplates.length) {
+                    const skippedLines = skippedItems.map(item => {
+                        const s = STATE.studentDataById.get(item.student_id) || {};
+                        return `${s.first_name || ''} ${s.last_name || ''} `
+                            + `(${s.idnumber || ''}) — ${s.email || ''}`.trim();
+                    }).join('\n');
+                    const noneMsg = 'None of the selected students have an active eTemplate '
+                        + 'for this alert. No alerts were queued.\n\nSkipped:\n';
+                    Notification.alert('', noneMsg + skippedLines);
                     return;
                 }
 
                 Ajax.call([{methodname: 'local_earlyalert_report_log_insert', args: {
-                    template_data: JSON.stringify(templateData),
+                    template_data: JSON.stringify(validTemplates),
                 }}])[0].then(() => {
-                    Notification.alert('', STRINGS.alert_sent_successfully || 'Alert sent successfully');
+                    let message = STRINGS.alert_sent_successfully || 'Alert sent successfully';
+                    if (skippedItems.length) {
+                        const skippedLines = skippedItems.map(item => {
+                            const s = STATE.studentDataById.get(item.student_id) || {};
+                            return `  • ${s.first_name || ''} ${s.last_name || ''} (${s.idnumber || ''}) — ${s.email || ''}`.trim();
+                        }).join('\n');
+                        message += `\n\n${skippedItems.length} student(s) skipped (no active eTemplate):\n${skippedLines}`;
+                    }
+                    Notification.alert('', message);
                 }).catch(Notification.exception);
             }).catch(Notification.exception);
         }

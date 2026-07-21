@@ -181,19 +181,49 @@ class process_mail_queue extends \core\task\scheduled_task {
     }
 
     public function send_moodle_notification($userfrom, $userto, $subject, $body, $course_id){
+        global $DB;
 
         mtrace("sending moodle notification to user: " . $userto . " from " . $userfrom);
+
+        // Resolve complete user records for message_send() compatibility.
+        $fromuser = $DB->get_record('user', ['id' => (int)$userfrom, 'deleted' => 0], '*', IGNORE_MISSING);
+        if (!$fromuser) {
+            $fromuser = \core_user::get_noreply_user();
+        }
+
+        $touser = $DB->get_record('user', ['id' => (int)$userto, 'deleted' => 0], '*', IGNORE_MISSING);
+        if (!$touser) {
+            mtrace("Recipient not found or deleted for userid: " . $userto);
+            return false;
+        }
+
+        $subject = trim((string)$subject);
+        if ($subject === '') {
+            $subject = get_string('pluginname', 'local_earlyalert');
+        }
+
+        $rawbody = trim((string)$body);
+        if ($rawbody === '') {
+            mtrace("Resolved template body is empty for recipient: " . $userto . ". Using subject as fallback body.");
+            $rawbody = $subject;
+        }
+
+        $plainbody = trim((string)html_to_text($rawbody));
+        if ($plainbody === '') {
+            $plainbody = $subject;
+        }
+
         // Create a new message object.
         try {
             $message = new \core\message\message();
             $message->component = 'local_earlyalert';
             $message->name = 'earlyalert_notification';
-            $message->userfrom = $userfrom; // The user sending the message.
-            $message->userto = $userto; // The user receiving the message.
+            $message->userfrom = $fromuser;
+            $message->userto = $touser;
             $message->subject = $subject;
-            $message->fullmessage = $body;
-            $message->fullmessageformat = FORMAT_HTML;
-            $message->fullmessagehtml = $body;
+            $message->fullmessage = $plainbody;
+            $message->fullmessageformat = FORMAT_PLAIN;
+            $message->fullmessagehtml = $rawbody;
             $message->smallmessage = 'An email alert with '. $subject . ' has been sent to you';
             $message->notification = 1; // This is a system generated notification.
             $message->courseid = $course_id;
@@ -208,6 +238,7 @@ class process_mail_queue extends \core\task\scheduled_task {
             return false;
         }
 
+        mtrace("message_send returned no message id for recipient: " . $userto);
         return false;
     }
 
