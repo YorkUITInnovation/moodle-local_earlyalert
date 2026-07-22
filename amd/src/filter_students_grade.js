@@ -433,6 +433,21 @@ const updateAssignmentTitleVisibility = () => {
     wrap.classList.toggle('d-none', STATE.alertType !== 'assign');
 };
 
+const updateInstructionsPanel = () => {
+    const panels = {
+        grade: document.getElementById('ea-instructions-grade'),
+        assign: document.getElementById('ea-instructions-assign'),
+        exam: document.getElementById('ea-instructions-exam'),
+        commendation: document.getElementById('ea-instructions-commendation'),
+    };
+    const activeKey = Object.keys(panels).includes(STATE.alertType) ? STATE.alertType : 'grade';
+    Object.entries(panels).forEach(([key, el]) => {
+        if (el) {
+            el.classList.toggle('d-none', key !== activeKey);
+        }
+    });
+};
+
 const getConditionForAlertType = alertType => {
     if (alertType === 'assign' || alertType === 'exam') {
         return 'missing';
@@ -472,6 +487,7 @@ const updateConditionForAlertType = () => {
     }
     updateThresholdVisibility();
     updateAssignmentTitleVisibility();
+    updateInstructionsPanel();
 };
 
 const getAlertTypeLabel = () => {
@@ -1130,6 +1146,7 @@ const openCourseFlow = (courseId, courseName) => {
     setCustomMessage('');
     updateCustomMessageUi();
     updateAssignmentTitleVisibility();
+    updateInstructionsPanel();
 
     updateSortIndicators();
     showWorkflow();
@@ -1407,6 +1424,7 @@ export const init = async() => {
     updateThresholdVisibility();
     updateCustomMessageUi();
     updateAssignmentTitleVisibility();
+    updateInstructionsPanel();
 
     // Initialize step badge colors
     document.querySelectorAll('.ea-step-label').forEach(stepNode => {

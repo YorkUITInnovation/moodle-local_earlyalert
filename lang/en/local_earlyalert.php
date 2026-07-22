@@ -39,8 +39,13 @@ $string['assignment_instructions'] = '<ul>
 <ul><li>Note that this title will appear in the email.</li></ul>
 </li>
 </ul>';
+$string['commendation_instructions'] = '<ul>
+<li>These messages recognize students who are performing above expectations in your course.</li>
+<li>Use this alert to encourage and motivate students who are excelling.</li>
+<li>Select the students you would like to commend from the list below.</li>
+</ul>';
 $string['assignment_title'] = 'Assignment Title';
-$string['assignment_title_required'] = 'Please add an assignment title before previewing or sending';
+$string['assignment_title_required'] = 'Before previewing or sending, please add an assignment title or select one or more assignments using the <b>Filter On</b> option below.';
 $string['available_alert_types'] = 'My available alerts';
 $string['active_courses'] = 'Active Courses';
 $string['alerts_term'] = 'Alerts (term)';

@@ -204,8 +204,21 @@
                              aria-labelledby="ea-step-2-criteria-help-heading"
                              data-bs-parent="#ea-step-2-criteria-help-accordion">
                             <div class="accordion-body">
-                                <div class="alert alert-info mb-0" role="alert">
+                                <div class="alert alert-info mb-0" role="alert"
+                                     id="ea-instructions-grade">
                                     {{#str}}grade_instructions, local_earlyalert{{/str}}
+                                </div>
+                                <div class="alert alert-info mb-0 d-none" role="alert"
+                                     id="ea-instructions-assign">
+                                    {{#str}}assignment_instructions, local_earlyalert{{/str}}
+                                </div>
+                                <div class="alert alert-info mb-0 d-none" role="alert"
+                                     id="ea-instructions-exam">
+                                    {{#str}}exam_instructions, local_earlyalert{{/str}}
+                                </div>
+                                <div class="alert alert-info mb-0 d-none" role="alert"
+                                     id="ea-instructions-commendation">
+                                    {{#str}}commendation_instructions, local_earlyalert{{/str}}
                                 </div>
                             </div>
                         </div>
@@ -262,8 +275,9 @@
                                 <div class="mb-3 d-none" id="ea-assignment-title-wrap">
                                     <div class="d-flex align-items-center">
                                         <p class="mb-0 me-2"><b>{{#str}}assignment_title, local_earlyalert{{/str}}:</b></p>
-                                        <input type="text" id="early-alert-assignment-title" class="form-control" style="max-width: 320px;" placeholder="Enter the assignment title (required)" required="">
+                                        <input type="text" id="early-alert-assignment-title" class="form-control" style="max-width: 320px;" placeholder="Enter the assignment title">
                                     </div>
+                                    <small class="text-body-primary">{{#str}}assignment_title_required, local_earlyalert{{/str}}</small>
                                 </div>
 
                                 <div class="mb-3">
