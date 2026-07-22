@@ -440,7 +440,6 @@
 <!--                        {{#str}}send_alert_now, local_earlyalert{{/str}}-->
 <!--                    </button>-->
 <!--                </div>-->
-            </div>
         </div>
     </div>
 
@@ -451,13 +450,17 @@
                 <div class="modal-header">
                     <div>
                         <h5 class="modal-title" id="ea-preview-modal-title">{{#str}}message_preview, local_earlyalert{{/str}}</h5>
-                        <div class="text-muted small"><span>{{#str}}to_label, local_earlyalert{{/str}}:</span> <span
-                                id="ea-preview-modal-recipient"></span></div>
                     </div>
                     <button type="button" class="btn-close" data-action="earlyalert/close-preview"
                             aria-label="{{#str}}close, local_earlyalert{{/str}}"></button>
                 </div>
-                <div class="modal-body" id="ea-preview-modal-body"></div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <span class="fw-semibold">{{#str}}subject_line, local_earlyalert{{/str}}:</span>
+                        <span id="ea-preview-modal-subject"></span>
+                    </div>
+                    <div id="ea-preview-modal-body"></div>
+                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
                             data-action="earlyalert/close-preview">{{#str}}close, local_earlyalert{{/str}}</button>

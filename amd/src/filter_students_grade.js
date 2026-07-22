@@ -827,10 +827,9 @@ const updatePreview = () => {
 const previewStudent = studentid => {
     fetchStudentPreview(studentid).then(response => {
         STATE.previewData = response;
-        const student = STATE.studentDataById.get(studentid) || {};
-        const recipient = document.getElementById('ea-preview-modal-recipient');
-        if (recipient) {
-            recipient.textContent = `${student.first_name || ''} ${student.last_name || ''}`.trim();
+        const subject = document.getElementById('ea-preview-modal-subject');
+        if (subject) {
+            subject.textContent = response.subject || '';
         }
 
         const modalBody = document.getElementById('ea-preview-modal-body');
