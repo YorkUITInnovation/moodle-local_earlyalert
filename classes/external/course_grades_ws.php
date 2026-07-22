@@ -980,6 +980,11 @@ class local_earlyalert_course_grades_ws extends external_api {
             $gradetext = (!empty($selectedrange) && isset($selectedrange['letter'])) ? $selectedrange['letter'] : 'D+';
         }
 
+        $custommessageforpreview = (string)$params['custom_message'];
+        if ($hascustommessage && $custommessageforpreview === '') {
+            $custommessageforpreview = get_string('custommessage_preview_placeholder', 'local_earlyalert');
+        }
+
         $prepared = \local_etemplate\email::replace_message_placeholders(
             $preloadmessage,
             $preloadsubject,
@@ -988,7 +993,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             (int)$params['teacher_user_id'],
             $gradetext,
             (string)$params['assignment_title'],
-            (string)$params['custom_message']
+            $custommessageforpreview
         );
 
         $gradedetails = self::decode_grade_details_json((string)$params['grade_details_json']);

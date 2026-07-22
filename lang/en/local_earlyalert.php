@@ -229,6 +229,7 @@ $string['view_message'] = 'View Message Details';
 $string['update_campus'] = 'Update Campus profile field';
 $string['no_courses'] = 'No Courses found';
 $string['custom_message_button_label'] = 'Show Custom Message';
+$string['custommessage_preview_placeholder'] = '[If you would like to add a custom message here, use the "edit message" button above]';
 $string['not_using_gradebook'] = 'View all my students, irrespective of grade';
 
 /* Email template */
