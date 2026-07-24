@@ -332,17 +332,44 @@ const setCustomMessage = value => {
 
 const getCustomMessage = () => STATE.customMessage;
 
-const getPreviewProbeStudentId = () => {
+const getPreviewProbeStudentId = (preferCustomMessage = false) => {
     const selectedIds = Array.from(STATE.selectedStudents.keys());
-    if (selectedIds.length) {
-        return selectedIds.find(id => STATE.studentDataById.has(id)) || selectedIds[0] || 0;
+    if (!selectedIds.length) {
+        return 0;
     }
-    return STATE.currentPageStudentIds[0] || 0;
+
+    if (preferCustomMessage) {
+        const preferred = selectedIds.find(id => {
+            const student = STATE.studentDataById.get(id);
+            return !!(student && student.hascustommessage);
+        });
+        if (preferred) {
+            return preferred;
+        }
+    }
+
+    return selectedIds.find(id => STATE.studentDataById.has(id)) || selectedIds[0] || 0;
 };
 
 const refreshCustomMessageSupport = () => {
+    if (!STATE.courseId || !STATE.alertType || STATE.selectedStudents.size === 0) {
+        STATE.supportsCustomMessage = false;
+        updateCustomMessageUi();
+        return;
+    }
+
+    const selectedStudents = Array.from(STATE.selectedStudents.keys())
+        .map(studentid => STATE.studentDataById.get(studentid))
+        .filter(Boolean);
+
+    if (selectedStudents.length > 0) {
+        STATE.supportsCustomMessage = selectedStudents.some(student => !!student.hascustommessage);
+        updateCustomMessageUi();
+        return;
+    }
+
     const probeStudentId = getPreviewProbeStudentId();
-    if (!probeStudentId || !STATE.courseId || !STATE.alertType) {
+    if (!probeStudentId) {
         STATE.supportsCustomMessage = false;
         updateCustomMessageUi();
         return;
@@ -778,10 +805,7 @@ const updateComposeSummary = () => {
     summary.textContent = `Sending to ${count} students. Personalization tokens are filled automatically when sent.`;
 };
 
-const getFirstSelectedStudentId = () => {
-    const selectedIds = Array.from(STATE.selectedStudents.keys());
-    return selectedIds.find(id => STATE.studentDataById.has(id)) || selectedIds[0] || 0;
-};
+const getFirstSelectedStudentId = () => getPreviewProbeStudentId(true);
 
 const fetchStudentPreview = studentid => Ajax.call([{methodname: 'local_earlyalert_get_student_preview_template', args: {
     courseid: STATE.courseId,

@@ -693,6 +693,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         foreach ($records as $row) {
             $lang = self::process_lang_for_templates($row->lang ?? 'en');
             $template = null;
+            $hascustommessage = false;
             try {
                 $template = helper::get_email_template(
                     trim((string)$row->campus),
@@ -706,6 +707,13 @@ class local_earlyalert_course_grades_ws extends external_api {
             } catch (\Throwable $e) {
                 // Keep list loading resilient even if template mapping data is incomplete for one student.
                 $template = null;
+            }
+
+            if ($template) {
+                $hascustommessage = self::template_has_custom_message($template);
+                if (!$hascustommessage && (int)$messageType === (int)email::MESSAGE_TYPE_CATCHALL) {
+                    $hascustommessage = true;
+                }
             }
 
             $students[] = [
@@ -723,6 +731,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                 'revision_id' => 0,
                 'triggered_from_user_id' => (int)$params['teacher_user_id'],
                 'instructor_id' => (int)$params['teacher_user_id'],
+                'hascustommessage' => (bool)$hascustommessage,
                 'subject' => '',
                 'message' => '',
             ];
@@ -759,6 +768,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                 'revision_id' => new external_value(PARAM_INT, 'Template revision id'),
                 'triggered_from_user_id' => new external_value(PARAM_INT, 'Triggered from user id'),
                 'instructor_id' => new external_value(PARAM_INT, 'Instructor user id'),
+                'hascustommessage' => new external_value(PARAM_BOOL, 'Whether template supports [custommessage]'),
                 'subject' => new external_value(PARAM_RAW, 'Template subject'),
                 'message' => new external_value(PARAM_RAW, 'Template message'),
             ])),
