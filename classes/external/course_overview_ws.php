@@ -361,9 +361,13 @@ class local_earlyalert_course_overview_ws extends external_api {
         $messagesnapshot = $LOG->get_message_snapshot();
         if (is_array($subjectsnapshot) && array_key_exists('rendered', $subjectsnapshot)
                 && is_array($messagesnapshot) && array_key_exists('rendered', $messagesnapshot)) {
+            $message = (string)$messagesnapshot['rendered'];
+            if (!preg_match('/<[^>]+>/', $message)) {
+                $message = self::format_custom_message_for_html($message);
+            }
             return [
                 'subject' => $subjectsnapshot['rendered'],
-                'message' => $messagesnapshot['rendered'],
+                'message' => $message,
             ];
         }
 
@@ -379,7 +383,7 @@ class local_earlyalert_course_overview_ws extends external_api {
             $LOG->get_instructor_id(),
             $LOG->get_trigger_grade_letter(),
             $LOG->get_assignment_name(),
-            $LOG->get_custom_message()
+            self::format_custom_message_for_html((string)$LOG->get_custom_message())
         );
 
         $data = [
@@ -410,6 +414,32 @@ class local_earlyalert_course_overview_ws extends external_api {
                 'message' => new external_value(PARAM_RAW, 'Message body')
             )
         );
+    }
+
+    /**
+     * Convert textarea custom message content into safe HTML.
+     *
+     * Supports markdown syntax and preserves hard returns as <br> tags.
+     *
+     * @param string $custommessage
+     * @return string
+     */
+    private static function format_custom_message_for_html(string $custommessage): string {
+        $custommessage = trim($custommessage);
+        if ($custommessage === '') {
+            return '';
+        }
+
+        $normalised = preg_replace("/\r\n?|\n/", "\n", $custommessage);
+        // Markdown treats two trailing spaces as a hard line break.
+        $hardreturns = str_replace("\n", "  \n", $normalised);
+
+        return format_text($hardreturns, FORMAT_MARKDOWN, [
+            'trusted' => false,
+            'noclean' => false,
+            'filter' => false,
+            'para' => true,
+        ]);
     }
 }
 

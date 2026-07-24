@@ -984,6 +984,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         if ($hascustommessage && $custommessageforpreview === '') {
             $custommessageforpreview = get_string('custommessage_preview_placeholder', 'local_earlyalert');
         }
+        $custommessageforpreview = self::format_custom_message_for_html($custommessageforpreview);
 
         $prepared = \local_etemplate\email::replace_message_placeholders(
             $preloadmessage,
@@ -1069,6 +1070,32 @@ class local_earlyalert_course_grades_ws extends external_api {
         }
 
         return stripos((string)$preloadmessage, '[custommessage]') !== false;
+    }
+
+    /**
+     * Convert textarea custom message content into safe HTML.
+     *
+     * Supports markdown syntax and preserves hard returns as <br> tags.
+     *
+     * @param string $custommessage
+     * @return string
+     */
+    private static function format_custom_message_for_html(string $custommessage): string {
+        $custommessage = trim($custommessage);
+        if ($custommessage === '') {
+            return '';
+        }
+
+        $normalised = preg_replace("/\r\n?|\n/", "\n", $custommessage);
+        // Markdown treats two trailing spaces as a hard line break.
+        $hardreturns = str_replace("\n", "  \n", $normalised);
+
+        return format_text($hardreturns, FORMAT_MARKDOWN, [
+            'trusted' => false,
+            'noclean' => false,
+            'filter' => false,
+            'para' => true,
+        ]);
     }
 
     /**

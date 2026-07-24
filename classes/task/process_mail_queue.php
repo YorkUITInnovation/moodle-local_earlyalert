@@ -76,7 +76,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                     $email->get_instructor_id(),
                     $email->get_trigger_grade_letter(),
                     $email->get_assignment_name(),
-                    $email->get_custom_message(),
+                    $this->format_custom_message_for_html((string)$email->get_custom_message()),
                 );
                 $gradedetails = $email->get_grade_details();
                 $subject = $prepare_template->subject;
@@ -359,6 +359,32 @@ class process_mail_queue extends \core\task\scheduled_task {
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * Convert textarea custom message content into safe HTML.
+     *
+     * Supports markdown syntax and preserves hard returns as <br> tags.
+     *
+     * @param string $custommessage
+     * @return string
+     */
+    private function format_custom_message_for_html(string $custommessage): string {
+        $custommessage = trim($custommessage);
+        if ($custommessage === '') {
+            return '';
+        }
+
+        $normalised = preg_replace("/\r\n?|\n/", "\n", $custommessage);
+        // Markdown treats two trailing spaces as a hard line break.
+        $hardreturns = str_replace("\n", "  \n", $normalised);
+
+        return format_text($hardreturns, FORMAT_MARKDOWN, [
+            'trusted' => false,
+            'noclean' => false,
+            'filter' => false,
+            'para' => true,
+        ]);
     }
 
 }
