@@ -92,13 +92,13 @@ class local_earlyalert_course_grades_ws extends external_api {
             // For grade_letter_id <= 0 (e.g., -1) we do not filter by grade at all.
             $grade_range = null;
             if ($grade_letter_id > 0) {
-                $grade_range = helper::get_moodle_grade_percent_range($grade_letter_id);
+                $grade_range = helper::get_moodle_grade_percent_range($grade_letter_id, true);
             }
 
             // Resolve [grade] placeholder text for use in the bulk preview.
             $gradeletter = null;
             if ($grade_letter_id > 0) {
-                $selectedgraderange = helper::get_moodle_grade_percent_range($grade_letter_id);
+                $selectedgraderange = helper::get_moodle_grade_percent_range($grade_letter_id, true);
                 $gradeletter = (!empty($selectedgraderange) && isset($selectedgraderange['letter'])) ? $selectedgraderange['letter'] : null;
             }
 
@@ -380,7 +380,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         $offset = ($page - 1) * $perpage;
         $search = trim((string)$params['search']);
 
-        $selectedrange = helper::get_moodle_grade_percent_range((int)$params['thresholdid']);
+        $selectedrange = helper::get_moodle_grade_percent_range((int)$params['thresholdid'], true);
 
         $courseitem = $DB->get_record('grade_items', ['courseid' => (int)$params['courseid'], 'itemtype' => 'course'], 'id,grademax');
 
@@ -986,7 +986,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         if ($thresholdpercent >= 0 && $thresholdpercent <= 100) {
             $gradetext = rtrim(rtrim(number_format($thresholdpercent, 1, '.', ''), '0'), '.') . '%';
         } else {
-            $selectedrange = helper::get_moodle_grade_percent_range((int)$params['thresholdid']);
+            $selectedrange = helper::get_moodle_grade_percent_range((int)$params['thresholdid'], true);
             $gradetext = (!empty($selectedrange) && isset($selectedrange['letter'])) ? $selectedrange['letter'] : 'D+';
         }
 
@@ -1275,6 +1275,14 @@ class local_earlyalert_course_grades_ws extends external_api {
         $params[$prefix . 'thresholdmin'] = $thresholdmin;
         $params[$prefix . 'thresholdmax'] = $thresholdmax;
 
+        if ($uselettergraderange && $thresholdmin > $thresholdmax) {
+            return '1 = 0';
+        }
+
+        if ($uselettergraderange && $condition === 'below') {
+            return "{$percentexpr} < :" . $prefix . "thresholdmin";
+        }
+
         if ($uselettergraderange || $condition === 'above') {
             return "{$percentexpr} >= :" . $prefix . "thresholdmin AND {$percentexpr} <= :" . $prefix . "thresholdmax";
         }
@@ -1293,6 +1301,14 @@ class local_earlyalert_course_grades_ws extends external_api {
      * @return bool
      */
     private static function grade_matches_threshold($percent, $condition, $thresholdmin, $thresholdmax, $uselettergraderange = false) {
+        if ($uselettergraderange && $thresholdmin > $thresholdmax) {
+            return false;
+        }
+
+        if ($uselettergraderange && $condition === 'below') {
+            return $percent < $thresholdmin;
+        }
+
         if ($uselettergraderange || $condition === 'above') {
             return $percent >= $thresholdmin && $percent <= $thresholdmax;
         }

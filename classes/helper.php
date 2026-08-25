@@ -370,13 +370,44 @@ class helper
      * Pass a value <= 0 (e.g., -1) to indicate no grade filtering.
      *
      * @param int $grade_letter_id
+     * @param bool $preferordinal When true, treat 1..10 values as fixed UI ordinals (A+..F)
      * @return array|null Returns ['min' => float, 'max' => float] or null when no filter
      */
-    public static function get_moodle_grade_percent_range($grade_letter_id)
+    public static function get_moodle_grade_percent_range($grade_letter_id, $preferordinal = false)
     {
         try {
             $grade_letters = new \local_earlyalert\grade_letters();
             $grade_ranges = $grade_letters->get_grade_percentage_range();
+
+            $standardranges = [
+                10 => ['min' => 0.0, 'max' => 39.99, 'letter' => 'F'],
+                9 => ['min' => 40.0, 'max' => 49.99, 'letter' => 'E'],
+                8 => ['min' => 50.0, 'max' => 54.99, 'letter' => 'D'],
+                7 => ['min' => 55.0, 'max' => 59.99, 'letter' => 'D+'],
+                6 => ['min' => 60.0, 'max' => 64.99, 'letter' => 'C'],
+                5 => ['min' => 65.0, 'max' => 69.99, 'letter' => 'C+'],
+                4 => ['min' => 70.0, 'max' => 74.99, 'letter' => 'B'],
+                3 => ['min' => 75.0, 'max' => 79.99, 'letter' => 'B+'],
+                2 => ['min' => 80.0, 'max' => 89.99, 'letter' => 'A'],
+                1 => ['min' => 90.0, 'max' => 100.0, 'letter' => 'A+'],
+            ];
+
+            if ($preferordinal && $grade_letter_id > 0 && isset($standardranges[$grade_letter_id])) {
+                $targetletter = $standardranges[$grade_letter_id]['letter'];
+
+                // Prefer Moodle-configured boundaries for the same letter, while using fixed UI ordinals.
+                foreach ($grade_ranges as $range) {
+                    if (!isset($range['letter'])) {
+                        continue;
+                    }
+                    if (strcasecmp(trim((string)$range['letter']), $targetletter) === 0) {
+                        return $range;
+                    }
+                }
+
+                // Fall back to standard boundaries when the letter is missing from Moodle config.
+                return $standardranges[$grade_letter_id];
+            }
 
             if ($grade_letter_id > 0 && isset($grade_ranges[$grade_letter_id])) {
                 return $grade_ranges[$grade_letter_id];
@@ -396,18 +427,6 @@ class helper
             }
 
             if ($grade_letter_id > 0) {
-                $standardranges = [
-                    10 => ['min' => 0.0, 'max' => 39.99, 'letter' => 'F'],
-                    9 => ['min' => 40.0, 'max' => 49.99, 'letter' => 'E'],
-                    8 => ['min' => 50.0, 'max' => 54.99, 'letter' => 'D'],
-                    7 => ['min' => 55.0, 'max' => 59.99, 'letter' => 'D+'],
-                    6 => ['min' => 60.0, 'max' => 64.99, 'letter' => 'C'],
-                    5 => ['min' => 65.0, 'max' => 69.99, 'letter' => 'C+'],
-                    4 => ['min' => 70.0, 'max' => 74.99, 'letter' => 'B'],
-                    3 => ['min' => 75.0, 'max' => 79.99, 'letter' => 'B+'],
-                    2 => ['min' => 80.0, 'max' => 89.99, 'letter' => 'A'],
-                    1 => ['min' => 90.0, 'max' => 100.0, 'letter' => 'A+'],
-                ];
 
                 if (isset($standardranges[$grade_letter_id])) {
                     return $standardranges[$grade_letter_id];
