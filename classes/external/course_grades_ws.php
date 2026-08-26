@@ -1279,12 +1279,8 @@ class local_earlyalert_course_grades_ws extends external_api {
             return '1 = 0';
         }
 
-        if ($uselettergraderange && $condition === 'below') {
-            return "{$percentexpr} < :" . $prefix . "thresholdmin";
-        }
-
-        if ($uselettergraderange || $condition === 'above') {
-            return "{$percentexpr} >= :" . $prefix . "thresholdmin AND {$percentexpr} <= :" . $prefix . "thresholdmax";
+        if ($condition === 'above') {
+            return "{$percentexpr} >= :" . $prefix . "thresholdmin";
         }
 
         return "{$percentexpr} <= :" . $prefix . "thresholdmax";
@@ -1305,12 +1301,8 @@ class local_earlyalert_course_grades_ws extends external_api {
             return false;
         }
 
-        if ($uselettergraderange && $condition === 'below') {
-            return $percent < $thresholdmin;
-        }
-
-        if ($uselettergraderange || $condition === 'above') {
-            return $percent >= $thresholdmin && $percent <= $thresholdmax;
+        if ($condition === 'above') {
+            return $percent >= $thresholdmin;
         }
 
         return $percent <= $thresholdmax;
