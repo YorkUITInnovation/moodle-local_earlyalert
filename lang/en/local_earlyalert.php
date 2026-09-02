@@ -211,6 +211,9 @@ $string['showgrades'] = 'Show Grades';
 $string['academic_year_setting'] = 'Academic year';
 $string['academic_year_setting_desc'] = 'Select the academic year to use across Early Alert. Choose Current to automatically follow the current academic year, or pick a previous year for testing.';
 $string['academic_year_current'] = 'Current ({$a})';
+$string['academic_year'] = 'Academic Year';
+$string['select_academic_year'] = 'Select academic year';
+$string['all_academic_years'] = 'All Academic Years';
 $string['student_lookup'] = 'Student Lookup';
 $string['student_lookup_help'] = '<ul><li>You can search for a student using their student number (SISID) or Name</li>
 <li>You can wildcard (*) the name if required, and then select the correct student from the list </li>

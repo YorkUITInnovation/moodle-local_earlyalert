@@ -28,14 +28,14 @@ const MarkdownRenderer = ({ content }) => {
       // Ensure bullet lists have proper spacing
       .replace(/\n- /g, '\n- ')
       .replace(/\n\* /g, '\n* ');
-    
+
     // Split by double newlines to get paragraphs, but also handle single newlines followed by bullets
     const sections = normalizedText.split(/\n\s*\n/);
-    
+
     return sections.map((section, sIndex) => {
       // Skip empty sections
       if (!section.trim()) return null;
-      
+
       // Check if it's a header
       if (section.startsWith('###')) {
         return (
@@ -44,7 +44,7 @@ const MarkdownRenderer = ({ content }) => {
           </h3>
         );
       }
-      
+
       if (section.startsWith('##')) {
         return (
           <h2 key={sIndex} className="text-lg font-semibold text-gray-900 mb-2 mt-3">
@@ -52,7 +52,7 @@ const MarkdownRenderer = ({ content }) => {
           </h2>
         );
       }
-      
+
       if (section.startsWith('#')) {
         return (
           <h1 key={sIndex} className="text-xl font-bold text-gray-900 mb-2 mt-3">
@@ -60,15 +60,15 @@ const MarkdownRenderer = ({ content }) => {
           </h1>
         );
       }
-      
+
       // Check if this section contains bullet points or numbered lists
       const lines = section.split('\n').filter(line => line.trim());
       const listItems = [];
       const regularLines = [];
-      
+
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
-        
+
         if (line.startsWith('- ') || line.startsWith('* ')) {
           listItems.push(line.replace(/^[\-\*] /, ''));
         } else if (line.match(/^\d+\. /)) {
@@ -90,7 +90,7 @@ const MarkdownRenderer = ({ content }) => {
           regularLines.push(line);
         }
       }
-      
+
       // Handle any remaining list items
       if (listItems.length > 0) {
         regularLines.push(
@@ -103,7 +103,7 @@ const MarkdownRenderer = ({ content }) => {
           </ul>
         );
       }
-      
+
       // If we only have React elements (lists), return them
       if (regularLines.every(line => React.isValidElement(line))) {
         return (
@@ -112,11 +112,11 @@ const MarkdownRenderer = ({ content }) => {
           </div>
         );
       }
-      
+
       // Process regular text lines
       const textContent = regularLines.filter(line => typeof line === 'string').join(' ');
       const reactElements = regularLines.filter(line => React.isValidElement(line));
-      
+
       return (
         <div key={sIndex} className="mb-2">
           {textContent && (
@@ -129,7 +129,7 @@ const MarkdownRenderer = ({ content }) => {
       );
     }).filter(Boolean);
   };
-  
+
   const formatInlineMarkdown = (text) => {
     // Handle bold text
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -137,15 +137,39 @@ const MarkdownRenderer = ({ content }) => {
     text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
     // Handle inline code
     text = text.replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-xs">$1</code>');
-    
+
     return <span dangerouslySetInnerHTML={{ __html: text }} />;
   };
-  
+
   return (
     <div className="prose prose-sm max-w-none">
       {renderMarkdown(content)}
     </div>
   );
+};
+
+const getCurrentAcademicYearStart = () => {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+
+  // Academic year starts in September.
+  return month >= 8 ? year : year - 1;
+};
+
+const buildAcademicYearOptions = (count = 6) => {
+  const currentStartYear = getCurrentAcademicYearStart();
+
+  return Array.from({ length: count }, (_, index) => {
+    const startYear = currentStartYear - index;
+    const endYear = startYear + 1;
+    const value = `${startYear}-${endYear}`;
+
+    return {
+      value,
+      label: value
+    };
+  });
 };
 
 const EarlyAlertDashboard = () => {
@@ -161,23 +185,31 @@ const EarlyAlertDashboard = () => {
     'ai_assistant',
     'analyzing_data',
     'suggested_questions',
-    'type_message'
+    'type_message',
+    'academic_year',
+    'select_academic_year',
+    'all_academic_years'
   ]);
 
   // API data hook
-  const { 
-    loading, 
-    error, 
-    students, 
-    alerts, 
-    metrics, 
+  const {
+    loading,
+    error,
+    students,
+    alerts,
+    metrics,
     chartData,
     usingMockData,
-    loadData, 
-    refreshAlerts, 
+    loadData,
+    refreshAlerts,
     refreshMetrics,
     refreshChartData
   } = useApiData();
+
+  const academicYearOptions = useMemo(() => buildAcademicYearOptions(), []);
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState(
+    () => academicYearOptions[0]?.value || 'all'
+  );
 
   const [searchTerm, setSearchTerm] = useState('');
   const [tableSearchTerm, setTableSearchTerm] = useState('');
@@ -211,6 +243,8 @@ const EarlyAlertDashboard = () => {
   ]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const showAiFeatures = false;
+  const showHeaderActionButtons = currentView === 'administrator';
 
   // Read report_type query parameter on component mount
   useEffect(() => {
@@ -253,10 +287,10 @@ const EarlyAlertDashboard = () => {
     { id: 'actualGrade', label: 'Actual Grade', required: false }
   ];
 
-  // Initialize data from API
+  // Initialize/reload data whenever the selected academic year changes.
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadData({ academicYear: selectedAcademicYear });
+  }, [loadData, selectedAcademicYear]);
 
   // Debug: Log when alerts data changes
   // Filter alerts based on current filter selections
@@ -277,8 +311,8 @@ const EarlyAlertDashboard = () => {
         (chartFilterType === 'faculty' && (facultyMapping[alert.faculty_template] || alert.faculty_template) === selectedChartData)
       );
 
-      return matchesFaculty && matchesStatus && matchesTemplateType && matchesStudentType && 
-             matchesCampus && matchesAlertType && matchesAcademicStatus && matchesStudyLevel && 
+      return matchesFaculty && matchesStatus && matchesTemplateType && matchesStudentType &&
+             matchesCampus && matchesAlertType && matchesAcademicStatus && matchesStudyLevel &&
              matchesChart;
     });
 
@@ -291,26 +325,26 @@ const EarlyAlertDashboard = () => {
     return [...filteredAlerts].sort((a, b) => {
       let aValue = a[sortField];
       let bValue = b[sortField];
-      
+
       // Handle nested properties (e.g., student.immigrationStatus)
       if (sortField.includes('.')) {
         const keys = sortField.split('.');
         aValue = keys.reduce((obj, key) => obj?.[key], a);
         bValue = keys.reduce((obj, key) => obj?.[key], b);
       }
-      
+
       // Handle date sorting
       if (sortField === 'dateRaised') {
         aValue = new Date(aValue);
         bValue = new Date(bValue);
       }
-      
+
       // Handle string sorting
       if (typeof aValue === 'string') {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
       }
-      
+
       if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
@@ -320,7 +354,7 @@ const EarlyAlertDashboard = () => {
   // Filter alerts for the table with additional table search
   const tableFilteredAlerts = useMemo(() => {
     return sortedAlerts.filter(alert => {
-      const matchesTableSearch = !tableSearchTerm || 
+      const matchesTableSearch = !tableSearchTerm ||
         alert.studentName?.toLowerCase().includes(tableSearchTerm.toLowerCase()) ||
         alert.email?.toLowerCase().includes(tableSearchTerm.toLowerCase()) ||
         alert.alertType?.toLowerCase().includes(tableSearchTerm.toLowerCase()) ||
@@ -349,7 +383,7 @@ const EarlyAlertDashboard = () => {
       'Missed Assignment': 0,
       'Missed Test/Quiz': 0
     };
-    
+
     // Count alerts by type from filtered alerts
     filteredAlerts.forEach(alert => {
       const type = alert.alertType;
@@ -357,10 +391,10 @@ const EarlyAlertDashboard = () => {
         alertTypeCategories[type]++;
       }
     });
-    
+
     // Convert to array format for the chart with complementary but distinct colors
-    return Object.entries(alertTypeCategories).map(([name, value]) => ({ 
-      name, 
+    return Object.entries(alertTypeCategories).map(([name, value]) => ({
+      name,
       value,
       color: name === 'Low Grade' ? '#E31837' :        // Red (York University red)
              name === 'Missed Assignment' ? '#F59E0B' : // Amber/Orange
@@ -370,42 +404,42 @@ const EarlyAlertDashboard = () => {
 
   const currentFacultyData = useMemo(() => {
     if (!chartData?.faculty_distribution) return [];
-    
-    // If no filters are applied, use API data  
-    if (!selectedChartData && !filterFaculty && !filterStatus && !filterTemplateType && !filterStudentType && 
+
+    // If no filters are applied, use API data
+    if (!selectedChartData && !filterFaculty && !filterStatus && !filterTemplateType && !filterStudentType &&
         !filterCampus && !filterAlertType && !filterAcademicStatus && !filterStudyLevel && !searchTerm) {
       return chartData.faculty_distribution.map(item => ({
         name: facultyMapping[item.name] || item.name,
         alerts: item.value
       }));
     }
-    
+
     // Calculate from filtered alerts
     const facultyCounts = {};
     filteredAlerts.forEach(alert => {
       const properFacultyName = facultyMapping[alert.faculty_template] || alert.faculty_template;
       facultyCounts[properFacultyName] = (facultyCounts[properFacultyName] || 0) + 1;
     });
-    
+
     return Object.entries(facultyCounts).map(([name, alerts]) => ({ name, alerts }));
   }, [chartData, filteredAlerts, selectedChartData, filterFaculty, filterStatus, filterTemplateType, filterStudentType, searchTerm]);
 
   const currentTimelineData = useMemo(() => {
     if (!chartData?.timeline_data) return [];
-    
+
     // If no filters are applied, use API data
-    if (!selectedChartData && !filterFaculty && !filterStatus && !filterTemplateType && !filterStudentType && 
+    if (!selectedChartData && !filterFaculty && !filterStatus && !filterTemplateType && !filterStudentType &&
         !filterCampus && !filterAlertType && !filterAcademicStatus && !filterStudyLevel && !searchTerm) {
       return chartData.timeline_data;
     }
-    
+
     // Calculate from filtered alerts
     const timelineCounts = {};
     filteredAlerts.forEach(alert => {
       const date = new Date(alert.dateRaised).toISOString().split('T')[0];
       timelineCounts[date] = (timelineCounts[date] || 0) + 1;
     });
-    
+
     return Object.entries(timelineCounts)
       .sort(([a], [b]) => new Date(a) - new Date(b))
       .map(([date, alerts]) => ({ date, alerts }));
@@ -413,29 +447,29 @@ const EarlyAlertDashboard = () => {
 
   const currentInterventionData = useMemo(() => {
     if (!chartData?.status_distribution) return [];
-    
+
     // If no filters are applied, use API data
-    if (!selectedChartData && !filterFaculty && !filterStatus && !filterTemplateType && !filterStudentType && 
+    if (!selectedChartData && !filterFaculty && !filterStatus && !filterTemplateType && !filterStudentType &&
         !filterCampus && !filterAlertType && !filterAcademicStatus && !filterStudyLevel && !searchTerm) {
       return chartData.status_distribution;
     }
-    
+
     // Calculate from filtered alerts
     const statusCounts = {};
     filteredAlerts.forEach(alert => {
       const status = alert.status || 'Unadvised';
       statusCounts[status] = (statusCounts[status] || 0) + 1;
     });
-    
+
     return Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
   }, [chartData, filteredAlerts, selectedChartData, filterFaculty, filterStatus, filterTemplateType, filterStudentType, searchTerm]);
 
   const currentRiskSegmentationData = chartData?.risk_segmentation || [];
   const currentCampusAnalysisData = useMemo(() => {
     if (!chartData?.campus_analysis) return [];
-    
+
     // If no filters are applied, use API data
-    if (!selectedChartData && !filterFaculty && !filterStatus && !filterTemplateType && !filterStudentType && 
+    if (!selectedChartData && !filterFaculty && !filterStatus && !filterTemplateType && !filterStudentType &&
         !filterCampus && !filterAlertType && !filterAcademicStatus && !filterStudyLevel && !searchTerm) {
       return chartData.campus_analysis.map(item => ({
         name: campusMapping[item.campus] || item.campus,
@@ -443,7 +477,7 @@ const EarlyAlertDashboard = () => {
         uniqueStudents: item.students
       }));
     }
-    
+
     // Calculate from filtered alerts
     const campusCounts = {};
     const campusStudents = {};
@@ -453,7 +487,7 @@ const EarlyAlertDashboard = () => {
       if (!campusStudents[campusName]) campusStudents[campusName] = new Set();
       campusStudents[campusName].add(alert.studentId);
     });
-    
+
     return Object.entries(campusCounts).map(([name, totalAlerts]) => ({
       name,
       totalAlerts,
@@ -546,18 +580,18 @@ const EarlyAlertDashboard = () => {
 
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
-    
+
     const userMessage = {
       id: Date.now(),
       role: 'user',
       content: message,
       timestamp: new Date()
     };
-    
+
     setChatMessages(prev => [...prev, userMessage]);
     setChatInput('');
     setIsChatLoading(true);
-    
+
     try {
       // Use the integrated service that handles both local and AI analytics
 
@@ -574,6 +608,7 @@ const EarlyAlertDashboard = () => {
         timelineData: currentTimelineData,
         interventionData: currentInterventionData,
         currentFilters: {
+          academicYear: selectedAcademicYear,
           faculty: filterFaculty,
           status: filterStatus,
           templateType: filterTemplateType,
@@ -585,14 +620,14 @@ const EarlyAlertDashboard = () => {
           searchTerm: searchTerm
         }
       });
-      
+
       const aiResponse = {
         id: Date.now() + 1,
         role: 'assistant',
         content: response,
         timestamp: new Date()
       };
-      
+
       setChatMessages(prev => [...prev, aiResponse]);
       setIsChatLoading(false);
     } catch (error) {
@@ -692,8 +727,9 @@ const EarlyAlertDashboard = () => {
       if (filterAlertType) filterInfo.push(`Alert-${filterAlertType.replace(/[^a-zA-Z0-9]/g, '')}`);
       if (filterAcademicStatus) filterInfo.push(`AcadStatus-${filterAcademicStatus.replace(/[^a-zA-Z0-9]/g, '')}`);
       if (filterStudyLevel) filterInfo.push(`StudyLevel-${filterStudyLevel.replace(/[^a-zA-Z0-9]/g, '')}`);
+      if (selectedAcademicYear) filterInfo.push(`AcademicYear-${selectedAcademicYear}`);
       if (tableSearchTerm) filterInfo.push(`Search-${tableSearchTerm.replace(/[^a-zA-Z0-9]/g, '')}`);
-      
+
       const filterSuffix = filterInfo.length > 0 ? `_${filterInfo.join('_')}` : '';
       const filename = `York_EarlyAlerts_${dateStr}${filterSuffix}.xlsx`;
 
@@ -764,8 +800,8 @@ const EarlyAlertDashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mt-4" style={{ marginBottom: '0px' }}>
-            <button 
-              onClick={() => loadData()} 
+            <button
+              onClick={() => loadData({ academicYear: selectedAcademicYear })}
               disabled={loading}
               style={{
                 backgroundColor: '#E31837',
@@ -781,52 +817,76 @@ const EarlyAlertDashboard = () => {
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               <span>{getString('refresh_data')}</span>
             </button>
-            
-            <button
-              onClick={() => {
-                console.log('Ask AI button clicked!');
-                setShowConversationalAnalytics(!showConversationalAnalytics);
-                // Close the Visualization Panel if it's open
-                if (!showConversationalAnalytics) {
-                  setShowVisualizationPanel(false);
-                }
-              }}
-              className="flex items-center gap-2 px-4 py-2 btn-ask-ai rounded-lg transition-all duration-200 font-medium"
-              style={{ 
-                backgroundColor: showConversationalAnalytics ? '#B91C1C' : '#E31837',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'none'
-              }}
-            >
-              <Brain className="w-4 h-4" />
-              {showConversationalAnalytics ? getString('hide_ai') : getString('ask_ai')}
-            </button>
-            
-            <button
-              onClick={() => {
-                setShowVisualizationPanel(!showVisualizationPanel);
-                // Close the AI Panel if it's open
-                if (!showVisualizationPanel) {
-                  setShowConversationalAnalytics(false);
-                }
-              }}
-              className="flex items-center gap-2 px-4 py-2 btn-visualize rounded-lg transition-all duration-200 font-medium"
-              style={{ 
-                backgroundColor: showVisualizationPanel ? '#B91C1C' : '#E31837',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <BarChart3 className="w-4 h-4" />
-              {showVisualizationPanel ? getString('hide_charts') : getString('generate_charts')}
-            </button>
+
+            <div className="flex items-center gap-2">
+              <label htmlFor="academic-year-select" className="text-sm font-medium text-gray-700">
+                {getString('academic_year')}
+              </label>
+              <select
+                id="academic-year-select"
+                aria-label={getString('select_academic_year')}
+                value={selectedAcademicYear}
+                onChange={(e) => setSelectedAcademicYear(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31837] focus:border-[#E31837] bg-white text-sm"
+              >
+                <option value="all">{getString('all_academic_years')}</option>
+                {academicYearOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {showHeaderActionButtons && showAiFeatures && (
+              <button
+                onClick={() => {
+                  console.log('Ask AI button clicked!');
+                  setShowConversationalAnalytics(!showConversationalAnalytics);
+                  // Close the Visualization Panel if it's open.
+                  if (!showConversationalAnalytics) {
+                    setShowVisualizationPanel(false);
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 btn-ask-ai rounded-lg transition-all duration-200 font-medium"
+                style={{
+                  backgroundColor: showConversationalAnalytics ? '#B91C1C' : '#E31837',
+                  color: 'white',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <Brain className="w-4 h-4" />
+                {showConversationalAnalytics ? getString('hide_ai') : getString('ask_ai')}
+              </button>
+            )}
+
+            {showHeaderActionButtons && (
+              <button
+                onClick={() => {
+                  setShowVisualizationPanel(!showVisualizationPanel);
+                  // Close the AI Panel if it's open
+                  if (!showVisualizationPanel) {
+                    setShowConversationalAnalytics(false);
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 btn-visualize rounded-lg transition-all duration-200 font-medium"
+                style={{
+                  backgroundColor: showVisualizationPanel ? '#B91C1C' : '#E31837',
+                  color: 'white',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'none'
+                }}
+              >
+                <BarChart3 className="w-4 h-4" />
+                {showVisualizationPanel ? getString('hide_charts') : getString('generate_charts')}
+              </button>
+            )}
           </div>
-          
+
           {/* Inline Conversational Analytics */}
-          {showConversationalAnalytics && (
+          {showAiFeatures && showConversationalAnalytics && (
             <div className="bg-white rounded-lg shadow-lg border border-gray-200" style={{ marginTop: '0px' }}>
               <div className="p-4 border-b bg-gradient-to-r from-[#E31837] to-[#B91C1C] text-white rounded-t-lg">
                 <div className="flex items-center gap-3">
@@ -883,25 +943,25 @@ const EarlyAlertDashboard = () => {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Suggested Questions - only show if no custom messages */}
                 {chatMessages.length === 1 && (
                   <div className="mt-2 mb-2">
                     <p className="text-sm text-gray-600 mb-2">{getString('suggested_questions')}</p>
                     <div className="space-y-1">
-                      <button 
+                      <button
                         onClick={() => handleSuggestedQuestion("What are the key insights from the current data?")}
                         className="block w-full text-left px-3 py-1.5 text-sm bg-white hover:bg-gray-100 rounded border transition-colors"
                       >
                         What are the key insights from the current data?
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleSuggestedQuestion("Which faculty needs the most attention?")}
                         className="block w-full text-left px-3 py-1.5 text-sm bg-white hover:bg-gray-100 rounded border transition-colors"
                       >
                         Which faculty needs the most attention?
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleSuggestedQuestion("What are the most common alert types?")}
                         className="block w-full text-left px-3 py-1.5 text-sm bg-white hover:bg-gray-100 rounded border transition-colors"
                       >
@@ -910,7 +970,7 @@ const EarlyAlertDashboard = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Input Area */}
                 <div className="mt-4 -mx-4 px-0 pt-4 border-t border-gray-200 bg-gray-50">
                   <div className="flex items-center gap-3 px-4">
@@ -924,7 +984,7 @@ const EarlyAlertDashboard = () => {
                       style={{ width: '100%' }}
                       disabled={isChatLoading}
                     />
-                    <button 
+                    <button
                       onClick={() => handleSendMessage(chatInput)}
                       disabled={isChatLoading || !chatInput.trim()}
                       className="flex-shrink-0 w-12 h-12 bg-[#E31837] text-white rounded-lg hover:bg-[#B91C1C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
@@ -936,7 +996,7 @@ const EarlyAlertDashboard = () => {
               </div>
             </div>
           )}
-          
+
           {/* Dynamic Visualization Panel */}
           {showVisualizationPanel && (
             <VisualizationPanel
@@ -950,6 +1010,7 @@ const EarlyAlertDashboard = () => {
                 timelineData: currentTimelineData,
                 interventionData: currentInterventionData,
                 currentFilters: {
+                  academicYear: selectedAcademicYear,
                   faculty: filterFaculty,
                   status: filterStatus,
                   templateType: filterTemplateType,
