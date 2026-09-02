@@ -84,7 +84,7 @@ class ldap
      * @global \stdClass $USER
      * @global \stdClass $CFG
      */
-    private function get_user_courses($acad_year = 2024, $id_number = 0,
+    private function get_user_courses($acad_year = null, $id_number = 0,
                                       $user_name = '')
     {
         global $CFG, $DB, $USER;
@@ -108,6 +108,10 @@ class ldap
             } else {
                 $search_on = 'pyCourseInstructor';
                 $search_values = $user_name;
+            }
+
+            if ($acad_year === null) {
+                $acad_year = helper::get_acad_year();
             }
 
             $period = $this->get_current_period();
@@ -481,28 +485,7 @@ class ldap
      */
     public function get_acad_year()
     {
-        $month = date('n', time());
-
-        switch ($month) {
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-                $acad_year = (date('Y', time()) - 1);
-                break;
-            case 9:
-            case 10:
-            case 11:
-            case 12:
-                $acad_year = date('Y', time());
-                break;
-        }
-
-        return $acad_year;
+        return helper::get_acad_year();
     }
 
     /**

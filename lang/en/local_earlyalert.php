@@ -208,6 +208,9 @@ $string['select_students'] ='Select the students to whom you would like a {$a} a
 You can preview the message by clicking on the “preview” button prior to sending.<br><em>N.B. Graduate Students and Teaching Assistants may appear here – please disregard them.</em>';
 $string['send_email_to_advisors'] = 'Send email to advisors?';
 $string['showgrades'] = 'Show Grades';
+$string['academic_year_setting'] = 'Academic year';
+$string['academic_year_setting_desc'] = 'Select the academic year to use across Early Alert. Choose Current to automatically follow the current academic year, or pick a previous year for testing.';
+$string['academic_year_current'] = 'Current ({$a})';
 $string['student_lookup'] = 'Student Lookup';
 $string['student_lookup_help'] = '<ul><li>You can search for a student using their student number (SISID) or Name</li>
 <li>You can wildcard (*) the name if required, and then select the correct student from the list </li>
