@@ -298,7 +298,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'alert_type' => new external_value(PARAM_TEXT, 'Alert type', VALUE_DEFAULT, 'grade'),
             'filtermode' => new external_value(PARAM_TEXT, 'course|single|multi', VALUE_DEFAULT, 'course'),
             'multimode' => new external_value(PARAM_TEXT, 'any|average|weighted', VALUE_DEFAULT, 'any'),
-            'condition' => new external_value(PARAM_TEXT, 'below|above|missing', VALUE_DEFAULT, 'below'),
+            'condition' => new external_value(PARAM_TEXT, 'below|above|missing|range', VALUE_DEFAULT, 'below'),
             'thresholdid' => new external_value(PARAM_INT, 'Grade letter id', VALUE_DEFAULT, 7),
             'thresholdpercent' => new external_value(PARAM_FLOAT, 'Numeric threshold percent', VALUE_DEFAULT, -1),
             'gradeitemid' => new external_value(PARAM_INT, 'Single grade item id', VALUE_DEFAULT, 0),
@@ -412,7 +412,9 @@ class local_earlyalert_course_grades_ws extends external_api {
         }
 
         $mode = in_array($params['filtermode'], ['course', 'single', 'multi']) ? $params['filtermode'] : 'course';
-        $condition = self::get_condition_for_alert_type((string)$params['alert_type']);
+        $condition = in_array($params['condition'], ['below', 'above', 'missing', 'range'], true)
+            ? $params['condition']
+            : self::get_condition_for_alert_type((string)$params['alert_type']);
         $multimode = in_array($params['multimode'], ['any', 'average', 'weighted']) ? $params['multimode'] : 'any';
         $thresholdpercent = (float)$params['thresholdpercent'];
 
@@ -422,6 +424,9 @@ class local_earlyalert_course_grades_ws extends external_api {
             if ($condition === 'above') {
                 $thresholdmin = $thresholdpercent;
                 $thresholdmax = 100;
+            } elseif ($condition === 'range') {
+                $thresholdmin = 0;
+                $thresholdmax = $thresholdpercent;
             } else {
                 $thresholdmin = 0;
                 $thresholdmax = $thresholdpercent;
@@ -1270,8 +1275,11 @@ class local_earlyalert_course_grades_ws extends external_api {
         $params[$prefix . 'thresholdmin'] = $thresholdmin;
         $params[$prefix . 'thresholdmax'] = $thresholdmax;
 
-        if ($uselettergraderange || $condition === 'above') {
+        if ($uselettergraderange || $condition === 'range') {
             return "{$percentexpr} >= :" . $prefix . "thresholdmin AND {$percentexpr} <= :" . $prefix . "thresholdmax";
+        }
+        if ($condition === 'above') {
+            return "{$percentexpr} >= :" . $prefix . "thresholdmin";
         }
 
         return "{$percentexpr} <= :" . $prefix . "thresholdmax";
@@ -1288,8 +1296,11 @@ class local_earlyalert_course_grades_ws extends external_api {
      * @return bool
      */
     private static function grade_matches_threshold($percent, $condition, $thresholdmin, $thresholdmax, $uselettergraderange = false) {
-        if ($uselettergraderange || $condition === 'above') {
+        if ($uselettergraderange || $condition === 'range') {
             return $percent >= $thresholdmin && $percent <= $thresholdmax;
+        }
+        if ($condition === 'above') {
+            return $percent >= $thresholdmin;
         }
 
         return $percent <= $thresholdmax;

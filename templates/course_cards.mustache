@@ -237,9 +237,17 @@
                                            for="ea-include-all-students">{{#str}}not_using_gradebook, local_earlyalert{{/str}}</label>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3" id="ea-condition-display-wrap">
                                     <label class="form-label">{{#str}}condition, local_earlyalert{{/str}}</label>
                                     <div id="ea-condition-display" class="form-control-plaintext fw-semibold"></div>
+                                    <div class="form-text">{{#str}}condition_locked_help, local_earlyalert{{/str}}</div>
+                                </div>
+                                <div class="mb-3 d-none" id="ea-condition-select-wrap">
+                                    <label class="form-label" for="ea-condition">{{#str}}condition, local_earlyalert{{/str}}</label>
+                                    <select id="ea-condition" class="form-select">
+                                        <option value="above">&gt;= (Above or equal to)</option>
+                                        <option value="range">{{#str}}condition_grade_range, local_earlyalert{{/str}}</option>
+                                    </select>
                                     <div class="form-text">{{#str}}condition_locked_help, local_earlyalert{{/str}}</div>
                                 </div>
                                 <div class="mb-3" id="ea-threshold-wrap">
