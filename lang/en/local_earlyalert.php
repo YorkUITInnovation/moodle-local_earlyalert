@@ -33,10 +33,10 @@ $string['adashboard'] = 'Admin Dashboard';
 $string['adjust_default_grade'] = 'Adjust Default Grade';
 $string['alerts_raised'] = 'Alerts raised';
 $string['assignment_instructions'] = '<ul>
-<li>These messages inform students of a missed assignment that threatens their success in the course 
-</li> 
-<li>To ensure they know which assignment you are referring to, please enter the assignment title below.
-<ul><li>Note that this title will appear in the email.</li></ul>
+<li>These messages inform students of any missed assignments that threaten their success in the course</li> 
+<li>To ensure they know which assignment(s) you are referring to, please enter the assignment details so that they appear in the email:
+<ul><li>Either fill in an “Assignment Title” or select a filter option and grade item(s)</li>
+</ul>
 </li>
 </ul>';
 $string['commendation_instructions'] = '<ul>
@@ -88,10 +88,6 @@ $string['filter_on'] = 'Filter on';
 $string['grade_items'] = 'Grade items';
 $string['grade_items_help'] = 'Choose one or more assignments/quizzes/tests when filtering below course level.';
 $string['gradedetails_assignments'] = '{$a}';
-$string['gradedetails_average_type'] = 'Average type used: {$a}';
-$string['gradedetails_average_type_any'] = 'Any';
-$string['gradedetails_average_type_average'] = 'Average';
-$string['gradedetails_average_type_weighted'] = 'Weighted';
 $string['matched_items'] = 'Matched items';
 $string['grade_threshold_and_students'] = 'Grade & Students';
 $string['risk_level'] = 'Risk level';
@@ -180,10 +176,10 @@ $string['grade_instructions'] = '
     <li>Grades messages inform students they are averaging below a certain letter grade.
         <ul><li>The default has been set to a D+.</li></ul>
     </li> 
-    <li>Should you wish to adjust this for your course, please use the threshold selectors below.
+    <li>Should you wish to adjust this for your course, please use the threshold and filters selectors below.
         <ul>
             <li>Note that this is the letter grade that will appear in the email (e.g. you are averaging a D+ or less)</li>
-            <li>If you are using the gradebook, this is also how you sort your students to show only those averaging a specific grade or less (based on the gradebook course total). If you set the box to D+, for example, you will only see a list of students who are averaging a D+ or less in your list. In order for this feature to work properly, you must have “exclude empty grades” checked under “Grade category” in your eClass settings.</li>
+            <li>If you are using the gradebook, this is also how you sort your students to show only those averaging a specific grade or less (based on the filtering options you select).</li>
         </ul>
     </li>    
 </ul>';

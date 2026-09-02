@@ -1180,16 +1180,11 @@ class local_earlyalert_course_grades_ws extends external_api {
                 implode(', ', $gradedetails['assignments']));
         }
 
-        $averagetype = !empty($gradedetails['average_type']) ? (string)$gradedetails['average_type'] : '';
-        if ($averagetype !== '') {
-            $modekey = 'gradedetails_average_type_' . $averagetype;
-            $modevalue = get_string_manager()->string_exists($modekey, 'local_earlyalert')
-                ? get_string($modekey, 'local_earlyalert')
-                : $averagetype;
-            $lines[] = get_string('gradedetails_average_type', 'local_earlyalert', $modevalue);
+        if (empty($lines)) {
+            return '';
         }
 
-        return implode("\n", $lines);
+        return '(' . implode(' ', $lines) . ')';
     }
 
     /**

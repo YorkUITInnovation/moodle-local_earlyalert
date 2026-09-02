@@ -501,17 +501,29 @@ const updateThresholdVisibility = () => {
     }
 };
 
+const updateConditionDisplayVisibility = () => {
+    const conditionBlock = document.getElementById('ea-condition-display')?.closest('.mb-3');
+    if (conditionBlock) {
+        conditionBlock.classList.toggle('d-none', STATE.includeAllStudents);
+    }
+};
+
 const updateConditionForAlertType = () => {
     STATE.condition = getConditionForAlertType(STATE.alertType);
     const conditionDisplay = document.getElementById('ea-condition-display');
     if (conditionDisplay) {
-        const conditionLabels = {
-            'below': '<= (Below or equal to)',
-            'above': '>= (Above or equal to)',
-            'missing': 'Missing (no grade submitted)',
-        };
-        conditionDisplay.textContent = conditionLabels[STATE.condition] || STATE.condition;
+        if (STATE.includeAllStudents) {
+            conditionDisplay.textContent = '';
+        } else {
+            const conditionLabels = {
+                'below': '<= (Below or equal to)',
+                'above': '>= (Above or equal to)',
+                'missing': 'Missing (no grade submitted)',
+            };
+            conditionDisplay.textContent = conditionLabels[STATE.condition] || STATE.condition;
+        }
     }
+    updateConditionDisplayVisibility();
     updateThresholdVisibility();
     updateAssignmentTitleVisibility();
     updateInstructionsPanel();
@@ -598,6 +610,7 @@ const updateFilterModeContainerVisibility = () => {
     }
 
     filterModeContainer.classList.toggle('d-none', STATE.includeAllStudents);
+    updateConditionDisplayVisibility();
 };
 
 const deriveFilterModeFromSelection = () => {
