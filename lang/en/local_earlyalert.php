@@ -63,7 +63,7 @@ $string['choose_alert_type_help'] = 'Start by selecting the kind of alert you wa
 $string['compose_and_send'] = 'Send';
 $string['compose_help_text'] = 'Personalize the message before sending it to the selected students.';
 $string['compose_message'] = 'Compose Message';
-$string['condition_locked_help'] = 'Condition is set by the selected alert type; for commendations, choose >= or a grade range.';
+$string['condition_locked_help'] = 'Condition is set by the selected alert type; for commendations in Letter grade range mode, choose >= or a grade range.';
 $string['additional_message'] = 'Additional message';
 $string['additional_message_help'] = 'Optional text inserted into the eTemplate [custommessage] field. Template structure, routing, subject, and placeholders are managed in eTemplate.';
 $string['etemplate_template_note'] = 'Messages are resolved from local eTemplate using the selected student\'s campus, faculty, major, course, alert type, and language rules.';

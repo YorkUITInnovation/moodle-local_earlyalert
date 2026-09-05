@@ -420,6 +420,10 @@ class local_earlyalert_course_grades_ws extends external_api {
 
         $uselettergraderange = !($thresholdpercent >= 0 && $thresholdpercent <= 100);
 
+        if ((string)$params['alert_type'] === 'commendation' && !$uselettergraderange && $condition === 'range') {
+            $condition = 'above';
+        }
+
         if (!$uselettergraderange) {
             if ($condition === 'above') {
                 $thresholdmin = $thresholdpercent;
@@ -1283,6 +1287,10 @@ class local_earlyalert_course_grades_ws extends external_api {
             return "{$percentexpr} >= :" . $prefix . "thresholdmin";
         }
 
+        if ($condition === 'range') {
+            return "({$percentexpr} >= :" . $prefix . "thresholdmin AND {$percentexpr} <= :" . $prefix . "thresholdmax)";
+        }
+
         return "{$percentexpr} <= :" . $prefix . "thresholdmax";
     }
 
@@ -1303,6 +1311,10 @@ class local_earlyalert_course_grades_ws extends external_api {
 
         if ($condition === 'above') {
             return $percent >= $thresholdmin;
+        }
+
+        if ($condition === 'range') {
+            return $percent >= $thresholdmin && $percent <= $thresholdmax;
         }
 
         return $percent <= $thresholdmax;

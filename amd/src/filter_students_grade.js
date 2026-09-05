@@ -506,15 +506,16 @@ const updateConditionDisplayVisibility = () => {
     const conditionSelectWrap = document.getElementById('ea-condition-select-wrap');
     const select = document.getElementById('ea-condition');
     const isCommendation = STATE.alertType === 'commendation';
+    const canUseCommendationRange = isCommendation && STATE.thresholdMode === 'letter';
     const hiddenByAllStudents = STATE.includeAllStudents;
 
     if (conditionDisplayWrap) {
-        conditionDisplayWrap.classList.toggle('d-none', hiddenByAllStudents || isCommendation);
+        conditionDisplayWrap.classList.toggle('d-none', hiddenByAllStudents || canUseCommendationRange);
     }
     if (conditionSelectWrap) {
-        conditionSelectWrap.classList.toggle('d-none', hiddenByAllStudents || !isCommendation);
+        conditionSelectWrap.classList.toggle('d-none', hiddenByAllStudents || !canUseCommendationRange);
     }
-    if (select && isCommendation) {
+    if (select && canUseCommendationRange) {
         select.value = ['above', 'range'].includes(STATE.condition) ? STATE.condition : 'above';
     }
 
@@ -522,7 +523,7 @@ const updateConditionDisplayVisibility = () => {
     if (conditionDisplay) {
         if (hiddenByAllStudents) {
             conditionDisplay.textContent = '';
-        } else if (!isCommendation) {
+        } else {
             const conditionLabels = {
                 'below': '<= (Below or equal to)',
                 'above': '>= (Above or equal to)',
@@ -536,7 +537,9 @@ const updateConditionDisplayVisibility = () => {
 
 const updateConditionForAlertType = () => {
     if (STATE.alertType === 'commendation') {
-        if (!['above', 'range'].includes(STATE.condition)) {
+        if (STATE.thresholdMode !== 'letter') {
+            STATE.condition = 'above';
+        } else if (!['above', 'range'].includes(STATE.condition)) {
             STATE.condition = 'above';
         }
     } else {
@@ -1431,6 +1434,7 @@ export const init = async() => {
         }
         if (event.target.id === 'ea-threshold-mode') {
             STATE.thresholdMode = event.target.value === 'percent' ? 'percent' : 'letter';
+            updateConditionForAlertType();
             updateThresholdVisibility();
         }
         if (event.target.id === 'ea-threshold-percent') {
@@ -1441,11 +1445,9 @@ export const init = async() => {
             }
         }
         if (event.target.id === 'ea-condition') {
-            if (event.target.value === 'range') {
-                STATE.condition = 'range';
-            } else {
-                STATE.condition = 'above';
-            }
+            STATE.condition = (STATE.alertType === 'commendation'
+                && STATE.thresholdMode === 'letter'
+                && event.target.value === 'range') ? 'range' : 'above';
             STATE.page = 1;
             updateConditionDisplayVisibility();
             loadStudents();
