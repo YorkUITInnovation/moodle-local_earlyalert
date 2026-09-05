@@ -8,13 +8,18 @@ class ApiService {
   }
 
   // Load real student data from data.php
-  async loadRealStudentData() {
+  async loadRealStudentData(filters = {}) {
     // Always fetch fresh data, never use cache
 
     try {
-      // Add cache-busting timestamp to force fresh load
-      const timestamp = new Date().getTime();
-      const response = await fetch(`/local/earlyalert/react/dashboard/data.php?t=${timestamp}`, {
+      // Add cache-busting timestamp and optional academic year filter.
+      const queryParams = new URLSearchParams();
+      queryParams.set('t', String(new Date().getTime()));
+      if (filters.academicYear) {
+        queryParams.set('academic_year', filters.academicYear);
+      }
+
+      const response = await fetch(`/local/earlyalert/react/dashboard/data.php?${queryParams.toString()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -72,11 +77,11 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error(`API request failed: ${endpoint}`, error);
@@ -88,13 +93,13 @@ class ApiService {
   async getStudents(filters = {}) {
     try {
       // First, try to use real student data
-      const realData = await this.loadRealStudentData();
+      const realData = await this.loadRealStudentData(filters);
 
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
 
         // Extract unique students from alert logs
         const studentMap = new Map();
-        
+
         realData.alert_logs.forEach(log => {
           if (log.sisid && log.firstname && log.surname) {
             const key = log.sisid.toString();
@@ -125,7 +130,7 @@ class ApiService {
             }
           }
         });
-        
+
         const students = Array.from(studentMap.values());
         return students;
       }
@@ -186,16 +191,16 @@ class ApiService {
     try {
       // Fetch all students with no filters and high limit
       const students = await this.getStudents({ limit: 2000 });
-      
+
       // Fetch all alerts with no filters and high limit (API max is 1000)
       const alerts = await this.getAlerts({ limit: 1000 });
-      
+
       // Fetch dashboard metrics for additional context
       const metrics = await this.getDashboardMetrics();
-      
+
       // Fetch chart data for trends
       const chartData = await this.getChartData();
-      
+
       return {
         students,
         alerts,
@@ -211,17 +216,17 @@ class ApiService {
     }
   }
 
-  // Alert endpoints - now uses real student data first, then falls back to API  
+  // Alert endpoints - now uses real student data first, then falls back to API
   async getAlerts(filters = {}) {
     try {
       // First, try to use real student data
-      const realData = await this.loadRealStudentData();
+      const realData = await this.loadRealStudentData(filters);
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
         // Transform alert logs into dashboard format
         let missingFacultyCount = 0;
         const alerts = realData.alert_logs.map((log, index) => {
           const alertDate = log.date_message_sent ? new Date(log.date_message_sent) : new Date();
-          
+
           // Track missing faculty data
           if (!log.progfaculty && !log.faculty_template) {
             missingFacultyCount++;
@@ -339,7 +344,7 @@ class ApiService {
             }
           };
         });
-        
+
         if (missingFacultyCount > 0) {
           console.warn(`⚠️ Found ${missingFacultyCount} alerts with missing faculty data`);
         }
@@ -352,26 +357,26 @@ class ApiService {
 
     // Fallback to original API logic
     const queryParams = new URLSearchParams();
-    
+
     // Set a high limit to get all alerts (default API limit is 100)
     queryParams.append('limit', '1000');
-    
+
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== '') {
         queryParams.append(key, value);
       }
     });
-    
+
     const queryString = queryParams.toString();
     const endpoint = `/api/alerts?${queryString}`;
-    
+
     return this.request(endpoint);
   }
 
   // Helper method to extract message type from alert name
   extractMessageType(name) {
     if (!name) return 'Unknown';
-    
+
     // Extract the core message type from patterns like 'Campus: Type' or 'Faculty: Type'
     if (name.includes('Low Grade')) {
       return 'Low Grade';
@@ -380,14 +385,14 @@ class ApiService {
     } else if (name.includes('Missed Test') || name.includes('MissedTest')) {
       return 'Missed Test/Quiz';
     }
-    
+
     return 'Unknown';
   }
 
   // Helper method to map priority based on grade thresholds
   mapPriority(triggerGrade, actualGrade) {
     if (!actualGrade) return 'Medium';
-    
+
     const grade = parseFloat(actualGrade);
     if (grade < 50) return 'High';
     if (grade < 60) return 'Medium';
@@ -423,10 +428,10 @@ class ApiService {
   }
 
   // Dashboard endpoints - now uses real student data first, then falls back to API
-  async getDashboardMetrics() {
+  async getDashboardMetrics(filters = {}) {
     try {
       // First, try to calculate metrics from real student data
-      const realData = await this.loadRealStudentData();
+      const realData = await this.loadRealStudentData(filters);
 
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
 
@@ -447,13 +452,13 @@ class ApiService {
           if (priority === 'High') highPriorityCount++;
           else if (priority === 'Medium') mediumPriorityCount++;
           else lowPriorityCount++;
-          
+
           // Count status
           const status = this.mapAlertStatus(alert);
           if (status === 'Advised') advisedCount++;
           else unadvisedCount++;
         });
-        
+
         const totalAlerts = alerts.length;
         const activeAlerts = unadvisedCount; // Active alerts are unadvised alerts
 
@@ -478,15 +483,15 @@ class ApiService {
     return this.request('/api/dashboard/metrics');
   }
 
-  async getChartData() {
+  async getChartData(filters = {}) {
     try {
       // First, try to generate chart data from real student data
-      const realData = await this.loadRealStudentData();
+      const realData = await this.loadRealStudentData(filters);
 
       if (realData && realData.alert_logs && realData.alert_logs.length > 0) {
 
         const alerts = realData.alert_logs;
-        
+
         // Alert types distribution
         const alertTypeMap = new Map();
         const facultyMap = new Map();
@@ -494,38 +499,38 @@ class ApiService {
         const priorityMap = new Map();
         const campusMap = new Map();
         const timelineMap = new Map();
-        
+
         alerts.forEach(alert => {
           // Alert types
           const alertType = alert.name || 'Unknown Alert';
           alertTypeMap.set(alertType, (alertTypeMap.get(alertType) || 0) + 1);
-          
+
           // Faculty distribution
           const faculty = alert.PROGFACULTY || alert.faculty_template || 'Unknown';
           facultyMap.set(faculty, (facultyMap.get(faculty) || 0) + 1);
-          
+
           // Status distribution
           const status = this.mapAlertStatus(alert);
           statusMap.set(status, (statusMap.get(status) || 0) + 1);
-          
+
           // Priority distribution
           const priority = this.mapPriority(alert.trigger_grade, alert.actual_grade);
           priorityMap.set(priority, (priorityMap.get(priority) || 0) + 1);
-          
+
           // Campus analysis
           const campus = alert.CAMPUS ? alert.CAMPUS : this.mapCampusTemplate(alert.campus_template);
           campusMap.set(campus, (campusMap.get(campus) || 0) + 1);
-          
+
           // Timeline data
           if (alert.date_message_sent) {
             const date = new Date(alert.date_message_sent).toISOString().split('T')[0];
             timelineMap.set(date, (timelineMap.get(date) || 0) + 1);
           }
         });
-        
+
         // Convert maps to chart data arrays
         const CHART_COLORS = ['#E31837', '#B91C1C', '#991B1B', '#7F1D1D', '#DC2626', '#EF4444', '#F87171'];
-        
+
         return {
           alert_types: Array.from(alertTypeMap.entries()).map(([name, value], index) => ({
             name, value, color: CHART_COLORS[index % CHART_COLORS.length]
@@ -703,7 +708,7 @@ class ApiService {
       academicStatus: alert.student.academic_status,
       immigrationStatus: alert.student.immigration_status
     }));
-    
+
     return transformed;
   }
 
@@ -714,7 +719,7 @@ class ApiService {
       console.warn('⚠️ transformStudentsForDashboard - students is not an array:', students);
       return [];
     }
-    
+
     return students.map(student => ({
       id: student.id,
       sisId: student.sisid,

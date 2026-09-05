@@ -33,10 +33,10 @@ $string['adashboard'] = 'Admin Dashboard';
 $string['adjust_default_grade'] = 'Adjust Default Grade';
 $string['alerts_raised'] = 'Alerts raised';
 $string['assignment_instructions'] = '<ul>
-<li>These messages inform students of a missed assignment that threatens their success in the course 
-</li> 
-<li>To ensure they know which assignment you are referring to, please enter the assignment title below.
-<ul><li>Note that this title will appear in the email.</li></ul>
+<li>These messages inform students of any missed assignments that threaten their success in the course</li> 
+<li>To ensure they know which assignment(s) you are referring to, please enter the assignment details so that they appear in the email:
+<ul><li>Either fill in an “Assignment Title” or select a filter option and grade item(s)</li>
+</ul>
 </li>
 </ul>';
 $string['commendation_instructions'] = '<ul>
@@ -63,7 +63,7 @@ $string['choose_alert_type_help'] = 'Start by selecting the kind of alert you wa
 $string['compose_and_send'] = 'Send';
 $string['compose_help_text'] = 'Personalize the message before sending it to the selected students.';
 $string['compose_message'] = 'Compose Message';
-$string['condition_locked_help'] = 'Condition is set by the selected alert type.';
+$string['condition_locked_help'] = 'Condition is set by the selected alert type; for commendations, choose >= or a grade range.';
 $string['additional_message'] = 'Additional message';
 $string['additional_message_help'] = 'Optional text inserted into the eTemplate [custommessage] field. Template structure, routing, subject, and placeholders are managed in eTemplate.';
 $string['etemplate_template_note'] = 'Messages are resolved from local eTemplate using the selected student\'s campus, faculty, major, course, alert type, and language rules.';
@@ -79,6 +79,7 @@ $string['condition'] = 'Condition';
 $string['condition_above'] = 'Above (>)';
 $string['condition_below'] = 'Below (<)';
 $string['condition_missing'] = 'Missing';
+$string['condition_grade_range'] = 'Grade range (between >= and <=)';
 $string['course_code_title'] = 'Course code & title';
 $string['earlyalert_dashboard_subtitle'] = 'Review active courses, identify students at risk, and launch a guided alert workflow.';
 $string['earlyalert_dashboard_title'] = 'Early Alert Dashboard';
@@ -88,10 +89,6 @@ $string['filter_on'] = 'Filter on';
 $string['grade_items'] = 'Grade items';
 $string['grade_items_help'] = 'Choose one or more assignments/quizzes/tests when filtering below course level.';
 $string['gradedetails_assignments'] = '{$a}';
-$string['gradedetails_average_type'] = 'Average type used: {$a}';
-$string['gradedetails_average_type_any'] = 'Any';
-$string['gradedetails_average_type_average'] = 'Average';
-$string['gradedetails_average_type_weighted'] = 'Weighted';
 $string['matched_items'] = 'Matched items';
 $string['grade_threshold_and_students'] = 'Grade & Students';
 $string['risk_level'] = 'Risk level';
@@ -180,10 +177,10 @@ $string['grade_instructions'] = '
     <li>Grades messages inform students they are averaging below a certain letter grade.
         <ul><li>The default has been set to a D+.</li></ul>
     </li> 
-    <li>Should you wish to adjust this for your course, please use the threshold selectors below.
+    <li>Should you wish to adjust this for your course, please use the threshold and filters selectors below.
         <ul>
             <li>Note that this is the letter grade that will appear in the email (e.g. you are averaging a D+ or less)</li>
-            <li>If you are using the gradebook, this is also how you sort your students to show only those averaging a specific grade or less (based on the gradebook course total). If you set the box to D+, for example, you will only see a list of students who are averaging a D+ or less in your list. In order for this feature to work properly, you must have “exclude empty grades” checked under “Grade category” in your eClass settings.</li>
+            <li>If you are using the gradebook, this is also how you sort your students to show only those averaging a specific grade or less (based on the filtering options you select).</li>
         </ul>
     </li>    
 </ul>';
@@ -208,6 +205,12 @@ $string['select_students'] ='Select the students to whom you would like a {$a} a
 You can preview the message by clicking on the “preview” button prior to sending.<br><em>N.B. Graduate Students and Teaching Assistants may appear here – please disregard them.</em>';
 $string['send_email_to_advisors'] = 'Send email to advisors?';
 $string['showgrades'] = 'Show Grades';
+$string['academic_year_setting'] = 'Academic year';
+$string['academic_year_setting_desc'] = 'Select the academic year to use across Early Alert. Choose Current to automatically follow the current academic year, or pick a previous year for testing.';
+$string['academic_year_current'] = 'Current ({$a})';
+$string['academic_year'] = 'Academic Year';
+$string['select_academic_year'] = 'Select academic year';
+$string['all_academic_years'] = 'All Academic Years';
 $string['student_lookup'] = 'Student Lookup';
 $string['student_lookup_help'] = '<ul><li>You can search for a student using their student number (SISID) or Name</li>
 <li>You can wildcard (*) the name if required, and then select the correct student from the list </li>

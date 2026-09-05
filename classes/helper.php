@@ -22,28 +22,37 @@ class helper
     const ALERT_TYPE_ASSIGN = 'assign';
     const ALERT_TYPE_EXAM = 'exam';
 
+    /**
+     * Returns the academic year based only on server date.
+     * Academic year starts in September and is represented by the start year.
+     *
+     * @return int
+     */
+    public static function get_current_acad_year()
+    {
+        $month = (int)date('n', time());
+        $year = (int)date('Y', time());
+
+        if ($month >= 9) {
+            return $year;
+        }
+
+        return $year - 1;
+    }
+
     public static function get_acad_year()
     {
-        $month = date('n', time());
-        switch ($month) {
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-                $acad_year = (date('Y', time()) - 1);
-                break;
-            case 9:
-            case 10:
-            case 11:
-            case 12:
-                $acad_year = date('Y', time());
-                break;
+        global $CFG;
+
+        // A value > 0 means a specific academic year override is selected.
+        if (!empty($CFG->earlyalert_academicyear) && is_numeric($CFG->earlyalert_academicyear)) {
+            $configuredyear = (int)$CFG->earlyalert_academicyear;
+            if ($configuredyear > 0) {
+                return $configuredyear;
+            }
         }
-        return $acad_year;
+
+        return self::get_current_acad_year();
     }
 
     public static function get_courses_in_acadyear($courses)

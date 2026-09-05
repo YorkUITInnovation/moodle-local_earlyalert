@@ -32,9 +32,10 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 try {
     $date_range = optional_param('date_range', null, PARAM_TEXT);
+    $academicyear = optional_param('academic_year', '', PARAM_ALPHANUMEXT);
 
     // Use the existing logs class to get data
-    $logs = \local_earlyalert\logs::get_logs($date_range);
+    $logs = \local_earlyalert\logs::get_logs($date_range, $academicyear);
 
     // Transform the data to match the expected format for the React dashboard
     $formatted_logs = [];
@@ -123,6 +124,7 @@ try {
         'data' => $formatted_logs,
         'count' => count($formatted_logs),
         'date_range' => $date_range,
+        'academic_year' => $academicyear,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (Exception $e) {

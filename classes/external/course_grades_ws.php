@@ -298,7 +298,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'alert_type' => new external_value(PARAM_TEXT, 'Alert type', VALUE_DEFAULT, 'grade'),
             'filtermode' => new external_value(PARAM_TEXT, 'course|single|multi', VALUE_DEFAULT, 'course'),
             'multimode' => new external_value(PARAM_TEXT, 'any|average|weighted', VALUE_DEFAULT, 'any'),
-            'condition' => new external_value(PARAM_TEXT, 'below|above|missing', VALUE_DEFAULT, 'below'),
+            'condition' => new external_value(PARAM_TEXT, 'below|above|missing|range', VALUE_DEFAULT, 'below'),
             'thresholdid' => new external_value(PARAM_INT, 'Grade letter id', VALUE_DEFAULT, 7),
             'thresholdpercent' => new external_value(PARAM_FLOAT, 'Numeric threshold percent', VALUE_DEFAULT, -1),
             'gradeitemid' => new external_value(PARAM_INT, 'Single grade item id', VALUE_DEFAULT, 0),
@@ -412,7 +412,9 @@ class local_earlyalert_course_grades_ws extends external_api {
         }
 
         $mode = in_array($params['filtermode'], ['course', 'single', 'multi']) ? $params['filtermode'] : 'course';
-        $condition = self::get_condition_for_alert_type((string)$params['alert_type']);
+        $condition = in_array($params['condition'], ['below', 'above', 'missing', 'range'], true)
+            ? $params['condition']
+            : self::get_condition_for_alert_type((string)$params['alert_type']);
         $multimode = in_array($params['multimode'], ['any', 'average', 'weighted']) ? $params['multimode'] : 'any';
         $thresholdpercent = (float)$params['thresholdpercent'];
 
@@ -422,6 +424,9 @@ class local_earlyalert_course_grades_ws extends external_api {
             if ($condition === 'above') {
                 $thresholdmin = $thresholdpercent;
                 $thresholdmax = 100;
+            } elseif ($condition === 'range') {
+                $thresholdmin = 0;
+                $thresholdmax = $thresholdpercent;
             } else {
                 $thresholdmin = 0;
                 $thresholdmax = $thresholdpercent;
@@ -986,7 +991,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         if ($thresholdpercent >= 0 && $thresholdpercent <= 100) {
             $gradetext = rtrim(rtrim(number_format($thresholdpercent, 1, '.', ''), '0'), '.') . '%';
         } else {
-            $selectedrange = helper::get_moodle_grade_percent_range((int)$params['thresholdid'], true);
+            $selectedrange = helper::get_moodle_grade_percent_range((int)$params['thresholdid']);
             $gradetext = (!empty($selectedrange) && isset($selectedrange['letter'])) ? $selectedrange['letter'] : 'D+';
         }
 
@@ -1180,16 +1185,11 @@ class local_earlyalert_course_grades_ws extends external_api {
                 implode(', ', $gradedetails['assignments']));
         }
 
-        $averagetype = !empty($gradedetails['average_type']) ? (string)$gradedetails['average_type'] : '';
-        if ($averagetype !== '') {
-            $modekey = 'gradedetails_average_type_' . $averagetype;
-            $modevalue = get_string_manager()->string_exists($modekey, 'local_earlyalert')
-                ? get_string($modekey, 'local_earlyalert')
-                : $averagetype;
-            $lines[] = get_string('gradedetails_average_type', 'local_earlyalert', $modevalue);
+        if (empty($lines)) {
+            return '';
         }
 
-        return implode("\n", $lines);
+        return '(' . implode(' ', $lines) . ')';
     }
 
     /**

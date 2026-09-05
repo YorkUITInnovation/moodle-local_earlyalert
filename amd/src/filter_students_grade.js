@@ -501,17 +501,59 @@ const updateThresholdVisibility = () => {
     }
 };
 
-const updateConditionForAlertType = () => {
-    STATE.condition = getConditionForAlertType(STATE.alertType);
+const updateConditionDisplayVisibility = () => {
+    const conditionDisplayWrap = document.getElementById('ea-condition-display-wrap');
+    const conditionSelectWrap = document.getElementById('ea-condition-select-wrap');
+    const select = document.getElementById('ea-condition');
+    const isCommendation = STATE.alertType === 'commendation';
+    const hiddenByAllStudents = STATE.includeAllStudents;
+
+    if (conditionDisplayWrap) {
+        conditionDisplayWrap.classList.toggle('d-none', hiddenByAllStudents || isCommendation);
+    }
+    if (conditionSelectWrap) {
+        conditionSelectWrap.classList.toggle('d-none', hiddenByAllStudents || !isCommendation);
+    }
+    if (select && isCommendation) {
+        select.value = ['above', 'range'].includes(STATE.condition) ? STATE.condition : 'above';
+    }
+
     const conditionDisplay = document.getElementById('ea-condition-display');
     if (conditionDisplay) {
+        if (hiddenByAllStudents) {
+            conditionDisplay.textContent = '';
+        } else if (!isCommendation) {
+            const conditionLabels = {
+                'below': '<= (Below or equal to)',
+                'above': '>= (Above or equal to)',
+                'missing': 'Missing (no grade submitted)',
+                'range': 'Grade range (between >= and <=)',
+            };
+            conditionDisplay.textContent = conditionLabels[STATE.condition] || STATE.condition;
+        }
+    }
+};
+
+const updateConditionForAlertType = () => {
+    if (STATE.alertType === 'commendation') {
+        if (!['above', 'range'].includes(STATE.condition)) {
+            STATE.condition = 'above';
+        }
+    } else {
+        STATE.condition = getConditionForAlertType(STATE.alertType);
+    }
+
+    const conditionDisplay = document.getElementById('ea-condition-display');
+    if (conditionDisplay && !STATE.includeAllStudents && STATE.alertType !== 'commendation') {
         const conditionLabels = {
             'below': '<= (Below or equal to)',
             'above': '>= (Above or equal to)',
             'missing': 'Missing (no grade submitted)',
+            'range': 'Grade range (between >= and <=)',
         };
         conditionDisplay.textContent = conditionLabels[STATE.condition] || STATE.condition;
     }
+    updateConditionDisplayVisibility();
     updateThresholdVisibility();
     updateAssignmentTitleVisibility();
     updateInstructionsPanel();
@@ -598,6 +640,7 @@ const updateFilterModeContainerVisibility = () => {
     }
 
     filterModeContainer.classList.toggle('d-none', STATE.includeAllStudents);
+    updateConditionDisplayVisibility();
 };
 
 const deriveFilterModeFromSelection = () => {
@@ -1398,7 +1441,14 @@ export const init = async() => {
             }
         }
         if (event.target.id === 'ea-condition') {
-            updateConditionForAlertType();
+            if (event.target.value === 'range') {
+                STATE.condition = 'range';
+            } else {
+                STATE.condition = 'above';
+            }
+            STATE.page = 1;
+            updateConditionDisplayVisibility();
+            loadStudents();
         }
         if (event.target.id === 'ea-grade-filter-mode') {
             STATE.filterMode = event.target.value;

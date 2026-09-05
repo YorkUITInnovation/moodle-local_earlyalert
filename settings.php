@@ -42,6 +42,23 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtextarea('earlyalert_markham_streams', get_string('markham_streams', 'local_earlyalert'), '', "MPR\nMAH\nMNO"));
     // Add a setting for showing grades or not
     $settings->add(new admin_setting_configcheckbox('earlyalert_showgrades', get_string('showgrades', 'local_earlyalert'), '', 0));
+    $currentacademicyear = \local_earlyalert\helper::get_current_acad_year();
+    $academicyearoptions = [
+        '' => '',
+        0 => get_string('academic_year_current', 'local_earlyalert', $currentacademicyear . '-' . ($currentacademicyear + 1)),
+    ];
+    // Keep a rolling window of previous years available for testing.
+    for ($offset = 1; $offset <= 8; $offset++) {
+        $year = $currentacademicyear - $offset;
+        $academicyearoptions[$year] = $year . '-' . ($year + 1);
+    }
+    $settings->add(new admin_setting_configselect(
+        'earlyalert_academicyear',
+        get_string('academic_year_setting', 'local_earlyalert'),
+        get_string('academic_year_setting_desc', 'local_earlyalert'),
+        '',
+        $academicyearoptions
+    ));
     /*Ldap server url*/
     $settings->add(new admin_setting_configtext('earlyalert_ldapurl', get_string('ldap_url', 'local_earlyalert'), '', 'ldaps://pydirectory.yorku.ca'));
     /*Ldap server user*/

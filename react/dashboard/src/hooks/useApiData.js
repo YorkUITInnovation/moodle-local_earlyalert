@@ -1,5 +1,5 @@
 // React hook for API data management
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import apiService from '../services/apiService';
 
 // Mock data for when API is not available
@@ -173,45 +173,50 @@ export const useApiData = () => {
   const loadData = useCallback(async (filters = {}) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Try to load alerts and students (the critical data)
       let alertsData, studentsData, metricsData, chartsData;
-      
+
+      const sharedFilters = {};
+      if (filters.academicYear) {
+        sharedFilters.academicYear = filters.academicYear;
+      }
+
       try {
         [alertsData, studentsData] = await Promise.all([
-          apiService.getAlerts(filters.alerts || {}),
-          apiService.getStudents(filters.students || {})
+          apiService.getAlerts({ ...(filters.alerts || {}), ...sharedFilters }),
+          apiService.getStudents({ ...(filters.students || {}), ...sharedFilters })
         ]);
       } catch (coreErr) {
         console.error('❌ useApiData - Failed to load core data:', coreErr.message);
         throw coreErr; // Re-throw to fall back to mock data
       }
-      
+
       // Try to load metrics and charts (non-critical, can fail gracefully)
       try {
         [metricsData, chartsData] = await Promise.all([
-          apiService.getDashboardMetrics(),
-          apiService.getChartData()
+          apiService.getDashboardMetrics(sharedFilters),
+          apiService.getChartData(sharedFilters)
         ]);
       } catch (metricsErr) {
         console.warn('⚠️ useApiData - Metrics/charts failed, using defaults:', metricsErr.message);
         metricsData = mockMetrics;
         chartsData = mockChartData;
       }
-      
+
       const transformedStudents = apiService.transformStudentsForDashboard(studentsData);
       const transformedAlerts = apiService.transformAlertsForDashboard(alertsData);
-      
+
       setAlerts(transformedAlerts);
       setStudents(transformedStudents);
       setMetrics(metricsData);
       setChartData(chartsData);
       setUsingMockData(false);
-      
+
     } catch (err) {
       console.warn('⚠️ useApiData - API not available, using mock data:', err.message);
-      
+
       // Fall back to mock data only if API is truly unavailable
       setAlerts(mockAlerts);
       setStudents(mockStudents);
@@ -230,7 +235,7 @@ export const useApiData = () => {
       setAlerts(mockAlerts);
       return;
     }
-    
+
     try {
       const alertsData = await apiService.getAlerts(filters);
       setAlerts(apiService.transformAlertsForDashboard(alertsData));
@@ -246,7 +251,7 @@ export const useApiData = () => {
       setMetrics(mockMetrics);
       return;
     }
-    
+
     try {
       const metricsData = await apiService.getDashboardMetrics();
       setMetrics(metricsData);
@@ -262,7 +267,7 @@ export const useApiData = () => {
       setChartData(mockChartData);
       return;
     }
-    
+
     try {
       const chartsData = await apiService.getChartData();
       setChartData(chartsData);
@@ -273,40 +278,36 @@ export const useApiData = () => {
     }
   }, [usingMockData]);
 
-  // Load data on mount
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   // Update alert status
   const updateAlertStatus = useCallback(async (alertId, statusUpdate) => {
     if (usingMockData) {
       // Update mock data
-      setAlerts(prevAlerts => 
-        prevAlerts.map(alert => 
-          alert.id === alertId 
+      setAlerts(prevAlerts =>
+        prevAlerts.map(alert =>
+          alert.id === alertId
             ? { ...alert, ...statusUpdate, lastUpdated: new Date() }
             : alert
         )
       );
       return;
     }
-    
+
     try {
       const updatedAlert = await apiService.updateAlert(alertId, statusUpdate);
-      
+
       // Update local state
-      setAlerts(prevAlerts => 
-        prevAlerts.map(alert => 
-          alert.id === alertId 
+      setAlerts(prevAlerts =>
+        prevAlerts.map(alert =>
+          alert.id === alertId
             ? { ...alert, ...statusUpdate, lastUpdated: new Date() }
             : alert
         )
       );
-      
+
       // Refresh metrics to reflect changes
       refreshMetrics();
-      
+
       return updatedAlert;
     } catch (err) {
       setError(err.message);
@@ -327,16 +328,16 @@ export const useApiData = () => {
       setAlerts(prevAlerts => [...prevAlerts, newAlert]);
       return newAlert;
     }
-    
+
     try {
       const newAlert = await apiService.createAlert(alertData);
-      
+
       // Refresh alerts and metrics
       await Promise.all([
         refreshAlerts(),
         refreshMetrics()
       ]);
-      
+
       return newAlert;
     } catch (err) {
       setError(err.message);
@@ -361,12 +362,12 @@ export const useApiData = () => {
     alerts,
     metrics,
     chartData,
-    
+
     // State
     loading,
     error,
     usingMockData,
-    
+
     // Actions
     loadData,
     refreshAlerts,
@@ -375,7 +376,7 @@ export const useApiData = () => {
     updateAlertStatus,
     createAlert,
     checkHealth,
-    
+
     // Clear error
     clearError: () => setError(null)
   };
