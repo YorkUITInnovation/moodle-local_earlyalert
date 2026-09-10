@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_earlyalert';
-$plugin->release = '2.0.12 (Build 20260728002)';
-$plugin->version = 20260728002;
+$plugin->release = '2.0.13 (Build 20260910000)';
+$plugin->version = 20260910000;
 $plugin->requires = 2024042200; // Moodle 5.1 minimum requirement.
 $plugin->maturity = MATURITY_STABLE;
