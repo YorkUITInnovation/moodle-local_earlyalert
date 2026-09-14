@@ -1,0 +1,87 @@
+<!-- Mobile Screenshot Placeholder -->
+<svg width="390" height="844" viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg">
+  <rect width="390" height="844" fill="#f8fafc"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="390" height="100" fill="#E31837"/>
+  <text x="195" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Early Alerts</text>
+  <text x="195" y="55" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">Dashboard</text>
+  
+  <!-- Stats Cards -->
+  <rect x="20" y="120" width="160" height="100" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="100" y="140" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Total Alerts</text>
+  <text x="100" y="180" text-anchor="middle" fill="#E31837" font-family="Arial, sans-serif" font-size="24" font-weight="bold">1,247</text>
+  <text x="100" y="200" text-anchor="middle" fill="#10b981" font-family="Arial, sans-serif" font-size="10">↑ 12% this week</text>
+  
+  <rect x="210" y="120" width="160" height="100" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="290" y="140" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Active Students</text>
+  <text x="290" y="180" text-anchor="middle" fill="#E31837" font-family="Arial, sans-serif" font-size="24" font-weight="bold">892</text>
+  <text x="290" y="200" text-anchor="middle" fill="#10b981" font-family="Arial, sans-serif" font-size="10">↑ 8% this week</text>
+  
+  <!-- Quick Actions -->
+  <rect x="20" y="240" width="350" height="80" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="195" y="260" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Quick Actions</text>
+  
+  <rect x="40" y="275" width="100" height="30" rx="15" fill="#E31837"/>
+  <text x="90" y="293" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">New Alert</text>
+  
+  <rect x="150" y="275" width="100" height="30" rx="15" fill="#6b7280"/>
+  <text x="200" y="293" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">View Reports</text>
+  
+  <rect x="260" y="275" width="100" height="30" rx="15" fill="#10b981"/>
+  <text x="310" y="293" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">Success Rate</text>
+  
+  <!-- Recent Alerts List -->
+  <rect x="20" y="340" width="350" height="460" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="195" y="365" text-anchor="middle" fill="#374151" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Recent Alerts</text>
+  
+  <!-- Alert Items -->
+  <rect x="30" y="380" width="330" height="60" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+  <circle cx="50" cy="410" r="8" fill="#ef4444"/>
+  <text x="70" y="400" fill="#374151" font-family="Arial, sans-serif" font-size="12" font-weight="bold">John Smith</text>
+  <text x="70" y="415" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Academic Risk - LAPS</text>
+  <text x="70" y="428" fill="#6b7280" font-family="Arial, sans-serif" font-size="9">2 hours ago</text>
+  <text x="320" y="410" text-anchor="end" fill="#E31837" font-family="Arial, sans-serif" font-size="10">High</text>
+  
+  <rect x="30" y="450" width="330" height="60" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+  <circle cx="50" cy="480" r="8" fill="#f59e0b"/>
+  <text x="70" y="470" fill="#374151" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Sarah Johnson</text>
+  <text x="70" y="485" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Attendance - Schulich</text>
+  <text x="70" y="498" fill="#6b7280" font-family="Arial, sans-serif" font-size="9">4 hours ago</text>
+  <text x="320" y="480" text-anchor="end" fill="#f59e0b" font-family="Arial, sans-serif" font-size="10">Medium</text>
+  
+  <rect x="30" y="520" width="330" height="60" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+  <circle cx="50" cy="550" r="8" fill="#ef4444"/>
+  <text x="70" y="540" fill="#374151" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Mike Chen</text>
+  <text x="70" y="555" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Grade Drop - Lassonde</text>
+  <text x="70" y="568" fill="#6b7280" font-family="Arial, sans-serif" font-size="9">6 hours ago</text>
+  <text x="320" y="550" text-anchor="end" fill="#ef4444" font-family="Arial, sans-serif" font-size="10">High</text>
+  
+  <rect x="30" y="590" width="330" height="60" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+  <circle cx="50" cy="620" r="8" fill="#10b981"/>
+  <text x="70" y="610" fill="#374151" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Emma Wilson</text>
+  <text x="70" y="625" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Resolved - Health</text>
+  <text x="70" y="638" fill="#6b7280" font-family="Arial, sans-serif" font-size="9">1 day ago</text>
+  <text x="320" y="620" text-anchor="end" fill="#10b981" font-family="Arial, sans-serif" font-size="10">Resolved</text>
+  
+  <rect x="30" y="660" width="330" height="60" fill="#fff7ed" stroke="#fed7aa" stroke-width="1"/>
+  <circle cx="50" cy="690" r="8" fill="#f59e0b"/>
+  <text x="70" y="680" fill="#374151" font-family="Arial, sans-serif" font-size="12" font-weight="bold">David Brown</text>
+  <text x="70" y="695" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Financial Aid - AMPD</text>
+  <text x="70" y="708" fill="#6b7280" font-family="Arial, sans-serif" font-size="9">1 day ago</text>
+  <text x="320" y="690" text-anchor="end" fill="#f59e0b" font-family="Arial, sans-serif" font-size="10">Medium</text>
+  
+  <!-- Bottom Navigation -->
+  <rect x="0" y="780" width="390" height="64" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <circle cx="78" cy="810" r="12" fill="#E31837"/>
+  <text x="78" y="830" text-anchor="middle" fill="#E31837" font-family="Arial, sans-serif" font-size="10">Dashboard</text>
+  
+  <circle cx="156" cy="810" r="12" fill="#6b7280"/>
+  <text x="156" y="830" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Alerts</text>
+  
+  <circle cx="234" cy="810" r="12" fill="#6b7280"/>
+  <text x="234" y="830" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Reports</text>
+  
+  <circle cx="312" cy="810" r="12" fill="#6b7280"/>
+  <text x="312" y="830" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="10">Settings</text>
+</svg>

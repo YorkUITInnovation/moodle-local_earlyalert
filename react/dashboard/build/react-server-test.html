@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Dev Server - Aura Test</title>
+</head>
+<body>
+    <h1>Testing Aura on React Dev Server (no React app)</h1>
+    <p>This tests if the issue is with the React dev server itself.</p>
+    
+    <!-- Container divs -->
+    <div id="aura-widget"></div>
+    <div id="aura-chat-widget"></div>
+    <div id="aura-embed-211"></div>
+    
+    <!-- Aura Embed Script -->
+    <script type="text/javascript" src="https://auraembed-api.uit.yorku.ca/embed/211/load"></script>
+    
+    <script>
+        console.log('Testing Aura on React dev server without React app...');
+        setTimeout(() => {
+            console.log('Checking for Aura elements...');
+            const auraElements = document.querySelectorAll('[id*="aura"], [class*="aura"], iframe[src*="aura"], [class*="chat"], [id*="chat"]');
+            console.log('Found elements:', auraElements.length);
+            
+            if (auraElements.length > 0) {
+                console.log('SUCCESS: Aura elements found!');
+                auraElements.forEach((el, i) => {
+                    console.log(`Element ${i}:`, el.tagName, el.id, el.className);
+                });
+            } else {
+                console.log('No Aura elements found - may be an issue with the React dev server or embed ID');
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

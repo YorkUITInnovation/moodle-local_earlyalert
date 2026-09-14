@@ -1,0 +1,10 @@
+<!-- 512x512 PWA Icon -->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="85" fill="#E31837"/>
+  <circle cx="256" cy="180" r="65" fill="white" stroke="none"/>
+  <rect x="191" y="270" width="130" height="20" rx="10" fill="white"/>
+  <rect x="201" y="305" width="110" height="15" rx="7.5" fill="white"/>
+  <rect x="211" y="335" width="90" height="15" rx="7.5" fill="white"/>
+  <path d="M150 380 L256 420 L362 380" stroke="white" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <text x="256" y="460" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">EARLY ALERTS</text>
+</svg>
