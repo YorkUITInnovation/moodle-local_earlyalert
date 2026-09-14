@@ -1,0 +1,108 @@
+{
+  "short_name": "Early Alerts",
+  "name": "York University Early Alerts Dashboard",
+  "description": "Real-time student early alert analytics and intervention tracking system for York University",
+  "icons": [
+    {
+      "src": "favicon-32x32.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "icon-192x192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icon-512x512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "theme_color": "#E31837",
+  "background_color": "#F9FAFB",
+  "scope": "/",
+  "categories": ["education", "productivity", "utilities"],
+  "lang": "en-US",
+  "screenshots": [
+    {
+      "src": "screenshot-desktop.svg",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "Dashboard Overview"
+    },
+    {
+      "src": "screenshot-mobile.svg",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Mobile View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Alerts",
+      "short_name": "Alerts",
+      "description": "View current student alerts",
+      "url": "/?shortcut=alerts",
+      "icons": [{ "src": "icon-192x192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Analytics",
+      "short_name": "Analytics",
+      "description": "View dashboard analytics",
+      "url": "/?shortcut=analytics",
+      "icons": [{ "src": "icon-192x192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "AI Assistant",
+      "short_name": "AURA",
+      "description": "Open AI assistant",
+      "url": "/?shortcut=aura",
+      "icons": [{ "src": "icon-192x192.svg", "sizes": "192x192", "type": "image/svg+xml" }]
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/import",
+      "accept": {
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+        "text/csv": [".csv"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["text/csv", ".xlsx"]
+        }
+      ]
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+earlyalerts",
+      "url": "/?alert=%s"
+    }
+  ]
+}

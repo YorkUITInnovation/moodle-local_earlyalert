@@ -1,0 +1,10 @@
+<!-- 192x192 PWA Icon -->
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="32" fill="#E31837"/>
+  <circle cx="96" cy="70" r="25" fill="white" stroke="none"/>
+  <rect x="71" y="105" width="50" height="8" rx="4" fill="white"/>
+  <rect x="76" y="120" width="40" height="6" rx="3" fill="white"/>
+  <rect x="81" y="132" width="30" height="6" rx="3" fill="white"/>
+  <path d="M60 150 L96 165 L132 150" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <text x="96" y="175" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">ALERTS</text>
+</svg>

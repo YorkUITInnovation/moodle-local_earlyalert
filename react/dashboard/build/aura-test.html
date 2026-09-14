@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Embed Test - Standalone</title>
+</head>
+<body>
+    <h1>Aura Embed Test - Standalone HTML</h1>
+    <p>This is a simple HTML page to test if the Aura embed works outside of React.</p>
+    
+    <!-- Aura Embed Script -->
+    <script type="text/javascript" src="https://auraembed-api.uit.yorku.ca/embed/132/load" async></script>
+    
+    <script>
+        // Log when script loads
+        setTimeout(() => {
+            console.log('Checking for Aura elements in standalone page...');
+            const auraElements = document.querySelectorAll('[id*="aura"], [class*="aura"], iframe[src*="aura"], [class*="chat"], [id*="chat"]');
+            console.log('Found elements:', auraElements.length);
+            auraElements.forEach((el, i) => {
+                console.log(`Element ${i}:`, el.tagName, el.id || 'no-id', el.className || 'no-class');
+            });
+            
+            // Check window for Aura objects
+            console.log('Window.Aura:', window.Aura);
+            console.log('Window object keys containing "aura":', Object.keys(window).filter(key => key.toLowerCase().includes('aura')));
+        }, 3000);
+    </script>
+</body>
+</html>
