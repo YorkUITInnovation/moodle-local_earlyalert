@@ -17,11 +17,10 @@ use local_etemplate\email;
 function local_earlyalert_debug_get_profile_field(int $userid, string $shortname): string {
     global $DB;
 
-    $sql = "SELECT uid.data
-              FROM {user_info_data} uid
-              JOIN {user_info_field} uif ON uif.id = uid.fieldid
-             WHERE uid.userid = :userid
-               AND uif.shortname = :shortname";
+    $sql = "SELECT COALESCE(NULLIF(uid.data, ''), NULLIF(uif.defaultdata, ''), '')
+              FROM {user_info_field} uif
+         LEFT JOIN {user_info_data} uid ON uid.fieldid = uif.id AND uid.userid = :userid
+             WHERE uif.shortname = :shortname";
 
     return (string)($DB->get_field_sql($sql, ['userid' => $userid, 'shortname' => $shortname]) ?: '');
 }

@@ -612,7 +612,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                    u.idnumber,
                    u.email,
                    u.lang,
-                   COALESCE(campusd.data, '') AS campus,
+                   COALESCE(NULLIF(campusd.data, ''), NULLIF(campusf.defaultdata, ''), '') AS campus,
                    COALESCE(facultyd.data, '') AS faculty,
                    COALESCE(majord.data, '') AS major,
                    gg_course.finalgrade AS coursefinalgrade,
@@ -928,11 +928,10 @@ class local_earlyalert_course_grades_ws extends external_api {
         try {
             $student = $DB->get_record('user', ['id' => (int)$params['studentid']], '*', MUST_EXIST);
 
-        $campus = (string)$DB->get_field_sql("SELECT uid.data
-                                               FROM {user_info_data} uid
-                                               JOIN {user_info_field} uif ON uif.id = uid.fieldid
-                                              WHERE uid.userid = :userid
-                                                AND uif.shortname = 'campus'", ['userid' => $student->id]) ?: '';
+        $campus = (string)$DB->get_field_sql("SELECT COALESCE(NULLIF(uid.data, ''), NULLIF(uif.defaultdata, ''), '')
+                                               FROM {user_info_field} uif
+                                          LEFT JOIN {user_info_data} uid ON uid.fieldid = uif.id AND uid.userid = :userid
+                                              WHERE uif.shortname = 'campus'", ['userid' => $student->id]) ?: '';
         $faculty = (string)$DB->get_field_sql("SELECT uid.data
                                                 FROM {user_info_data} uid
                                                 JOIN {user_info_field} uif ON uif.id = uid.fieldid
