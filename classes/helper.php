@@ -231,6 +231,10 @@ class helper
 //                $campus_profile_field->id = 0;
 //            }
             $campus_profile_field = $DB->get_record('user_info_field', ['shortname' => 'campus']);
+            $campusfielddefault = '';
+            if (!empty($campus_profile_field) && isset($campus_profile_field->defaultdata)) {
+                $campusfielddefault = trim((string)$campus_profile_field->defaultdata);
+            }
 
             $students = array();
             if (isset($course_id)) {
@@ -280,6 +284,7 @@ class helper
                         //has campus
                         $studentcampus = $campus->campus;
                     } else {
+                        $studentcampus = $campusfielddefault;
                         // Get user info from ldap if available
                         if ($LDAP !== null && !empty($mdl_user) && !empty($mdl_user->id) && !empty($mdl_user->idnumber) && $campus_profile_field->id != 0) {
                             try {
@@ -289,6 +294,10 @@ class helper
 
                                 // try getting campus from stream
                                 $campus = helper::get_campus_from_stream($student_info['pystream']);
+
+                                if (!empty($campus)) {
+                                    $studentcampus = $campus;
+                                }
 
                                 // Update campus profile field
                                 $params = [
@@ -303,7 +312,6 @@ class helper
                                 // Continue without LDAP data
                             }
                         }
-                        $studentcampus = isset($campus) ? $campus : '';
                     }
                     if ($faculty = $DB->get_record_sql("SELECT uid.data AS 'faculty'
                             FROM {user_info_data} uid
