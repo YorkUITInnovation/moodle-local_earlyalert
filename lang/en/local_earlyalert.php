@@ -88,6 +88,7 @@ $string['flagged_students'] = 'Flagged Students';
 $string['filter_on'] = 'Filter on';
 $string['grade_items'] = 'Grade items';
 $string['grade_items_help'] = 'Choose one or more assignments/quizzes/tests when filtering below course level.';
+$string['gradedetails_details'] = 'Details: {$a}';
 $string['gradedetails_assignments'] = '{$a}';
 $string['matched_items'] = 'Matched items';
 $string['grade_threshold_and_students'] = 'Grade & Students';

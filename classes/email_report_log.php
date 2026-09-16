@@ -539,6 +539,17 @@ CONST GRADE_A_PLUS = 1;
     }
 
     /**
+     * Check if this alert is a commendation type
+     *
+     * @return bool
+     */
+    public function is_commendation(): bool
+    {
+        $TEMPLATE = new \local_etemplate\email($this->template_id);
+        return $TEMPLATE->get_messagetype() === \local_etemplate\email::MESSAGE_TYPE_COMMENDATION;
+    }
+
+    /**
      * @return timemodified - bigint (18)
      */
     public function get_timemodified(): int

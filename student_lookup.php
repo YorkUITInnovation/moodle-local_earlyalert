@@ -96,6 +96,7 @@ if ($user_id) {
                 $data[$i] = new \stdClass();
                 $data[$i]->id = $LOG->get_id();
                 $data[$i]->message_type = $LOG->get_message_type(); // returns nice name for message type - template id is the key
+                $data[$i]->is_commendation = $LOG->is_commendation();
                 $data[$i]->user_read = $LOG->get_user_read();
                 $data[$i]->trigger_grade = $LOG->get_trigger_grade_letter();
                 $data[$i]->student_advised_by_advisor = $LOG->get_student_advised_by_advisor();

@@ -59,6 +59,8 @@ function local_earlyalert_debug_map_alert_type_to_message_type(string $alerttype
         case 'exam':
             return email::MESSAGE_TYPE_EXAM;
         case 'commendation':
+            return email::MESSAGE_TYPE_COMMENDATION;
+        case 'catchall':
             return email::MESSAGE_TYPE_CATCHALL;
         case 'grade':
         default:

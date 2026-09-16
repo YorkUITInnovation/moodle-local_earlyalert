@@ -23,6 +23,53 @@ class helper
     const ALERT_TYPE_EXAM = 'exam';
 
     /**
+     * Replace the [gradedetails] token with formatted grade details text.
+     *
+     * @param string $message
+     * @param array $gradedetails
+     * @return string
+     */
+    public static function replace_grade_details_placeholder(string $message, array $gradedetails): string
+    {
+        if (strpos($message, '[gradedetails]') === false) {
+            return $message;
+        }
+
+        return str_replace('[gradedetails]', self::format_grade_details_text($gradedetails), $message);
+    }
+
+    /**
+     * Build the shared human-readable gradedetails text.
+     *
+     * @param array $gradedetails
+     * @return string
+     */
+    public static function format_grade_details_text(array $gradedetails): string
+    {
+        $lines = [];
+
+        $assignments = [];
+        if (!empty($gradedetails['assignments']) && is_array($gradedetails['assignments'])) {
+            foreach ($gradedetails['assignments'] as $assignment) {
+                $name = trim((string)$assignment);
+                if ($name !== '') {
+                    $assignments[] = $name;
+                }
+            }
+        }
+
+        if (!empty($assignments)) {
+            $lines[] = get_string('gradedetails_assignments', 'local_earlyalert', implode(', ', $assignments));
+        }
+
+        if (empty($lines)) {
+            return '';
+        }
+
+        return '(' . get_string('gradedetails_details', 'local_earlyalert', implode(' ', $lines)) . ')';
+    }
+
+    /**
      * Returns the academic year based only on server date.
      * Academic year starts in September and is represented by the start year.
      *

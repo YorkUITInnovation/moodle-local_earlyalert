@@ -29,9 +29,9 @@
                                  aria-labelledby="heading{{id}}" data-bs-parent="#accordionCourseOverview">
                                 <div class="accordion-body py-2">
                                     {{#logs}}
-                                        <div class="row mb-2">
+                                        <div class="row {{#is_commendation}}bg-success text-white{{/is_commendation}}">
                                             <div class="col-md-6">
-                                                {{{message_type}}} - {{date_sent}}
+                                                {{#is_commendation}}<span class="badge bg-success text-white">🎉 {{message_type}}</span>{{/is_commendation}}{{^is_commendation}}{{message_type}}{{/is_commendation}} - {{date_sent}}
                                             </div>
                                             <div class="col-md-2">
                                                 <button type="button" class="btn btn-primary btn-sm btn-early-alert-preview-message" data-logid="{{id}}">
@@ -39,6 +39,7 @@
                                                 </button>
                                             </div>
                                             <div class="col-md-4 d-flex justify-content-end">
+                                                {{^is_commendation}}
                                                 <table class="table table-borderless table-sm">
                                                     <thead class="thead-light">
                                                     <tr>
@@ -74,6 +75,7 @@
                                                     </tbody>
 
                                                 </table>
+                                                {{/is_commendation}}
                                             </div>
                                         </div>
                                     {{/logs}}

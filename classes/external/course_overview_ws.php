@@ -31,6 +31,7 @@ use core_external\external_function_parameters;
 use core_external\external_value;
 use core_external\external_single_structure;
 use core_external\external_multiple_structure;
+use local_earlyalert\helper;
 use local_earlyalert\email_report_log;
 use local_etemplate\email;
 use local_earlyalert\base;
@@ -115,6 +116,7 @@ class local_earlyalert_course_overview_ws extends external_api {
                 $data = new \stdClass();
                 $data->id = $log->id;
                 $data->message_type = $LOG->get_message_type(); // returns nice name for message type
+                $data->is_commendation = $LOG->is_commendation();
                 $data->user_read = $LOG->get_user_read();
                 $data->course_id = $LOG->get_course_id();
                 $data->course_name = $LOG->get_course_name();
@@ -359,9 +361,10 @@ class local_earlyalert_course_overview_ws extends external_api {
 
         $subjectsnapshot = $LOG->get_subject_snapshot();
         $messagesnapshot = $LOG->get_message_snapshot();
+        $gradedetails = $LOG->get_grade_details();
         if (is_array($subjectsnapshot) && array_key_exists('rendered', $subjectsnapshot)
                 && is_array($messagesnapshot) && array_key_exists('rendered', $messagesnapshot)) {
-            $message = (string)$messagesnapshot['rendered'];
+            $message = helper::replace_grade_details_placeholder((string)$messagesnapshot['rendered'], $gradedetails);
             if (!preg_match('/<[^>]+>/', $message)) {
                 $message = self::format_custom_message_for_html($message);
             }
@@ -385,10 +388,11 @@ class local_earlyalert_course_overview_ws extends external_api {
             $LOG->get_assignment_name(),
             self::format_custom_message_for_html((string)$LOG->get_custom_message())
         );
+        $message = helper::replace_grade_details_placeholder($prepare_template->message, $gradedetails);
 
         $data = [
             'subject' => $prepare_template->subject,
-            'message' => $prepare_template->message
+            'message' => $message
         ];
 
         return $data;
@@ -441,5 +445,6 @@ class local_earlyalert_course_overview_ws extends external_api {
             'para' => true,
         ]);
     }
+
 }
 

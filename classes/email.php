@@ -18,6 +18,7 @@ class email extends crud
     const MESSAGE_TYPE_ASSIGNMENT = 1;
     const MESSAGE_TYPE_EXAM = 2;
     const MESSAGE_TYPE_CATCHALL = 3;
+    const MESSAGE_TYPE_COMMENDATION = 4;
 
     /**
      *

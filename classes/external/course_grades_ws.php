@@ -68,6 +68,9 @@ class local_earlyalert_course_grades_ws extends external_api {
                     $message_type = email::MESSAGE_TYPE_EXAM;
                     break;
                 case 'commendation':
+                    $message_type = email::MESSAGE_TYPE_COMMENDATION;
+                    break;
+                case 'catchall':
                     $message_type = email::MESSAGE_TYPE_CATCHALL;
                     break;
                 default:
@@ -166,7 +169,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                     $preloadtriggeredfromuserid =
                         property_exists($preload_data, 'triggered_from_user_id') ? (int)$preload_data->triggered_from_user_id : 0;
                     $hascustommessage = self::template_has_custom_message($template, $preloadmessage);
-                    if (!$hascustommessage && (int)$message_type === (int)email::MESSAGE_TYPE_CATCHALL) {
+                    if (!$hascustommessage && ((int)$message_type === (int)email::MESSAGE_TYPE_CATCHALL || (int)$message_type === (int)email::MESSAGE_TYPE_COMMENDATION)) {
                         $hascustommessage = true;
                     }
 
@@ -720,7 +723,7 @@ class local_earlyalert_course_grades_ws extends external_api {
 
             if ($template) {
                 $hascustommessage = self::template_has_custom_message($template);
-                if (!$hascustommessage && (int)$messageType === (int)email::MESSAGE_TYPE_CATCHALL) {
+                if (!$hascustommessage && ((int)$messageType === (int)email::MESSAGE_TYPE_CATCHALL || (int)$messageType === (int)email::MESSAGE_TYPE_COMMENDATION)) {
                     $hascustommessage = true;
                 }
             }
@@ -986,7 +989,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         $preloadinstructorid = property_exists($preload, 'instructor_id') ?
             (int)$preload->instructor_id : (int)$params['teacher_user_id'];
         $hascustommessage = self::template_has_custom_message($template, $preloadmessage);
-        if (!$hascustommessage && (int)$messageType === (int)email::MESSAGE_TYPE_CATCHALL) {
+        if (!$hascustommessage && ((int)$messageType === (int)email::MESSAGE_TYPE_CATCHALL || (int)$messageType === (int)email::MESSAGE_TYPE_COMMENDATION)) {
             $hascustommessage = true;
         }
 
@@ -1019,7 +1022,7 @@ class local_earlyalert_course_grades_ws extends external_api {
         $preparedmessage = is_object($prepared) && property_exists($prepared, 'message')
             ? (string)$prepared->message
             : '';
-        $preparedmessage = self::replace_grade_details_placeholder($preparedmessage, $gradedetails);
+        $preparedmessage = helper::replace_grade_details_placeholder($preparedmessage, $gradedetails);
 
             return [
                 'templateid' => $preloadtemplateid,
@@ -1159,41 +1162,6 @@ class local_earlyalert_course_grades_ws extends external_api {
         ];
     }
 
-    /**
-     * Replace [gradedetails] placeholder in preview message.
-     *
-     * @param string $message
-     * @param array $gradedetails
-     * @return string
-     */
-    private static function replace_grade_details_placeholder(string $message, array $gradedetails): string {
-        if (strpos($message, '[gradedetails]') === false) {
-            return $message;
-        }
-
-        return str_replace('[gradedetails]', self::format_grade_details_text($gradedetails), $message);
-    }
-
-    /**
-     * Format grade details text for preview message.
-     *
-     * @param array $gradedetails
-     * @return string
-     */
-    private static function format_grade_details_text(array $gradedetails): string {
-        $lines = [];
-
-        if (!empty($gradedetails['assignments'])) {
-            $lines[] = get_string('gradedetails_assignments', 'local_earlyalert',
-                implode(', ', $gradedetails['assignments']));
-        }
-
-        if (empty($lines)) {
-            return '';
-        }
-
-        return '(' . implode(' ', $lines) . ')';
-    }
 
     /**
      * Returns for student preview template.

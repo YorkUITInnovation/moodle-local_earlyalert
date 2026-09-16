@@ -32,6 +32,7 @@ global $CFG;
 require_once($CFG->dirroot . '/message/lib.php');
 
 use local_earlyalert\email_report_log;
+use local_earlyalert\helper;
 use local_etemplate\email;
 use local_etemplate\emails;
 
@@ -80,7 +81,7 @@ class process_mail_queue extends \core\task\scheduled_task {
                 );
                 $gradedetails = $email->get_grade_details();
                 $subject = $prepare_template->subject;
-                $body = $this->replace_grade_details_placeholder($prepare_template->message, $gradedetails);
+                $body = helper::replace_grade_details_placeholder($prepare_template->message, $gradedetails);
                 $course_id = $emailtoprocess->course_id;
                 $resolvedat = time();
                 $teacher = $DB->get_record('user', ['id' => $email->get_instructor_id()], 'firstname, lastname');
@@ -306,51 +307,6 @@ class process_mail_queue extends \core\task\scheduled_task {
         return $json === false ? '' : $json;
     }
 
-    /**
-     * Replace [gradedetails] token with formatted grade details text.
-     *
-     * @param string $message
-     * @param array $gradedetails
-     * @return string
-     */
-    private function replace_grade_details_placeholder(string $message, array $gradedetails): string {
-        if (strpos($message, '[gradedetails]') === false) {
-            return $message;
-        }
-
-        $replacement = $this->format_grade_details_text($gradedetails);
-        return str_replace('[gradedetails]', $replacement, $message);
-    }
-
-    /**
-     * Build human-readable gradedetails placeholder text from captured metadata.
-     *
-     * @param array $gradedetails
-     * @return string
-     */
-    private function format_grade_details_text(array $gradedetails): string {
-        $lines = [];
-
-        $assignments = [];
-        if (!empty($gradedetails['assignments']) && is_array($gradedetails['assignments'])) {
-            foreach ($gradedetails['assignments'] as $assignment) {
-                $name = trim((string)$assignment);
-                if ($name !== '') {
-                    $assignments[] = $name;
-                }
-            }
-        }
-
-        if (!empty($assignments)) {
-            $lines[] = get_string('gradedetails_assignments', 'local_earlyalert', implode(', ', $assignments));
-        }
-
-        if (empty($lines)) {
-            return '';
-        }
-
-        return '(' . implode(' ', $lines) . ')';
-    }
 
     /**
      * Convert textarea custom message content into safe HTML.
