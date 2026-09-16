@@ -1623,6 +1623,8 @@ class local_earlyalert_course_grades_ws extends external_api {
             case 'exam':
                 return email::MESSAGE_TYPE_EXAM;
             case 'commendation':
+                return email::MESSAGE_TYPE_COMMENDATION;
+            case 'catchall':
                 return email::MESSAGE_TYPE_CATCHALL;
             case 'grade':
             default:

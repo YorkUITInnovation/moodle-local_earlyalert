@@ -362,9 +362,33 @@ class local_earlyalert_course_overview_ws extends external_api {
         $subjectsnapshot = $LOG->get_subject_snapshot();
         $messagesnapshot = $LOG->get_message_snapshot();
         $gradedetails = $LOG->get_grade_details();
+        // Precompute the final human-readable grade-details text so we can detect
+        // whether the saved rendered snapshot already contains it.
+        $gradedetailstext = helper::format_grade_details_text($gradedetails);
         if (is_array($subjectsnapshot) && array_key_exists('rendered', $subjectsnapshot)
                 && is_array($messagesnapshot) && array_key_exists('rendered', $messagesnapshot)) {
-            $message = helper::replace_grade_details_placeholder((string)$messagesnapshot['rendered'], $gradedetails);
+            $message = (string)$messagesnapshot['rendered'];
+            // If the saved rendered snapshot is missing the grade-details fragment,
+            // rebuild the message from the raw snapshot and stored placeholder values.
+            if ($gradedetailstext !== '' && strpos($message, $gradedetailstext) === false) {
+                $student = $LOG->get_student();
+                $contextvalues = is_array($messagesnapshot['context'] ?? null) ? $messagesnapshot['context'] : [];
+                $snapshotvalues = is_array($messagesnapshot['values'] ?? null) ? $messagesnapshot['values'] : [];
+                $prepared = email::replace_message_placeholders(
+                    (string)($messagesnapshot['raw'] ?? ''),
+                    (string)($subjectsnapshot['raw'] ?? ''),
+                    (int)($contextvalues['courseid'] ?? $LOG->getCourseId()),
+                    $student,
+                    (int)($contextvalues['instructorid'] ?? $LOG->get_instructor_id()),
+                    (string)($snapshotvalues['grade'] ?? $LOG->get_trigger_grade_letter()),
+                    (string)($snapshotvalues['assignmenttitle'] ?? $LOG->get_assignment_name()),
+                    self::format_custom_message_for_html((string)($snapshotvalues['custommessage'] ?? $LOG->get_custom_message()))
+                );
+                $message = is_object($prepared) && property_exists($prepared, 'message') ? (string)$prepared->message : $message;
+            }
+            // Run the shared helper again so the preview always renders grade details
+            // in the same way as the send-time email body.
+            $message = helper::replace_grade_details_placeholder($message, $gradedetails);
             if (!preg_match('/<[^>]+>/', $message)) {
                 $message = self::format_custom_message_for_html($message);
             }
