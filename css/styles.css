@@ -24,18 +24,6 @@
     height: 1rem;
 }
 
-.student-lookup-table .student-course-name {
-    font-weight: bold;
-}
-
-.student-lookup-table td.student-course-table-cell,
-.student-lookup-table td.student-grade-table-cell {
-    width: 150px;
-}
-
-.student-lookup-table .active-row {
-    background-color: #e0f7fa;
-}
 
 /* Ensure all alert-type card text is white on hover. */
 #earlyalert-dashboard .ea-alert-option:hover,
@@ -154,11 +142,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    min-height: 4.75rem;
     margin-bottom: 0.75rem;
     padding: 0.875rem 1rem;
     border: 1px solid #dee2e6;
-    border-radius: 0.75rem;
+    border-radius: 0.25rem;
     background-color: #ffffff;
 }
 
@@ -166,6 +153,7 @@
     border-color: #198754;
     background-color: #198754;
     color: #ffffff;
+    padding-bottom: 1.875rem;
 }
 
 .early-alert-log-summary {
@@ -181,22 +169,18 @@
 }
 
 .early-alert-log-type {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.85rem;
-    border-radius: 999px;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
     background-color: #f8f9fa;
     color: #212529;
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     font-weight: 600;
-    line-height: 1.2;
 }
 
 .early-alert-log-type--commendation {
     background-color: rgba(255, 255, 255, 0.16);
     color: #ffffff;
-    font-size: 1rem;
 }
 
 .early-alert-log-type-icon,
@@ -232,15 +216,13 @@
 }
 
 .early-alert-followup-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.35rem 0.75rem;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
     border: 1px solid #dee2e6;
-    border-radius: 999px;
+    border-radius: 0.25rem;
     background-color: #f8f9fa;
     color: #212529;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 600;
     white-space: nowrap;
 }
