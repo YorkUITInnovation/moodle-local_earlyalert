@@ -23,31 +23,57 @@ class helper
     const ALERT_TYPE_EXAM = 'exam';
 
     /**
-     * Replace the [gradedetails] token with formatted grade details text.
+     * Replace grade-details tokens with formatted text.
      *
      * @param string $message
      * @param array $gradedetails
+     * @param string $fallbackassignment
      * @return string
      */
-    public static function replace_grade_details_placeholder(string $message, array $gradedetails): string
-    {
+    public static function replace_grade_details_placeholder(
+        string $message,
+        array $gradedetails,
+        string $fallbackassignment = ''
+    ): string {
         if (strpos($message, '[gradedetails]') === false) {
             return $message;
         }
 
-        return str_replace('[gradedetails]', self::format_grade_details_text($gradedetails), $message);
+        return str_replace('[gradedetails]', self::format_grade_details_text($gradedetails, $fallbackassignment), $message);
     }
 
     /**
      * Build the shared human-readable gradedetails text.
      *
      * @param array $gradedetails
+     * @param string $fallbackassignment
      * @return string
      */
-    public static function format_grade_details_text(array $gradedetails): string
+    public static function format_grade_details_text(array $gradedetails, string $fallbackassignment = ''): string
     {
+        $gradedetails = self::normalize_grade_details($gradedetails, $fallbackassignment);
         $lines = [];
 
+        if (!empty($gradedetails['assignments'])) {
+            $lines[] = get_string('gradedetails_assignments', 'local_earlyalert', implode(', ', $gradedetails['assignments']));
+        }
+
+        if (empty($lines)) {
+            return '';
+        }
+
+        return '(' . get_string('gradedetails_details', 'local_earlyalert', implode(' ', $lines)) . ')';
+    }
+
+    /**
+     * Normalize grade details from the canonical saved payload.
+     *
+     * @param array $gradedetails
+     * @param string $fallbackassignment
+     * @return array{assignments: array, average_type: string}
+     */
+    public static function normalize_grade_details(array $gradedetails, string $fallbackassignment = ''): array
+    {
         $assignments = [];
         if (!empty($gradedetails['assignments']) && is_array($gradedetails['assignments'])) {
             foreach ($gradedetails['assignments'] as $assignment) {
@@ -58,15 +84,29 @@ class helper
             }
         }
 
-        if (!empty($assignments)) {
-            $lines[] = get_string('gradedetails_assignments', 'local_earlyalert', implode(', ', $assignments));
+        if (empty($assignments)) {
+            $fallbackassignment = trim($fallbackassignment);
+            if ($fallbackassignment !== '') {
+                $assignments[] = $fallbackassignment;
+            }
         }
 
-        if (empty($lines)) {
-            return '';
+        $assignments = array_values(array_unique(array_filter(array_map('trim', $assignments), static function($value) {
+            return $value !== '';
+        })));
+
+        $averagetype = '';
+        if (!empty($gradedetails['average_type'])) {
+            $candidate = trim((string)$gradedetails['average_type']);
+            if (in_array($candidate, ['any', 'average', 'weighted'], true)) {
+                $averagetype = $candidate;
+            }
         }
 
-        return '(' . get_string('gradedetails_details', 'local_earlyalert', implode(' ', $lines)) . ')';
+        return [
+            'assignments' => $assignments,
+            'average_type' => $averagetype,
+        ];
     }
 
     /**

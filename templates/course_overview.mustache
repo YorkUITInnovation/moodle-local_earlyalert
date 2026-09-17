@@ -29,53 +29,40 @@
                                  aria-labelledby="heading{{id}}" data-bs-parent="#accordionCourseOverview">
                                 <div class="accordion-body py-2">
                                     {{#logs}}
-                                        <div class="row {{#is_commendation}}bg-success text-white{{/is_commendation}}">
-                                            <div class="col-md-6">
-                                                {{#is_commendation}}<span class="badge bg-success text-white">🎉 {{message_type}}</span>{{/is_commendation}}{{^is_commendation}}{{message_type}}{{/is_commendation}} - {{date_sent}}
+                                        <div class="early-alert-log-item {{#is_commendation}}early-alert-log-item--commendation{{/is_commendation}}">
+                                            <div class="early-alert-log-summary">
+                                                <div class="early-alert-log-heading">
+                                                    <span class="early-alert-log-type {{#is_commendation}}early-alert-log-type--commendation{{/is_commendation}}">
+                                                        {{#is_commendation}}<span class="early-alert-log-type-icon" aria-hidden="true">🎉</span>{{/is_commendation}}
+                                                        <span>{{message_type}}</span>
+                                                    </span>
+                                                    <span class="early-alert-log-date">{{date_sent}}</span>
+                                                </div>
                                             </div>
-                                            <div class="col-md-2">
+                                            <div class="early-alert-log-actions">
                                                 <button type="button" class="btn btn-primary btn-sm btn-early-alert-preview-message" data-logid="{{id}}">
                                                     {{#str}}view_message, local_earlyalert{{/str}}
                                                 </button>
                                             </div>
-                                            <div class="col-md-4 d-flex justify-content-end">
-                                                {{^is_commendation}}
-                                                <table class="table table-borderless table-sm">
-                                                    <thead class="thead-light">
-                                                    <tr>
-                                                        <th>
-                                                            <div class="d-flex justify-content-center">
-                                                                Instructor/TA
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <div class="d-flex justify-content-center">
-                                                                Advisor
-                                                            </div>
-                                                        </th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <div class="d-flex justify-content-center">
-                                                                <input type="checkbox" class="checkbox-instructor-followup"
-                                                                       data-logid="{{id}}"
-                                                                       {{#student_advised_by_instructor}}checked{{/student_advised_by_instructor}}>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="d-flex justify-content-center">
-                                                                <input type="checkbox" disabled class="checkbox-advisor-followup"
-                                                                       data-logid="{{id}}"
-                                                                       {{#student_advised_by_advisor}}checked{{/student_advised_by_advisor}}>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    </tbody>
-
-                                                </table>
-                                                {{/is_commendation}}
+                                            <div class="early-alert-log-status">
+                                                <div class="early-alert-followup-list">
+                                                    {{#is_commendation}}
+                                                        <span class="early-alert-followup-pill early-alert-followup-pill--commendation">
+                                                            <span class="early-alert-followup-pill__icon" aria-hidden="true">★</span>
+                                                             {{#str}}positive_outreach, local_earlyalert{{/str}}
+                                                        </span>
+                                                    {{/is_commendation}}
+                                                    {{^is_commendation}}
+                                                        <span class="early-alert-followup-pill {{#student_advised_by_instructor}}early-alert-followup-pill--done{{/student_advised_by_instructor}}{{^student_advised_by_instructor}}early-alert-followup-pill--pending{{/student_advised_by_instructor}}">
+                                                            <span class="early-alert-followup-pill__icon" aria-hidden="true">{{#student_advised_by_instructor}}✓{{/student_advised_by_instructor}}{{^student_advised_by_instructor}}○{{/student_advised_by_instructor}}</span>
+                                                            Instructor/TA {{#student_advised_by_instructor}}followed up{{/student_advised_by_instructor}}{{^student_advised_by_instructor}}pending{{/student_advised_by_instructor}}
+                                                        </span>
+                                                        <span class="early-alert-followup-pill {{#student_advised_by_advisor}}early-alert-followup-pill--done{{/student_advised_by_advisor}}{{^student_advised_by_advisor}}early-alert-followup-pill--pending{{/student_advised_by_advisor}}">
+                                                            <span class="early-alert-followup-pill__icon" aria-hidden="true">{{#student_advised_by_advisor}}✓{{/student_advised_by_advisor}}{{^student_advised_by_advisor}}○{{/student_advised_by_advisor}}</span>
+                                                            Advisor {{#student_advised_by_advisor}}followed up{{/student_advised_by_advisor}}{{^student_advised_by_advisor}}pending{{/student_advised_by_advisor}}
+                                                        </span>
+                                                    {{/is_commendation}}
+                                                </div>
                                             </div>
                                         </div>
                                     {{/logs}}

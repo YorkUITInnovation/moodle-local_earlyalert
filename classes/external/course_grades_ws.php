@@ -1022,7 +1022,11 @@ class local_earlyalert_course_grades_ws extends external_api {
         $preparedmessage = is_object($prepared) && property_exists($prepared, 'message')
             ? (string)$prepared->message
             : '';
-        $preparedmessage = helper::replace_grade_details_placeholder($preparedmessage, $gradedetails);
+        $preparedmessage = helper::replace_grade_details_placeholder(
+            $preparedmessage,
+            $gradedetails,
+            (string)$params['assignment_title']
+        );
 
             return [
                 'templateid' => $preloadtemplateid,
@@ -1140,26 +1144,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             return $default;
         }
 
-        $assignments = [];
-        if (!empty($decoded['assignments']) && is_array($decoded['assignments'])) {
-            foreach ($decoded['assignments'] as $assignment) {
-                $name = trim((string)$assignment);
-                if ($name !== '') {
-                    $assignments[] = $name;
-                }
-            }
-        }
-
-        $averagetype = '';
-        if (!empty($decoded['average_type'])
-                && in_array($decoded['average_type'], ['any', 'average', 'weighted'], true)) {
-            $averagetype = $decoded['average_type'];
-        }
-
-        return [
-            'assignments' => $assignments,
-            'average_type' => $averagetype,
-        ];
+        return helper::normalize_grade_details($decoded);
     }
 
 

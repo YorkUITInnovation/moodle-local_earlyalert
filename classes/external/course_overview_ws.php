@@ -361,10 +361,20 @@ class local_earlyalert_course_overview_ws extends external_api {
 
         $subjectsnapshot = $LOG->get_subject_snapshot();
         $messagesnapshot = $LOG->get_message_snapshot();
+        $snapshotvalues = is_array($messagesnapshot['values'] ?? null) ? $messagesnapshot['values'] : [];
+        $contextvalues = is_array($messagesnapshot['context'] ?? null) ? $messagesnapshot['context'] : [];
+        $fallbackassignment = (string)($snapshotvalues['assignmenttitle']
+            ?? $contextvalues['assignmentname']
+            ?? $LOG->get_assignment_name());
         $gradedetails = $LOG->get_grade_details();
+        if (empty($gradedetails['assignments'])
+                && !empty($snapshotvalues['grade_details'])
+                && is_array($snapshotvalues['grade_details'])) {
+            $gradedetails = helper::normalize_grade_details($snapshotvalues['grade_details'], $fallbackassignment);
+        }
         // Precompute the final human-readable grade-details text so we can detect
         // whether the saved rendered snapshot already contains it.
-        $gradedetailstext = helper::format_grade_details_text($gradedetails);
+        $gradedetailstext = helper::format_grade_details_text($gradedetails, $fallbackassignment);
         if (is_array($subjectsnapshot) && array_key_exists('rendered', $subjectsnapshot)
                 && is_array($messagesnapshot) && array_key_exists('rendered', $messagesnapshot)) {
             $message = (string)$messagesnapshot['rendered'];
@@ -372,8 +382,6 @@ class local_earlyalert_course_overview_ws extends external_api {
             // rebuild the message from the raw snapshot and stored placeholder values.
             if ($gradedetailstext !== '' && strpos($message, $gradedetailstext) === false) {
                 $student = $LOG->get_student();
-                $contextvalues = is_array($messagesnapshot['context'] ?? null) ? $messagesnapshot['context'] : [];
-                $snapshotvalues = is_array($messagesnapshot['values'] ?? null) ? $messagesnapshot['values'] : [];
                 $prepared = email::replace_message_placeholders(
                     (string)($messagesnapshot['raw'] ?? ''),
                     (string)($subjectsnapshot['raw'] ?? ''),
@@ -388,7 +396,7 @@ class local_earlyalert_course_overview_ws extends external_api {
             }
             // Run the shared helper again so the preview always renders grade details
             // in the same way as the send-time email body.
-            $message = helper::replace_grade_details_placeholder($message, $gradedetails);
+            $message = helper::replace_grade_details_placeholder($message, $gradedetails, $fallbackassignment);
             if (!preg_match('/<[^>]+>/', $message)) {
                 $message = self::format_custom_message_for_html($message);
             }
@@ -412,7 +420,11 @@ class local_earlyalert_course_overview_ws extends external_api {
             $LOG->get_assignment_name(),
             self::format_custom_message_for_html((string)$LOG->get_custom_message())
         );
-        $message = helper::replace_grade_details_placeholder($prepare_template->message, $gradedetails);
+        $message = helper::replace_grade_details_placeholder(
+            $prepare_template->message,
+            $gradedetails,
+            $LOG->get_assignment_name()
+        );
 
         $data = [
             'subject' => $prepare_template->subject,

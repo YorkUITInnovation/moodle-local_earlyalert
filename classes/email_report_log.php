@@ -395,40 +395,16 @@ CONST GRADE_A_PLUS = 1;
      */
     public function get_grade_details(): array
     {
-        $default = [
-            'assignments' => [],
-            'average_type' => '',
-        ];
-
         if (empty($this->grade_details_json)) {
-            return $default;
+            return helper::normalize_grade_details([], (string)$this->assignment_name);
         }
 
         $decoded = json_decode($this->grade_details_json, true);
         if (!is_array($decoded)) {
-            return $default;
+            return helper::normalize_grade_details([], (string)$this->assignment_name);
         }
 
-        $assignments = [];
-        if (!empty($decoded['assignments']) && is_array($decoded['assignments'])) {
-            foreach ($decoded['assignments'] as $assignment) {
-                $assignmentname = trim((string)$assignment);
-                if ($assignmentname !== '') {
-                    $assignments[] = $assignmentname;
-                }
-            }
-        }
-
-        $averagetype = '';
-        if (isset($decoded['average_type'])
-                && in_array($decoded['average_type'], ['any', 'average', 'weighted'], true)) {
-            $averagetype = $decoded['average_type'];
-        }
-
-        return [
-            'assignments' => $assignments,
-            'average_type' => $averagetype,
-        ];
+        return helper::normalize_grade_details($decoded, (string)$this->assignment_name);
     }
 
     public function get_student_advised_by_advisor(): int

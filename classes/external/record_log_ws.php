@@ -31,6 +31,7 @@ use core_external\external_function_parameters;
 use core_external\external_value;
 use local_earlyalert\email_report_log;
 use local_earlyalert\base;
+use local_earlyalert\helper;
 
 /**
  * Record log web service class.
@@ -105,26 +106,10 @@ class local_earlyalert_record_log_ws extends external_api {
             if (!is_array($gradedetails)) {
                 $gradedetails = [];
             }
-            $assignments = [];
-            if (!empty($gradedetails['assignments']) && is_array($gradedetails['assignments'])) {
-                foreach ($gradedetails['assignments'] as $assignment) {
-                    $assignmentname = trim((string)$assignment);
-                    if ($assignmentname !== '') {
-                        $assignments[] = $assignmentname;
-                    }
-                }
-            }
-
-            $averagetype = '';
-            if (isset($gradedetails['average_type'])
-                    && in_array($gradedetails['average_type'], ['any', 'average', 'weighted'], true)) {
-                $averagetype = $gradedetails['average_type'];
-            }
-
-            $normalizedgradedetails = [
-                'assignments' => $assignments,
-                'average_type' => $averagetype,
-            ];
+            $normalizedgradedetails = helper::normalize_grade_details(
+                $gradedetails,
+                (string)($student['assignment_name'] ?? '')
+            );
             $payloadalerttype = $student['alert_type'] ?? ($student['alerttype'] ?? '');
             $alerttype = self::normalize_alert_type($payloadalerttype);
             if ($alerttype === '' && $requestalerttype !== '') {
@@ -146,6 +131,34 @@ class local_earlyalert_record_log_ws extends external_api {
             $data->actual_grade = self::convertGradeToNumeric($student['actual_grade'] ?? '');
             $data->custom_message = ($student['custom_message'] ?? '');
             $data->grade_details_json = json_encode($normalizedgradedetails);
+            $data->subjectjson = self::encode_snapshot(self::build_initial_snapshot_payload(
+                (string)($student['subject'] ?? ''),
+                [
+                    'grade_details' => $normalizedgradedetails,
+                    'assignmenttitle' => (string)($student['assignment_name'] ?? ''),
+                    'custommessage' => (string)($student['custom_message'] ?? ''),
+                    'grade' => (string)($student['trigger_grade'] ?? ''),
+                ],
+                [
+                    'courseid' => (int)($student['course_id'] ?? 0),
+                    'instructorid' => (int)($student['instructor_id'] ?? 0),
+                    'assignmentname' => (string)($student['assignment_name'] ?? ''),
+                ]
+            ));
+            $data->messagejson = self::encode_snapshot(self::build_initial_snapshot_payload(
+                (string)($student['message'] ?? ''),
+                [
+                    'grade_details' => $normalizedgradedetails,
+                    'assignmenttitle' => (string)($student['assignment_name'] ?? ''),
+                    'custommessage' => (string)($student['custom_message'] ?? ''),
+                    'grade' => (string)($student['trigger_grade'] ?? ''),
+                ],
+                [
+                    'courseid' => (int)($student['course_id'] ?? 0),
+                    'instructorid' => (int)($student['instructor_id'] ?? 0),
+                    'assignmentname' => (string)($student['assignment_name'] ?? ''),
+                ]
+            ));
             //all logs default to unadvised
             $data->student_advised_by_advisor = 0;
             $data->student_advised_by_instructor = 0;
@@ -216,6 +229,35 @@ class local_earlyalert_record_log_ws extends external_api {
         ];
 
         return $map[$raw] ?? '';
+    }
+
+    /**
+     * Build a minimal preview snapshot from the already rendered alert payload.
+     *
+     * @param string $rendered
+     * @param array $values
+     * @param array $context
+     * @return array
+     */
+    private static function build_initial_snapshot_payload(string $rendered, array $values, array $context): array {
+        return [
+            'raw' => $rendered,
+            'rendered' => $rendered,
+            'values' => $values,
+            'context' => $context,
+            'resolvedat' => time(),
+        ];
+    }
+
+    /**
+     * Encode snapshot payload for storage.
+     *
+     * @param array $payload
+     * @return string
+     */
+    private static function encode_snapshot(array $payload): string {
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return $json === false ? '' : $json;
     }
 
     /**

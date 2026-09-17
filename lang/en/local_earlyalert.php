@@ -124,6 +124,7 @@ $string['overall_course_grade'] = 'Overall Course Grade';
 $string['preview_message_placeholder'] = 'Select a student to see a personalized preview.';
 $string['preview_unavailable_message'] = 'A preview is not available for this student yet.';
 $string['preview_unavailable_subject'] = 'Preview unavailable';
+$string['positive_outreach'] = 'Positive outreach';
 $string['previous'] = 'Previous';
 $string['risk_high'] = 'High';
 $string['risk_low'] = 'Low';

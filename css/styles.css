@@ -148,3 +148,134 @@
 #early-alert-student-results .early-alert-grade-column .badge.badge-primary {
     background-color: #6c757d !important;
 }
+
+.early-alert-log-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 4.75rem;
+    margin-bottom: 0.75rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.75rem;
+    background-color: #ffffff;
+}
+
+.early-alert-log-item--commendation {
+    border-color: #198754;
+    background-color: #198754;
+    color: #ffffff;
+}
+
+.early-alert-log-summary {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.early-alert-log-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.early-alert-log-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    background-color: #f8f9fa;
+    color: #212529;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.early-alert-log-type--commendation {
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+.early-alert-log-type-icon,
+.early-alert-followup-pill__icon {
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.early-alert-log-date {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.early-alert-log-item--commendation .early-alert-log-date {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.early-alert-log-actions {
+    flex: 0 0 auto;
+}
+
+.early-alert-log-status {
+    flex: 0 0 20rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.early-alert-followup-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.early-alert-followup-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 999px;
+    background-color: #f8f9fa;
+    color: #212529;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.early-alert-followup-pill--done {
+    border-color: #198754;
+    background-color: #e8f6ee;
+    color: #146c43;
+}
+
+.early-alert-followup-pill--pending {
+    border-color: #ced4da;
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.early-alert-followup-pill--commendation {
+    border-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+@media (max-width: 767.98px) {
+    .early-alert-log-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .early-alert-log-actions,
+    .early-alert-log-status {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .early-alert-followup-list {
+        justify-content: flex-start;
+    }
+}

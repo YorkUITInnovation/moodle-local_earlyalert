@@ -81,7 +81,11 @@ class process_mail_queue extends \core\task\scheduled_task {
                 );
                 $gradedetails = $email->get_grade_details();
                 $subject = $prepare_template->subject;
-                $body = helper::replace_grade_details_placeholder($prepare_template->message, $gradedetails);
+                $body = helper::replace_grade_details_placeholder(
+                    $prepare_template->message,
+                    $gradedetails,
+                    $email->get_assignment_name()
+                );
                 $course_id = $emailtoprocess->course_id;
                 $resolvedat = time();
                 $teacher = $DB->get_record('user', ['id' => $email->get_instructor_id()], 'firstname, lastname');
