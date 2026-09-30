@@ -252,11 +252,11 @@
    needed for rows to line up with their neighbours. Margin/padding are set
    here so every alert row (commendation or not) shares identical spacing. */
 .early-alert-alert-row {
-    margin-top: 0.75rem;
-    margin-bottom: 0.75rem;
-    border-radius: 0.75rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    margin-top: 0.35rem;
+    margin-bottom: 0.35rem;
+    border-radius: 0.5rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
 }
 
 .early-alert-alert-row > [class^="col-"],
@@ -271,6 +271,16 @@
 
 .early-alert-alert-row .col-md-4 {
     justify-content: flex-end;
+}
+
+/* Tighten the Instructor/Advisor follow-up table's own cell padding — this
+   table sets the row's overall height (it's always rendered, even hidden
+   for commendation rows, to keep heights consistent) so shrinking its
+   built-in Bootstrap table-sm padding is what actually reduces row height. */
+.early-alert-alert-row .col-md-4 table.table-sm th,
+.early-alert-alert-row .col-md-4 table.table-sm td {
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
 }
 
 /* Commendation rows: a solid Bootstrap "success" green highlight so the row

@@ -45,10 +45,17 @@ $PAGE->requires->js_call_amd('local_earlyalert/student_lookup', 'init');
 // Cache-bust using the plugin's release version (bumps on every upgrade) —
 // $PAGE->requires->css() emits a plain, unversioned <link> tag otherwise, so
 // browsers/CDNs would keep serving a stale cached copy after each release.
-// Using the plugin version (not filemtime()) avoids a filesystem stat() on
-// every request and only changes the URL when the plugin is actually upgraded.
+// In developer debug mode (active dev/QA), use the file's mtime instead so
+// CSS edits are picked up immediately without needing a version bump — this
+// costs one extra stat() per request, acceptable only outside production.
+if ($CFG->debugdeveloper) {
+    $cssfile = $CFG->dirroot . '/local/earlyalert/css/styles.css';
+    $cssversion = file_exists($cssfile) ? filemtime($cssfile) : time();
+} else {
+    $cssversion = get_config('local_earlyalert', 'version');
+}
 $PAGE->requires->css(new moodle_url('/local/earlyalert/css/styles.css', [
-    'v' => get_config('local_earlyalert', 'version'),
+    'v' => $cssversion,
 ]));
 
 $user_id = optional_param('user_id', 0, PARAM_INT);
