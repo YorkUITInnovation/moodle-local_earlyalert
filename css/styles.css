@@ -245,11 +245,11 @@
     color: #ffffff;
 }
 
-/* Keep the alert row height/spacing consistent between rows that show the
-   instructor/advisor follow-up checkboxes and commendation rows which do not.
-   The checkbox/table column always reserves the same minimum height, and both
-   row types stretch to match it, so commendation rows (which have no table)
-   line up with the normal alert rows. */
+/* Keep the alert row height/spacing consistent. The instructor/advisor
+   follow-up table is always rendered (even for commendation rows, where it
+   is hidden via Bootstrap's .invisible + disabled inputs), so every row
+   shares the exact same DOM structure/height and no guessed min-height is
+   needed for rows to line up with their neighbours. */
 .early-alert-alert-row {
     margin-bottom: 0.5rem;
     border-radius: 0.5rem;
@@ -261,7 +261,6 @@
 .early-alert-alert-row > [class*=" col-"] {
     display: flex;
     align-items: center;
-    min-height: 4.75rem;
 }
 
 .early-alert-alert-row .col-md-2 {
@@ -281,9 +280,16 @@
     color: #0f5132;
 }
 
-.early-alert-commendation-row .btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
+.early-alert-commendation-row .btn-outline-success {
+    background-color: #ffffff;
+    border-color: #198754;
+    color: #146c43;
+}
+
+.early-alert-commendation-row .btn-outline-success:hover,
+.early-alert-commendation-row .btn-outline-success:focus {
+    background-color: #198754;
+    border-color: #198754;
     color: #ffffff;
 }
 

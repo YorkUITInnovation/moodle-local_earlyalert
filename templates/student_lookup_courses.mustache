@@ -28,13 +28,12 @@
                                 {{#is_commendation}}<strong>{{message_type}}</strong> - {{date_sent}} <i class="fa fa-champagne-glasses fa-lg text-success ms-2"></i>{{/is_commendation}}{{^is_commendation}}{{message_type}} - {{date_sent}}{{/is_commendation}}
                             </div>
                             <div class="col-md-2">
-                                <button type="button" class="btn btn-sm btn-early-alert-preview-message {{#is_commendation}}btn-secondary{{/is_commendation}}{{^is_commendation}}btn-primary{{/is_commendation}}" data-logid="{{id}}">
+                                <button type="button" class="btn btn-sm btn-early-alert-preview-message {{#is_commendation}}btn-outline-success{{/is_commendation}}{{^is_commendation}}btn-primary{{/is_commendation}}" data-logid="{{id}}">
                                     {{#str}}view_message, local_earlyalert{{/str}}
                                 </button>
                             </div>
                             <div class="col-md-4 d-flex justify-content-end">
-                                {{^is_commendation}}
-                                <table class="table table-borderless table-sm">
+                                <table class="table table-borderless table-sm {{#is_commendation}}invisible{{/is_commendation}}" {{#is_commendation}}aria-hidden="true"{{/is_commendation}}>
                                     <thead class="table-light">
                                     <tr>
                                         <th>
@@ -56,8 +55,10 @@
                                             <div class="d-flex justify-content-center">
                                                 <input type="checkbox" class="checkbox-instructor-followup"
                                                        data-logid="{{id}}"
+                                                       tabindex="{{#is_commendation}}-1{{/is_commendation}}{{^is_commendation}}0{{/is_commendation}}"
                                                        {{#student_advised_by_instructor}}checked{{/student_advised_by_instructor}}
-                                                       {{#disabled_instructor}}disabled{{/disabled_instructor}}>
+                                                       {{#disabled_instructor}}disabled{{/disabled_instructor}}
+                                                       {{#is_commendation}}disabled{{/is_commendation}}>
                                             </div>
 
                                         </td>
@@ -65,15 +66,16 @@
                                             <div class="d-flex justify-content-center">
                                                 <input  type="checkbox" class="checkbox-advisor-followup"
                                                         data-logid="{{id}}"
+                                                        tabindex="{{#is_commendation}}-1{{/is_commendation}}{{^is_commendation}}0{{/is_commendation}}"
                                                         {{#student_advised_by_advisor}}checked{{/student_advised_by_advisor}}
-                                                        {{#disabled_advisor}}disabled{{/disabled_advisor}}>
+                                                        {{#disabled_advisor}}disabled{{/disabled_advisor}}
+                                                        {{#is_commendation}}disabled{{/is_commendation}}>
                                             </div>
                                         </td>
                                     </tr>
                                     </tbody>
 
                                 </table>
-                                {{/is_commendation}}
                             </div>
                         </div>
                     {{/alerts}}
