@@ -42,6 +42,7 @@ if (!has_capability('local/earlyalert:access_early_alert', $context)) {
 
 // Load AMD module
 $PAGE->requires->js_call_amd('local_earlyalert/student_lookup', 'init');
+$PAGE->requires->css('/local/earlyalert/css/styles.css');
 
 $user_id = optional_param('user_id', 0, PARAM_INT);
 $selectedstudent = null;

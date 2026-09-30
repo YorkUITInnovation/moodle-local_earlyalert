@@ -133,6 +133,7 @@ class local_earlyalert_record_log_ws extends external_api {
             $data->grade_details_json = json_encode($normalizedgradedetails);
             $data->subjectjson = self::encode_snapshot(self::build_initial_snapshot_payload(
                 (string)($student['subject'] ?? ''),
+                (string)($student['subject'] ?? ''),
                 [
                     'grade_details' => $normalizedgradedetails,
                     'assignmenttitle' => (string)($student['assignment_name'] ?? ''),
@@ -146,6 +147,7 @@ class local_earlyalert_record_log_ws extends external_api {
                 ]
             ));
             $data->messagejson = self::encode_snapshot(self::build_initial_snapshot_payload(
+                (string)($student['raw_message'] ?? ($student['message'] ?? '')),
                 (string)($student['message'] ?? ''),
                 [
                     'grade_details' => $normalizedgradedetails,
@@ -234,14 +236,15 @@ class local_earlyalert_record_log_ws extends external_api {
     /**
      * Build a minimal preview snapshot from the already rendered alert payload.
      *
+     * @param string $raw
      * @param string $rendered
      * @param array $values
      * @param array $context
      * @return array
      */
-    private static function build_initial_snapshot_payload(string $rendered, array $values, array $context): array {
+    private static function build_initial_snapshot_payload(string $raw, string $rendered, array $values, array $context): array {
         return [
-            'raw' => $rendered,
+            'raw' => $raw,
             'rendered' => $rendered,
             'values' => $values,
             'context' => $context,

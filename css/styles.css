@@ -245,6 +245,13 @@
     color: #ffffff;
 }
 
+/* Keep the alert row height/spacing consistent between rows that show the
+   instructor/advisor follow-up checkboxes and commendation rows which do not. */
+.early-alert-alert-row {
+    align-items: center;
+    min-height: 5.5rem;
+}
+
 @media (max-width: 767.98px) {
     .early-alert-log-item {
         align-items: flex-start;

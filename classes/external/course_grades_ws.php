@@ -1019,11 +1019,11 @@ class local_earlyalert_course_grades_ws extends external_api {
         );
 
         $gradedetails = self::decode_grade_details_json((string)$params['grade_details_json']);
-        $preparedmessage = is_object($prepared) && property_exists($prepared, 'message')
+        $rawmessage = is_object($prepared) && property_exists($prepared, 'message')
             ? (string)$prepared->message
             : '';
         $preparedmessage = helper::replace_grade_details_placeholder(
-            $preparedmessage,
+            $rawmessage,
             $gradedetails,
             (string)$params['assignment_title']
         );
@@ -1038,6 +1038,7 @@ class local_earlyalert_course_grades_ws extends external_api {
                 'hascustommessage' => $hascustommessage,
                 'subject' => is_object($prepared) && property_exists($prepared, 'subject') ? (string)$prepared->subject : '',
                 'message' => $preparedmessage,
+                'raw_message' => $rawmessage,
             ];
         } catch (\Throwable $t) {
             return self::build_preview_unavailable_response(
@@ -1069,6 +1070,7 @@ class local_earlyalert_course_grades_ws extends external_api {
             'hascustommessage' => false,
             'subject' => get_string('preview_unavailable_subject', 'local_earlyalert'),
             'message' => get_string('preview_unavailable_message', 'local_earlyalert'),
+            'raw_message' => get_string('preview_unavailable_message', 'local_earlyalert'),
         ];
     }
 
@@ -1163,7 +1165,8 @@ class local_earlyalert_course_grades_ws extends external_api {
             'course_id' => new external_value(PARAM_INT, 'Course id'),
             'hascustommessage' => new external_value(PARAM_BOOL, 'Whether template contains [custommessage] token'),
             'subject' => new external_value(PARAM_RAW, 'Preview subject'),
-            'message' => new external_value(PARAM_RAW, 'Preview body'),
+            'message' => new external_value(PARAM_RAW, 'Preview body with [gradedetails] replaced'),
+            'raw_message' => new external_value(PARAM_RAW, 'Raw message body with [gradedetails] placeholder intact'),
         ]);
     }
 

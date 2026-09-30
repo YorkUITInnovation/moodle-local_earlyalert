@@ -1029,6 +1029,7 @@ const buildResolvedAlertPayload = studentid => fetchStudentPreview(studentid).th
         grade_details: getGradeDetailsForSnapshot(),
         subject: response.subject || '',
         message: response.message || '',
+        raw_message: response.raw_message || response.message || '',
     };
 });
 
