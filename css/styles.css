@@ -249,12 +249,14 @@
    follow-up table is always rendered (even for commendation rows, where it
    is hidden via Bootstrap's .invisible + disabled inputs), so every row
    shares the exact same DOM structure/height and no guessed min-height is
-   needed for rows to line up with their neighbours. */
+   needed for rows to line up with their neighbours. Margin/padding are set
+   here so every alert row (commendation or not) shares identical spacing. */
 .early-alert-alert-row {
-    margin-bottom: 0.5rem;
-    border-radius: 0.5rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: 0.75rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
 .early-alert-alert-row > [class^="col-"],
@@ -271,26 +273,50 @@
     justify-content: flex-end;
 }
 
-/* Commendation rows: soft rounded highlight rather than a solid block of
-   colour, so the text/icon stay legible and the row reads as an accent
-   rather than a heavy banner. */
+/* Commendation rows: a solid Bootstrap "success" green highlight so the row
+   visibly stands out from the regular alert rows above/below it. Spacing
+   (margin/padding/border-radius) is inherited from .early-alert-alert-row
+   above so both row types line up and feel consistent. */
 .early-alert-commendation-row {
-    background-color: #e6f7ec;
-    border: 1px solid #b7e4c7;
-    color: #0f5132;
+    background-color: #198754;
+    border: 1px solid #146c43;
+    color: #ffffff;
 }
 
 .early-alert-commendation-row .btn-outline-success {
     background-color: #ffffff;
-    border-color: #198754;
+    border-color: #ffffff;
     color: #146c43;
 }
 
 .early-alert-commendation-row .btn-outline-success:hover,
 .early-alert-commendation-row .btn-outline-success:focus {
-    background-color: #198754;
-    border-color: #198754;
+    background-color: #146c43;
+    border-color: #ffffff;
     color: #ffffff;
+}
+
+/* Dark mode (Moove theme: body.moove-darkmode or [data-bs-theme="dark"]).
+   The commendation row itself (solid green + white text/button) already has
+   enough self-contained contrast to look correct in both modes unchanged.
+   The Instructor/Advisor follow-up table header uses Bootstrap's
+   .table-light, which hardcodes a light-grey background — washed out
+   against a dark page. Swap it for dark-mode-appropriate tokens so it
+   matches the rest of the dark UI. */
+body.moove-darkmode .early-alert-alert-row thead.table-light,
+[data-bs-theme="dark"] .early-alert-alert-row thead.table-light,
+body.moove-darkmode .early-alert-alert-row thead.table-light th,
+[data-bs-theme="dark"] .early-alert-alert-row thead.table-light th {
+    background-color: var(--bs-secondary-bg) !important;
+    color: var(--bs-body-color) !important;
+    border-color: var(--bs-border-color) !important;
+}
+
+/* Slightly deeper border so the green highlight keeps a crisp edge against
+   a near-black card/page background. */
+body.moove-darkmode .early-alert-commendation-row,
+[data-bs-theme="dark"] .early-alert-commendation-row {
+    border-color: #0f5132;
 }
 
 @media (max-width: 767.98px) {

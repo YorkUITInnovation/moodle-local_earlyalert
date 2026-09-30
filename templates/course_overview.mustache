@@ -31,7 +31,7 @@
                                     {{#logs}}
                                         <div class="row early-alert-alert-row {{#is_commendation}}early-alert-commendation-row{{/is_commendation}}">
                                             <div class="col-md-6">
-                                                {{#is_commendation}}<strong>{{message_type}}</strong> - {{date_sent}} <i class="fa fa-champagne-glasses fa-lg text-success ms-2"></i>{{/is_commendation}}{{^is_commendation}}{{message_type}} - {{date_sent}}{{/is_commendation}}
+                                                {{#is_commendation}}<strong>{{message_type}}</strong> - {{date_sent}} <i class="fa fa-champagne-glasses fa-lg text-white ms-2"></i>{{/is_commendation}}{{^is_commendation}}{{message_type}} - {{date_sent}}{{/is_commendation}}
                                             </div>
                                             <div class="col-md-2">
                                                 <button type="button" class="btn btn-sm btn-early-alert-preview-message {{#is_commendation}}btn-outline-success{{/is_commendation}}{{^is_commendation}}btn-primary{{/is_commendation}}" data-logid="{{id}}">
@@ -40,7 +40,7 @@
                                             </div>
                                             <div class="col-md-4 d-flex justify-content-end">
                                                 <table class="table table-borderless table-sm {{#is_commendation}}invisible{{/is_commendation}}" {{#is_commendation}}aria-hidden="true"{{/is_commendation}}>
-                                                    <thead class="thead-light">
+                                                    <thead class="table-light">
                                                     <tr>
                                                         <th>
                                                             <div class="d-flex justify-content-center">
