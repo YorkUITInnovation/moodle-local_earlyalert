@@ -23,12 +23,12 @@
             <div id="collapse{{id}}" class="accordion-collapse collapse" aria-labelledby="heading{{id}}" data-bs-parent="#accordionStudentCourses">
                 <div class="accordion-body">
                     {{#alerts}}
-                        <div class="row early-alert-alert-row {{#is_commendation}}bg-success text-white{{/is_commendation}}">
+                        <div class="row early-alert-alert-row {{#is_commendation}}early-alert-commendation-row{{/is_commendation}}">
                             <div class="col-md-6">
-                                {{#is_commendation}}<span class="badge bg-success text-white">{{message_type}}</span> - {{date_sent}} <i class="fa fa-champagne-glasses fa-lg text-white ms-2"></i>{{/is_commendation}}{{^is_commendation}}{{message_type}} - {{date_sent}}{{/is_commendation}}
+                                {{#is_commendation}}<strong>{{message_type}}</strong> - {{date_sent}} <i class="fa fa-champagne-glasses fa-lg text-success ms-2"></i>{{/is_commendation}}{{^is_commendation}}{{message_type}} - {{date_sent}}{{/is_commendation}}
                             </div>
                             <div class="col-md-2">
-                                <button type="button" class="btn btn-sm btn-early-alert-preview-message {{#is_commendation}}btn-secondary text-white{{/is_commendation}}{{^is_commendation}}btn-primary{{/is_commendation}}" data-logid="{{id}}">
+                                <button type="button" class="btn btn-sm btn-early-alert-preview-message {{#is_commendation}}btn-secondary{{/is_commendation}}{{^is_commendation}}btn-primary{{/is_commendation}}" data-logid="{{id}}">
                                     {{#str}}view_message, local_earlyalert{{/str}}
                                 </button>
                             </div>

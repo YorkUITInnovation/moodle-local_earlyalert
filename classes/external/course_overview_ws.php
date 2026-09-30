@@ -170,6 +170,7 @@ class local_earlyalert_course_overview_ws extends external_api {
                                     array(
                                         'id' => new external_value(PARAM_INT, 'Log ID'),
                                         'message_type' => new external_value(PARAM_TEXT, 'Message type'),
+                                        'is_commendation' => new external_value(PARAM_BOOL, 'Is commendation alert'),
                                         'user_read' => new external_value(PARAM_INT, 'User read status'),
                                         'course_id' => new external_value(PARAM_INT, 'Course ID'),
                                         'course_name' => new external_value(PARAM_TEXT, 'Course name'),

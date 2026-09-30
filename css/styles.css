@@ -246,10 +246,45 @@
 }
 
 /* Keep the alert row height/spacing consistent between rows that show the
-   instructor/advisor follow-up checkboxes and commendation rows which do not. */
+   instructor/advisor follow-up checkboxes and commendation rows which do not.
+   The checkbox/table column always reserves the same minimum height, and both
+   row types stretch to match it, so commendation rows (which have no table)
+   line up with the normal alert rows. */
 .early-alert-alert-row {
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.early-alert-alert-row > [class^="col-"],
+.early-alert-alert-row > [class*=" col-"] {
+    display: flex;
     align-items: center;
-    min-height: 5.5rem;
+    min-height: 4.75rem;
+}
+
+.early-alert-alert-row .col-md-2 {
+    justify-content: flex-start;
+}
+
+.early-alert-alert-row .col-md-4 {
+    justify-content: flex-end;
+}
+
+/* Commendation rows: soft rounded highlight rather than a solid block of
+   colour, so the text/icon stay legible and the row reads as an accent
+   rather than a heavy banner. */
+.early-alert-commendation-row {
+    background-color: #e6f7ec;
+    border: 1px solid #b7e4c7;
+    color: #0f5132;
+}
+
+.early-alert-commendation-row .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #ffffff;
 }
 
 @media (max-width: 767.98px) {
