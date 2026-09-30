@@ -36,8 +36,15 @@ $context = context_system::instance();
 if (!has_capability('local/earlyalert:access_early_alert', $context)) {
     redirect($CFG->wwwroot . '/my');
 }
-// Load CSS
-$PAGE->requires->css('/local/earlyalert/css/styles.css');
+// Load CSS.
+// Cache-bust using the plugin's release version (bumps on every upgrade) —
+// $PAGE->requires->css() emits a plain, unversioned <link> tag otherwise, so
+// browsers/CDNs would keep serving a stale cached copy after each release.
+// Using the plugin version (not filemtime()) avoids a filesystem stat() on
+// every request and only changes the URL when the plugin is actually upgraded.
+$PAGE->requires->css(new moodle_url('/local/earlyalert/css/styles.css', [
+    'v' => get_config('local_earlyalert', 'version'),
+]));
 // Load AMD module.
 $PAGE->requires->js_call_amd('local_earlyalert/filter_students_grade', 'init');
 $PAGE->requires->js_call_amd('local_earlyalert/impersonate_user_lookup', 'init');
