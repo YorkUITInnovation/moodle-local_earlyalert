@@ -215,6 +215,14 @@ code {
   background-color: #dcfce7;
 }
 
+.bg-green-600 {
+  background-color: #16a34a;
+}
+
+.text-green-700 {
+  color: #15803d;
+}
+
 .bg-gray-200 {
   background-color: #e5e7eb;
 }
