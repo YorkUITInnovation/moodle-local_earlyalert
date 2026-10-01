@@ -557,7 +557,7 @@ const AdministratorView = ({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('low_grade')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_assignment')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_test_quiz')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">{getString('commendations')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('commendations')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
