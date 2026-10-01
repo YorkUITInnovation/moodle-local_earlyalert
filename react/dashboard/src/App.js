@@ -1037,6 +1037,7 @@ const EarlyAlertDashboard = () => {
           <AdministratorView
             metrics={metrics}
             alerts={alerts}
+            academicYear={selectedAcademicYear}
             students={students}
             chartData={chartData}
             filteredAlerts={filteredAlerts}

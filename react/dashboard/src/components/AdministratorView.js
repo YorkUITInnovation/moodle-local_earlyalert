@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Users, AlertTriangle, CheckCircle, Target, Award, Clock, BarChart3 } from 'lucide-react';
+import { TrendingUp, Users, AlertTriangle, CheckCircle, Target, Award, Clock, BarChart3, PartyPopper } from 'lucide-react';
 import { useLanguageStrings } from '../hooks/useLanguageStrings';
 import { FACULTY_NAMES, getFacultyCode, facultyMapping } from '../constants/facultyMapping';
 
@@ -21,9 +21,10 @@ const normalizeAlertStudentId = (alert) => {
   return String(rawId).trim();
 };
 
-const AdministratorView = ({ 
-  metrics, 
-  alerts, 
+const AdministratorView = ({
+  metrics,
+  alerts,
+  academicYear,
   students, 
   chartData, 
   filteredAlerts,
@@ -76,7 +77,6 @@ const AdministratorView = ({
     'unique_students_advised',
     'based_unique_students'
   ]);
-
   // Calculate strategic metrics
   const strategicMetrics = useMemo(() => {
     const totalAlerts = alerts?.length || 0;
@@ -547,6 +547,9 @@ const AdministratorView = ({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{faculty.missedTest}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-green-700">{commendationsByFaculty[faculty.faculty] || 0}</div>
                     </td>
                   </tr>
                 );

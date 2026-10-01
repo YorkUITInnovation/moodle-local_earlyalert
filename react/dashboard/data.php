@@ -40,8 +40,27 @@ try {
     // Transform the data to match the expected format for the React dashboard
     $formatted_logs = [];
 
+    // When requested, return only commendations (used by the administrator commendations tile).
+    $commendationsonly = optional_param('commendations_only', 0, PARAM_INT);
+
     if ($logs && is_array($logs)) {
         foreach ($logs as $log) {
+            $iscommendation = (int)$log->message_type === \local_etemplate\email::MESSAGE_TYPE_COMMENDATION;
+            if ($commendationsonly) {
+                if ($iscommendation) {
+                    $formatted_logs[] = [
+                        'id' => $log->id,
+                        'sisid' => $log->sisid,
+                        'progfaculty' => $log->progfaculty,
+                        'timecreated' => $log->timecreated,
+                    ];
+                }
+                continue;
+            }
+            // Commendations have no advising interaction, so exclude them from the dashboard and its counts.
+            if ($iscommendation) {
+                continue;
+            }
             $formatted_logs[] = [
                 'id' => $log->id,
                 'name' => $log->name,
