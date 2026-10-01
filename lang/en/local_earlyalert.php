@@ -382,6 +382,8 @@ $string['based_total_alerts'] = 'Based on total alerts raised';
 $string['students_advised'] = 'Students Advised';
 $string['unique_students_advised'] = 'Unique Students Advised';
 $string['based_unique_students'] = 'Based on unique students with alerts';
+$string['commendations'] = 'Commendations';
+$string['commendations_not_in_total'] = 'Not included in total alerts';
 $string['domestic'] = 'Domestic';
 $string['international'] = 'International';
 $string['all_academic_statuses'] = 'All Academic Statuses';
@@ -423,4 +425,6 @@ $string['medium'] = 'Medium';
 $string['low'] = 'Low';
 $string['advised'] = 'Advised';
 $string['unadvised'] = 'Unadvised';
+
+
 

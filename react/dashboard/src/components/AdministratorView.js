@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Users, AlertTriangle, CheckCircle, Target, Award, Clock, BarChart3, PartyPopper } from 'lucide-react';
 import { useLanguageStrings } from '../hooks/useLanguageStrings';
@@ -77,6 +77,32 @@ const AdministratorView = ({
     'unique_students_advised',
     'based_unique_students'
   ]);
+  // Commendations are fetched separately and are NOT part of the alert totals.
+  const [commendations, setCommendations] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    const params = new URLSearchParams({ commendations_only: '1', t: String(Date.now()) });
+    if (academicYear) {
+      params.set('academic_year', academicYear);
+    }
+    fetch(`/local/earlyalert/react/dashboard/data.php?${params.toString()}`, { cache: 'no-store' })
+      .then(res => res.json())
+      .then(json => {
+        if (!cancelled && json && json.success) setCommendations(json.data || []);
+      })
+      .catch(err => console.error('Error loading commendations:', err));
+    return () => { cancelled = true; };
+  }, [academicYear]);
+
+  const commendationsByFaculty = useMemo(() => {
+    const counts = {};
+    commendations.forEach(c => {
+      const key = facultyMapping[c.progfaculty] || c.progfaculty || 'Unknown';
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return counts;
+  }, [commendations]);
+
   // Calculate strategic metrics
   const strategicMetrics = useMemo(() => {
     const totalAlerts = alerts?.length || 0;
@@ -322,7 +348,7 @@ const AdministratorView = ({
     <div className="space-y-6">
       {/* Executive Summary */}
       <div className="bg-white rounded-lg shadow-lg border-2 border-[#E31837] p-8">
-        <div className="grid gap-6 mt-6" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
+        <div className="grid gap-6 mt-6" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
           <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center justify-between mb-4">
               <div className="p-4 rounded-lg bg-[#E31837] text-white shadow-md">
@@ -376,6 +402,17 @@ const AdministratorView = ({
             <h3 className="text-sm font-medium text-gray-600 mb-2">{getString('students_advised')}</h3>
             <div className="text-3xl font-bold text-gray-900 mb-2">{strategicMetrics.studentsAdvisedRate}%</div>
             <p className="text-sm text-gray-500">{getString('based_unique_students')}</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 rounded-lg bg-green-600 text-white shadow-md">
+                <PartyPopper className="w-8 h-8" />
+              </div>
+            </div>
+            <h3 className="text-sm font-medium text-gray-600 mb-2">Commendations</h3>
+            <div className="text-3xl font-bold text-gray-900 mb-2">{commendations.length}</div>
+            <p className="text-sm text-gray-500">Not included in total alerts</p>
           </div>
         </div>
       </div>
@@ -520,6 +557,7 @@ const AdministratorView = ({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('low_grade')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_assignment')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_test_quiz')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">{getString('commendations')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
