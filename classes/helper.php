@@ -84,12 +84,8 @@ class helper
             }
         }
 
-        if (empty($assignments)) {
-            $fallbackassignment = trim($fallbackassignment);
-            if ($fallbackassignment !== '') {
-                $assignments[] = $fallbackassignment;
-            }
-        }
+        // Note: $fallbackassignment is intentionally NOT used. When no grade details were saved,
+        // [gradedetails] must render empty rather than echoing the assignment title.
 
         $assignments = array_values(array_unique(array_filter(array_map('trim', $assignments), static function($value) {
             return $value !== '';

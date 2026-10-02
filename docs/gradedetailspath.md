@@ -51,7 +51,7 @@ So both screens read the saved `grade_details_json` and snapshot at view time. T
 
 ## Fallback rules
 
-- Empty assignments list: the assignment name is used as the detail, if non-empty.
+- Empty assignments list: `[gradedetails]` renders as an empty string. The assignment title is NOT used as a fallback.
 - Nothing available: the token is replaced with an empty string.
 
 ## Known risks / things to check
