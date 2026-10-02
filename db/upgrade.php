@@ -286,5 +286,32 @@ function xmldb_local_earlyalert_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 20260910000, 'local', 'earlyalert');
     }
 
+    if ($oldversion < 20261002000) {
+
+        // Repair drifted schemas: ensure every report_log column added by earlier steps exists.
+        // Previous-field positions are intentionally omitted so this works regardless of drift.
+        $table = new xmldb_table('local_earlyalert_report_log');
+
+        $fields = [
+            new xmldb_field('student_profile', XMLDB_TYPE_TEXT, null, null, null, null, null),
+            new xmldb_field('custom_message', XMLDB_TYPE_TEXT, null, null, null, null, null),
+            new xmldb_field('subjectjson', XMLDB_TYPE_TEXT, null, null, null, null, null),
+            new xmldb_field('messagejson', XMLDB_TYPE_TEXT, null, null, null, null, null),
+            new xmldb_field('snapshot_status', XMLDB_TYPE_CHAR, '20', null, null, null, null),
+            new xmldb_field('grade_details_json', XMLDB_TYPE_TEXT, null, null, null, null, null),
+            new xmldb_field('threshold_mode', XMLDB_TYPE_CHAR, '20', null, null, null, null),
+            new xmldb_field('threshold_percent', XMLDB_TYPE_NUMBER, '10,2', null, null, null, null),
+            new xmldb_field('alert_type', XMLDB_TYPE_CHAR, '20', null, null, null, null),
+        ];
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+
+        // Earlyalert savepoint reached.
+        upgrade_plugin_savepoint(true, 20261002000, 'local', 'earlyalert');
+    }
+
     return true;
 }

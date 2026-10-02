@@ -75,7 +75,9 @@ const AdministratorView = ({
     'based_total_alerts',
     'students_advised',
     'unique_students_advised',
-    'based_unique_students'
+    'based_unique_students',
+    'commendations',
+    'commendations_caption'
   ]);
   // Commendations are fetched separately and are NOT part of the alert totals.
   const [commendations, setCommendations] = useState([]);
@@ -557,7 +559,10 @@ const AdministratorView = ({
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('low_grade')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_assignment')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('missed_test_quiz')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{getString('commendations')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {getString('commendations')}
+                  <div className="text-[10px] font-normal normal-case text-gray-400 tracking-normal">{getString('commendations_caption')}</div>
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
