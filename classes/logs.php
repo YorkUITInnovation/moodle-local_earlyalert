@@ -4,6 +4,31 @@ namespace local_earlyalert;
 
 class logs
 {
+    /** First academic year start (September 1) that reporting covers, regardless of when the plugin started. */
+    const REPORTING_FIRST_YEAR = 2025;
+
+    /**
+     * Academic years (YYYY-YYYY) that have logged alerts, newest first, never before the first reporting year.
+     *
+     * @return string[]
+     */
+    public static function get_available_academic_years(): array
+    {
+        global $DB;
+
+        $floor = strtotime(self::REPORTING_FIRST_YEAR . '-09-01 00:00:00');
+        $timestamps = $DB->get_fieldset_select('local_earlyalert_report_log', 'timecreated', 'timecreated >= :floor', ['floor' => $floor]);
+        $years = [];
+        foreach ($timestamps as $time) {
+            $startyear = ((int)date('n', (int)$time) >= 9) ? (int)date('Y', (int)$time) : (int)date('Y', (int)$time) - 1;
+            $years[$startyear] = true;
+        }
+        krsort($years);
+
+        return array_map(static function ($startyear) {
+            return $startyear . '-' . ($startyear + 1);
+        }, array_keys($years));
+    }
 
     public static function get_logs($date_range = null, $academicyear = null)
     {
@@ -15,6 +40,8 @@ class logs
 
         if ($academicyear === 'all') {
             $applydaterange = false;
+            $conditions[] = 'l.timecreated >= :floortime';
+            $params['floortime'] = strtotime(self::REPORTING_FIRST_YEAR . '-09-01 00:00:00');
         }
 
         if (!empty($academicyear) && $applydaterange) {

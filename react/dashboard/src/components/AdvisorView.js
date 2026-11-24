@@ -18,6 +18,7 @@ const AdvisorView = ({
   chartData,
   filteredAlerts,
   tableFilteredAlerts,
+  academicYear,
   currentFacultyData,
   currentAlertTypeData,
   currentTimelineData,
@@ -185,7 +186,61 @@ const AdvisorView = ({
   };
 
   // Export filtered data
-  const exportToExcel = () => {
+  const buildCommendationExportRow = (log) => ({
+    'Student ID': log.sisid || 'N/A',
+    'Student Name': `${log.firstname || ''} ${log.surname || ''}`.trim() || 'N/A',
+    'Email': log.email || 'N/A',
+    'Alert Type': 'Commendation',
+    'Date Raised': log.timecreated ? new Date(log.timecreated.replace(' ', 'T')).toLocaleDateString() : 'N/A',
+    'Status': 'N/A',
+    'Advised by Advisor': 'N/A',
+    'Advised by Instructor': 'N/A',
+    'Faculty Template': log.faculty_template || 'N/A',
+    'Campus Template': campusMapping[log.campus_template] || log.campus_template || 'N/A',
+    'Course Template': log.course_template || 'N/A',
+    'Course': log.course_fullname || log.course_shortname || 'N/A',
+    'Professor': `${log.instructor_firstname || ''} ${log.instructor_lastname || ''}`.trim() || 'N/A',
+    'Session Name': log.sessionname || 'N/A',
+    'Program Faculty': log.progfaculty || 'N/A',
+    'Campus': campusMapping[log.campus] || log.campus || 'N/A',
+    'Program': log.program || 'N/A',
+    'Academic Qualification': log.acadqualification || 'N/A',
+    'Basis': log.basis || 'N/A',
+    'Study Level': log.studylevel || 'N/A',
+    'Immigration Status': log.immigrationstatus || 'N/A',
+    'Language Correspondence': log.languagecorrespondence || 'N/A',
+    'Mature Flag': log.matureflag || 'N/A',
+    'OSAP Flag': log.osapflag || 'N/A',
+    'Varsity Flag': log.varsityflag || 'N/A',
+    'ESL Flag': log.eslflag || 'N/A',
+    'Scholarship Flag': log.scholarshipflag || 'N/A',
+    'GPA': log.ogpa || 'N/A',
+    'Latest Academic Decision': log.latestacademicdecision || 'N/A',
+    'Academic Decision Term': log.academicdecisionterm || 'N/A',
+    'Academic Status': log.academicstatus || 'N/A'
+  });
+
+  // Commendations are not part of the dashboard data, so fetch them for the export only.
+  const fetchCommendationExportRows = async () => {
+    try {
+      const params = new URLSearchParams({ commendations_full: '1', t: String(Date.now()) });
+      if (academicYear) params.set('academic_year', academicYear);
+      const response = await fetch(`/local/earlyalert/react/dashboard/data.php?${params.toString()}`, { cache: 'no-store' });
+      const json = await response.json();
+      const term = (tableSearchTerm || '').toLowerCase();
+      return (json && json.success ? json.data : [])
+        .map(buildCommendationExportRow)
+        .filter(row => !term || row['Student Name'].toLowerCase().includes(term)
+          || row['Email'].toLowerCase().includes(term)
+          || 'commendation'.includes(term)
+          || String(row['Course Template']).toLowerCase().includes(term));
+    } catch (err) {
+      console.error('Error loading commendations for export:', err);
+      return [];
+    }
+  };
+
+  const exportToExcel = async () => {
     const exportData = tableFilteredAlerts.map(alert => {
       const student = getStudentDetails(alert.studentId);
       return {
@@ -224,7 +279,8 @@ const AdvisorView = ({
       };
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const commendationRows = await fetchCommendationExportRows();
+    const worksheet = XLSX.utils.json_to_sheet([...exportData, ...commendationRows]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Alerts');
     XLSX.writeFile(workbook, `student-alerts-${new Date().toISOString().split('T')[0]}.xlsx`);

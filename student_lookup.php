@@ -100,6 +100,7 @@ if ($user_id) {
             $alerts = $DB->get_records('local_earlyalert_report_log', ['course_id' => $course->id, 'target_user_id' => $user_id],'timecreated DESC', 'id');
             $i = 0;
             $data = [];
+            $hasnoncommendation = false;
             foreach ($alerts as $alert) {
                 $LOG = new email_report_log($alert->id);
                 // Get full student record
@@ -123,11 +124,13 @@ if ($user_id) {
                 $data[$i]->teacher_firstname = $teacher->firstname;
                 $data[$i]->teacher_lastname = $teacher->lastname;
                 $data[$i]->teacher_email = $teacher->email;
+                $hasnoncommendation = $hasnoncommendation || !$data[$i]->is_commendation;
                 unset($LOG);
                 $i++;
             }
             $course->alerts = $data;
-            $course->has_alerts = count($alerts) > 0;
+            $course->has_alerts = $hasnoncommendation;
+            $course->only_commendations = count($alerts) > 0 && !$hasnoncommendation;
             }
         }
     }

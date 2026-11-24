@@ -31,6 +31,12 @@ header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 
 try {
+    if (optional_param('list_years', 0, PARAM_INT)) {
+        http_response_code(200);
+        echo json_encode(['success' => true, 'years' => \local_earlyalert\logs::get_available_academic_years()]);
+        exit;
+    }
+
     $date_range = optional_param('date_range', null, PARAM_TEXT);
     $academicyear = optional_param('academic_year', '', PARAM_ALPHANUMEXT);
 
@@ -42,6 +48,7 @@ try {
 
     // When requested, return only commendations (used by the administrator commendations tile).
     $commendationsonly = optional_param('commendations_only', 0, PARAM_INT);
+    $commendationsfull = optional_param('commendations_full', 0, PARAM_INT);
 
     if ($logs && is_array($logs)) {
         foreach ($logs as $log) {
@@ -58,7 +65,8 @@ try {
                 continue;
             }
             // Commendations have no advising interaction, so exclude them from the dashboard and its counts.
-            if ($iscommendation) {
+            // They are only returned in full (alongside no alerts) for inclusion in the export.
+            if ($iscommendation !== (bool)$commendationsfull) {
                 continue;
             }
             $formatted_logs[] = [

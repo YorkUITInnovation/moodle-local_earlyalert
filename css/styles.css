@@ -306,6 +306,24 @@
     color: #ffffff;
 }
 
+/* Accordion header for students/courses that only have commendations: same
+   green as the commendation rows, in both collapsed and expanded states. */
+.accordion-button.early-alert-accordion-commendation,
+.accordion-button.early-alert-accordion-commendation:not(.collapsed) {
+    background-color: #198754;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.accordion-button.early-alert-accordion-commendation::after {
+    filter: brightness(0) invert(1);
+}
+
+.accordion-button.early-alert-accordion-commendation:focus {
+    border-color: #146c43;
+    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.4);
+}
+
 /* Dark mode (Moove theme: body.moove-darkmode or [data-bs-theme="dark"]).
    The commendation row itself (solid green + white text/button) already has
    enough self-contained contrast to look correct in both modes unchanged.

@@ -426,6 +426,8 @@ $string['medium'] = 'Medium';
 $string['low'] = 'Low';
 $string['advised'] = 'Advised';
 $string['unadvised'] = 'Unadvised';
-
-
-
+$string['sending'] = 'Sending...';
+$string['loading_courses'] = 'Loading courses...';
+$string['processing_report'] = 'Processing report. Large courses may take a moment, please wait...';
+$string['alerts_skipped_duplicate'] = '{$a} student(s) were skipped because they have already been sent this alert.';
+$string['commendation'] = 'Commendation';

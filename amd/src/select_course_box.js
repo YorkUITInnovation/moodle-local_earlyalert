@@ -1,4 +1,5 @@
 import ajax from 'core/ajax';
+import {get_string as getString} from 'core/str';
 
 const selectCourseBox = {
     init: function(selector, method, userid, placeholder) {
@@ -10,10 +11,19 @@ const selectCourseBox = {
         if (!userid) {
             return;
         }
+        select.disabled = true;
+        getString('loading_courses', 'local_earlyalert').then(text => {
+            if (select.options.length === 1 && select.disabled) {
+                select.options[0].textContent = text;
+            }
+            return text;
+        }).catch(() => {});
         ajax.call([{
             methodname: method,
             args: { userid: userid }
         }])[0].then(function(courses) {
+            select.options[0].textContent = placeholder;
+            select.disabled = false;
             if (Array.isArray(courses)) {
                 courses.forEach(course => {
                     const option = document.createElement('option');
@@ -23,6 +33,8 @@ const selectCourseBox = {
                 });
             }
         }).catch(function() {
+            select.options[0].textContent = placeholder;
+            select.disabled = false;
         });
     }
 };

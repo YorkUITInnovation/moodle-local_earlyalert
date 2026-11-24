@@ -29,7 +29,8 @@ if ($count > 0) {
 
 // 2. Fetch remaining logs to update them.
 echo html_writer::tag('h3', "\nFetching remaining log records to update student profiles...", ['style' => 'margin-top: 20px;']);
-$logs = $DB->get_records('local_earlyalert_report_log');
+// Only backfill logs whose profile snapshot is empty (these show as unknown students in reports).
+$logs = $DB->get_records_select('local_earlyalert_report_log', "student_profile IS NULL OR student_profile = ''");
 if (empty($logs)) {
     echo html_writer::tag('p', "No log records found to update. Exiting.");
     echo $OUTPUT->footer();
@@ -106,8 +107,8 @@ echo $summary;
 
 if (!empty($not_found_users)) {
     echo html_writer::tag('h3', 'Moodle IDs for Profiles Not Found in SIS', ['style' => 'margin-top: 20px;']);
-    foreach ($not_found_users as $user->idnumber) {
-        echo html_writer::tag('p', $user->id);
+    foreach ($not_found_users as $notfounduser) {
+        echo html_writer::tag('p', $notfounduser->id);
     }
 }
 

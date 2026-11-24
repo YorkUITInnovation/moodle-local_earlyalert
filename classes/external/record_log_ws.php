@@ -78,6 +78,7 @@ class local_earlyalert_record_log_ws extends external_api {
         $ids=[];
         $students = json_decode($template_data, true);
         $requestalerttype = self::normalize_alert_type($params['alert_type'] ?? '');
+        $lockfactory = \core\lock\lock_config::get_lock_factory('local_earlyalert_alert_log');
         forEach($students as $student) {
             // Get idnumber from user student_id
             $user = $DB->get_record('user', array('id' => $student['student_id']), '*', MUST_EXIST);
@@ -170,8 +171,33 @@ class local_earlyalert_record_log_ws extends external_api {
             $data->date_message_sent = 0;
             $data->timecreated = time();
             $data->timemodified = time();
-            $EMAIL_LOG = new email_report_log();
-            $id = $EMAIL_LOG->insert_record($data);
+            // An alert is only ever sent once per student, course, alert type and assignment
+            // (and trigger grade for grade alerts).
+            $lock = $lockfactory->get_lock('course_' . (int)$data->course_id . '_user_' . (int)$data->target_user_id, 30);
+            if (!$lock) {
+                continue;
+            }
+            try {
+                $duplicatesql = 'target_user_id = :target AND course_id = :course AND alert_type = :alerttype
+                    AND assignment_name = :assignment';
+                $duplicateparams = [
+                    'target' => (int)$data->target_user_id,
+                    'course' => (int)$data->course_id,
+                    'alerttype' => (string)$data->alert_type,
+                    'assignment' => (string)$data->assignment_name,
+                ];
+                if ($data->alert_type === 'grade') {
+                    $duplicatesql .= ' AND trigger_grade = :trigger';
+                    $duplicateparams['trigger'] = $data->trigger_grade;
+                }
+                if ($DB->record_exists_select('local_earlyalert_report_log', $duplicatesql, $duplicateparams)) {
+                    continue;
+                }
+                $EMAIL_LOG = new email_report_log();
+                $id = $EMAIL_LOG->insert_record($data);
+            } finally {
+                $lock->release();
+            }
             $id > 0 ? array_push($ids, $id) : error_log('error saving message');
         }
 

@@ -19,10 +19,13 @@
                     {{#students}}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="heading{{id}}">
-                                <button class="accordion-button collapsed" type="button"
+                                <button class="accordion-button collapsed {{#only_commendations}}early-alert-accordion-commendation{{/only_commendations}}" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapse{{id}}"
                                         aria-expanded="false" aria-controls="collapse{{id}}">
                                     {{lastname}}, {{firstname}} ({{idnumber}})
+                                    {{#only_commendations}}
+                                        <span class="ms-2"><i class="fa fa-champagne-glasses fa-lg" aria-hidden="true"></i><span class="visually-hidden">{{#str}}commendation, local_earlyalert{{/str}}</span></span>
+                                    {{/only_commendations}}
                                 </button>
                             </h2>
                             <div id="collapse{{id}}" class="accordion-collapse collapse"

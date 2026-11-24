@@ -79,6 +79,9 @@ const loadStrings = async() => {
     const keys = [
         'selected',
         'loading',
+        'sending',
+        'processing_report',
+        'alerts_skipped_duplicate',
         'send_early_alert',
         'no_students_found',
         'preview_email',
@@ -440,10 +443,12 @@ const setLoadingRows = () => {
     if (!tbody) {
         return;
     }
-    const loadingtext = escapeHtml(STRINGS.loading || 'Loading...');
+    const loadingtext = escapeHtml(STRINGS.processing_report || STRINGS.loading || 'Loading...');
     tbody.innerHTML = `
         <tr>
-            <td colspan="6" class="text-center text-muted py-4">${loadingtext}</td>
+            <td colspan="6" class="text-center text-muted py-4" role="status" aria-live="polite">
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>${loadingtext}
+            </td>
         </tr>`;
 };
 
@@ -1033,7 +1038,27 @@ const buildResolvedAlertPayload = studentid => fetchStudentPreview(studentid).th
     };
 });
 
+let sendingAlerts = false;
+
+const setSendingState = sending => {
+    sendingAlerts = sending;
+    document.querySelectorAll(SELECTORS.sendAlerts).forEach(button => {
+        button.disabled = sending;
+        button.setAttribute('aria-busy', sending ? 'true' : 'false');
+        if (sending) {
+            button.dataset.originalLabel = button.innerHTML;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>'
+                + (STRINGS.sending || 'Sending...');
+        } else if (button.dataset.originalLabel) {
+            button.innerHTML = button.dataset.originalLabel;
+        }
+    });
+};
+
 const sendAlerts = () => {
+    if (sendingAlerts) {
+        return;
+    }
     const ids = Array.from(STATE.selectedStudents.keys());
     if (!ids.length) {
         Notification.alert('', STRINGS.no_students_found || 'No students selected');
@@ -1046,6 +1071,10 @@ const sendAlerts = () => {
         STRINGS.send || 'Send',
         STRINGS.cancel || 'Cancel',
         () => {
+            if (sendingAlerts) {
+                return;
+            }
+            setSendingState(true);
             Promise.all(ids.map(buildResolvedAlertPayload)).then(templateData => {
                 const validTemplates = templateData.filter(item => !!item.template_id);
                 const skippedItems = templateData.filter(item => !item.template_id);
@@ -1062,11 +1091,21 @@ const sendAlerts = () => {
                     return;
                 }
 
-                Ajax.call([{methodname: 'local_earlyalert_report_log_insert', args: {
+                return Ajax.call([{methodname: 'local_earlyalert_report_log_insert', args: {
                     template_data: JSON.stringify(validTemplates),
                     alert_type: STATE.alertType,
-                }}])[0].then(() => {
-                    Str.get_string('sent_dialog_text', 'local_earlyalert', validTemplates.length)
+                }}])[0].then(insertedCount => {
+                    const sentCount = parseInt(insertedCount, 10) || 0;
+                    const duplicateCount = validTemplates.length - sentCount;
+                    const appendDuplicates = message => (duplicateCount > 0
+                        ? `${message}\n\n${(STRINGS.alerts_skipped_duplicate || '{$a} student(s) already alerted.')
+                            .replace('{$a}', duplicateCount)}`
+                        : message);
+                    if (!sentCount) {
+                        Notification.alert('', appendDuplicates(''));
+                        return;
+                    }
+                    Str.get_string('sent_dialog_text', 'local_earlyalert', sentCount)
                         .then(successMessage => {
                             let message = successMessage;
                             if (skippedItems.length) {
@@ -1079,12 +1118,12 @@ const sendAlerts = () => {
                                 }).join('\n');
                                 message += `\n\n${skippedItems.length} student(s) skipped (no active eTemplate):\n${skippedLines}`;
                             }
-                            Notification.alert('', message);
+                            Notification.alert('', appendDuplicates(message));
                         })
                         .catch(() => {
                             let message = (
                                 `${STRINGS.alert_sent_successfully || 'Alert sent successfully'} `
-                                + `(${validTemplates.length})`
+                                + `(${sentCount})`
                             );
                             if (skippedItems.length) {
                                 const skippedLines = skippedItems.map(item => {
@@ -1096,10 +1135,10 @@ const sendAlerts = () => {
                                 }).join('\n');
                                 message += `\n\n${skippedItems.length} student(s) skipped (no active eTemplate):\n${skippedLines}`;
                             }
-                            Notification.alert('', message);
+                            Notification.alert('', appendDuplicates(message));
                         });
                 }).catch(Notification.exception);
-            }).catch(Notification.exception);
+            }).catch(Notification.exception).finally(() => setSendingState(false));
         }
     );
 };

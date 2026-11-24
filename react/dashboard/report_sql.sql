@@ -27,7 +27,47 @@ Select l.id,
        l.custom_message,
        FROM_UNIXTIME(l.timecreated, '%Y-%m-%d %H:%i:%s')       As timecreated,
        FROM_UNIXTIME(l.date_message_sent, '%Y-%m-%d %H:%i:%s') As date_message_sent,
-       jt.*
+       COALESCE(NULLIF(jt.SISID, ''), su.idnumber) As SISID,
+       COALESCE(NULLIF(jt.FIRSTNAME, ''), su.firstname) As FIRSTNAME,
+       COALESCE(NULLIF(jt.SURNAME, ''), su.lastname) As SURNAME,
+       jt.ACADEMICYEAR,
+       jt.STUDYSESSION,
+       jt.SESSIONNAME,
+       jt.TRANSCRIPTTITLE,
+       COALESCE(NULLIF(jt.PROGFACULTY, ''), ufaculty.data) As PROGFACULTY,
+       COALESCE(NULLIF(jt.CAMPUS, ''), ucampus.data) As CAMPUS,
+       jt.COLLEGEAFFILIATION,
+       jt.COLLEGE,
+       COALESCE(NULLIF(jt.PROGRAM, ''), umajor.data) As PROGRAM,
+       jt.ACADQUALIFICATION,
+       jt.CURRICULUMDETAIL,
+       jt.SUBJECT1,
+       jt.SUBJECT1FACULTY,
+       jt.SUBJECT1FACULTYDESC,
+       jt.UNIT1,
+       jt.TITLE1,
+       jt.SUBJECT2,
+       jt.SUBJECT2FACULTY,
+       jt.SUBJECT2FACULTYDESC,
+       jt.UNIT2,
+       jt.TITLE2,
+       jt.BASIS,
+       COALESCE(NULLIF(jt.EMAIL, ''), su.email) As EMAIL,
+       jt.STUDYLEVEL,
+       jt.IMMIGRATIONSTATUS,
+       jt.VISAFLAG,
+       jt.VISAEXPIRYDATE,
+       jt.LANGUAGECORRESPONDENCE,
+       jt.MATUREFLAG,
+       jt.OSAPFLAG,
+       jt.VARSITYFLAG,
+       jt.ESLFLAG,
+       jt.SCHOLARSHIPFLAG,
+       jt.OGPA,
+       jt.LATESTACADEMICDECISION,
+       jt.ACADEMICDECISIONTERM,
+       jt.ACADEMICSTATUS,
+       jt.REGISTRATIONSTATUS
 From {local_earlyalert_report_log} l
          Inner Join
      {local_et_email} et On et.id = l.template_id
@@ -83,3 +123,11 @@ From {local_earlyalert_report_log} l
   )
                    ) AS jt
                    ON TRUE
+         -- Moodle fallback for students whose Oracle profile snapshot is empty.
+         LEFT JOIN {user} su ON su.id = l.target_user_id
+         LEFT JOIN {user_info_field} fcampus ON fcampus.shortname = 'campus'
+         LEFT JOIN {user_info_data} ucampus ON ucampus.userid = su.id AND ucampus.fieldid = fcampus.id
+         LEFT JOIN {user_info_field} ffaculty ON ffaculty.shortname = 'ldapfaculty'
+         LEFT JOIN {user_info_data} ufaculty ON ufaculty.userid = su.id AND ufaculty.fieldid = ffaculty.id
+         LEFT JOIN {user_info_field} fmajor ON fmajor.shortname = 'ldapmajor'
+         LEFT JOIN {user_info_data} umajor ON umajor.userid = su.id AND umajor.fieldid = fmajor.id

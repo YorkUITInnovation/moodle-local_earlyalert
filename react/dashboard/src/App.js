@@ -8,6 +8,7 @@ import VisualizationPanel from './components/VisualizationPanel';
 import ViewToggle from './components/ViewToggle';
 import AdministratorView from './components/AdministratorView';
 import AdvisorView from './components/AdvisorView';
+import apiService from './services/apiService';
 import { useApiData } from './hooks/useApiData';
 import { useLanguageStrings } from './hooks/useLanguageStrings';
 import azureOpenAIService from './services/azureOpenAIService';
@@ -157,19 +158,14 @@ const getCurrentAcademicYearStart = () => {
   return month >= 8 ? year : year - 1;
 };
 
-const buildAcademicYearOptions = (count = 6) => {
-  const currentStartYear = getCurrentAcademicYearStart();
+// Reporting never goes back before the 2025-2026 academic year.
+const FIRST_REPORTING_YEAR = 2025;
 
-  return Array.from({ length: count }, (_, index) => {
-    const startYear = currentStartYear - index;
-    const endYear = startYear + 1;
-    const value = `${startYear}-${endYear}`;
+const toAcademicYearOption = (value) => ({ value, label: value });
 
-    return {
-      value,
-      label: value
-    };
-  });
+const buildFallbackAcademicYearOptions = () => {
+  const startYear = Math.max(getCurrentAcademicYearStart(), FIRST_REPORTING_YEAR);
+  return [toAcademicYearOption(`${startYear}-${startYear + 1}`)];
 };
 
 const EarlyAlertDashboard = () => {
@@ -206,10 +202,24 @@ const EarlyAlertDashboard = () => {
     refreshChartData
   } = useApiData();
 
-  const academicYearOptions = useMemo(() => buildAcademicYearOptions(), []);
+  const [academicYearOptions, setAcademicYearOptions] = useState(buildFallbackAcademicYearOptions);
   const [selectedAcademicYear, setSelectedAcademicYear] = useState(
-    () => academicYearOptions[0]?.value || 'all'
+    () => buildFallbackAcademicYearOptions()[0].value
   );
+
+  // Only offer academic years that actually have alert logs.
+  useEffect(() => {
+    apiService.loadAcademicYears()
+      .then((years) => {
+        const valid = years.filter((year) => parseInt(year, 10) >= FIRST_REPORTING_YEAR);
+        if (!valid.length) {
+          return;
+        }
+        setAcademicYearOptions(valid.map(toAcademicYearOption));
+        setSelectedAcademicYear((current) => (current === 'all' || valid.includes(current) ? current : valid[0]));
+      })
+      .catch((err) => console.error('Error loading academic years:', err));
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [tableSearchTerm, setTableSearchTerm] = useState('');
@@ -1049,6 +1059,7 @@ const EarlyAlertDashboard = () => {
           />
         ) : (
           <AdvisorView
+            academicYear={selectedAcademicYear}
             alerts={alerts}
             students={students}
             metrics={metrics}

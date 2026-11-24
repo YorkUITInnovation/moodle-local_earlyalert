@@ -95,9 +95,11 @@ class local_earlyalert_course_overview_ws extends external_api {
             } else {
                 $student->has_logs = false;
             }
+            $student->only_commendations = false;
             // Enter the student record into the results array
             $results[$i] = $student;
             $x = 0;
+            $noncommendation = false;
             foreach ($logs as $log) {
                 // Get the log object
                 $LOG = new email_report_log($log->id);
@@ -137,11 +139,13 @@ class local_earlyalert_course_overview_ws extends external_api {
                 $data->custom_message = $LOG->get_custom_message();
                 // Add data to results
                 $results[$i]->logs[$x] = $data;
+                $noncommendation = $noncommendation || !$data->is_commendation;
                 unset($LOG);
                 unset($data);
                 $x++;
             }
 
+            $results[$i]->only_commendations = $x > 0 && !$noncommendation;
             $i++;
         }
         raise_memory_limit(MEMORY_STANDARD);
@@ -165,6 +169,7 @@ class local_earlyalert_course_overview_ws extends external_api {
                             'lastname' => new external_value(PARAM_TEXT, 'Last name'),
                             'idnumber' => new external_value(PARAM_TEXT, 'ID Number'),
                             'has_logs' => new external_value(PARAM_BOOL, 'Student has logs'),
+                            'only_commendations' => new external_value(PARAM_BOOL, 'Student only has commendation logs'),
                             'logs' => new external_multiple_structure(
                                 new external_single_structure(
                                     array(

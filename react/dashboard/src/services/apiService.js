@@ -7,6 +7,16 @@ class ApiService {
     // DO NOT cache real student data - always fetch fresh
   }
 
+  // Academic years that have alert logs (never before 2025-2026)
+  async loadAcademicYears() {
+    const response = await fetch('/local/earlyalert/react/dashboard/data.php?list_years=1', {cache: 'no-store'});
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const json = await response.json();
+    return json.years || [];
+  }
+
   // Load real student data from data.php
   async loadRealStudentData(filters = {}) {
     // Always fetch fresh data, never use cache
