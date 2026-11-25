@@ -462,7 +462,10 @@ const updateAssignmentTitleVisibility = () => {
     if (!wrap) {
         return;
     }
-    wrap.classList.toggle('d-none', STATE.alertType !== 'assign');
+    // Exam and commendation alerts can use an optional title to tell repeat alerts apart.
+    wrap.classList.toggle('d-none', !['assign', 'exam', 'commendation'].includes(STATE.alertType));
+    wrap.querySelector('[data-region="title-required"]')?.classList.toggle('d-none', STATE.alertType !== 'assign');
+    wrap.querySelector('[data-region="title-optional"]')?.classList.toggle('d-none', STATE.alertType === 'assign');
 };
 
 const updateInstructionsPanel = () => {

@@ -431,3 +431,4 @@ $string['loading_courses'] = 'Loading courses...';
 $string['processing_report'] = 'Processing report. Large courses may take a moment, please wait...';
 $string['alerts_skipped_duplicate'] = '{$a} student(s) were skipped because they have already been sent this alert.';
 $string['commendation'] = 'Commendation';
+$string['assignment_title_optional'] = 'Optional: add a title (for example the exam name) if this student may need another alert of this type in the same course.';

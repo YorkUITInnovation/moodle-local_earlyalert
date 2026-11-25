@@ -171,26 +171,41 @@ class local_earlyalert_record_log_ws extends external_api {
             $data->date_message_sent = 0;
             $data->timecreated = time();
             $data->timemodified = time();
-            // An alert is only ever sent once per student, course, alert type and assignment
-            // (and trigger grade for grade alerts).
+            // The same rule applies to every alert type (grade, assign, exam, commendation): an alert is only
+            // sent once per student, course, alert type, assignment title, trigger grade and selected grade items.
             $lock = $lockfactory->get_lock('course_' . (int)$data->course_id . '_user_' . (int)$data->target_user_id, 30);
             if (!$lock) {
                 continue;
             }
             try {
                 $duplicatesql = 'target_user_id = :target AND course_id = :course AND alert_type = :alerttype
-                    AND assignment_name = :assignment';
+                    AND assignment_name = :assignment AND trigger_grade = :trigger';
                 $duplicateparams = [
                     'target' => (int)$data->target_user_id,
                     'course' => (int)$data->course_id,
                     'alerttype' => (string)$data->alert_type,
                     'assignment' => (string)$data->assignment_name,
+                    'trigger' => $data->trigger_grade,
                 ];
-                if ($data->alert_type === 'grade') {
-                    $duplicatesql .= ' AND trigger_grade = :trigger';
-                    $duplicateparams['trigger'] = $data->trigger_grade;
+                // Same student/course/type/assignment title; the selected grade items (if any) must match too,
+                // so a new assignment or grade item is never treated as a duplicate.
+                $isduplicate = false;
+                $newitems = $normalizedgradedetails['assignments'];
+                sort($newitems);
+                $existing = $DB->get_records_select('local_earlyalert_report_log', $duplicatesql, $duplicateparams,
+                    '', 'id, grade_details_json');
+                foreach ($existing as $existinglog) {
+                    $existingdetails = helper::normalize_grade_details(
+                        json_decode((string)$existinglog->grade_details_json, true) ?: []
+                    );
+                    $existingitems = $existingdetails['assignments'];
+                    sort($existingitems);
+                    if ($existingitems == $newitems) {
+                        $isduplicate = true;
+                        break;
+                    }
                 }
-                if ($DB->record_exists_select('local_earlyalert_report_log', $duplicatesql, $duplicateparams)) {
+                if ($isduplicate) {
                     continue;
                 }
                 $EMAIL_LOG = new email_report_log();
