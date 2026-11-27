@@ -28,6 +28,9 @@ class ApiService {
       if (filters.academicYear) {
         queryParams.set('academic_year', filters.academicYear);
       }
+      if (filters.commendations) {
+        queryParams.set('commendations_full', '1');
+      }
 
       const response = await fetch(`/local/earlyalert/react/dashboard/data.php?${queryParams.toString()}`, {
         cache: 'no-store',
@@ -245,7 +248,7 @@ class ApiService {
           return {
             id: log.id || index + 1,
             student_id: log.sisid,
-            alert_type: this.extractMessageType(log.name),
+            alert_type: filters.commendations ? 'Commendation' : this.extractMessageType(log.name),
             template_type: log.template_type || 'Unknown',
             course_code: log.course || 'N/A',
             course_name: log.course_fullname || log.course_shortname || 'N/A',

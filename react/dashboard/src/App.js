@@ -202,6 +202,7 @@ const EarlyAlertDashboard = () => {
     refreshChartData
   } = useApiData();
 
+  const [reportMode, setReportMode] = useState('alerts');
   const [academicYearOptions, setAcademicYearOptions] = useState(buildFallbackAcademicYearOptions);
   const [selectedAcademicYear, setSelectedAcademicYear] = useState(
     () => buildFallbackAcademicYearOptions()[0].value
@@ -299,8 +300,8 @@ const EarlyAlertDashboard = () => {
 
   // Initialize/reload data whenever the selected academic year changes.
   useEffect(() => {
-    loadData({ academicYear: selectedAcademicYear });
-  }, [loadData, selectedAcademicYear]);
+    loadData({ academicYear: selectedAcademicYear, commendations: reportMode === 'commendations' });
+  }, [loadData, selectedAcademicYear, reportMode]);
 
   // Debug: Log when alerts data changes
   // Filter alerts based on current filter selections
@@ -811,7 +812,7 @@ const EarlyAlertDashboard = () => {
         <div className="mb-8">
           <div className="flex items-center gap-4 mt-4" style={{ marginBottom: '0px' }}>
             <button
-              onClick={() => loadData({ academicYear: selectedAcademicYear })}
+              onClick={() => loadData({ academicYear: selectedAcademicYear, commendations: reportMode === 'commendations' })}
               disabled={loading}
               style={{
                 backgroundColor: '#E31837',
@@ -1060,6 +1061,8 @@ const EarlyAlertDashboard = () => {
         ) : (
           <AdvisorView
             academicYear={selectedAcademicYear}
+            reportMode={reportMode}
+            setReportMode={setReportMode}
             alerts={alerts}
             students={students}
             metrics={metrics}

@@ -183,10 +183,12 @@ export const useApiData = () => {
         sharedFilters.academicYear = filters.academicYear;
       }
 
+      const recordFilters = { ...sharedFilters, commendations: !!filters.commendations };
+
       try {
         [alertsData, studentsData] = await Promise.all([
-          apiService.getAlerts({ ...(filters.alerts || {}), ...sharedFilters }),
-          apiService.getStudents({ ...(filters.students || {}), ...sharedFilters })
+          apiService.getAlerts({ ...(filters.alerts || {}), ...recordFilters }),
+          apiService.getStudents({ ...(filters.students || {}), ...recordFilters })
         ]);
       } catch (coreErr) {
         console.error('❌ useApiData - Failed to load core data:', coreErr.message);

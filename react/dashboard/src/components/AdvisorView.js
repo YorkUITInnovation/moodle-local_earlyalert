@@ -12,6 +12,8 @@ import { useLanguageStrings } from '../hooks/useLanguageStrings';
 import { campusMapping } from '../constants/campusMapping';
 
 const AdvisorView = ({ 
+  reportMode,
+  setReportMode,
   alerts,
   students,
   metrics,
@@ -63,6 +65,8 @@ const AdvisorView = ({
   chartFilterType,
   setChartFilterType
 }) => {
+  const isCommendations = reportMode === 'commendations';
+
   // Language strings hook
   const { getString } = useLanguageStrings([
     'advisor_staff_dashboard',
@@ -88,6 +92,10 @@ const AdvisorView = ({
     'filter_type',
     'chart_filter',
     'student_alerts_total',
+    'student_commendations_total',
+    'report_mode_alerts',
+    'report_mode_commendations',
+    'commendations_not_alerts_note',
     'search_placeholder',
     'hide_filters',
     'show_filters',
@@ -186,60 +194,6 @@ const AdvisorView = ({
   };
 
   // Export filtered data
-  const buildCommendationExportRow = (log) => ({
-    'Student ID': log.sisid || 'N/A',
-    'Student Name': `${log.firstname || ''} ${log.surname || ''}`.trim() || 'N/A',
-    'Email': log.email || 'N/A',
-    'Alert Type': 'Commendation',
-    'Date Raised': log.timecreated ? new Date(log.timecreated.replace(' ', 'T')).toLocaleDateString() : 'N/A',
-    'Status': 'N/A',
-    'Advised by Advisor': 'N/A',
-    'Advised by Instructor': 'N/A',
-    'Faculty Template': log.faculty_template || 'N/A',
-    'Campus Template': campusMapping[log.campus_template] || log.campus_template || 'N/A',
-    'Course Template': log.course_template || 'N/A',
-    'Course': log.course_fullname || log.course_shortname || 'N/A',
-    'Professor': `${log.instructor_firstname || ''} ${log.instructor_lastname || ''}`.trim() || 'N/A',
-    'Session Name': log.sessionname || 'N/A',
-    'Program Faculty': log.progfaculty || 'N/A',
-    'Campus': campusMapping[log.campus] || log.campus || 'N/A',
-    'Program': log.program || 'N/A',
-    'Academic Qualification': log.acadqualification || 'N/A',
-    'Basis': log.basis || 'N/A',
-    'Study Level': log.studylevel || 'N/A',
-    'Immigration Status': log.immigrationstatus || 'N/A',
-    'Language Correspondence': log.languagecorrespondence || 'N/A',
-    'Mature Flag': log.matureflag || 'N/A',
-    'OSAP Flag': log.osapflag || 'N/A',
-    'Varsity Flag': log.varsityflag || 'N/A',
-    'ESL Flag': log.eslflag || 'N/A',
-    'Scholarship Flag': log.scholarshipflag || 'N/A',
-    'GPA': log.ogpa || 'N/A',
-    'Latest Academic Decision': log.latestacademicdecision || 'N/A',
-    'Academic Decision Term': log.academicdecisionterm || 'N/A',
-    'Academic Status': log.academicstatus || 'N/A'
-  });
-
-  // Commendations are not part of the dashboard data, so fetch them for the export only.
-  const fetchCommendationExportRows = async () => {
-    try {
-      const params = new URLSearchParams({ commendations_full: '1', t: String(Date.now()) });
-      if (academicYear) params.set('academic_year', academicYear);
-      const response = await fetch(`/local/earlyalert/react/dashboard/data.php?${params.toString()}`, { cache: 'no-store' });
-      const json = await response.json();
-      const term = (tableSearchTerm || '').toLowerCase();
-      return (json && json.success ? json.data : [])
-        .map(buildCommendationExportRow)
-        .filter(row => !term || row['Student Name'].toLowerCase().includes(term)
-          || row['Email'].toLowerCase().includes(term)
-          || 'commendation'.includes(term)
-          || String(row['Course Template']).toLowerCase().includes(term));
-    } catch (err) {
-      console.error('Error loading commendations for export:', err);
-      return [];
-    }
-  };
-
   const exportToExcel = async () => {
     const exportData = tableFilteredAlerts.map(alert => {
       const student = getStudentDetails(alert.studentId);
@@ -279,11 +233,10 @@ const AdvisorView = ({
       };
     });
 
-    const commendationRows = await fetchCommendationExportRows();
-    const worksheet = XLSX.utils.json_to_sheet([...exportData, ...commendationRows]);
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Alerts');
-    XLSX.writeFile(workbook, `student-alerts-${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(workbook, worksheet, isCommendations ? 'Commendations' : 'Alerts');
+    XLSX.writeFile(workbook, `student-${isCommendations ? 'commendations' : 'alerts'}-${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   // Clear all filters
@@ -335,7 +288,30 @@ const AdvisorView = ({
         })}
       </div>
 
+      {/* Alerts / Commendations toggle: commendations are not alerts, so they get their own view */}
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4">
+        <div className="flex items-center gap-2">
+          {['alerts', 'commendations'].map((mode) => (
+            <button
+              key={mode}
+              onClick={() => { clearAllFilters(); setReportMode(mode); }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                reportMode === mode
+                  ? (mode === 'alerts' ? 'bg-[#E31837] text-white border-[#E31837]' : 'bg-green-600 text-white border-green-600')
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {getString(mode === 'alerts' ? 'report_mode_alerts' : 'report_mode_commendations')}
+            </button>
+          ))}
+        </div>
+        {!isCommendations && (
+          <p className="text-sm text-gray-500 mt-2">{getString('commendations_not_alerts_note')}</p>
+        )}
+      </div>
+
       {/* Actionable Charts */}
+      {!isCommendations && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Alert Types Distribution */}
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
@@ -398,6 +374,7 @@ const AdvisorView = ({
           </ResponsiveContainer>
         </div>
       </div>
+      )}
 
       {/* Collapsible Filters Panel */}
       {showFilters && (
@@ -441,6 +418,7 @@ const AdvisorView = ({
             ))}
           </select>
 
+          {!isCommendations && (
           <select
             value={filterAlertType}
             onChange={(e) => setFilterAlertType(e.target.value)}
@@ -451,6 +429,7 @@ const AdvisorView = ({
               <option key={type} value={type}>{type}</option>
             ))}
           </select>
+          )}
 
           <select
             value={filterStatus}
@@ -558,7 +537,7 @@ const AdvisorView = ({
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 whitespace-nowrap">
               <Users className="w-5 h-5 text-blue-600" />
-              {getString('student_alerts_total').replace('{$a}', advisorMetrics.totalFiltered)}
+              {getString(isCommendations ? 'student_commendations_total' : 'student_alerts_total').replace('{$a}', advisorMetrics.totalFiltered)}
             </h3>
             
             <div className="flex items-center justify-end whitespace-nowrap" style={{ gap: '8px' }}>
